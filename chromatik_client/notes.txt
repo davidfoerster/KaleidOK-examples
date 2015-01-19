@@ -1,0 +1,18 @@
+URL prefix: http://chromatik.labs.exalead.com/searchphotos?
+Query:
+	[start=N] - start index
+	[nhits=N] - number of hits
+	q= - query string
+		[KEYWORD...]
+		[(OPT color:[color group name]/[RGB in hex from preset]/[weight in percent]{s=200000})]
+		[saturation:(Colorful|greyscale)]
+		[darkness:(Bright|Dark)]
+		[rights:license_(1-6)]
+
+Licenses:
+ 1 - CC BY NC SA
+ 2 - CC BY NC
+ 3 - CC BY NC ND
+ 4 - CC BY
+ 5 - BY SA
+ 6 - BY ND
