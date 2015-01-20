@@ -9,7 +9,7 @@ Synesthetiator synesthiator;
 SynesketchPalette palettes; //colors taken from xml files in synesketch library
 EmotionalState synState = null; //no emotional state
 
-String GoogleSpeechApiKey = "";
+String GoogleSpeechApiKey;
 int[] bwPalette = { -10461088, -7303024, -6579301, -10987432, -7368817, //neutral colors
       -9868951,
       -5921371, -10526881, -8421505, -8224126, -6381922, -8224126, -8816263,  
@@ -22,6 +22,7 @@ void setup() {
   size(500, 500);
   
   try {
+    GoogleSpeechApiKey = new String(loadBytes("api-key.txt")).trim();
     synesthiator = new SynesthetiatorEmotion(this); //initialises synesthetiator for current sketch
     palettes = new SynesketchPalette("standard"); //colors initialised
   } catch (Exception ex) {
