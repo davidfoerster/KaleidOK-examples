@@ -26,7 +26,7 @@ public class Catcher
    */
   public void draw() {
     a.g.fill(0);
-    a.g.rect(a.mouseX - w/2, y, w, h);
+    a.g.rect(getHorizontalPos(), y, w, h);
   }
 
   /**
@@ -36,6 +36,10 @@ public class Catcher
    * @return true on collision; false otherwise
    */
   public boolean collides(Bubble b) {
-    return b.collides(a.mouseX - w/2, y, w, h);
+    return b.collidesRect(getHorizontalPos(), y, w, h);
+  }
+
+  private int getHorizontalPos() {
+    return a.mouseX - w / 2;
   }
 }

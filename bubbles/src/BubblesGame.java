@@ -24,7 +24,7 @@ public class BubblesGame extends PApplet
     catcher = new Catcher(this, height - 20, 100, 20);
 
     // spawn some initial bubbles
-    spawnBubbles(10);
+    spawnBubbles((int) bubblesPerSecond);
   }
 
   public void draw() {
