@@ -1,5 +1,9 @@
 import processing.core.PApplet;
 
+import static util.Math.between;
+import static util.Math.square;
+import static util.Math.clamp;
+
 
 /**
  * Represents a falling bubble.
@@ -60,14 +64,46 @@ public class Bubble
    * @param height rectangle height
    * @return true on collision; false otherwise
    */
-  public boolean collides(int x, int y, int width, int height) {
-    /*
-     * Currently: Simple collision detection with the bounding box of the rectangle.
-     * TODO: Calculate collision with the actual circle instead.
-     */
-    int r = diameter / 2;
-    return (x < this.x + r) && (x + width > this.x - r) &&
-      (y < this.y + r) && (y + height > this.y - r);
+  public boolean collidesRect( int x, int y, int width, int height ) {
+    boolean collides =
+      // Is the circle center inside rectangle?
+      (between(this.x, x, x + height) && between(this.y, y, y + width)) ||
+      // Does any of the rectangle sides intersect the circle?
+      collidesLineSegment(x, y, width, 0) ||
+      collidesLineSegment(x + width, y, 0, height) ||
+      collidesLineSegment(x, y + height, width, 0) ||
+      collidesLineSegment(x, y, 0, height);
+    //color = collides ? 0xFFFF0000 : 0xFFFFFF00;
+    return collides;
+  }
+
+  /**
+   * Checks whether the circle of the bubble intersects with a given axis-
+   * parallel line segment.
+   *
+   * @param ox horizontal position of the support vector of the line
+   * @param oy vertical position of the support vector of the line
+   * @param vx horizontal direction and length of the line segment
+   * @param vy vertical direction and length of the line segment
+   * @return true on intersection; false otherwise
+   */
+  public boolean collidesLineSegment( int ox, int oy, int vx, int vy ) {
+    if (vx == 0 || vy == 0) {
+      float r;
+      if (vx != 0) {
+        r = (float)(this.x - ox) / vx;
+      } else if (vy != 0) {
+        r = (float)(this.y - oy) / vy;
+      } else {
+        r = 0;
+      }
+
+      r = clamp(r, 0, 1);
+      float x = ox + r * vx, y = oy + r * vy;
+      return square(this.x - x) + square(this.y - y) <= square(diameter / 2);
+    }
+
+    throw new UnsupportedOperationException("The line segment isn't parallel to a coordinate axis");
   }
 
   /**
