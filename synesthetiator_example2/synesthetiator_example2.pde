@@ -10,15 +10,15 @@ EmotionalState synState = null; //no emotional state
 String emoText = "I'm so happy this finally works."; //text that is analysed
 int[] bwPalette = { -10461088, -7303024, -6579301, -10987432, -7368817, //neutral colors
       -9868951,
-      -5921371, -10526881, -8421505, -8224126, -6381922, -8224126, -8816263,  
-      -10724260, -11645362, -9934744, -5658199, -8947849, -5395027, -6579301, 
-      -9868951, -6842473, -11053225, -9276814, -6645094, -8816263, -6710887, 
-      -5921371, -10987432, -8092540, -7039852, -7697782, -5789785, -8750470, 
-      -10197916, -6381922, -8750470, -5855578 }; 
+      -5921371, -10526881, -8421505, -8224126, -6381922, -8224126, -8816263,
+      -10724260, -11645362, -9934744, -5658199, -8947849, -5395027, -6579301,
+      -9868951, -6842473, -11053225, -9276814, -6645094, -8816263, -6710887,
+      -5921371, -10987432, -8092540, -7039852, -7697782, -5789785, -8750470,
+      -10197916, -6381922, -8750470, -5855578 };
 
 void setup() {
   size(900, 200);
-  
+
   try {
     synesthiator = new SynesthetiatorEmotion(this); //initialises synesthetiator for current sketch
     palettes = new SynesketchPalette("standard"); //colors initialised
@@ -26,13 +26,13 @@ void setup() {
     ex.printStackTrace(); //shows content of current stack (function currently in, and called previosuly)
     exit();
   }
-  
+
   noLoop(); //stops setup looping
 }
 
 //  if this code throws an exception when mouse cliked, then the code in "catch" is run
 void mouseClicked() {
-  try {          
+  try {
     synesthiator.synesthetise(emoText);
   } catch (Exception ex) {
     ex.printStackTrace();
@@ -42,55 +42,38 @@ void mouseClicked() {
 /**
  * This is required by the synesthetiator, and called everytime "synesthetised()" is called
  *
- * @param state - result of emotion analysis 
+ * @param state - result of emotion analysis
  */
-void synesketchUpdate(SynesketchState state) { 
+void synesketchUpdate(SynesketchState state) {
   synState = (EmotionalState) state;
   redraw();
 }
 
-void draw() { //redraw background 
+void draw() { //redraw background
   background(255);
   fill(0);
   text(frameCount, 5, 100); //counter of times clicked
-  
+
   if (synState != null) { //does something
     Emotion emo = synState.getStrongestEmotion();
-    float sat = sqrt((float) emo.getWeight()); //sqaure root
-    int[] currentPalette = null;
-    
-    switch (emo.getType()) {  //switch to the case of the current emotion type
-    case Emotion.NEUTRAL:
+    int[] currentPalette;
+    float sat;
+
+    if (emo.getType() != Emotion.NEUTRAL) {
+      currentPalette = palettes.getColors(emo);
+      sat = sqrt((float) emo.getWeight());
+    } else {
       currentPalette = bwPalette;
       sat = 0.5f;
-      break; //breaks switch statement, goes to end of block of switch statement
-    case Emotion.HAPPINESS:
-      currentPalette = palettes.getHappinessColors();
-      break;
-    case Emotion.SADNESS:
-      currentPalette = palettes.getSadnessColors();
-      break;
-    case Emotion.ANGER:
-      currentPalette = palettes.getAngerColors();
-      break;
-    case Emotion.FEAR:
-      currentPalette = palettes.getFearColors();
-      break;
-    case Emotion.DISGUST:
-      currentPalette = palettes.getDisgustColors();
-      break;
-    case Emotion.SURPRISE:
-      currentPalette = palettes.getSurpriseColors();
-      break;
     }
-    
-    // TODO: Shorter 
+
+    // TODO: Shorter
     int[] colors = new int[]{ 0xe51919 }; //java.util.Arrays.copyOf(currentPalette, 1);
     drawChromatikImages(buildChromatikQuery(0, 10, null, colors));
-    
+
     text(synState.getText(), 5, 120);
     text(emo.getType() + ", " + emo.getWeight(), 5, 140);
-    
+
     for (int i = 0; i < colors.length; i++) {
       fill(colors[i] | 0xFF000000);
       rect(10 + i * 15, 160, 10, 10);
@@ -101,7 +84,7 @@ void draw() { //redraw background
 String buildChromatikQuery(int start, int nhits, String keywords, int[] colors)
 {
   String q = (keywords != null && !keywords.isEmpty()) ? keywords + ' ' : "";
-  
+
   if (colors != null && colors.length != 0) {
     q += '(';
     int weight = (int)(100.0 / colors.length);
@@ -112,7 +95,7 @@ String buildChromatikQuery(int start, int nhits, String keywords, int[] colors)
     }
     q += ')';
   }
-  
+
   try {
     return
       "http://chromatik.labs.exalead.com/searchphotos" +
@@ -126,28 +109,28 @@ String buildChromatikQuery(int start, int nhits, String keywords, int[] colors)
 
 void drawChromatikImages(String url) {
   println(url);
-  
+
   // Load and parse response object from URL
   JSONArray a = loadJSONArray(url);
-  
+
   // get number of elements in array
   int length = a.size();
-  
+
   // array index 0 contains number total search hits
   println("Hits: " + a.getInt(0));
-  
+
   // loop over result set, starting from index 1(!)
   for (int i = 1; i < length; i++) {
     // get image object at index i
     JSONObject imgInfo = a.getJSONObject(i);
-    
+
     // the image title is stored with the key "title"
     String title = imgInfo.getString("title", "<untitled>");
-    
+
     // the thumbnail URL is stored under "squarethumbnailurl"
     String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
     println(title + " (" + thumbnailUrl + ')');
-    
+
     // download image
     // TODO: React to images that can't be loaded
     PImage img = loadImage(thumbnailUrl);
