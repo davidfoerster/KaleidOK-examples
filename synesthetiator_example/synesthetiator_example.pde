@@ -53,11 +53,12 @@ void draw() { //redraw background
   fill(0);
   text(frameCount, 5, 20); //counter of times clicked
 
-  if (synState != null) { //does something
+  if (synState != null) { //skip if no result state available
     Emotion emo = synState.getStrongestEmotion();
     int[] currentPalette;
     float sat;
 
+    // set palette according to strongest detected emotion type
     if (emo.getType() != Emotion.NEUTRAL) {
       currentPalette = palettes.getColors(emo);
       sat = sqrt((float) emo.getWeight());
@@ -66,7 +67,10 @@ void draw() { //redraw background
       sat = 0.5f;
     }
 
+    // choose random color from palette
     color c = currentPalette[(int) random(currentPalette.length)];
+
+    // draw text and emotion state details in chosen color
     fill(red(c), green(c), blue(c));
     text(synState.getText(), 5, 40);
     text(emo.getType() + ", " + emo.getWeight(), 5, 60);
