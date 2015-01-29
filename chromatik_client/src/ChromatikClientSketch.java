@@ -1,4 +1,3 @@
-import http.requests.GetRequest;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
@@ -186,18 +185,6 @@ public class ChromatikClientSketch extends PApplet
       // draw image
       image(img, imgXpos + 10, 10, 75, 75);
     }
-  }
-
-  /**
-   * Sends request with {@link http.requests.GetRequest}.
-   */
-  @Deprecated
-  private void deprecatedWay( String url )
-  {
-    GetRequest get = new GetRequest(url);
-    get.send();
-    println("Reponse Content: " + get.getContent());
-    println("Reponse Content-Length Header: " + get.getHeader("Content-Length"));
   }
 
 }
