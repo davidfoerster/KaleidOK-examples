@@ -29,6 +29,8 @@ public class Connection
 
   protected Reader reader;
 
+  protected String body;
+
   public Connection( HttpURLConnection c )
   {
     this(c, new MimeTypeMap());
@@ -133,6 +135,41 @@ public class Connection
       reader = new InputStreamReader(in, charset);
     }
     return reader;
+  }
+
+  public String getBody() throws IOException
+  {
+    if (body == null)
+    {
+      c.connect();
+      long len = c.getContentLength();
+      if (len == 0)
+        return "";
+      if (len > Integer.MAX_VALUE)
+        throw new IOException("Content length exceeds " + Integer.MAX_VALUE);
+
+      StringBuilder sb;
+      if (len >= 0) {
+        sb = new StringBuilder((int) len);
+      } else {
+        sb = new StringBuilder();
+        len = Long.MAX_VALUE;
+      }
+
+      Reader r = getReader();
+      char[] buf = new char[(int) Math.min(len, 1 << 16)];
+      while (true) {
+        int count = r.read(buf);
+        if (count < 0)
+          break;
+        sb.append(buf, 0, count);
+      }
+
+      r.close();
+      body = sb.toString();;
+    }
+
+    return body;
   }
 
   private void parseContentType() throws IOException
