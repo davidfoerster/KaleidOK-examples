@@ -12,25 +12,60 @@ import java.util.Map;
 import static processing.core.PApplet.urlEncode;
 
 
+/**
+ * Holds all the parameters to build a Chromatik image search query.
+ */
 public class ChromatikQuery
 {
+  /**
+   * The start index of the requested section of the result set
+   */
   public int start = 0;
 
+  /**
+   * Maximum result set section size
+   */
   public int nhits;
 
+  /**
+   * Search keywords (if any) separated by spaces
+   */
   public String keywords;
 
+  /**
+   * Search option map. Possible option keys include "saturation", "darkness",
+   * and "rights".
+   *
+   * To add a color to a search query, construct a {@link ChromatikColor}
+   * object and use it as the key to the option entry. The value is the
+   * weight of that color as a {@link java.lang.Number} object between 0 and 1.
+   */
   public Map<Object, Object> opts = new HashMap<Object, Object>();
 
+  /**
+   * The protocol, host, and path component of the query URL
+   */
   public String urlPath = DEFAULT_URL_PATH;
 
   private StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
 
+  /**
+   * Constructs a query object with the default result set size and no
+   * keywords.
+   */
   public ChromatikQuery()
   {
     this(QUERY_NHITS_DEFAULT, null);
   }
 
+  /**
+   * Constructs a query object with preset parameters.
+   *
+   * @param nhits  Result set size
+   * @param keywords  Query keywords
+   * @param colors  RGB color values to search for; the weight is the inverse
+   *   of the amount of colors
+   */
   public ChromatikQuery( int nhits, String keywords, int... colors )
   {
     this.nhits = nhits;
@@ -44,6 +79,10 @@ public class ChromatikQuery
     }
   }
 
+  /**
+   * Issues the query as specified and returns the result object.
+   * @return  Query result
+   */
   public JSONArray getResult()
   {
     try {
@@ -54,6 +93,12 @@ public class ChromatikQuery
     }
   }
 
+  /**
+   * Returns a URL object with the current service specification and query
+   * parameters.
+   *
+   * @return  Query URL
+   */
   public URL getUrl()
   {
     try {
@@ -63,6 +108,11 @@ public class ChromatikQuery
     }
   }
 
+  /**
+   * Builds and returns just the query part of the URL string of this query.
+   *
+   * @return The current query string
+   */
   public String getQueryString()
   {
     return buildQueryString().substring(urlPath.length());
@@ -125,6 +175,11 @@ public class ChromatikQuery
     return sb;
   }
 
+  /**
+   * Returns the whole URL string of the current query.
+   *
+   * @return Query URL string
+   */
   @Override
   public String toString()
   {

@@ -5,17 +5,41 @@ import static java.lang.Math.round;
 import static chromatik.Utils.square;
 
 
+/**
+ * Represents one of Chromatik’s preset colors.
+ */
 public class ChromatikColor
 {
+  /**
+   * RGB color value
+   */
   public final int value;
 
+  /**
+   * Name of the color group as required by Chromatik’s search engine
+   */
   public final String groupName;
 
+  /**
+   * Construct color object by a compound RGB value
+   *
+   * @param rgb  An RGB color value
+   * @see #ChromatikColor(int, int, int)
+   */
   public ChromatikColor( int rgb )
   {
     this((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff);
   }
 
+  /**
+   * Construct color object from individual RGB values (0-255).
+   * The resulting color object will contain the most similar color of the set
+   * of Chromatik’s preset colors.
+   *
+   * @param r  Red color component
+   * @param g  Green color component
+   * @param b  Blue color component
+   */
   public ChromatikColor( int r, int g, int b )
   {
     float[] hsb = java.awt.Color.RGBtoHSB(r, g, b, null);
