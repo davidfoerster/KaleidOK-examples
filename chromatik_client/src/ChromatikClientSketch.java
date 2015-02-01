@@ -11,6 +11,7 @@ import java.util.Map;
 public class ChromatikClientSketch extends PApplet
 {
 
+  @SuppressWarnings("ConstantConditions")
   public void setup()
   {
     size(800, 200);
@@ -21,9 +22,10 @@ public class ChromatikClientSketch extends PApplet
     q.opts.put(new ChromatikColor(0xeb5252), 0.25f);
     q.opts.put(new ChromatikColor(0x9feb52), 0.18f);
     println("query: " + q.getQueryString());
+    drawQuery(q);
 
     JSONArray resultSet = q.getResult();
-    if (q != null) {
+    if (q == null) {
       exit();
       return;
     }
@@ -34,23 +36,26 @@ public class ChromatikClientSketch extends PApplet
 
   private void drawQuery( ChromatikQuery q )
   {
-    fill(0);
-    text("keywords: " + q.keywords, 10, 20);
+    background(255.f);
 
-    int x = 10;
-    stroke(0);
+    fill(0.f);
+    text("keywords: " + q.keywords, 5, 20);
+
+    int x = 5;
+    stroke(0.f);
     noFill();
-    rect(x, 25, 200, 25);
+    rect(x - 1, 24, 200, 26);
+    noStroke();
 
     for (Map.Entry<Object, Object> o: q.opts.entrySet()) {
       if (o.getKey() instanceof ChromatikColor) {
         ChromatikColor c = (ChromatikColor) o.getKey();
 
-        fill(c.value);
-        int width = (int)(((Number) o.getValue()).floatValue() * 200);
+        fill(c.value | 0xff000000);
+        int width = (int)(((Number) o.getValue()).floatValue() * 100) * 2;
         rect(x, 25, width, 25);
 
-        fill((brightness(c.value) >= 128) ? 255 : 0);
+        fill((brightness(c.value) < 128) ? 255.f : 0.f);
         text(c.groupName, x + 1, 45);
 
         x += width;
@@ -66,7 +71,7 @@ public class ChromatikClientSketch extends PApplet
     // array index 0 contains number total search hits
     println("Hits: " + a.getInt(0));
 
-    int imgXpos = 10;
+    int imgXpos = 5;
     // loop over result set, starting from index 1(!)
     for (int i = 1; i < length; i++) {
       // get image object at index i
