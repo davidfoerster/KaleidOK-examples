@@ -5,18 +5,18 @@ import static java.lang.Math.round;
 import static chromatik.Utils.square;
 
 
-public class Color
+public class ChromatikColor
 {
   public final int value;
 
   public final String groupName;
 
-  public Color( int rgb )
+  public ChromatikColor( int rgb )
   {
     this((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff);
   }
 
-  public Color( int r, int g, int b )
+  public ChromatikColor( int r, int g, int b )
   {
     float[] hsb = java.awt.Color.RGBtoHSB(r, g, b, null);
 
@@ -78,7 +78,7 @@ public class Color
   @Override
   public boolean equals( Object obj )
   {
-    return obj instanceof Color && ((Color) obj).value == this.value;
+    return obj instanceof ChromatikColor && ((ChromatikColor) obj).value == this.value;
   }
 
   static final String[] HUE_NAMES = {

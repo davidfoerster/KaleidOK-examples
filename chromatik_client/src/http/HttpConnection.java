@@ -11,7 +11,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
 
-public class Connection
+public class HttpConnection
 {
   public static final String HTTP_PROTOCOL = "http";
 
@@ -31,31 +31,31 @@ public class Connection
 
   protected String body;
 
-  public Connection( HttpURLConnection c )
+  public HttpConnection( HttpURLConnection c )
   {
     this(c, new MimeTypeMap());
   }
 
-  public Connection( HttpURLConnection c, MimeTypeMap acceptedMimeTypes )
+  public HttpConnection( HttpURLConnection c, MimeTypeMap acceptedMimeTypes )
   {
     this.c = c;
     this.acceptedMimeTypes = acceptedMimeTypes;
   }
 
-  public static Connection openURL( URL url ) throws IOException
+  public static HttpConnection openURL( URL url ) throws IOException
   {
     try {
-      return openURL(url, Connection.class);
+      return openURL(url, HttpConnection.class);
     } catch (ReflectiveOperationException e) {
       throw new Error(e);
     }
   }
 
-  protected static Connection openURL( URL url, Class<? extends Connection> clazz )
+  protected static HttpConnection openURL( URL url, Class<? extends HttpConnection> clazz )
     throws IOException, ReflectiveOperationException
   {
     checkHttpProtocol(url);
-    Constructor<? extends Connection> ctor =
+    Constructor<? extends HttpConnection> ctor =
       clazz.getConstructor(HttpURLConnection.class);
     return ctor.newInstance(url.openConnection());
   }
@@ -166,7 +166,7 @@ public class Connection
       }
 
       r.close();
-      body = sb.toString();;
+      body = sb.toString();
     }
 
     return body;

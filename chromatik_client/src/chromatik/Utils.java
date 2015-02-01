@@ -3,7 +3,7 @@ package chromatik;
 import java.util.Arrays;
 
 
-public final class Utils
+final class Utils
 {
   private Utils() { }
 

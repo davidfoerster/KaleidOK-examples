@@ -4,31 +4,25 @@ import processing.data.JSONArray;
 import processing.data.JSONObject;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.InflaterInputStream;
 
 
-public class JsonConnection extends Connection
+public class JsonHttpConnection extends HttpConnection
 {
   protected Object json;
 
-  public JsonConnection( HttpURLConnection c )
+  public JsonHttpConnection( HttpURLConnection c )
   {
     super(c, MIME_TYPE_MAP);
     defaultCharset = DEFAULT_CHARSET;
   }
 
-  public static JsonConnection openURL( URL url ) throws IOException
+  public static JsonHttpConnection openURL( URL url ) throws IOException
   {
     try {
-      return (JsonConnection) openURL(url, JsonConnection.class);
+      return (JsonHttpConnection) openURL(url, JsonHttpConnection.class);
     } catch (ReflectiveOperationException e) {
       throw new Error(e);
     }

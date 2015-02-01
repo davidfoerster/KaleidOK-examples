@@ -9,14 +9,13 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.zip.Deflater;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.*;
 
 
-public class ConnectionTest
+public class HttpConnectionTest
 {
   public static final String
     PATH = "/",
@@ -30,9 +29,7 @@ public class ConnectionTest
   @Rule
   public WireMockRule wireMockRule = new WireMockRule();
 
-  public MappingBuilder mb;
-
-  public Connection con;
+  public HttpConnection con;
 
   public void setUp(ResponseDefinitionBuilder r) throws Exception
   {
@@ -44,7 +41,7 @@ public class ConnectionTest
     r.withHeader("Content-Type", contentType);
     stubFor(get(urlEqualTo(PATH)).willReturn(r));
 
-    con = Connection.openURL(
+    con = HttpConnection.openURL(
       new URL("http", "localhost", wireMockRule.port(), PATH));
   }
 
@@ -143,7 +140,7 @@ public class ConnectionTest
   public void testGetResponseMimeType4() throws Exception
   {
     setUp(aResponse());
-    con.acceptedMimeTypes = JsonConnection.MIME_TYPE_MAP;
+    con.acceptedMimeTypes = JsonHttpConnection.MIME_TYPE_MAP;
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 }

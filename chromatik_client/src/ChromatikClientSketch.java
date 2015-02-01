@@ -1,5 +1,5 @@
-import chromatik.Color;
-import chromatik.Query;
+import chromatik.ChromatikColor;
+import chromatik.ChromatikQuery;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
@@ -15,11 +15,11 @@ public class ChromatikClientSketch extends PApplet
   {
     size(800, 200);
 
-    Query q = new Query();
+    ChromatikQuery q = new ChromatikQuery();
     q.nhits = 10;
     q.keywords = "";
-    q.opts.put(new Color(color(192, 0, 0)), 0.20f);
-    q.opts.put(new Color(color(128, 0, 128)), 0.15f);
+    q.opts.put(new ChromatikColor(0xeb5252), 0.25f);
+    q.opts.put(new ChromatikColor(0x9feb52), 0.18f);
     println("query: " + q.getQueryString());
 
     JSONArray resultSet = q.getResult();
@@ -32,7 +32,7 @@ public class ChromatikClientSketch extends PApplet
     noLoop();
   }
 
-  private void drawQuery( Query q )
+  private void drawQuery( ChromatikQuery q )
   {
     fill(0);
     text("keywords: " + q.keywords, 10, 20);
@@ -43,8 +43,8 @@ public class ChromatikClientSketch extends PApplet
     rect(x, 25, 200, 25);
 
     for (Map.Entry<Object, Object> o: q.opts.entrySet()) {
-      if (o.getKey() instanceof Color) {
-        Color c = (Color) o.getKey();
+      if (o.getKey() instanceof ChromatikColor) {
+        ChromatikColor c = (ChromatikColor) o.getKey();
 
         fill(c.value);
         int width = (int)(((Number) o.getValue()).floatValue() * 200);

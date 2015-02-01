@@ -8,23 +8,22 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 
-public class QueryTest
+public class ChromatikQueryTest
 {
-  private Map<String, String> getParams( Query q )
+  private Map<String, String> getParams( ChromatikQuery q )
   {
     String qs = q.getQueryString();
     assertTrue(qs.startsWith("?"));
 
-    String[] p = qs.substring(1).split("&");
     HashMap<String, String> m = new HashMap<String, String>();
-    for (int i = 0; i < p.length; i++) {
-      int split = p[i].indexOf('=');
+    for (String p: qs.substring(1).split("&")) {
+      int split = p.indexOf('=');
       String key, value;
       if (split >= 0) {
-        key = PApplet.urlDecode(p[i].substring(0, split));
-        value = PApplet.urlDecode(p[i].substring(split + 1));
+        key = PApplet.urlDecode(p.substring(0, split));
+        value = PApplet.urlDecode(p.substring(split + 1));
       } else {
-        key = PApplet.urlDecode(p[i]);
+        key = PApplet.urlDecode(p);
         value = null;
       }
 
@@ -68,12 +67,12 @@ public class QueryTest
   @Test
   public void testGetQueryString1() throws Exception
   {
-    Query q = new Query();
+    ChromatikQuery q = new ChromatikQuery();
     q.start = 42;
     Map<String, String> p = getParams(q);
 
     assertEquals("42", p.get("start"));
-    assertEquals(Integer.toString(Query.QUERY_NHITS_DEFAULT), p.get("nhits"));
+    assertEquals(Integer.toString(ChromatikQuery.QUERY_NHITS_DEFAULT), p.get("nhits"));
 
     assertEquals(2, p.size());
   }
@@ -82,7 +81,7 @@ public class QueryTest
   public void testGetQueryString2() throws Exception
   {
     String keywords = "foo bar";
-    Map<String, String> p = getParams(new Query(10, keywords, null));
+    Map<String, String> p = getParams(new ChromatikQuery(10, keywords, null));
 
     assertEquals("0", p.get("start"));
     assertEquals("10", p.get("nhits"));
@@ -94,7 +93,7 @@ public class QueryTest
   @Test
   public void testGetQueryString3() throws Exception
   {
-    Map<String, String> p = getParams(new Query(10, null, 0xe51919));
+    Map<String, String> p = getParams(new ChromatikQuery(10, null, 0xe51919));
 
     assertEquals("0", p.get("start"));
     assertEquals("10", p.get("nhits"));
@@ -107,7 +106,7 @@ public class QueryTest
   public void testGetQueryString4() throws Exception
   {
     String keywords = "foo bar";
-    Map<String, String> p = getParams(new Query(10, keywords, 0xe51919));
+    Map<String, String> p = getParams(new ChromatikQuery(10, keywords, 0xe51919));
 
     assertEquals("0", p.get("start"));
     assertEquals("10", p.get("nhits"));
@@ -119,10 +118,10 @@ public class QueryTest
   @Test
   public void testGetQueryString5() throws Exception
   {
-    Query q = new Query(10, null, null);
-    q.opts.put(new Color(0xe51919), 0.07f);
-    q.opts.put(new Color(0xebeb52), 0.23f);
-    q.opts.put(new Color(0x1313ac), 0.42f);
+    ChromatikQuery q = new ChromatikQuery(10, null, null);
+    q.opts.put(new ChromatikColor(0xe51919), 0.07f);
+    q.opts.put(new ChromatikColor(0xebeb52), 0.23f);
+    q.opts.put(new ChromatikColor(0x1313ac), 0.42f);
     Map<String, String> p = getParams(q);
 
     assertEquals("0", p.get("start"));

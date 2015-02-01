@@ -1,6 +1,6 @@
 package chromatik;
 
-import http.JsonConnection;
+import http.JsonHttpConnection;
 import processing.data.JSONArray;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.Map;
 import static processing.core.PApplet.urlEncode;
 
 
-public class Query
+public class ChromatikQuery
 {
   public int start = 0;
 
@@ -26,12 +26,12 @@ public class Query
 
   private StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
 
-  public Query()
+  public ChromatikQuery()
   {
     this(QUERY_NHITS_DEFAULT, null);
   }
 
-  public Query(int nhits, String keywords, int... colors)
+  public ChromatikQuery( int nhits, String keywords, int... colors )
   {
     this.nhits = nhits;
     this.keywords = (keywords != null) ? keywords : "";
@@ -40,14 +40,14 @@ public class Query
     {
       Float weight = Math.min(1.f / colors.length, MAX_COLOR_WEIGHT);
       for (int c: colors)
-        opts.put(new Color(c), weight);
+        opts.put(new ChromatikColor(c), weight);
     }
   }
 
   public JSONArray getResult()
   {
     try {
-      return JsonConnection.openURL(getUrl()).getArray();
+      return JsonHttpConnection.openURL(getUrl()).getArray();
     } catch (IOException e) {
       e.printStackTrace();
       return null;
@@ -92,9 +92,9 @@ public class Query
         for (Map.Entry<Object, Object> o: opts.entrySet())
         {
           sb.append(QUERY_SPACE);
-          if (o.getKey() instanceof Color)
+          if (o.getKey() instanceof ChromatikColor)
           {
-            Color c = (Color) o.getKey();
+            ChromatikColor c = (ChromatikColor) o.getKey();
             int weight = (int)(((Number) o.getValue()).floatValue() * 100);
             if (weight <= 0 || weight > 100)
               throw new IllegalArgumentException("Color weight lies outside (0, 100]: " + weight);
