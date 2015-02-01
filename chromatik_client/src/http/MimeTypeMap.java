@@ -194,11 +194,7 @@ public class MimeTypeMap extends HashMap<String, Float>
    */
   public void freeze()
   {
-    if (!frozen) {
-      checkFrozen();
-    } else {
-      this.frozen = frozen;
-    }
+    frozen = true;
   }
 
   private void checkFrozen() {
