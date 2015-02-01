@@ -79,11 +79,11 @@ public class MimeTypeMap extends HashMap<String, Float>
     if (!MIME_TYPE_PATTERN.matcher(key).matches())
       throw new IllegalArgumentException("Invalid MIME type: " + key);
 
-    if (value != null && !(value.floatValue() >= 0 && value.floatValue() <= 1))
+    if (value != null && !(value >= 0 && value <= 1))
     {
       throw new IllegalArgumentException(
         "Invalid preference qualifier for MIME type " + key + ':' + ' ' +
-          value.floatValue());
+          value);
     }
 
     return super.put(key, value);
@@ -127,7 +127,7 @@ public class MimeTypeMap extends HashMap<String, Float>
   {
     Float q = get(mime);
     if (q != null)
-      return (q.floatValue() > 0) ? mime : null;
+      return (q > 0) ? mime : null;
     if (!wildcards || WILDCARD.equals(mime))
       return null;
 
@@ -143,11 +143,11 @@ public class MimeTypeMap extends HashMap<String, Float>
       mime = new String(buf);
       q = get(mime);
       if (q != null)
-        return (q.floatValue() > 0) ? mime : null;
+        return (q > 0) ? mime : null;
     }
 
     q = get(WILDCARD);
-    return (q != null && q.floatValue() > 0) ? WILDCARD : null;
+    return (q != null && q > 0) ? WILDCARD : null;
   }
 
   /**
@@ -224,5 +224,5 @@ public class MimeTypeMap extends HashMap<String, Float>
     qFormat.setMaximumIntegerDigits(1);
     qFormat.setMinimumFractionDigits(0);
     qFormat.setMaximumFractionDigits(3);
-  };
+  }
 }
