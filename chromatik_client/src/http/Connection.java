@@ -96,6 +96,12 @@ public class Connection
         throw new IOException("No response responseCharset");
 
       String contentEncoding = c.getContentEncoding();
+      if (contentEncoding == null) {
+        contentEncoding = c.getHeaderField("transfer-encoding");
+        if ("chunked".equals(contentEncoding))
+          contentEncoding = null;
+      }
+
       Class<? extends FilterInputStream> dec = decoders.get(contentEncoding);
       if (dec == null) {
         if (!decoders.containsKey(contentEncoding))
