@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="httprequests_processing">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Software/devel/processing-sketchbook/libraries/httprequests_processing/library/commons-codec-1.4.jar!/" />
+      <root url="jar://$USER_HOME$/Software/devel/processing-sketchbook/libraries/httprequests_processing/library/commons-logging-1.1.1.jar!/" />
+      <root url="jar://$USER_HOME$/Software/devel/processing-sketchbook/libraries/httprequests_processing/library/httpclient-4.1.2.jar!/" />
+      <root url="jar://$USER_HOME$/Software/devel/processing-sketchbook/libraries/httprequests_processing/library/httpclient-cache-4.1.2.jar!/" />
+      <root url="jar://$USER_HOME$/Software/devel/processing-sketchbook/libraries/httprequests_processing/library/httpcore-4.1.2.jar!/" />
+      <root url="jar://$USER_HOME$/Software/devel/processing-sketchbook/libraries/httprequests_processing/library/httpmime-4.1.2.jar!/" />
+      <root url="jar://$USER_HOME$/Software/devel/processing-sketchbook/libraries/httprequests_processing/library/httprequests_processing.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
