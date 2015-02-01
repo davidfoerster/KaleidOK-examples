@@ -85,12 +85,14 @@ public class ChromatikClientSketch extends PApplet
       println(title + " (" + thumbnailUrl + ')');
 
       // download image
-      // TODO: React to images that can't be loaded
       PImage img = loadImage(thumbnailUrl);
-      // draw image
-      image(img, imgXpos, 60, 75, 75);
 
-      imgXpos += 75 + 5;
+      if (img != null && img.width > 0 && img.height > 0) {
+        // draw image
+        image(img, imgXpos, 60, 75, 75);
+
+        imgXpos += 75 + 5;
+      }
     }
   }
 
