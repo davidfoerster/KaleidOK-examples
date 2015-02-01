@@ -44,9 +44,14 @@ public class Query
     }
   }
 
-  public JSONArray getResult() throws IOException
+  public JSONArray getResult()
   {
-    return JsonConnection.openURL(getUrl()).getArray();
+    try {
+      return JsonConnection.openURL(getUrl()).getArray();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   public URL getUrl()
