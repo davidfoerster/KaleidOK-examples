@@ -22,6 +22,7 @@ public class JsonConnection extends Connection
   public JsonConnection( HttpURLConnection c )
   {
     super(c, MIME_TYPE_MAP);
+    defaultCharset = DEFAULT_CHARSET;
   }
 
   public static JsonConnection openURL( URL url ) throws IOException
@@ -58,4 +59,6 @@ public class JsonConnection extends Connection
     put(MimeTypeMap.WILDCARD, 0.1f);
     freeze();
   }};
+
+  public static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 }

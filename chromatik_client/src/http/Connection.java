@@ -19,6 +19,8 @@ public class Connection
 
   public MimeTypeMap acceptedMimeTypes;
 
+  public Charset defaultCharset;
+
   protected String responseMimeType;
 
   protected Charset responseCharset;
@@ -89,7 +91,7 @@ public class Connection
           throw new IOException("Unsupported response MIME type: " + mimeType);
       }
 
-      Charset charset = getResponseCharset();
+      Charset charset = getResponseCharset(true);
       if (charset == null)
         throw new IOException("No response responseCharset");
 
@@ -119,9 +121,10 @@ public class Connection
   public Reader getReader() throws IOException
   {
     if (reader == null) {
+      Charset charset = getResponseCharset(true);
+      assert charset != null;
       InputStream in = getInputStream();
-      assert responseCharset != null;
-      reader = new InputStreamReader(in, responseCharset);
+      reader = new InputStreamReader(in, charset);
     }
     return reader;
   }
@@ -162,11 +165,13 @@ public class Connection
     return responseMimeType;
   }
 
-  public Charset getResponseCharset() throws IOException
+  public Charset getResponseCharset( boolean allowDefault ) throws IOException
   {
     if (responseMimeType == null)
       parseContentType();
-    return responseCharset;
+    return (responseCharset != null || !allowDefault) ?
+      responseCharset :
+      defaultCharset;
   }
 
   public static final Map<String, Class<? extends FilterInputStream>> decoders =
