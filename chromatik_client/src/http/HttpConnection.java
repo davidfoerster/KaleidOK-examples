@@ -15,7 +15,7 @@ public class HttpConnection
 {
   public static final String HTTP_PROTOCOL = "http";
 
-  public final HttpURLConnection c;
+  final HttpURLConnection c;
 
   public MimeTypeMap acceptedMimeTypes;
 
@@ -30,6 +30,8 @@ public class HttpConnection
   protected Reader reader;
 
   protected String body;
+
+  private boolean connected = false;
 
   public HttpConnection( HttpURLConnection c )
   {
@@ -70,13 +72,17 @@ public class HttpConnection
 
   public void connect() throws IOException
   {
-    if (acceptedMimeTypes != null && c.getRequestProperty("Accept") == null) {
+    if (connected)
+      return;
+
+    if (acceptedMimeTypes != null) {
       String accept = acceptedMimeTypes.toString();
       if (!accept.isEmpty())
         c.setRequestProperty("Accept", accept);
     }
 
     c.connect();
+    connected = true;
   }
 
   public InputStream getInputStream() throws IOException
@@ -141,7 +147,7 @@ public class HttpConnection
   {
     if (body == null)
     {
-      c.connect();
+      connect();
       long len = c.getContentLength();
       if (len == 0)
         return "";
@@ -174,6 +180,7 @@ public class HttpConnection
 
   private void parseContentType() throws IOException
   {
+    connect();
     String ct = c.getContentType();
     if (ct == null)
       return;
