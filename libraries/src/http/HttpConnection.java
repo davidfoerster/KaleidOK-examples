@@ -221,7 +221,7 @@ public class HttpConnection
       defaultCharset;
   }
 
-  public static final Map<String, Class<? extends FilterInputStream>> decoders =
+  protected static final Map<String, Class<? extends FilterInputStream>> decoders =
     new HashMap<String, Class<? extends FilterInputStream>>() {{
       put(null, null);
       put("deflate", InflaterInputStream.class);
