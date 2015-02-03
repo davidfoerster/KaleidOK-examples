@@ -102,7 +102,7 @@ public class ChromatikClientSketch extends PApplet
 
       // the thumbnail URL is stored under "squarethumbnailurl"
       String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
-      println(title + " (" + thumbnailUrl + ')');
+      println(title + '(' + ' ' + thumbnailUrl + ')');
 
       // download image
       PImage img = loadImage(thumbnailUrl);
@@ -116,4 +116,8 @@ public class ChromatikClientSketch extends PApplet
     }
   }
 
+  public static void main( String... args )
+  {
+    new ChromatikClientSketch().runSketch(args);
+  }
 }

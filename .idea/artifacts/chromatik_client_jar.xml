@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="chromatik_client:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/chromatik_client_jar</output-path>
+    <root id="archive" name="chromatik_client.jar">
+      <element id="module-output" name="chromatik_client" />
+      <element id="module-output" name="libraries" />
+      <element id="extracted-dir" path="/usr/local/opt/processing/core/library/core.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
