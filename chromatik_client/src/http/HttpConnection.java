@@ -99,10 +99,6 @@ public class HttpConnection
           throw new IOException("Unsupported response MIME type: " + mimeType);
       }
 
-      Charset charset = getResponseCharset(true);
-      if (charset == null)
-        throw new IOException("No response responseCharset");
-
       String contentEncoding = c.getContentEncoding();
       if (contentEncoding == null) {
         contentEncoding = c.getHeaderField("transfer-encoding");
@@ -136,9 +132,10 @@ public class HttpConnection
   {
     if (reader == null) {
       Charset charset = getResponseCharset(true);
-      assert charset != null;
-      InputStream in = getInputStream();
-      reader = new InputStreamReader(in, charset);
+      if (charset == null)
+        throw new IOException("No response charset");
+
+      reader = new InputStreamReader(getInputStream(), charset);
     }
     return reader;
   }
