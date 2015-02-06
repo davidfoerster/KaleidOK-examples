@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="speech_chromasthetiator:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/speech_chromasthetiator_jar</output-path>
+    <root id="archive" name="speech_chromasthetiator.jar">
+      <element id="module-output" name="speech_chromasthetiator" />
+      <element id="module-output" name="libraries" />
+      <element id="module-output" name="Synesketch" />
+      <element id="extracted-dir" path="$USER_HOME$/Software/devel/processing-sketchbook/libraries/stt/library/stt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="/usr/local/opt/processing/core/library/core.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

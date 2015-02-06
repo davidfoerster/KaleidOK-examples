@@ -3,8 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/KaleidOK Examples.iml" filepath="$PROJECT_DIR$/KaleidOK Examples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../Synesketch/code/Synesketch.iml" filepath="$PROJECT_DIR$/../../Synesketch/code/Synesketch.iml" />
       <module fileurl="file://$PROJECT_DIR$/chromatik_client/chromatik_client.iml" filepath="$PROJECT_DIR$/chromatik_client/chromatik_client.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
+      <module fileurl="file://$PROJECT_DIR$/speech_chromasthetiator/speech_chromasthetiator.iml" filepath="$PROJECT_DIR$/speech_chromasthetiator/speech_chromasthetiator.iml" />
     </modules>
   </component>
 </project>
