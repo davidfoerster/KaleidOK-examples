@@ -105,6 +105,19 @@ public class ChromatikColor
     return obj instanceof ChromatikColor && ((ChromatikColor) obj).value == this.value;
   }
 
+  @Override
+  public String toString()
+  {
+    char[] a = new char[groupName.length() + 9];
+    Utils.toHex(value, a, 0, 6);
+    a[6] = ' ';
+    a[7] = '(';
+    groupName.getChars(0, groupName.length(), a, 8);
+    a[a.length - 1] = ')';
+
+    return new String(a);
+  }
+
   static final String[] HUE_NAMES = {
     "Red", "Orange", "Yellow", "Green", "Green", "Green",
     "Cyan", "Blue", "Blue", "Purple", "Pink", "Pink"

@@ -29,10 +29,15 @@ final class Utils
   {
     if (dst == null)
       dst = new char[Long.SIZE / 4];
+    return toHex(n, dst, 0, dst.length);
+  }
+
+  public static char[] toHex( long n, char[] dst, int offset, int len )
+  {
     int i;
-    for (i = dst.length - 1; i >= 0 && n != 0; i--, n >>>= 4)
+    for (i = offset + len - 1; i >= offset && n != 0; i--, n >>>= 4)
       dst[i] = Character.forDigit((int) n & 0xf, 16);
-    Arrays.fill(dst, 0, i + 1, '0');
+    Arrays.fill(dst, offset, i + 1, '0');
     return dst;
   }
 }

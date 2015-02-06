@@ -55,7 +55,7 @@ public class ChromatikQuery
    */
   public ChromatikQuery()
   {
-    this(QUERY_NHITS_DEFAULT, null);
+    this(QUERY_NHITS_DEFAULT, null, (int[]) null);
   }
 
   /**
