@@ -12,6 +12,8 @@ import synesketch.emotion.Emotion;
 import synesketch.emotion.EmotionalState;
 import synesketch.emotion.SynesthetiatorEmotion;
 
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
@@ -23,6 +25,8 @@ public class SpeechChromasthetiatorSketch extends PApplet
    * Maximum amount of colors to use in the query to Chromatik
    */
   public int maxColors = 2;
+
+  public Document keywordsDoc;
 
   private ChromatikQuery chromatikQuery;
 
@@ -177,6 +181,15 @@ public class SpeechChromasthetiatorSketch extends PApplet
 
   private void updateQuery()
   {
+    try {
+      chromatikQuery.keywords =
+        (keywordsDoc != null && keywordsDoc.getLength() != 0) ?
+          keywordsDoc.getText(0, keywordsDoc.getLength()) :
+          null;
+    } catch (BadLocationException ex) {
+      throw new Error(ex);
+    }
+
     Emotion emo = synState.getStrongestEmotion();
 
     // Derive color weight in search query from emotional weighting
