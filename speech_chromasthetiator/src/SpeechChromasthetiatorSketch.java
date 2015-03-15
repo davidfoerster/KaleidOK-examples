@@ -8,15 +8,14 @@ import processing.data.JSONObject;
 import synesketch.SynesketchState;
 import synesketch.Synesthetiator;
 import synesketch.art.util.SynesketchPalette;
+import synesketch.emotion.AffectWord;
 import synesketch.emotion.Emotion;
 import synesketch.emotion.EmotionalState;
 import synesketch.emotion.SynesthetiatorEmotion;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 
 public class SpeechChromasthetiatorSketch extends PApplet
@@ -25,6 +24,8 @@ public class SpeechChromasthetiatorSketch extends PApplet
    * Maximum amount of colors to use in the query to Chromatik
    */
   public int maxColors = 2;
+
+  public int maxKeywords = 1;
 
   public Document keywordsDoc;
 
@@ -185,17 +186,23 @@ public class SpeechChromasthetiatorSketch extends PApplet
 
   private void updateQuery()
   {
-    try {
-      if (keywordsDoc != null && keywordsDoc.getLength() != 0) {
+    Emotion emo = synState.getStrongestEmotion();
+
+    if (keywordsDoc != null && keywordsDoc.getLength() != 0) {
+      try {
         chromatikQuery.keywords = keywordsDoc.getText(0, keywordsDoc.getLength());
-      } else {
-        chromatikQuery.keywords = synState.getStrongestEmotion().getTypeName();
+      } catch (BadLocationException e) {
+        // this really shouldn't happen with the chosen location
+        throw new Error(e);
       }
-    } catch (BadLocationException ex) {
-      throw new Error(ex);
+    } else if (emo.getType() != Emotion.NEUTRAL) {
+      chromatikQuery.keywords =
+        joinStrings(findStrongestAffectWords(
+          synState.getAffectWords(), maxKeywords), ' ');
+    } else {
+      chromatikQuery.keywords = "";
     }
 
-    Emotion emo = synState.getStrongestEmotion();
 
     // Derive color weight in search query from emotional weighting
     Float weight =
@@ -254,6 +261,39 @@ public class SpeechChromasthetiatorSketch extends PApplet
     }
 
     return ar;
+  }
+
+  static String[] findStrongestAffectWords(List<AffectWord> affectWords, int maxCount)
+  {
+    affectWords = new ArrayList<AffectWord>(affectWords);
+    Collections.sort(affectWords, AffectWord.WeightSumComparator.getInstance());
+
+    if (maxCount < 0 || maxCount > affectWords.size())
+      maxCount = affectWords.size();
+    String[] resultWords = new String[maxCount];
+    for (int i = 0; i < maxCount; i++)
+      resultWords[i] = affectWords.get(i).getWord();
+
+    return resultWords;
+  }
+
+  static String joinStrings(String[] ar, char separator)
+  {
+    if (ar.length == 0)
+      return "";
+    if (ar.length == 1)
+      return ar[0];
+
+    int len = ar.length - 1;
+    for (String s: ar)
+      len += s.length();
+    StringBuilder sb = new StringBuilder(len);
+
+    sb.append(ar[0]);
+    for (int i = 1; i < ar.length; i++)
+      sb.append(separator).append(ar[i]);
+
+    return sb.toString();
   }
 
   public static void main( String... args )
