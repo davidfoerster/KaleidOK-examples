@@ -20,12 +20,18 @@ import java.util.*;
 
 public class SpeechChromasthetiatorSketch extends PApplet
 {
+  // Configuration:
+
   /**
    * Maximum amount of colors to use in the query to Chromatik
    */
   public int maxColors = 2;
 
   public int maxKeywords = 1;
+
+  public final boolean autoRecord = true;
+
+  // other instance attributes:
 
   public Document keywordsDoc;
 
@@ -67,7 +73,12 @@ public class SpeechChromasthetiatorSketch extends PApplet
     resultSet = new ArrayList<PImage>(chromatikQuery.nhits);
 
     size(800, 200);
-    noLoop();
+
+    if (autoRecord) {
+      stt.enableAutoRecord();
+    } else {
+      noLoop();
+    }
   }
 
   @Override
@@ -132,14 +143,18 @@ public class SpeechChromasthetiatorSketch extends PApplet
   @Override
   public void keyPressed ()
   {
-    loop();
-    stt.begin();
+    if (!autoRecord) {
+      loop();
+      stt.begin();
+    }
   }
 
   @Override
   public void keyReleased ()
   {
-    stt.end();
+    if (!autoRecord) {
+      stt.end();
+    }
   }
 
   /**
@@ -153,7 +168,9 @@ public class SpeechChromasthetiatorSketch extends PApplet
   @SuppressWarnings("UnusedDeclaration")
   public void transcribe( String utterance, float confidence )
   {
-    noLoop();
+    if (!autoRecord)
+      noLoop();
+
     //println("Transcription finished: " + utterance + ' ' + '(' + confidence + ')');
 
     try {
