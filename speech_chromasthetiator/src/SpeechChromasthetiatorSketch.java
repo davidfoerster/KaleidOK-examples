@@ -79,21 +79,25 @@ public class SpeechChromasthetiatorSketch extends PApplet
 
   private void drawQuery()
   {
+    int y = 0;
+
     if (synState != null) {
       // draw uttered text
       fill(0);
-      text(synState.getText() + ' ' + '(' +
-        synState.getStrongestEmotion().toString() + ')',
-        5, 20);
+      text("keywords: " + chromatikQuery.keywords + ',' + ' ' +
+          synState.getStrongestEmotion().toString(),
+        5, y += 20);
+      text(synState.getText(), 5, y += 20);
     }
 
     // rectangle frame for color composition
     int x = 5;
     stroke(0);
     noFill();
-    rect(x - 1, 24, 200, 26);
+    rect(x - 1, y += 4, 200, 26);
     noStroke();
 
+    y += 1;
     for (Map.Entry<Object, Object> o: chromatikQuery.opts.entrySet()) {
       if (o.getKey() instanceof ChromatikColor) {
         ChromatikColor c = (ChromatikColor) o.getKey();
@@ -104,11 +108,11 @@ public class SpeechChromasthetiatorSketch extends PApplet
          */
         fill(c.value | 0xff000000);
         int width = (int)((Float) o.getValue() * 100) * 2;
-        rect(x, 25, width, 25);
+        rect(x, y, width, 25);
 
         // draw color group name over color rectangle
         fill((brightness(c.value) < 128) ? 255 : 0);
-        text(c.groupName, x + 1, 45);
+        text(c.groupName, x + 1, y + 20);
 
         x += width;
       }
@@ -119,7 +123,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
   {
     int imgXpos = 5;
     for (PImage img: resultSet) {
-      image(img, imgXpos, 60, 75, 75);
+      image(img, imgXpos, 80, 75, 75);
       imgXpos += 75 + 5;
     }
   }
