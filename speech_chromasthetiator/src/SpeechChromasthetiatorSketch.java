@@ -225,7 +225,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
 
       // the thumbnail URL is stored under "squarethumbnailurl"
       String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
-      println(title + '(' + ' ' + thumbnailUrl + ')');
+      println(title + ' ' + '(' + thumbnailUrl + ')');
 
       // download image
       PImage img = loadImage(thumbnailUrl);
