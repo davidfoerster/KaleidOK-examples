@@ -86,7 +86,9 @@ public class ChromatikQuery
   public JSONArray getResult()
   {
     try {
-      return JsonHttpConnection.openURL(getUrl()).getArray();
+      URL url = getUrl();
+      //System.err.println(url.toString());
+      return JsonHttpConnection.openURL(url).getArray();
     } catch (IOException e) {
       e.printStackTrace();
       return null;
