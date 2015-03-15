@@ -182,10 +182,11 @@ public class SpeechChromasthetiatorSketch extends PApplet
   private void updateQuery()
   {
     try {
-      chromatikQuery.keywords =
-        (keywordsDoc != null && keywordsDoc.getLength() != 0) ?
-          keywordsDoc.getText(0, keywordsDoc.getLength()) :
-          null;
+      if (keywordsDoc != null && keywordsDoc.getLength() != 0) {
+        chromatikQuery.keywords = keywordsDoc.getText(0, keywordsDoc.getLength());
+      } else {
+        chromatikQuery.keywords = synState.getStrongestEmotion().getTypeName();
+      }
     } catch (BadLocationException ex) {
       throw new Error(ex);
     }
