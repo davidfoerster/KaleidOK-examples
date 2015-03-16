@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: edu.cmu.sphinx:sphinx4-samples:1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/edu/cmu/sphinx/sphinx4-samples/1.0-SNAPSHOT/sphinx4-samples-1.0-20150223.210658-7.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/edu/cmu/sphinx/sphinx4-samples/1.0-SNAPSHOT/sphinx4-samples-1.0-20150223.210658-7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/edu/cmu/sphinx/sphinx4-samples/1.0-SNAPSHOT/sphinx4-samples-1.0-20150223.210658-7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
