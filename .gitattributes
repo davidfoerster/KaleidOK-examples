@@ -1,2 +1,4 @@
 *.java	diff=java
 *.pde	diff=java
+
+MANIFEST.MF	whitespace=-blank-at-eof
