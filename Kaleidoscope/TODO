@@ -1,0 +1,30 @@
+ - Try to move back to Minim library. Can the audio processor work simultaneously with the speech-to-text library on the audio input? (easy)
+
+ - noise filter; figure out how to get rid of intense low frequencies
+
+ - Detect pitch and act upon it (see issues below) (easy)
+
+ - asynchronous synesthetiation and image downloads
+
+ - figure out how to display images ((re-)placement, transition)
+
+ - choose and use feature from Tarsos or minim audio for foobar layer
+
+ - mock Chromatik client (optional)
+
+TarsosDSP:
+ - enable overlapping FFT windows (trivial)
+ - implement volume level detection (easy)
+ - logarithmic averaging of Fourier amplitudes (medium)
+ - put pitch detector into audio processing chain (easy)
+
+Minim:
+ - implement overlapping FFT windows (medium)
+ - implement pitch detection algorithm (hard)
+
+STT:
+ - Re-implement STT to use Java audio framework instead of Minim. While at it, improve the library architecture (threading and stuff). (medium)
+
+Sphinx:
+ - get it to work properly
+ - find out, how to relate single words to recording sections
