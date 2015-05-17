@@ -11,6 +11,7 @@ import javax.sound.sampled.TargetDataLine;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
+import synesketch.SynesketchState;
 /*
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
@@ -21,7 +22,7 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 
 class Kaleidoscope extends PApplet
 {
-  private CircularLayer[] layers;
+  CircularLayer[] layers;
 
   private PImage[] images; // array to hold 4 input images
 
@@ -36,6 +37,8 @@ class Kaleidoscope extends PApplet
 
   private Thread audioDispatcherThread;
 
+  final SpeechChromasthetiator speechChromasthetiator = new SpeechChromasthetiator(this);
+
 
   @Override
   public void setup()
@@ -49,6 +52,7 @@ class Kaleidoscope extends PApplet
       //audioSource = new Minim(this).getLineIn(Minim.MONO, 2048, 22050);
       setupAudioDispatcher();
       setupLayers();
+      speechChromasthetiator.setup();
       audioDispatcherThread.start();
     } catch (LineUnavailableException ex) {
       exit();
@@ -107,11 +111,27 @@ class Kaleidoscope extends PApplet
   }
 
 
-
   @Override
   public void keyPressed()
   {
-    currentImage = (currentImage + 1) % images.length;
+    //currentImage = (currentImage + 1) % images.length;
+    speechChromasthetiator.keyPressed();
+  }
+
+  @Override
+  public void keyReleased()
+  {
+    speechChromasthetiator.keyReleased();
+  }
+
+  public void transcribe( String utterance, float confidence )
+  {
+    speechChromasthetiator.transcribe(utterance, confidence);
+  }
+
+  public void synesketchUpdate( SynesketchState state )
+  {
+    speechChromasthetiator.synesketchUpdate(state);
   }
 
   @Override

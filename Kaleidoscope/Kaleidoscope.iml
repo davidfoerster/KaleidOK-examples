@@ -12,5 +12,7 @@
     <orderEntry type="library" name="jogl2" level="application" />
     <orderEntry type="library" name="Processing 3" level="application" />
     <orderEntry type="library" name="Google Speech-to-Text" level="application" />
+    <orderEntry type="module" module-name="libraries" />
+    <orderEntry type="module" module-name="Synesketch" />
   </component>
 </module>
