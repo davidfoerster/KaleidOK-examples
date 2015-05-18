@@ -7,11 +7,6 @@ final class Utils
 {
   private Utils() { }
 
-  public static float square( float x )
-  {
-    return x * x;
-  }
-
   /**
    * Writes the hexadecimal representation of an integer to a char array. If
    * the array is too short to hold all necessary digits, it'll only contain

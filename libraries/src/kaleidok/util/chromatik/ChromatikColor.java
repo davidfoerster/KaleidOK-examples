@@ -2,7 +2,7 @@ package kaleidok.util.chromatik;
 
 import static java.lang.Math.max;
 import static java.lang.Math.round;
-import static kaleidok.util.chromatik.Utils.square;
+import static kaleidok.util.Math.square;
 
 
 /**
