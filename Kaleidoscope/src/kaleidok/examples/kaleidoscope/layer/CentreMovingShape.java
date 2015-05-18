@@ -10,7 +10,7 @@ public class CentreMovingShape extends CircularLayer
 {
   private int imageIndex;
 
-  private final VolumeLevelProcessor volumeLevelProcessor;
+  private VolumeLevelProcessor volumeLevelProcessor;
 
   public CentreMovingShape( Kaleidoscope parent, PImage img, int segmentCount, int radius,
     VolumeLevelProcessor volumeLevelProcessor )
@@ -27,7 +27,7 @@ public class CentreMovingShape extends CircularLayer
   {
     double level = volumeLevelProcessor.getLevel();
     //System.out.println("Volume level: " + level);
-    float radius = outerRadius * (float) Math.pow(level, 0.5) * 8f;
+    float radius = outerRadius * (float) Math.pow(level, 0.5) * 4f;
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
