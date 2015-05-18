@@ -1,35 +1,29 @@
 package kaleidok.examples.kaleidoscope.layer;
 
 import be.tarsos.dsp.AudioDispatcher;
-import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.AudioProcessor;
-import be.tarsos.dsp.util.fft.FFT;
+import kaleidok.audio.processor.FFTProcessor;
 import kaleidok.examples.kaleidoscope.Kaleidoscope;
 import processing.core.PApplet;
 import processing.core.PImage;
 
 
-public class SpectrogramLayer extends CircularLayer implements AudioProcessor
+public class SpectrogramLayer extends CircularLayer
 {
-
-	private AudioDispatcher audioDispatcher;
-	private final FFT fft;
-	private final float[] amplitudes, transformbuffer;
 	private final int samplesPerSegment;
+
+  private final FFTProcessor fft;
 
 	public SpectrogramLayer(PApplet parent, PImage img, int segmentCount, int innerRadius, int outerRadius, AudioDispatcher audioDispatcher)
 	{
 		super(parent, img, segmentCount, innerRadius, outerRadius);
 
-		this.audioDispatcher = audioDispatcher;
-		amplitudes = new float[Kaleidoscope.audioBufferSize / 2];
-		transformbuffer = new float[Kaleidoscope.audioBufferSize];
-		samplesPerSegment = amplitudes.length / segmentCount;
+    fft = new FFTProcessor(Kaleidoscope.audioBufferSize);
+    audioDispatcher.addAudioProcessor(fft);
+		samplesPerSegment = fft.amplitudes.length / segmentCount;
 		assert samplesPerSegment > 0;
-	  fft = new FFT(Kaleidoscope.audioBufferSize);
-	  audioDispatcher.addAudioProcessor(this);
 	}
 
+  @Override
 	public void run()
 	{
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
@@ -57,25 +51,11 @@ public class SpectrogramLayer extends CircularLayer implements AudioProcessor
 
 	private float getAvg(int i)
 	{
+    final float[] amplitudes = fft.amplitudes;
 		final int offset = i * samplesPerSegment;
 		float sum = amplitudes[offset];
     for (int j = 1; j < samplesPerSegment; j++)
     	sum += amplitudes[offset + j];
     return sum / samplesPerSegment;
 	}
-
-	public boolean process( AudioEvent audioEvent )
-	{
-		float[] audioFloatBuffer = audioEvent.getFloatBuffer();
-		System.arraycopy(audioFloatBuffer, 0, transformbuffer, 0, audioFloatBuffer.length);
-		fft.forwardTransform(transformbuffer);
-		fft.modulus(transformbuffer, amplitudes);
-		return true;
-	}
-
-	public void processingFinished()
-	{
-		// Nothing to do here
-	}
-
 }

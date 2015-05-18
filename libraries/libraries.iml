@@ -39,5 +39,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="Processing 3" level="application" />
+    <orderEntry type="library" name="TarsosDSP" level="application" />
   </component>
 </module>
