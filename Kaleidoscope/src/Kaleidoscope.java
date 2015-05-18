@@ -11,7 +11,6 @@ import javax.sound.sampled.TargetDataLine;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
-import synesketch.SynesketchState;
 /*
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
@@ -24,11 +23,13 @@ class Kaleidoscope extends PApplet
 {
   CircularLayer[] layers;
 
-  private PImage[] images; // array to hold 4 input images
+  public PImage[] images; // array to hold 4 input images
 
-  private int currentImage; // variable to keep track of the current image
+  public PImage bgImage;
 
-  private int currentImage2; //for the second
+  private int bgImageIndex; // variable to keep track of the current image
+
+  public CentreMovingShape centreLayer; //for the second
 
   public static final int audioBufferSize = 1 << 11;
 
@@ -37,7 +38,7 @@ class Kaleidoscope extends PApplet
 
   private Thread audioDispatcherThread;
 
-  final SpeechChromasthetiator speechChromasthetiator = new SpeechChromasthetiator(this);
+  final Chromasthetiator chromasthetiator = new Chromasthetiator(this);
 
 
   @Override
@@ -49,10 +50,12 @@ class Kaleidoscope extends PApplet
 
     try {
       setupImages();
-      //audioSource = new Minim(this).getLineIn(Minim.MONO, 2048, 22050);
       setupAudioDispatcher();
       setupLayers();
-      speechChromasthetiator.setup();
+
+      chromasthetiator.setup();
+      chromasthetiator.chromatikQuery.nhits = 1;
+
       audioDispatcherThread.start();
     } catch (LineUnavailableException ex) {
       exit();
@@ -70,8 +73,8 @@ class Kaleidoscope extends PApplet
       loadImage("images/particles.jpg")
     };
 
-    currentImage = (int) random(images.length); // randomly choose the currentImage
-    currentImage2 = (int) random(images.length);
+    bgImageIndex = (int) random(images.length); // randomly choose the bgImageIndex
+    bgImage = images[bgImageIndex];
   }
 
   private void setupAudioDispatcher() throws LineUnavailableException
@@ -86,7 +89,7 @@ class Kaleidoscope extends PApplet
       new SpectrogramLayer(this, images[0], 512, 125, 290, audioDispatcher),
       new OuterMovingShape(this, images[4], 16, 300),
       new FoobarLayer(this, images[3], 16, 125, 275),
-      new CentreMovingShape(this, images[currentImage2], 16, 150),
+      centreLayer = new CentreMovingShape(this, null, 16, 150),
       null
     };
   }
@@ -105,40 +108,26 @@ class Kaleidoscope extends PApplet
   private void drawBackgroundTexture()
   {
     // background image
-    image(images[currentImage], 0, 0, width, (float) width/height*images[currentImage].height); // resize-display image correctly to cover the whole screen
+    image(bgImage, 0, 0, width, (float) width / height * bgImage.height); // resize-display image correctly to cover the whole screen
     fill(255, 125+sin(frameCount*0.01f)*5); // white fill with dynamic transparency
     rect(0, 0, width, height); // rect covering the whole canvas
   }
 
 
   @Override
-  public void keyPressed()
-  {
-    //currentImage = (currentImage + 1) % images.length;
-    speechChromasthetiator.keyPressed();
-  }
-
-  @Override
-  public void keyReleased()
-  {
-    speechChromasthetiator.keyReleased();
-  }
-
-  public void transcribe( String utterance, float confidence )
-  {
-    speechChromasthetiator.transcribe(utterance, confidence);
-  }
-
-  public void synesketchUpdate( SynesketchState state )
-  {
-    speechChromasthetiator.synesketchUpdate(state);
-  }
-
-  @Override
   public void mouseClicked()
   {
-    currentImage2 = (currentImage2 + 1) % images.length;
-    layers[3].currentImage = images[currentImage2];
+    switch (mouseButton) {
+    case LEFT:
+      if (centreLayer != null)
+        centreLayer.nextImage();
+      break;
+
+    case RIGHT:
+      bgImageIndex = (bgImageIndex + 1) % images.length;
+      bgImage = images[bgImageIndex];
+      break;
+    }
   }
 
 

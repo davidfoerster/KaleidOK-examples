@@ -4,10 +4,15 @@ import processing.core.PImage;
 
 class CentreMovingShape extends CircularLayer
 {
+  private int imageIndex;
 
-  public CentreMovingShape(PApplet parent, PImage img, int segmentCount, int radius)
+  public CentreMovingShape(Kaleidoscope parent, PImage img, int segmentCount, int radius)
   {
     super(parent, img, segmentCount, 0, radius);
+
+    imageIndex = (int) parent.random(parent.images.length);
+    if (img == null)
+      currentImage = parent.images[imageIndex];
   }
 
   public void run()
@@ -27,6 +32,13 @@ class CentreMovingShape extends CircularLayer
     }
     parent.endShape(); // finalize the Shape
     parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
+  }
+
+  public void nextImage()
+  {
+    Kaleidoscope parent = (Kaleidoscope) this.parent;
+    imageIndex = (imageIndex + 1) % parent.images.length;
+    currentImage = parent.images[imageIndex];
   }
 
 }
