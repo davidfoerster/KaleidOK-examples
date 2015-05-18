@@ -24,7 +24,7 @@ public class CentreMovingShape extends CircularLayer
     float radius = outerRadius;// * pow(level, 0.5) * 4;
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-    parent.translate(parent.width / 2, parent.height / 2); // translate to the left-center
+    parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
     parent.rotate(parent.frameCount * -0.002f); // rotate around this center --anticlockwise
     parent.noStroke(); // turn off stroke
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call

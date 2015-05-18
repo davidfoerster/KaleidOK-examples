@@ -16,7 +16,7 @@ public class OuterMovingShape extends CircularLayer
   public void run()
   {
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-    parent.translate(parent.width / 2, parent.height/2); // translate to the left-center
+    parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
 
     //float level = audioSource.mix.level();
     //float step = level;

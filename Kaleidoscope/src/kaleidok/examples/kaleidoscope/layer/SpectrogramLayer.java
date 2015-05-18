@@ -27,7 +27,7 @@ public class SpectrogramLayer extends CircularLayer
 	public void run()
 	{
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-		parent.translate(parent.width/2, parent.height/2); // translate to the right-center
+		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
 		parent.stroke(255);
 		parent.strokeWeight(0.5f);
 		parent.noStroke();

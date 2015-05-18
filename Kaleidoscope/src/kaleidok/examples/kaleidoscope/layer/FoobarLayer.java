@@ -19,7 +19,7 @@ public class FoobarLayer extends CircularLayer
 	  float fc2 = parent.frameCount * 0.02f;
 
 		parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-		parent.translate(parent.width / 2, parent.height/2); // translate to the right-center
+		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
 		parent.noStroke();
 		parent.stroke(255); // set stroke to white
 		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
