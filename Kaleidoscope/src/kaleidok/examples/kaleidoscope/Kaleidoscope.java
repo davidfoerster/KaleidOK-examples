@@ -1,5 +1,6 @@
 package kaleidok.examples.kaleidoscope;
 
+import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
 import processing.core.PApplet;
@@ -37,9 +38,8 @@ public class Kaleidoscope extends PApplet
 
   public static final int audioBufferSize = 1 << 11;
 
-  //AudioInput audioSource;
   AudioDispatcher audioDispatcher;
-
+  private final VolumeLevelProcessor volumeLevelProcessor = new VolumeLevelProcessor();
   private Thread audioDispatcherThread;
 
   final Chromasthetiator chromasthetiator = new Chromasthetiator(this);
@@ -87,6 +87,7 @@ public class Kaleidoscope extends PApplet
   private void setupAudioDispatcher() throws LineUnavailableException
   {
     audioDispatcher = new AudioDispatcher(getLine(1, 22050, 16, audioBufferSize), audioBufferSize, 0);
+    audioDispatcher.addAudioProcessor(volumeLevelProcessor);
     audioDispatcherThread = new Thread(audioDispatcher, "Audio dispatching");
   }
 
@@ -94,9 +95,9 @@ public class Kaleidoscope extends PApplet
   {
     layers = new CircularLayer[]{
       new SpectrogramLayer(this, images[0], 512, 125, 290, audioDispatcher),
-      new OuterMovingShape(this, images[4], 16, 300),
+      new OuterMovingShape(this, images[4], 16, 300, volumeLevelProcessor),
       new FoobarLayer(this, images[3], 16, 125, 275),
-      centreLayer = new CentreMovingShape(this, null, 16, 150),
+      centreLayer = new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
       null
     };
   }

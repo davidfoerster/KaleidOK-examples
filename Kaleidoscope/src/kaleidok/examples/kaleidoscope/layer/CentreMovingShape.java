@@ -1,5 +1,6 @@
 package kaleidok.examples.kaleidoscope.layer;
 
+import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.Kaleidoscope;
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -9,9 +10,13 @@ public class CentreMovingShape extends CircularLayer
 {
   private int imageIndex;
 
-  public CentreMovingShape( Kaleidoscope parent, PImage img, int segmentCount, int radius)
+  private final VolumeLevelProcessor volumeLevelProcessor;
+
+  public CentreMovingShape( Kaleidoscope parent, PImage img, int segmentCount, int radius,
+    VolumeLevelProcessor volumeLevelProcessor )
   {
     super(parent, img, segmentCount, 0, radius);
+    this.volumeLevelProcessor = volumeLevelProcessor;
 
     imageIndex = (int) parent.random(parent.images.length);
     if (img == null)
@@ -20,8 +25,9 @@ public class CentreMovingShape extends CircularLayer
 
   public void run()
   {
-    //float level = audioSource.mix.level();
-    float radius = outerRadius;// * pow(level, 0.5) * 4;
+    double level = volumeLevelProcessor.getLevel();
+    //System.out.println("Volume level: " + level);
+    float radius = outerRadius * (float) Math.pow(level, 0.5) * 8f;
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
