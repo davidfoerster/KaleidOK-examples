@@ -18,7 +18,7 @@ import javax.swing.text.Document;
 import java.util.*;
 
 
-public class SpeechChromasthetiator
+public class Chromasthetiator
 {
   // Configuration:
 
@@ -51,7 +51,7 @@ public class SpeechChromasthetiator
 
   private final Random rnd = new Random();
 
-  public SpeechChromasthetiator(Kaleidoscope parent)
+  public Chromasthetiator( Kaleidoscope parent )
   {
     this.parent = parent;
   }
