@@ -1,5 +1,6 @@
 package kaleidok.examples.kaleidoscope;
 
+import kaleidok.audio.processor.FFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
@@ -37,10 +38,13 @@ public class Kaleidoscope extends PApplet
   public CentreMovingShape centreLayer;
 
   public static final int audioBufferSize = 1 << 11;
+  public static final float audioSampleRate = 22050;
 
-  AudioDispatcher audioDispatcher;
-  private final VolumeLevelProcessor volumeLevelProcessor = new VolumeLevelProcessor();
+  private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
+
+  private VolumeLevelProcessor volumeLevelProcessor;
+  private FFTProcessor fftProcessor;
 
   final Chromasthetiator chromasthetiator = new Chromasthetiator(this);
 
@@ -86,15 +90,19 @@ public class Kaleidoscope extends PApplet
 
   private void setupAudioDispatcher() throws LineUnavailableException
   {
-    audioDispatcher = new AudioDispatcher(getLine(1, 22050, 16, audioBufferSize), audioBufferSize, 0);
-    audioDispatcher.addAudioProcessor(volumeLevelProcessor);
+    audioDispatcher = new AudioDispatcher(getLine(1, audioSampleRate, 16, audioBufferSize), audioBufferSize, 0);
     audioDispatcherThread = new Thread(audioDispatcher, "Audio dispatching");
+
+    audioDispatcher.addAudioProcessor(
+      volumeLevelProcessor = new VolumeLevelProcessor());
+    audioDispatcher.addAudioProcessor(
+      fftProcessor = new FFTProcessor(audioBufferSize));
   }
 
   private void setupLayers()
   {
     layers = new CircularLayer[]{
-      new SpectrogramLayer(this, images[0], 512, 125, 290, audioDispatcher),
+      new SpectrogramLayer(this, images[0], 512, 125, 290, fftProcessor),
       new OuterMovingShape(this, images[4], 16, 300, volumeLevelProcessor),
       new FoobarLayer(this, images[3], 16, 125, 275),
       centreLayer = new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
@@ -153,7 +161,7 @@ public class Kaleidoscope extends PApplet
   }
 
 
-  public static TarsosDSPAudioInputStream getLine( int channels, int sampleRate, int sampleSize, int bufferSize )
+  public static TarsosDSPAudioInputStream getLine( int channels, float sampleRate, int sampleSize, int bufferSize )
     throws LineUnavailableException
   {
     return getLine(new AudioFormat(sampleRate, sampleSize, channels, true, true), bufferSize);

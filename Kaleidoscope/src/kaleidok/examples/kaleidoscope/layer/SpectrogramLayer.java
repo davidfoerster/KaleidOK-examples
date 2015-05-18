@@ -9,17 +9,16 @@ import processing.core.PImage;
 
 public class SpectrogramLayer extends CircularLayer
 {
-	private final int samplesPerSegment;
+	private int samplesPerSegment;
 
-  private final FFTProcessor fft;
+  private float[] fftAmplitudes;
 
-	public SpectrogramLayer(PApplet parent, PImage img, int segmentCount, int innerRadius, int outerRadius, AudioDispatcher audioDispatcher)
+	public SpectrogramLayer(PApplet parent, PImage img, int segmentCount, int innerRadius, int outerRadius, FFTProcessor fft)
 	{
 		super(parent, img, segmentCount, innerRadius, outerRadius);
 
-    fft = new FFTProcessor(Kaleidoscope.audioBufferSize);
-    audioDispatcher.addAudioProcessor(fft);
-		samplesPerSegment = fft.amplitudes.length / segmentCount;
+    fftAmplitudes = fft.amplitudes;
+		samplesPerSegment = fftAmplitudes.length / segmentCount;
 		assert samplesPerSegment > 0;
 	}
 
@@ -51,7 +50,7 @@ public class SpectrogramLayer extends CircularLayer
 
 	private float getAvg(int i)
 	{
-    final float[] amplitudes = fft.amplitudes;
+    final float[] amplitudes = fftAmplitudes;
 		final int offset = i * samplesPerSegment;
 		float sum = amplitudes[offset];
     for (int j = 1; j < samplesPerSegment; j++)
