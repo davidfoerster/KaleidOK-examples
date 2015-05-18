@@ -111,7 +111,9 @@ public class Kaleidoscope extends PApplet
       if (l != null)
         l.run();
     }
+    drawFrameRate();
   }
+
 
   private void drawBackgroundTexture()
   {
@@ -119,6 +121,18 @@ public class Kaleidoscope extends PApplet
     image(bgImage, 0, 0, width, (float) width / height * bgImage.height); // resize-display image correctly to cover the whole screen
     fill(255, 125 + sin(frameCount * 0.01f) * 5); // white fill with dynamic transparency
     rect(0, 0, width, height); // rect covering the whole canvas
+  }
+
+
+  private String sampledFrameRate = "";
+
+  private void drawFrameRate()
+  {
+    if (frameCount % 15 == 0)
+      sampledFrameRate = String.valueOf((int) frameRate);
+
+    fill(0, 255, 0);
+    text(sampledFrameRate, 4, 14);
   }
 
 
