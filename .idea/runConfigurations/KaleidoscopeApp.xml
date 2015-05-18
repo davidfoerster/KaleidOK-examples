@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="KaleidoscopeApp" type="Applet" factoryName="Applet">
+    <module name="Kaleidoscope" />
+    <option name="HTML_USED" value="false" />
+    <option name="MAIN_CLASS_NAME" value="kaleidok.examples.kaleidoscope.KaleidoscopeApp" />
+    <option name="WIDTH" value="400" />
+    <option name="HEIGHT" value="300" />
+    <option name="POLICY_FILE" value="file://$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+    <method />
+  </configuration>
+</component>
