@@ -17,12 +17,6 @@ import javax.sound.sampled.TargetDataLine;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
-/*
-import be.tarsos.dsp.pitch.PitchDetectionHandler;
-import be.tarsos.dsp.pitch.PitchDetectionResult;
-import be.tarsos.dsp.pitch.PitchProcessor;
-import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
-*/
 
 
 public class Kaleidoscope extends PApplet
@@ -103,7 +97,7 @@ public class Kaleidoscope extends PApplet
   {
     layers = new CircularLayer[]{
       new SpectrogramLayer(this, images[0], 512, 125, 290, fftProcessor),
-      new OuterMovingShape(this, images[4], 16, 300, volumeLevelProcessor),
+      new OuterMovingShape(this, images[4], 16, 300, audioDispatcher),
       new FoobarLayer(this, images[3], 16, 125, 275),
       centreLayer = new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
       null

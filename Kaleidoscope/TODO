@@ -1,7 +1,5 @@
  - noise filter; figure out how to get rid of intense low frequencies
 
- - Detect pitch and act upon it (see issues below) (easy)
-
  - asynchronous synesthetiation and image downloads
 
  - figure out how to display images ((re-)placement, transition)
@@ -13,7 +11,6 @@
 TarsosDSP:
  - enable overlapping FFT windows (trivial)
  - logarithmic averaging of Fourier amplitudes (medium)
- - put pitch detector into audio processing chain (easy)
 
 Minim:
  - implement overlapping FFT windows (medium)
