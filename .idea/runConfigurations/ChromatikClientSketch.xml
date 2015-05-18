@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ChromatikClientSketch" type="Applet" factoryName="Applet">
     <module name="chromatik_client" />
-    <option name="MAIN_CLASS_NAME" value="ChromatikClientSketch" />
+    <option name="MAIN_CLASS_NAME" value="kaleidok.examples.ChromatikClientSketch" />
     <option name="HTML_USED" value="false" />
     <option name="WIDTH" value="400" />
     <option name="HEIGHT" value="300" />
