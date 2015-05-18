@@ -1,6 +1,5 @@
 import chromatik.ChromatikColor;
 import chromatik.ChromatikQuery;
-import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -15,7 +14,13 @@ import synesketch.emotion.SynesthetiatorEmotion;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
+import static java.lang.Math.max;
+import static java.lang.Math.sqrt;
 
 
 public class Chromasthetiator implements UpdateHandler
@@ -49,7 +54,11 @@ public class Chromasthetiator implements UpdateHandler
 
   public Chromasthetiator( Kaleidoscope parent )
   {
+
     this.parent = parent;
+
+    chromatikQuery = new ChromatikQuery();
+    chromatikQuery.nhits = 10;
   }
 
   public void setup()
@@ -62,9 +71,6 @@ public class Chromasthetiator implements UpdateHandler
       parent.exit();
       return;
     }
-
-    chromatikQuery = new ChromatikQuery();
-    chromatikQuery.nhits = 10;
 
     resultSet = new ArrayList<PImage>(chromatikQuery.nhits);
   }
@@ -122,8 +128,7 @@ public class Chromasthetiator implements UpdateHandler
 
 
     // Derive color weight in search query from emotional weighting
-    Float weight =
-      Math.max((float) Math.sqrt(emo.getWeight()) * 0.5f, 0.1f) / maxColors;
+    Float weight = max((float) sqrt(emo.getWeight()) * 0.5f, 0.1f) / maxColors;
 
     // Use (up to) maxColors random colors from palette for search query
     chromatikQuery.opts.clear();
@@ -146,7 +151,7 @@ public class Chromasthetiator implements UpdateHandler
     resultSet.ensureCapacity(length - 1);
 
     // array index 0 contains number total search hits
-    PApplet.println("Hits: " + a.getInt(0));
+    System.out.println("Hits: " + a.getInt(0));
 
     // loop over result set, starting from index 1(!)
     for (int i = 1; i < length; i++) {
@@ -158,7 +163,7 @@ public class Chromasthetiator implements UpdateHandler
 
       // the thumbnail URL is stored under "squarethumbnailurl"
       String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
-      PApplet.println(title + ' ' + '(' + thumbnailUrl + ')');
+      System.out.println(title + ' ' + '(' + thumbnailUrl + ')');
 
       // download image
       PImage img = parent.loadImage(thumbnailUrl);

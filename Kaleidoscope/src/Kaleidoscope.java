@@ -29,7 +29,7 @@ class Kaleidoscope extends PApplet
 
   private int bgImageIndex; // variable to keep track of the current image
 
-  public CentreMovingShape centreLayer; //for the second
+  public CentreMovingShape centreLayer;
 
   public static final int audioBufferSize = 1 << 11;
 
@@ -48,18 +48,21 @@ class Kaleidoscope extends PApplet
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
     smooth(4);
 
+    setupImages();
+
     try {
-      setupImages();
       setupAudioDispatcher();
-      setupLayers();
-
-      chromasthetiator.setup();
-      chromasthetiator.chromatikQuery.nhits = 1;
-
-      audioDispatcherThread.start();
     } catch (LineUnavailableException ex) {
       exit();
+      return;
     }
+
+    setupLayers();
+
+    chromasthetiator.chromatikQuery.nhits = 1;
+    chromasthetiator.setup();
+
+    audioDispatcherThread.start();
   }
 
   private void setupImages()
