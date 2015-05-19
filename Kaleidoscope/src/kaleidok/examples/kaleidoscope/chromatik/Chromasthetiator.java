@@ -96,8 +96,15 @@ public class Chromasthetiator implements UpdateHandler
     updateResultSet(chromatikQuery.getResult());
 
     if (!resultSet.isEmpty()) {
-      parent.bgImage = resultSet.get(0);
-      parent.centreLayer.currentImage = resultSet.get(0);
+      try {
+        parent.bgImage = resultSet.get(0);
+        parent.spectrogramLayer.currentImage = resultSet.get(2);
+        parent.outerMovingShape.currentImage = resultSet.get(1);
+        parent.foobarLayer.currentImage = resultSet.get(3);
+        parent.centreLayer.currentImage = resultSet.get(4);
+      } catch (IndexOutOfBoundsException ex) {
+        System.err.println(ex.getLocalizedMessage());
+      }
     }
 
     /*

@@ -64,7 +64,7 @@ public class Kaleidoscope extends PApplet
 
     setupLayers();
 
-    chromasthetiator.chromatikQuery.nhits = 1;
+    //chromasthetiator.chromatikQuery.nhits = 1;
     chromasthetiator.setup();
 
     audioDispatcherThread.start();
