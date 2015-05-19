@@ -71,15 +71,23 @@ public class Kaleidoscope extends PApplet
   {
     // load the images from the _Images folder (relative path from this kaleidoscope's folder)
     images = new PImage[]{
-      loadImage("images/cyclone.jpg"),
-      loadImage("images/radar.jpg"),
-      loadImage("images/happiness_texture.png"),
-      loadImage("images/topo.jpg"),
-      loadImage("images/particles.jpg")
+      loadImage_throw("images/one.jpg"),
+      loadImage_throw("images/two.jpg"),
+      loadImage_throw("images/three.jpg"),
+      loadImage_throw("images/four.jpg"),
+      loadImage_throw("images/five.jpg")
     };
 
     bgImageIndex = (int) random(images.length); // randomly choose the bgImageIndex
     bgImage = images[bgImageIndex];
+  }
+
+  public PImage loadImage_throw( String path ) throws RuntimeException
+  {
+    PImage img = loadImage(path);
+    if (img != null && img.width > 0 && img.height > 0)
+      return img;
+    throw new RuntimeException("Couldn't load image: " + path);
   }
 
   private void setupAudioDispatcher() throws LineUnavailableException
