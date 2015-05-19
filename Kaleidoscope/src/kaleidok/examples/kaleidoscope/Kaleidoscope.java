@@ -21,7 +21,7 @@ import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 
 public class Kaleidoscope extends PApplet
 {
-  CircularLayer[] layers;
+  private CircularLayer[] layers;
 
   public PImage[] images; // array to hold 4 input images
 
@@ -29,6 +29,9 @@ public class Kaleidoscope extends PApplet
 
   private int bgImageIndex; // variable to keep track of the current image
 
+  public SpectrogramLayer spectrogramLayer;
+  public OuterMovingShape outerMovingShape;
+  public FoobarLayer foobarLayer;
   public CentreMovingShape centreLayer;
 
   public static final int audioBufferSize = 1 << 11;
@@ -104,10 +107,14 @@ public class Kaleidoscope extends PApplet
   private void setupLayers()
   {
     layers = new CircularLayer[]{
-      new SpectrogramLayer(this, images[0], 512, 125, 290, fftProcessor),
-      new OuterMovingShape(this, images[4], 16, 300, audioDispatcher),
-      new FoobarLayer(this, images[3], 16, 125, 275),
-      centreLayer = new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
+      spectrogramLayer =
+        new SpectrogramLayer(this, images[0], 512, 125, 290, fftProcessor),
+      outerMovingShape =
+        new OuterMovingShape(this, images[4], 16, 300, audioDispatcher),
+      foobarLayer =
+        new FoobarLayer(this, images[3], 16, 125, 275),
+      centreLayer =
+        new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
       null
     };
   }
