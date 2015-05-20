@@ -77,7 +77,7 @@ public class Chromasthetiator implements UpdateHandler
       return;
     }
 
-    resultSet = new ArrayList<PImage>(chromatikQuery.nhits);
+    resultSet = new ArrayList<>(chromatikQuery.nhits);
   }
 
   public void issueQuery( String text ) throws Exception

@@ -66,9 +66,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     }
 
     setupLayers();
-
-    //chromasthetiator.chromatikQuery.nhits = 1;
-    chromasthetiator.setup();
+    setupChromasthetiator();
 
     audioDispatcherThread.start();
   }
@@ -120,6 +118,12 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
         new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
       null
     };
+  }
+
+  private void setupChromasthetiator()
+  {
+    //chromasthetiator.chromatikQuery.nhits = 1;
+    chromasthetiator.setup();
   }
 
 
