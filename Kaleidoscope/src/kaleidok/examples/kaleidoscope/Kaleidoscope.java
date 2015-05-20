@@ -1,5 +1,7 @@
 package kaleidok.examples.kaleidoscope;
 
+import com.flickr4java.flickr.Flickr;
+import com.flickr4java.flickr.REST;
 import kaleidok.audio.processor.FFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.layer.*;
@@ -122,6 +124,10 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
 
   private void setupChromasthetiator()
   {
+    String[] keys = loadStrings("api-key.flickr.txt");
+    Flickr flickr = new Flickr(keys[0], keys[1], new REST());
+    chromasthetiator.setFlickrApi(flickr);
+
     //chromasthetiator.chromatikQuery.nhits = 1;
     chromasthetiator.setup();
   }

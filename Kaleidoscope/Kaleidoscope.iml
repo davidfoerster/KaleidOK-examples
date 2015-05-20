@@ -13,5 +13,6 @@
     <orderEntry type="library" name="Processing 3" level="application" />
     <orderEntry type="module" module-name="libraries" />
     <orderEntry type="module" module-name="Synesketch" />
+    <orderEntry type="library" name="com.flickr4java:flickr4java:2.12" level="application" />
   </component>
 </module>

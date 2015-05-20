@@ -1,5 +1,9 @@
 package kaleidok.examples.kaleidoscope.chromatik;
 
+import com.flickr4java.flickr.Flickr;
+import com.flickr4java.flickr.FlickrException;
+import com.flickr4java.flickr.photos.PhotosInterface;
+import com.flickr4java.flickr.photos.Size;
 import kaleidok.util.chromatik.ChromatikColor;
 import kaleidok.util.chromatik.ChromatikQuery;
 import processing.core.PApplet;
@@ -53,6 +57,8 @@ public class Chromasthetiator implements UpdateHandler
   private SynesketchPalette palettes;
 
   private EmotionalState synState = null;
+
+  private PhotosInterface flickrPhotos = null;
 
   private final Random rnd = new Random();
 
@@ -171,8 +177,57 @@ public class Chromasthetiator implements UpdateHandler
     }
   }
 
+
   private static final Pattern FLICKR_URL_PATTERN = Pattern.compile(
-    "(?:_[khbcznmqts])?\\.(jpg|gif|png)$", Pattern.CASE_INSENSITIVE);
+    "/(\\p{Alnum}+)_(\\p{Alnum}+)(?:_\\p{Alpha})?\\.(\\p{Alpha}+)$");
+
+  private PImage getFlickrImage( JSONObject imgInfo )
+  {
+    if (flickrPhotos == null)
+      return getFlickrImageNoApi(imgInfo);
+
+    Matcher m =
+      FLICKR_URL_PATTERN.matcher(imgInfo.getString("squarethumbnailurl"));
+    if (m.find()) try {
+      Collection<Size> sizes = flickrPhotos.getSizes(m.group(1));
+      if (!sizes.isEmpty()) {
+        Size maxSize = Collections.max(sizes, PhotoSizeComparator.getInstance());
+        PImage img = parent.loadImage(maxSize.getSource());
+        if (img != null && img.width > 0 && img.height > 0) {
+          System.out.println(imgInfo.getString("title") + ' ' + '(' + maxSize.getSource() + ')');
+          return img;
+        }
+      }
+    } catch (FlickrException ex) {
+      System.err.println(ex.getLocalizedMessage());
+    }
+    return null;
+  }
+
+  public static class PhotoSizeComparator implements Comparator<Size>
+  {
+    private static PhotoSizeComparator instance = null;
+
+    public static PhotoSizeComparator getInstance()
+    {
+      if (instance == null)
+        instance = new PhotoSizeComparator();
+      return instance;
+    }
+
+    private PhotoSizeComparator() { }
+
+    @Override
+    public int compare( Size o1, Size o2 )
+    {
+      return Integer.compare(getSize(o1), getSize(o2));
+    }
+
+    private static int getSize( Size o )
+    {
+      return o.getWidth() * o.getHeight();
+    }
+  }
 
   private static final byte[] FLICKR_URL_SIZESUFFIXES = {
       'k', 'h', 'b', 'c', 'z', 0, 'n', 'm', 'q', 't', 's'
@@ -185,15 +240,15 @@ public class Chromasthetiator implements UpdateHandler
    * @return  the full-sized image; or <code>null</code>, if none could be
    *   retrieved
    */
-  private PImage getFlickrImage( JSONObject imgInfo )
+  private PImage getFlickrImageNoApi( JSONObject imgInfo )
   {
     String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
     Matcher m = FLICKR_URL_PATTERN.matcher(thumbnailUrl);
     if (m.find())
     {
-      String extension = thumbnailUrl.substring(m.start(1) - 1);
+      String extension = thumbnailUrl.substring(m.start(3) - 1);
       StringBuilder url = new StringBuilder(m.start() + 6);
-      url.append(thumbnailUrl, 0, m.start());
+      url.append(thumbnailUrl, 0, m.end(2));
       for (byte size: FLICKR_URL_SIZESUFFIXES)
       {
         if (size != 0)
@@ -212,6 +267,13 @@ public class Chromasthetiator implements UpdateHandler
     }
     return null;
   }
+
+
+  public void setFlickrApi( Flickr flickr )
+  {
+    flickrPhotos = flickr.getPhotosInterface();
+  }
+
 
   private int[] shuffleArray(int[] ar)
   {
