@@ -17,9 +17,12 @@ import javax.sound.sampled.TargetDataLine;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
+import processing.data.JSONArray;
+
+import java.util.List;
 
 
-public class Kaleidoscope extends PApplet
+public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResultHandler
 {
   private CircularLayer[] layers;
 
@@ -43,7 +46,7 @@ public class Kaleidoscope extends PApplet
   private VolumeLevelProcessor volumeLevelProcessor;
   private FFTProcessor fftProcessor;
 
-  final Chromasthetiator chromasthetiator = new Chromasthetiator(this);
+  final Chromasthetiator chromasthetiator = new Chromasthetiator(this, this);
 
 
   @Override
@@ -192,4 +195,17 @@ public class Kaleidoscope extends PApplet
     new Kaleidoscope().runSketch(args);
   }
 
+  @Override
+  public void handleChromatikResult( JSONArray queryResult, List<PImage> resultSet )
+  {
+    if (!resultSet.isEmpty()) {
+      int i = 0, j = 0;
+      bgImage = resultSet.get(j++);
+      while (i < layers.length && j < resultSet.size()) {
+        CircularLayer layer = layers[i++];
+        if (layer != null)
+          layer.currentImage = resultSet.get(j++);
+      }
+    }
+  }
 }

@@ -2,7 +2,7 @@ package kaleidok.examples.kaleidoscope.chromatik;
 
 import kaleidok.util.chromatik.ChromatikColor;
 import kaleidok.util.chromatik.ChromatikQuery;
-import kaleidok.examples.kaleidoscope.Kaleidoscope;
+import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -17,10 +17,7 @@ import synesketch.emotion.SynesthetiatorEmotion;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
@@ -41,24 +38,27 @@ public class Chromasthetiator implements UpdateHandler
 
   public Document keywordsDoc;
 
-  private final Kaleidoscope parent;
+  private final PApplet parent;
 
   public ChromatikQuery chromatikQuery;
 
-  ArrayList<PImage> resultSet;
+  public SearchResultHandler searchResultHandler = null;
+
+  private ArrayList<PImage> resultSet;
 
   private Synesthetiator synesthetiator;
 
   private SynesketchPalette palettes;
 
-  EmotionalState synState = null;
+  private EmotionalState synState = null;
 
   private final Random rnd = new Random();
 
-  public Chromasthetiator( Kaleidoscope parent )
+  public Chromasthetiator( PApplet parent, SearchResultHandler srh )
   {
 
     this.parent = parent;
+    this.searchResultHandler = srh;
 
     chromatikQuery = new ChromatikQuery();
     chromatikQuery.nhits = 10;
@@ -93,19 +93,13 @@ public class Chromasthetiator implements UpdateHandler
   {
     synState = (EmotionalState) state;
     updateQuery();
-    updateResultSet(chromatikQuery.getResult());
 
-    if (!resultSet.isEmpty()) {
-      try {
-        parent.bgImage = resultSet.get(0);
-        parent.spectrogramLayer.currentImage = resultSet.get(2);
-        parent.outerMovingShape.currentImage = resultSet.get(1);
-        parent.foobarLayer.currentImage = resultSet.get(3);
-        parent.centreLayer.currentImage = resultSet.get(4);
-      } catch (IndexOutOfBoundsException ex) {
-        System.err.println(ex.getLocalizedMessage());
-      }
-    }
+    JSONArray queryResult = chromatikQuery.getResult();
+    updateResultSet(queryResult);
+
+    SearchResultHandler searchResultHandler = this.searchResultHandler;
+    if (searchResultHandler != null)
+      searchResultHandler.handleChromatikResult(queryResult, resultSet);
 
     /*
      * The Processing API says, we shouldn't call draw() directly, but this is
@@ -230,6 +224,11 @@ public class Chromasthetiator implements UpdateHandler
       sb.append(separator).append(ar[i]);
 
     return sb.toString();
+  }
+
+
+  public interface SearchResultHandler {
+    void handleChromatikResult( JSONArray queryResult, List<PImage> resultSet );
   }
 
 }
