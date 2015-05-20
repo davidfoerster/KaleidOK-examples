@@ -139,7 +139,7 @@ public class Chromasthetiator implements UpdateHandler
     // Use (up to) maxColors random colors from palette for search query
     chromatikQuery.opts.clear();
     System.out.print("Colors:");
-    for (int c: shuffleArray(palettes.getColors(emo))) {
+    for (int c: palettes.getColors(emo)) {
       if (chromatikQuery.opts.size() == maxColors)
         break;
       ChromatikColor cc = new ChromatikColor(c);

@@ -58,7 +58,7 @@ public class KaleidoscopeApp extends JApplet
   private JTextField getMessageField()
   {
     if (messageField == null) {
-      messageField = new JTextField("Rage and anger will be the end of mankind");
+      messageField = new JTextField("happiness");
       messageField.setAction(new AbstractAction()
       {
         @Override
