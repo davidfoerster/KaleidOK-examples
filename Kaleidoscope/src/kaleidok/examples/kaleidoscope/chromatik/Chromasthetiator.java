@@ -18,6 +18,8 @@ import synesketch.emotion.SynesthetiatorEmotion;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
@@ -162,18 +164,53 @@ public class Chromasthetiator implements UpdateHandler
       // get image object at index i
       JSONObject imgInfo = a.getJSONObject(i);
 
-      // the image title is stored with the key "title"
-      String title = imgInfo.getString("title", "<untitled>");
-
-      // the thumbnail URL is stored under "squarethumbnailurl"
-      String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
-      System.out.println(title + ' ' + '(' + thumbnailUrl + ')');
-
       // download image
-      PImage img = parent.loadImage(thumbnailUrl);
-      if (img != null && img.width > 0 && img.height > 0)
+      PImage img = getFlickrImage(imgInfo);
+      if (img != null)
         resultSet.add(img);
     }
+  }
+
+  private static final Pattern FLICKR_URL_PATTERN = Pattern.compile(
+    "(?:_[khbcznmqts])?\\.(jpg|gif|png)$", Pattern.CASE_INSENSITIVE);
+
+  private static final byte[] FLICKR_URL_SIZESUFFIXES = {
+      'k', 'h', 'b', 'c', 'z', 0, 'n', 'm', 'q', 't', 's'
+    };
+
+  /**
+   * Returns the the full-sized image.
+   *
+   * @param imgInfo  A Chromatik response object with the image info
+   * @return  the full-sized image; or <code>null</code>, if none could be
+   *   retrieved
+   */
+  private PImage getFlickrImage( JSONObject imgInfo )
+  {
+    String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
+    Matcher m = FLICKR_URL_PATTERN.matcher(thumbnailUrl);
+    if (m.find())
+    {
+      String extension = thumbnailUrl.substring(m.start(1) - 1);
+      StringBuilder url = new StringBuilder(m.start() + 6);
+      url.append(thumbnailUrl, 0, m.start());
+      for (byte size: FLICKR_URL_SIZESUFFIXES)
+      {
+        if (size != 0)
+          url.append('_').append((char) size);
+        url.append(extension);
+
+        String urlStr = url.toString();
+        PImage img = parent.loadImage(urlStr);
+        if (img != null && img.width > 0 && img.height > 0) {
+          System.out.println(imgInfo.getString("title") + ' ' + '(' + urlStr + ')');
+          return img;
+        }
+
+        url.setLength(m.start());
+      }
+    }
+    return null;
   }
 
   private int[] shuffleArray(int[] ar)
