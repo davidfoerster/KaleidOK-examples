@@ -195,14 +195,14 @@ public class Chromasthetiator implements UpdateHandler
 
   static String[] findStrongestAffectWords(List<AffectWord> affectWords, int maxCount)
   {
-    affectWords = new ArrayList<AffectWord>(affectWords);
-    Collections.sort(affectWords, AffectWord.WeightSumComparator.getInstance());
+    AffectWord[] a = affectWords.toArray(new AffectWord[affectWords.size()]);
+    Arrays.sort(a, AffectWord.WeightSumComparator.getReverseInstance());
 
-    if (maxCount < 0 || maxCount > affectWords.size())
-      maxCount = affectWords.size();
+    if (maxCount < 0 || maxCount > a.length)
+      maxCount = a.length;
     String[] resultWords = new String[maxCount];
     for (int i = 0; i < maxCount; i++)
-      resultWords[i] = affectWords.get(i).getWord();
+      resultWords[i] = a[i].getWord();
 
     return resultWords;
   }
