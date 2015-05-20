@@ -3,7 +3,8 @@ Usage:
  1. Run KaleidoscopeApp as Java applet.
 
  2. Below the sketch canvas are two text fields. The upper one is for a message
-    to synesthetise, the lower one search terms for Chromatik's image search.
+    to synesthetise, the lower one for search terms for Chromatik's image
+    search.
 
  3. You can run perform a synesthetiation and image search by having the upper
     text field in focus and pressing ENTER.
