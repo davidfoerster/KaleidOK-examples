@@ -307,7 +307,7 @@ public class Chromasthetiator implements UpdateHandler
       return Collections.EMPTY_LIST;
 
     ArrayList<String> resultWords = new ArrayList<>(maxCount);
-    Comparator<AffectWord> comp = AffectWord.WeightSumComparator.getInstance();
+    Comparator<AffectWord> comp = AffectWord.SquareWeightSumComparator.getInstance();
 
     if (maxCount == 1) {
       resultWords.add(Collections.max(affectWords, comp).getWord());
