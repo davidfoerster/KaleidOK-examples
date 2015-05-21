@@ -36,7 +36,7 @@ public class Chromasthetiator implements UpdateHandler
    */
   public int maxColors = 2;
 
-  public int maxKeywords = 1;
+  public int maxKeywords = 0;
 
   // other instance attributes:
 
@@ -301,35 +301,46 @@ public class Chromasthetiator implements UpdateHandler
     return ar;
   }
 
-  static String[] findStrongestAffectWords(List<AffectWord> affectWords, int maxCount)
+  static List<String> findStrongestAffectWords(List<AffectWord> affectWords, int maxCount)
   {
-    AffectWord[] a = affectWords.toArray(new AffectWord[affectWords.size()]);
-    Arrays.sort(a, AffectWord.WeightSumComparator.getReverseInstance());
+    if (maxCount < 0 || maxCount > affectWords.size())
+      maxCount = affectWords.size();
+    if (maxCount == 0)
+      return Collections.EMPTY_LIST;
 
-    if (maxCount < 0 || maxCount > a.length)
-      maxCount = a.length;
-    String[] resultWords = new String[maxCount];
-    for (int i = 0; i < maxCount; i++)
-      resultWords[i] = a[i].getWord();
+    ArrayList<String> resultWords = new ArrayList<>(maxCount);
+    Comparator<AffectWord> comp = AffectWord.WeightSumComparator.getInstance();
 
+    if (maxCount == 1) {
+      resultWords.add(Collections.max(affectWords, comp).getWord());
+    } else {
+      AffectWord[] a = affectWords.toArray(new AffectWord[affectWords.size()]);
+      Arrays.sort(a, comp);
+      final int limit = affectWords.size() - maxCount;
+      for (int i = affectWords.size() - 1; i >= limit; i--)
+        resultWords.add(a[i].getWord());
+    }
     return resultWords;
   }
 
-  static String joinStrings(String[] ar, char separator)
+  static String joinStrings(Collection<String> ar, char separator)
   {
-    if (ar.length == 0)
+    if (ar.isEmpty())
       return "";
-    if (ar.length == 1)
-      return ar[0];
 
-    int len = ar.length - 1;
-    for (String s: ar)
-      len += s.length();
+    Iterator<String> it = ar.iterator();
+    if (ar.size() == 1)
+      return it.next();
+
+    int len = ar.size() - 1;
+    while (it.hasNext())
+      len += it.next().length();
     StringBuilder sb = new StringBuilder(len);
 
-    sb.append(ar[0]);
-    for (int i = 1; i < ar.length; i++)
-      sb.append(separator).append(ar[i]);
+    it = ar.iterator();
+    sb.append(it.next());
+    while (it.hasNext())
+      sb.append(separator).append(it.next());
 
     return sb.toString();
   }
