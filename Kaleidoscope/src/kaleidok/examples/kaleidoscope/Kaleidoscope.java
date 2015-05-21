@@ -136,12 +136,15 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   @Override
   public void draw()
   {
+    final long start = System.nanoTime();
+
     drawBackgroundTexture();
     for (CircularLayer l : layers) {
       if (l != null)
         l.run();
     }
-    drawFrameRate();
+
+    drawFrameRate(start);
   }
 
 
@@ -156,13 +159,16 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
 
   private String sampledFrameRate = "";
 
-  private void drawFrameRate()
+  private void drawFrameRate( long start )
   {
     if (frameCount % 15 == 0)
       sampledFrameRate = String.valueOf((int) frameRate);
 
+    final int offset = 4, size = 8;
+    textSize(size);
     fill(0, 255, 0);
-    text(sampledFrameRate, 4, 14);
+    text(sampledFrameRate, offset, size + offset);
+    text((int)(System.nanoTime() - start) / 1000000, offset, 2*size + offset);
   }
 
 
