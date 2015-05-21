@@ -5,12 +5,15 @@
  1. Flickr API key:
 
     [Request a Flickr API key](https://www.flickr.com/services/api/keys/apply/)
-    and store it in `data/api-key.flickr.txt`. The 1st line must contain the
-    public API key, the 2nd must contain the shared secret for that key.
-    Example:
+    and store it in `src/data/api-key.flickr.txt` (relative to this README
+    file). The 1st line must contain the public API key, the 2nd must contain
+    the shared secret for that key. Example:
 
         e0b92403f258c35c6b43d2e21c640f9f
         bd7a0f0bcc5dfc25
+    
+    Note: The above example does not contain a working key, just a randomly
+    generated look-alike.
 
  2. Some libraries need to be set up, but I'm not going into that now.
 
