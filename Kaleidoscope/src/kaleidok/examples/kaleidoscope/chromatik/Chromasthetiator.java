@@ -58,8 +58,6 @@ public class Chromasthetiator implements UpdateHandler
 
   private PhotosInterface flickrPhotos = null;
 
-  private final Random rnd = new Random();
-
   public Chromasthetiator( PApplet parent, SearchResultHandler srh )
   {
 
@@ -143,12 +141,12 @@ public class Chromasthetiator implements UpdateHandler
     // Use (up to) maxColors random colors from palette for search query
     chromatikQuery.opts.clear();
     System.out.print("Colors:");
-    for (int c: palettes.getColors(emo)) {
+    for (int c: shuffleArray(palettes.getColors(emo), new Random(synState.getText().hashCode()))) {
       if (chromatikQuery.opts.size() == maxColors)
         break;
       ChromatikColor cc = new ChromatikColor(c);
-      System.out.format(" #%06x (%s),", cc.value, cc.groupName);
-      chromatikQuery.opts.put(cc, weight);
+      if (chromatikQuery.opts.put(cc, weight) == null)
+        System.out.format(" #%06x (%s),", cc.value, cc.groupName);
     }
     System.out.println();
   }
@@ -284,7 +282,7 @@ public class Chromasthetiator implements UpdateHandler
   }
 
 
-  private int[] shuffleArray(int[] ar)
+  private static int[] shuffleArray( int[] ar, Random rnd )
   {
     ar = ar.clone();
 
