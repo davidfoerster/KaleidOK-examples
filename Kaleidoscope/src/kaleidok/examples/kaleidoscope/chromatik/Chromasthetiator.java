@@ -22,8 +22,6 @@ import synesketch.emotion.SynesthetiatorEmotion;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
@@ -178,28 +176,32 @@ public class Chromasthetiator implements UpdateHandler
   }
 
 
-  private static final Pattern FLICKR_URL_PATTERN = Pattern.compile(
-    "/(\\p{Alnum}+)_(\\p{Alnum}+)(?:_\\p{Alpha})?\\.(\\p{Alpha}+)$");
-
   private PImage getFlickrImage( JSONObject imgInfo )
   {
     if (flickrPhotos == null)
       return getFlickrImageNoApi(imgInfo);
 
-    Matcher m =
-      FLICKR_URL_PATTERN.matcher(imgInfo.getString("squarethumbnailurl"));
-    if (m.find()) try {
-      Collection<Size> sizes = flickrPhotos.getSizes(m.group(1));
-      if (!sizes.isEmpty()) {
-        Size maxSize = Collections.max(sizes, PhotoSizeComparator.getInstance());
-        PImage img = parent.loadImage(maxSize.getSource());
-        if (img != null && img.width > 0 && img.height > 0) {
-          System.out.println(imgInfo.getString("title") + ' ' + '(' + maxSize.getSource() + ')');
-          return img;
+    String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
+    int start = thumbnailUrl.lastIndexOf('/');
+    if (start >= 0) {
+      start += 1;
+      int end = thumbnailUrl.indexOf('_', start);
+      if (end >= 0) {
+        String photoId = thumbnailUrl.substring(start, end);
+        try {
+          Collection<Size> sizes = flickrPhotos.getSizes(photoId);
+          if (!sizes.isEmpty()) {
+            Size maxSize = Collections.max(sizes, PhotoSizeComparator.getInstance());
+            PImage img = parent.loadImage(maxSize.getSource());
+            if (img != null && img.width > 0 && img.height > 0) {
+              System.out.println(getImageTitle(imgInfo) + ' ' + '(' + maxSize.getSource() + ')');
+              return img;
+            }
+          }
+        } catch (FlickrException ex) {
+          System.err.println(ex.getLocalizedMessage());
         }
       }
-    } catch (FlickrException ex) {
-      System.err.println(ex.getLocalizedMessage());
     }
     return null;
   }
@@ -243,12 +245,14 @@ public class Chromasthetiator implements UpdateHandler
   private PImage getFlickrImageNoApi( JSONObject imgInfo )
   {
     String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
-    Matcher m = FLICKR_URL_PATTERN.matcher(thumbnailUrl);
-    if (m.find())
-    {
-      String extension = thumbnailUrl.substring(m.start(3) - 1);
-      StringBuilder url = new StringBuilder(m.start() + 6);
-      url.append(thumbnailUrl, 0, m.end(2));
+    int len = thumbnailUrl.length();
+    if (thumbnailUrl.charAt(len - 4) == '.') {
+      len -= 4;
+      String extension = thumbnailUrl.substring(len);
+      if (thumbnailUrl.charAt(len - 2) == '_')
+        len -= 2;
+      StringBuilder url = new StringBuilder(len);
+      url.append(thumbnailUrl, 0, len);
       for (byte size: FLICKR_URL_SIZESUFFIXES)
       {
         if (size != 0)
@@ -258,14 +262,19 @@ public class Chromasthetiator implements UpdateHandler
         String urlStr = url.toString();
         PImage img = parent.loadImage(urlStr);
         if (img != null && img.width > 0 && img.height > 0) {
-          System.out.println(imgInfo.getString("title") + ' ' + '(' + urlStr + ')');
+          System.out.println(getImageTitle(imgInfo) + ' ' + '(' + urlStr + ')');
           return img;
         }
 
-        url.setLength(m.start());
+        url.setLength(len);
       }
     }
     return null;
+  }
+
+  private static String getImageTitle( JSONObject imgInfo )
+  {
+    return imgInfo.getString("title", "<untitled>");
   }
 
 
