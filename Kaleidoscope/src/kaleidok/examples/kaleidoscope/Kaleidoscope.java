@@ -50,8 +50,6 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
     smooth(4);
 
-    setupImages();
-
     try {
       setupAudioDispatcher();
     } catch (LineUnavailableException ex) {
@@ -59,6 +57,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
       return;
     }
 
+    setupImages();
     setupLayers();
     setupChromasthetiator();
 
@@ -69,21 +68,22 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   {
     // load the images from the _Images folder (relative path from this kaleidoscope's folder)
     images = new PImage[]{
-      loadImage_throw("images/one.jpg"),
-      loadImage_throw("images/two.jpg"),
-      loadImage_throw("images/three.jpg"),
-      loadImage_throw("images/four.jpg"),
-      loadImage_throw("images/five.jpg")
+      loadImage("images/one.jpg", true),
+      loadImage("images/two.jpg", true),
+      loadImage("images/three.jpg", true),
+      loadImage("images/four.jpg", true),
+      loadImage("images/five.jpg", true)
     };
 
     bgImageIndex = (int) random(images.length); // randomly choose the bgImageIndex
     bgImage = images[bgImageIndex];
   }
 
-  public PImage loadImage_throw( String path ) throws RuntimeException
+  public PImage loadImage( String path, boolean throwOnFailure )
+    throws RuntimeException
   {
-    PImage img = loadImage(path);
-    if (img != null && img.width > 0 && img.height > 0)
+    PImage img = super.loadImage(path);
+    if (!throwOnFailure || (img != null && img.width > 0 && img.height > 0))
       return img;
     throw new RuntimeException("Couldn't load image: " + path);
   }
