@@ -4,6 +4,8 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.REST;
+import kaleidok.audio.ContinuousAudioInputStream;
+import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.FFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
@@ -12,7 +14,8 @@ import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
 
-import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.*;
+import java.io.IOException;
 import java.util.List;
 
 
@@ -33,7 +36,9 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
 
   public static final int audioBufferSize = 1 << 11;
   public static final int audioSampleRate = 22050;
+  public static final int audioOverlap = 0;
 
+  private final String audioSource;
   private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
 
@@ -42,6 +47,17 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
 
   final Chromasthetiator chromasthetiator = new Chromasthetiator(this, this);
 
+
+  public Kaleidoscope()
+  {
+    this(null);
+  }
+
+  public Kaleidoscope( String audioSource )
+  {
+    super();
+    this.audioSource = audioSource;
+  }
 
   @Override
   public void setup()
@@ -52,7 +68,8 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
 
     try {
       setupAudioDispatcher();
-    } catch (LineUnavailableException ex) {
+    } catch (LineUnavailableException | UnsupportedAudioFileException | IOException ex) {
+      ex.printStackTrace();
       exit();
       return;
     }
@@ -88,15 +105,32 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     throw new RuntimeException("Couldn't load image: " + path);
   }
 
-  private void setupAudioDispatcher() throws LineUnavailableException
+  private void setupAudioDispatcher()
+    throws LineUnavailableException, IOException, UnsupportedAudioFileException
   {
-    audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(audioSampleRate, audioBufferSize, 0);
-    audioDispatcherThread = new Thread(audioDispatcher, "Audio dispatching");
+    Runnable dispatcherRunnable;
+
+    if (audioSource == null) {
+      audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
+        audioSampleRate, audioBufferSize, audioOverlap);
+      dispatcherRunnable = audioDispatcher;
+    } else {
+      AudioInputStream ais =
+        AudioSystem.getAudioInputStream(createInputRaw(audioSource));
+      audioDispatcher =
+        new AudioDispatcher(new ContinuousAudioInputStream(ais),
+          audioBufferSize, audioOverlap);
+      dispatcherRunnable =
+        new DummyAudioPlayer().addToDispatcher(audioDispatcher);
+    }
 
     audioDispatcher.addAudioProcessor(
       volumeLevelProcessor = new VolumeLevelProcessor());
     audioDispatcher.addAudioProcessor(
       fftProcessor = new FFTProcessor(audioBufferSize));
+
+    audioDispatcherThread =
+      new Thread(dispatcherRunnable, "Audio dispatching");
   }
 
   private void setupLayers()

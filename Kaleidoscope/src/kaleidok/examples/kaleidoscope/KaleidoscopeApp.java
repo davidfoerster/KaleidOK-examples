@@ -40,7 +40,7 @@ public class KaleidoscopeApp extends JApplet
   private Kaleidoscope getSketch()
   {
     if (sketch == null) {
-      sketch = new Kaleidoscope();
+      sketch = new Kaleidoscope(getParameter("audio.input"));
       sketch.chromasthetiator.keywordsDoc = getKeywordField().getDocument();
       sketch.init();
     }
