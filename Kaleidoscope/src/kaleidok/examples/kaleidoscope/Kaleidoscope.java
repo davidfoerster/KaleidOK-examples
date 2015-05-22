@@ -1,26 +1,18 @@
 package kaleidok.examples.kaleidoscope;
 
+import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.REST;
 import kaleidok.audio.processor.FFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
-import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
+import kaleidok.examples.kaleidoscope.layer.*;
 import processing.core.PApplet;
 import processing.core.PImage;
-
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.TargetDataLine;
-
-import be.tarsos.dsp.AudioDispatcher;
-import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
-import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import processing.data.JSONArray;
 
+import javax.sound.sampled.LineUnavailableException;
 import java.util.List;
 
 
@@ -40,7 +32,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   public CentreMovingShape centreLayer;
 
   public static final int audioBufferSize = 1 << 11;
-  public static final float audioSampleRate = 22050;
+  public static final int audioSampleRate = 22050;
 
   private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
@@ -98,7 +90,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
 
   private void setupAudioDispatcher() throws LineUnavailableException
   {
-    audioDispatcher = new AudioDispatcher(getLine(1, audioSampleRate, 16, audioBufferSize), audioBufferSize, 0);
+    audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(audioSampleRate, audioBufferSize, 0);
     audioDispatcherThread = new Thread(audioDispatcher, "Audio dispatching");
 
     audioDispatcher.addAudioProcessor(
@@ -186,23 +178,6 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
       bgImage = images[bgImageIndex];
       break;
     }
-  }
-
-
-  public static TarsosDSPAudioInputStream getLine( int channels, float sampleRate, int sampleSize, int bufferSize )
-    throws LineUnavailableException
-  {
-    return getLine(new AudioFormat(sampleRate, sampleSize, channels, true, true), bufferSize);
-  }
-
-  public static TarsosDSPAudioInputStream getLine( AudioFormat format, int bufferSize )
-    throws LineUnavailableException
-  {
-    TargetDataLine line = (TargetDataLine) AudioSystem.getLine(
-      new DataLine.Info(TargetDataLine.class, format, bufferSize));
-    line.open(format, bufferSize);
-    line.start();
-    return new JVMAudioInputStream(new AudioInputStream(line));
   }
 
 
