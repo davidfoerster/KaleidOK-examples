@@ -26,9 +26,14 @@ public class DummyAudioPlayer implements AudioProcessor
     final long processedSamples = ev.getSamplesProcessed();
     if (startSample >= 0) {
       // all times in nanoseconds
-      LockSupport.parkNanos(
+      long delay =
         (long)((processedSamples - startSample) * sampleLength + 0.5) +
-          startTime - System.nanoTime());
+          startTime - System.nanoTime();
+      if (delay >= 0) {
+        LockSupport.parkNanos(delay);
+      } else {
+        System.out.println("Warning: audio processing too slow by " + (-delay) + " ns");
+      }
     } else {
       if (startTime < 0)
         startTime = System.nanoTime();
