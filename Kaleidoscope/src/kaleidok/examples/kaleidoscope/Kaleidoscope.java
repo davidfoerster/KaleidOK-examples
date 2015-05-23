@@ -164,6 +164,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   {
     final long start = System.nanoTime();
 
+    //background(0);
     drawBackgroundTexture();
     for (CircularLayer l : layers) {
       if (l != null)

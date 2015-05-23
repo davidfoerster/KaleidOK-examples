@@ -14,8 +14,6 @@ public class ContinuousAudioInputStream implements TarsosDSPAudioInputStream
 
   private final TarsosDSPAudioFormat format;
 
-  private long lastRead = -1;
-
   public ContinuousAudioInputStream( AudioInputStream source )
   {
     if (!source.markSupported())

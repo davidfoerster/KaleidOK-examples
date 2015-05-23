@@ -27,8 +27,9 @@ public class SpectrogramLayer extends CircularLayer
 	{
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
 		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
-		parent.stroke(255);
-		parent.strokeWeight(0.5f);
+    //parent.noFill();
+		//parent.stroke(255, 0, 0);
+		//parent.strokeWeight(0.5f);
 		parent.noStroke();
 		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
 		parent.texture(currentImage); // set the texture to use

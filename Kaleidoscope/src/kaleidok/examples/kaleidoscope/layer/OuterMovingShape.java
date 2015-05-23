@@ -39,7 +39,7 @@ public class OuterMovingShape extends CircularLayer
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
     parent.texture(currentImage); // set the texture to use
     parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
-    for (int i=0; i<segmentCount+1; i++) {
+    for (int i = 0; i <= segmentCount; i++) {
       drawCircleSegment(i % segmentCount); // make sure the end equals the start & draw the vertex using the custom drawVertex() method
     }
     parent.endShape(); // finalize the Shape

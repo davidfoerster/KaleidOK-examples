@@ -24,7 +24,7 @@ public class FoobarLayer extends CircularLayer
 		parent.stroke(255); // set stroke to white
 		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
 		parent.texture(currentImage); // set the texture to use
-	  for (int i=0; i<segmentCount+1; i++) {
+	  for (int i = 0; i <= segmentCount; i++) {
 	    int im = i % segmentCount; // make sure the end equals the start
 
 	    // each vertex has a noise-based dynamic movement
