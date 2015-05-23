@@ -1,5 +1,8 @@
 package kaleidok.util;
 
+import kaleidok.util.containers.FloatList;
+
+
 public final class Math
 {
   private Math() { }
@@ -35,6 +38,38 @@ public final class Math
     return sumOfSquares_noBoundsCheck(a, offset, halfLen) +
       sumOfSquares_noBoundsCheck(a, offset + halfLen, len - halfLen);
   }
+
+
+  public static float sum( FloatList a )
+  {
+    return (a.getSize() != 0) ? sum_noBoundsCheck(a, 0, a.getSize()) : 0;
+  }
+
+  public static float sum( FloatList a, int offset, int len )
+  {
+    if (offset < 0 || offset > a.getSize())
+      throw new ArrayIndexOutOfBoundsException("offset");
+    if (len < 0)
+      throw new ArrayIndexOutOfBoundsException("len");
+    if (offset + len > a.getSize())
+      throw new ArrayIndexOutOfBoundsException("offset+len");
+
+    return (len != 0) ? sum_noBoundsCheck(a, offset, len) : 0;
+  }
+
+  private static float sum_noBoundsCheck( FloatList a, int offset, int len )
+  {
+    assert offset >= 0 && len > 0;
+    assert offset + len <= a.getSize();
+
+    if (len == 1)
+      return a.get(offset);
+
+    int halfLen = len / 2;
+    return sum_noBoundsCheck(a, offset, halfLen) +
+      sum_noBoundsCheck(a, offset + halfLen, len - halfLen);
+  }
+
 
   public static float square( float x )
   {
