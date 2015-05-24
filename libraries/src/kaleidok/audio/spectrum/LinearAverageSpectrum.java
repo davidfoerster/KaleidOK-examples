@@ -95,7 +95,7 @@ public class LinearAverageSpectrum implements Spectrum
   @Override
   public float getBinFloat( float freq )
   {
-    return freq / getSampleRate() * (N * 2);
+    return freq / (float) bandwidth;
   }
 
   @Override
@@ -107,7 +107,7 @@ public class LinearAverageSpectrum implements Spectrum
   @Override
   public float getFreq( float n )
   {
-    return n / (this.N * 2) * getSampleRate();
+    return n * (float) bandwidth;
   }
 
   @Override
