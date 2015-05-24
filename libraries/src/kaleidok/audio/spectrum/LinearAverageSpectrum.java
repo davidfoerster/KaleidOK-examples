@@ -11,7 +11,7 @@ public class LinearAverageSpectrum implements Spectrum
 
   private double bandwidth = Double.NaN, binsPerBand = Double.NaN;
 
-  private int n = 0;
+  private int N = 0;
 
   public LinearAverageSpectrum( Spectrum spectrum )
   {
@@ -20,8 +20,8 @@ public class LinearAverageSpectrum implements Spectrum
 
   public void setBands( int n )
   {
-    if (this.n != n) {
-      this.n = n;
+    if (this.N != n) {
+      this.N = n;
       bandwidth = Double.NaN;
       binsPerBand = Double.NaN;
       update();
@@ -33,7 +33,7 @@ public class LinearAverageSpectrum implements Spectrum
     if (bandwidth != this.bandwidth) {
       this.bandwidth = bandwidth;
       binsPerBand = Double.NaN;
-      n = 0;
+      N = 0;
       update();
     }
   }
@@ -51,19 +51,19 @@ public class LinearAverageSpectrum implements Spectrum
 
     if (Double.isNaN(binsPerBand)) {
       if (!Double.isNaN(bandwidth)) {
-        n = (int) Math.ceil(sampleRate / (bandwidth * 2));
+        N = (int) Math.ceil(sampleRate / (bandwidth * 2));
       }
-      assert n != 0;
-      bandwidth = (double) sampleRate / (n * 2);
-      binsPerBand = (double) spectrum.getSize() / n;
+      assert N != 0;
+      bandwidth = (double) sampleRate / (N * 2);
+      binsPerBand = (double) spectrum.getSize() / N;
     }
     return true;
   }
 
   @Override
-  public float get( int bin )
+  public float get( int n )
   {
-    double begin = bin * binsPerBand, end = begin + binsPerBand;
+    double begin = n * binsPerBand, end = begin + binsPerBand;
     assert end <= spectrum.getSize();
     int lowBin = (int) begin, highBin = (int) end;
 
@@ -77,7 +77,7 @@ public class LinearAverageSpectrum implements Spectrum
   @Override
   public int getSize()
   {
-    return n;
+    return N;
   }
 
   @Override
@@ -89,7 +89,7 @@ public class LinearAverageSpectrum implements Spectrum
   @Override
   public float getBinFloat( float freq )
   {
-    return freq / getSampleRate() * (n * 2);
+    return freq / getSampleRate() * (N * 2);
   }
 
   @Override
@@ -99,14 +99,14 @@ public class LinearAverageSpectrum implements Spectrum
   }
 
   @Override
-  public float getFreq( float bin )
+  public float getFreq( float n )
   {
-    return bin / (n * 2) * getSampleRate();
+    return n / (this.N * 2) * getSampleRate();
   }
 
   @Override
-  public float getFreq( int bin )
+  public float getFreq( int n )
   {
-    return getFreq((float) bin);
+    return getFreq((float) n);
   }
 }

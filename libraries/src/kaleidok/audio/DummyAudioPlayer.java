@@ -23,11 +23,10 @@ public class DummyAudioPlayer implements AudioProcessor
   @Override
   public boolean process( AudioEvent ev )
   {
-    final long processedSamples = ev.getSamplesProcessed();
     if (startSample >= 0) {
       // all times in nanoseconds
-      long delay =
-        (long)((processedSamples - startSample) * sampleLength + 0.5) +
+      final long delay =
+        (long)((ev.getSamplesProcessed() - startSample) * sampleLength + 0.5) +
           startTime - System.nanoTime();
       if (delay >= 0) {
         LockSupport.parkNanos(delay);
@@ -37,7 +36,7 @@ public class DummyAudioPlayer implements AudioProcessor
     } else {
       if (startTime < 0)
         startTime = System.nanoTime();
-      startSample = processedSamples;
+      startSample = ev.getSamplesProcessed();
       sampleLength = 1e9 / ev.getSampleRate();
     }
     return true;

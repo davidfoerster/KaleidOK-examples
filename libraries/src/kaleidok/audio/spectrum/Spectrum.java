@@ -5,7 +5,7 @@ import kaleidok.util.containers.FloatList;
 
 public interface Spectrum extends FloatList
 {
-  float get( int bin );
+  float get( int n );
 
   int getSize();
 
@@ -15,7 +15,7 @@ public interface Spectrum extends FloatList
 
   int getBin( float freq );
 
-  float getFreq( float bin );
+  float getFreq( float n );
 
-  float getFreq( int bin );
+  float getFreq( int n );
 }
