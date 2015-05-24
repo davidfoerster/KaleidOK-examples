@@ -21,6 +21,9 @@ public class LinearAverageSpectrum implements Spectrum
   public void setBands( int n )
   {
     if (this.N != n) {
+      if (n <= 0)
+        throw new IllegalArgumentException("n ≤ 0");
+
       this.N = n;
       bandwidth = Double.NaN;
       binsPerBand = Double.NaN;
@@ -31,6 +34,9 @@ public class LinearAverageSpectrum implements Spectrum
   private void setBandwidth( double bandwidth )
   {
     if (bandwidth != this.bandwidth) {
+      if (bandwidth <= 0)
+        throw new IllegalArgumentException("bandwidth ≤ 0");
+
       this.bandwidth = bandwidth;
       binsPerBand = Double.NaN;
       N = 0;
