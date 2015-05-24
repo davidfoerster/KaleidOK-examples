@@ -76,7 +76,7 @@ public class LinearAverageSpectrum implements Spectrum
     double x = sum(spectrum, lowBin, highBin - lowBin);
     double cutoff = (begin - lowBin) * spectrum.get(lowBin); // left side
     if (highBin < spectrum.getSize())
-      cutoff += (end - highBin) * spectrum.get(highBin);
+      cutoff += (end - highBin) * spectrum.get(highBin); // right side
     return (float)(x - cutoff);
   }
 
