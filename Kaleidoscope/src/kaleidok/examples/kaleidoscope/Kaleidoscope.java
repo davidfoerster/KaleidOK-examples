@@ -18,6 +18,8 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.util.List;
 
+import static kaleidok.util.DebugManager.verbose;
+
 
 public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResultHandler
 {
@@ -171,7 +173,8 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
         l.run();
     }
 
-    drawFrameRate(start);
+    if (verbose >= 1)
+      drawFrameRate(start);
   }
 
 

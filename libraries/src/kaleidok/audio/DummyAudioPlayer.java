@@ -6,6 +6,9 @@ import be.tarsos.dsp.AudioProcessor;
 
 import java.util.concurrent.locks.LockSupport;
 
+import static kaleidok.util.DebugManager.debug;
+import static kaleidok.util.DebugManager.verbose;
+
 
 /**
  * Objects of this class delay the audio dispatching as an
@@ -30,7 +33,7 @@ public class DummyAudioPlayer implements AudioProcessor
           startTime - System.nanoTime();
       if (delay >= 0) {
         LockSupport.parkNanos(delay);
-      } else {
+      } else if (debug <= 0 && verbose >= 1) {
         System.out.println("Warning: audio processing too slow by " + (-delay) + " ns");
       }
     } else {
