@@ -12,13 +12,13 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
 
   private float sampleRate = 0;
 
-  private final float[] buffer;
+  private final int bufferSize;
 
   private int avgType = 0, avgParam1, avgParam2;
 
   public MinimFFTProcessor( int bufferSize )
   {
-    buffer = new float[bufferSize];
+    this.bufferSize = bufferSize;
   }
 
   public void noAverages()
@@ -74,13 +74,11 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
   {
     if (fft == null) {
       sampleRate = audioEvent.getSampleRate();
-      fft = new FFT(buffer.length, sampleRate);
+      fft = new FFT(bufferSize, sampleRate);
       updateAverages();
     }
 
-    float[] audioBuffer = audioEvent.getFloatBuffer();
-    System.arraycopy(audioBuffer, 0, buffer, 0, audioBuffer.length);
-    fft.forward(buffer);
+    fft.forward(audioEvent.getFloatBuffer());
     return true;
   }
 
@@ -99,7 +97,7 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
   @Override
   public int getSize()
   {
-    return fft.timeSize();
+    return bufferSize;
   }
 
   public float getSampleRate()
