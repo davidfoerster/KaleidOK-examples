@@ -71,13 +71,20 @@ public class LinearAverageSpectrum implements Spectrum
   {
     double begin = n * binsPerBand, end = begin + binsPerBand;
     assert end <= spectrum.getSize();
-    int lowBin = (int) begin, highBin = (int) end;
+    int lowBin = (int) begin + 1, highBin = (int) end;
 
-    double x = sum(spectrum, lowBin, highBin - lowBin);
-    double cutoff = (begin - lowBin) * spectrum.get(lowBin); // left side
-    if (highBin < spectrum.getSize())
-      cutoff += (end - highBin) * spectrum.get(highBin); // right side
-    return (float)(x - cutoff);
+    double x;
+    if (lowBin <= highBin) {
+      x = 0;
+      if (lowBin > 0)
+        x += (lowBin - begin) * spectrum.get(lowBin - 1); // left side
+      if (highBin < spectrum.getSize())
+        x += (end - highBin) * spectrum.get(highBin); // right side
+      x += sum(spectrum, lowBin, highBin - lowBin);
+    } else {
+      x = binsPerBand * spectrum.get(highBin);
+    }
+    return (float) x;
   }
 
   @Override
