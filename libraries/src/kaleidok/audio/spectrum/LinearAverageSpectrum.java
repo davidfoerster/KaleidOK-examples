@@ -93,15 +93,9 @@ public class LinearAverageSpectrum implements Spectrum
   }
 
   @Override
-  public float getBinFloat( float freq )
+  public float getBin( float freq )
   {
     return freq / (float) bandwidth;
-  }
-
-  @Override
-  public int getBin( float freq )
-  {
-    return Math.round(getBinFloat(freq));
   }
 
   @Override

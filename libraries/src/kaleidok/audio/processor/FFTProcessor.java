@@ -57,14 +57,9 @@ public class FFTProcessor implements AudioProcessor, Spectrum
     return sampleRate;
   }
 
-  public float getBinFloat( float freq )
+  public float getBin( float freq )
   {
     return freq / sampleRate * (amplitudes.length * 2);
-  }
-
-  public int getBin( float freq )
-  {
-    return Math.round(getBinFloat(freq));
   }
 
   public float getFreq( float bin )

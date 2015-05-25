@@ -11,9 +11,7 @@ public interface Spectrum extends FloatList
 
   float getSampleRate();
 
-  float getBinFloat( float freq );
-
-  int getBin( float freq );
+  float getBin( float freq );
 
   float getFreq( float n );
 
