@@ -1,5 +1,7 @@
 package kaleidok.examples.kaleidoscope;
 
+import kaleidok.util.DebugManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -13,6 +15,7 @@ public class KaleidoscopeApp extends JApplet
 
   public void init()
   {
+    DebugManager.fromApplet(this);
     initComponents();
   }
 
