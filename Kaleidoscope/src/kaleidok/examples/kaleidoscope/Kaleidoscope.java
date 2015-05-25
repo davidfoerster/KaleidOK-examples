@@ -38,8 +38,8 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   public CentreMovingShape centreLayer;
 
   public static final int audioBufferSize = 1 << 11;
+  public static final int audioOverlap = audioBufferSize / 2;
   public static final int audioSampleRate = 22050;
-  public static final int audioOverlap = 0;
 
   private final String audioSource;
   private AudioDispatcher audioDispatcher;
@@ -140,7 +140,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   {
     layers = new CircularLayer[]{
       spectrogramLayer =
-        new SpectrogramLayer(this, images[0], 512, 125, 290, fftProcessor),
+        new SpectrogramLayer(this, images[0], 256, 125, 290, fftProcessor),
       outerMovingShape =
         new OuterMovingShape(this, images[4], 16, 300, audioDispatcher),
       foobarLayer =
