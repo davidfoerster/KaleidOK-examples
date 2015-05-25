@@ -18,6 +18,7 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.util.List;
 
+import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
 
 
@@ -166,7 +167,6 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   {
     final long start = System.nanoTime();
 
-    //background(0);
     drawBackgroundTexture();
     for (CircularLayer l : layers) {
       if (l != null)
@@ -180,10 +180,15 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
 
   private void drawBackgroundTexture()
   {
-    // background image
-    image(bgImage, 0, 0, width, (float) width / height * bgImage.height); // resize-display image correctly to cover the whole screen
-    fill(255, 125 + sin(frameCount * 0.01f) * 5); // white fill with dynamic transparency
-    rect(0, 0, width, height); // rect covering the whole canvas
+    if (wireframe < 1) {
+      // background image
+      image(bgImage, 0, 0, width,
+        (float) width / height * bgImage.height); // resize-display image correctly to cover the whole screen
+      fill(255, 125 + sin(frameCount * 0.01f) * 5); // white fill with dynamic transparency
+      rect(0, 0, width, height); // rect covering the whole canvas
+    } else {
+      background(0);
+    }
   }
 
 

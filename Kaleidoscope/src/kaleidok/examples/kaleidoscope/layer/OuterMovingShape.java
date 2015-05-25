@@ -8,6 +8,8 @@ import kaleidok.examples.kaleidoscope.Kaleidoscope;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import static kaleidok.util.DebugManager.wireframe;
+
 
 public class OuterMovingShape extends CircularLayer
 {
@@ -35,9 +37,16 @@ public class OuterMovingShape extends CircularLayer
     }
     parent.rotate((float) angle); // rotate around this center
 
-    parent.noStroke(); // turn off stroke
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
-    parent.texture(currentImage); // set the texture to use
+    if (wireframe < 1) {
+      parent.texture(currentImage); // set the texture to use
+      parent.noStroke(); // turn off stroke
+    } else {
+      parent.noFill();
+      parent.stroke(128);
+      parent.strokeWeight(0.5f);
+    }
+
     parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
     for (int i = 0; i <= segmentCount; i++) {
       drawCircleSegment(i % segmentCount); // make sure the end equals the start & draw the vertex using the custom drawVertex() method

@@ -3,6 +3,8 @@ package kaleidok.examples.kaleidoscope.layer;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import static kaleidok.util.DebugManager.wireframe;
+
 
 public class FoobarLayer extends CircularLayer
 {
@@ -20,10 +22,15 @@ public class FoobarLayer extends CircularLayer
 
 		parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
 		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
-		parent.noStroke();
+
 		parent.stroke(255); // set stroke to white
 		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
-		parent.texture(currentImage); // set the texture to use
+		if (wireframe < 1) {
+			parent.texture(currentImage); // set the texture to use
+		} else {
+			parent.noFill();
+		}
+
 	  for (int i = 0; i <= segmentCount; i++) {
 	    int im = i % segmentCount; // make sure the end equals the start
 
