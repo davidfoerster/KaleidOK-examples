@@ -44,7 +44,7 @@ public class CentreMovingShape extends CircularLayer
       parent.strokeWeight(0.5f);
     }
 
-    parent.vertex(10f, 10f, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
+    parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
     for (int i = 0; i <= segmentCount; i++) {
       drawCircleVertex(i % segmentCount, radius); // make sure the end equals the start & draw the vertex using the custom drawVertex() method
     }
