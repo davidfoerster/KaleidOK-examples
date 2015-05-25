@@ -2,6 +2,8 @@ package kaleidok.util;
 
 import kaleidok.util.containers.FloatList;
 
+import static java.lang.Math.*;
+
 
 public final class Math
 {
@@ -74,5 +76,13 @@ public final class Math
   public static float square( float x )
   {
     return x * x;
+  }
+
+
+  public static final double LN2 = log(2), LN2_INV = 1 / LN2;
+
+  public static double log2( double x )
+  {
+    return log(x) * LN2_INV;
   }
 }
