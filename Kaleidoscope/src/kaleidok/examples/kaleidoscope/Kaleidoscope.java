@@ -6,7 +6,7 @@ import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.REST;
 import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
-import kaleidok.audio.processor.FFTProcessor;
+import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
 import kaleidok.examples.kaleidoscope.layer.*;
@@ -46,7 +46,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   private Thread audioDispatcherThread;
 
   private VolumeLevelProcessor volumeLevelProcessor;
-  private FFTProcessor fftProcessor;
+  private MinimFFTProcessor fftProcessor;
 
   final Chromasthetiator chromasthetiator = new Chromasthetiator(this, this);
 
@@ -130,7 +130,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     audioDispatcher.addAudioProcessor(
       volumeLevelProcessor = new VolumeLevelProcessor());
     audioDispatcher.addAudioProcessor(
-      fftProcessor = new FFTProcessor(audioBufferSize));
+      fftProcessor = new MinimFFTProcessor(audioBufferSize));
 
     audioDispatcherThread =
       new Thread(dispatcherRunnable, "Audio dispatching");

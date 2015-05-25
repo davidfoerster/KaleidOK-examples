@@ -1,28 +1,36 @@
 package kaleidok.examples.kaleidoscope.layer;
 
-import kaleidok.audio.spectrum.LogarithmicAverageSpectrum;
-import kaleidok.audio.spectrum.Spectrum;
+import kaleidok.audio.processor.MinimFFTProcessor;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.pow;
 import static kaleidok.util.DebugManager.wireframe;
+import static kaleidok.util.Math.log2;
 
 
 public class SpectrogramLayer extends CircularLayer
 {
-	private final LogarithmicAverageSpectrum avgSpectrum;
+	private final MinimFFTProcessor avgSpectrum;
 
 	public SpectrogramLayer( PApplet parent, PImage img, int segmentCount,
-    int innerRadius, int outerRadius, Spectrum spectrum )
+    int innerRadius, int outerRadius, MinimFFTProcessor spectrum )
 	{
 		super(parent, img, segmentCount, innerRadius, outerRadius);
-		avgSpectrum = new LogarithmicAverageSpectrum(spectrum);
-    avgSpectrum.setParameters(50, 7, (segmentCount - 1) / 7 + 1);
+    avgSpectrum = spectrum;
+
+    double nyquistFreq = 22050 / 2;
+    int minFreq = 86;
+    avgSpectrum.logAverages(minFreq, (int) ceil(segmentCount / log2(nyquistFreq / minFreq)));
 	}
 
   @Override
 	public void run()
 	{
+    if (!avgSpectrum.isReady())
+      return;
+
     assert segmentCount <= avgSpectrum.getSize();
 
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
@@ -41,7 +49,7 @@ public class SpectrogramLayer extends CircularLayer
 	  {
 	    int imi = i % segmentCount; // make sure the end equals the start
 
-	    float dynamicOuter = avgSpectrum.get(imi) / 10;
+	    float dynamicOuter = (float) pow(avgSpectrum.get(imi), 1.5f) * 1e-3f;
 	    //System.out.println(dynamicOuter);
 
 	    drawCircleVertex(imi, innerRadius); // draw the vertex using the custom drawVertex() method
