@@ -35,7 +35,7 @@ public class LinearAverageSpectrum implements Spectrum
   {
     if (bandwidth != this.bandwidth) {
       if (bandwidth <= 0)
-        throw new IllegalArgumentException("bandwidth ≤ 0");
+        throw new IllegalArgumentException("bandwidth must be positive");
 
       this.bandwidth = bandwidth;
       binsPerBand = Double.NaN;
