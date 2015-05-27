@@ -49,7 +49,7 @@ public class SpectrogramLayer extends CircularLayer
 	  {
 	    int imi = i % segmentCount; // make sure the end equals the start
 
-	    float dynamicOuter = (float) pow(avgSpectrum.get(imi), 1.5f) * 1e-3f;
+	    float dynamicOuter = (float) pow(avgSpectrum.get(imi), 1.125f) * 5e-3f;
 	    //System.out.println(dynamicOuter);
 
 	    drawCircleVertex(imi, innerRadius); // draw the vertex using the custom drawVertex() method
