@@ -1,4 +1,4 @@
-package kaleidok.util.http;
+package kaleidok.http;
 
 import org.junit.Before;
 import org.junit.Test;

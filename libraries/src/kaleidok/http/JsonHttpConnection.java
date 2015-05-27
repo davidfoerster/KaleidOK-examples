@@ -1,4 +1,4 @@
-package kaleidok.util.http;
+package kaleidok.http;
 
 import processing.data.JSONArray;
 import processing.data.JSONObject;

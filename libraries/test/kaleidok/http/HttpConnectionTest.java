@@ -1,4 +1,4 @@
-package kaleidok.util.http;
+package kaleidok.http;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;

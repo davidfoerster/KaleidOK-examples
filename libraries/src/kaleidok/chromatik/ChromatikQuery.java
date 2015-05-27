@@ -1,6 +1,6 @@
-package kaleidok.util.chromatik;
+package kaleidok.chromatik;
 
-import kaleidok.util.http.JsonHttpConnection;
+import kaleidok.http.JsonHttpConnection;
 import processing.data.JSONArray;
 
 import java.io.IOException;

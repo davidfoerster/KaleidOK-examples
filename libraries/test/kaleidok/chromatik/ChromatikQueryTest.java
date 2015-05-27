@@ -1,4 +1,4 @@
-package kaleidok.util.chromatik;
+package kaleidok.chromatik;
 
 import org.junit.Test;
 import processing.core.PApplet;

@@ -1,7 +1,7 @@
 package kaleidok.examples;
 
-import kaleidok.util.chromatik.ChromatikColor;
-import kaleidok.util.chromatik.ChromatikQuery;
+import kaleidok.chromatik.ChromatikColor;
+import kaleidok.chromatik.ChromatikQuery;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
@@ -83,7 +83,7 @@ public class ChromatikClientSketch extends PApplet
   /**
    * Fetches and draws the images of a query result set.
    * @param a A result object of a {@link ChromatikQuery}
-   * @see kaleidok.util.chromatik.ChromatikQuery#getResult()
+   * @see kaleidok.chromatik.ChromatikQuery#getResult()
    */
   private void drawResultSet( JSONArray a )
   {

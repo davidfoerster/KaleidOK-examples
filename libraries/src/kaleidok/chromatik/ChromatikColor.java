@@ -1,4 +1,4 @@
-package kaleidok.util.chromatik;
+package kaleidok.chromatik;
 
 import static java.lang.Math.max;
 import static java.lang.Math.round;

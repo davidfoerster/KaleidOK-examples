@@ -1,7 +1,7 @@
 package kaleidok.examples;
 
-import kaleidok.util.chromatik.ChromatikColor;
-import kaleidok.util.chromatik.ChromatikQuery;
+import kaleidok.chromatik.ChromatikColor;
+import kaleidok.chromatik.ChromatikQuery;
 import com.getflourish.stt.STT;
 import processing.core.PApplet;
 import processing.core.PImage;
