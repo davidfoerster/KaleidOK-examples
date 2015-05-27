@@ -34,7 +34,7 @@ public class JsonHttpConnection extends HttpConnection
       json = new JSONArray(getReader());
       reader.close();
     }
-    return (JSONArray) json;
+    return (json instanceof JSONArray) ? (JSONArray) json : null;
   }
 
   public JSONObject getObject() throws IOException
@@ -43,7 +43,7 @@ public class JsonHttpConnection extends HttpConnection
       json = new JSONObject(getReader());
       reader.close();
     }
-    return (JSONObject) json;
+    return (json instanceof JSONObject) ? (JSONObject) json : null;
   }
 
   public static final MimeTypeMap MIME_TYPE_MAP = new MimeTypeMap() {{

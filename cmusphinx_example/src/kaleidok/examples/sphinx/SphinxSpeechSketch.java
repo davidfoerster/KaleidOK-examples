@@ -21,7 +21,9 @@ public class SphinxSpeechSketch extends PApplet implements Thread.UncaughtExcept
   public void setup()
   {
     try {
-      srt = (audioFile != null) ? new StreamSpeechRecognizerThread(audioFile) : new LiveSpeechRecognizerThread();
+      srt = (audioFile != null) ?
+        new StreamSpeechRecognizerThread(audioFile) :
+        new LiveSpeechRecognizerThread();
       srt.setUncaughtExceptionHandler(this);
       srt.start();
     } catch (Exception e) {
