@@ -3,6 +3,7 @@ package kaleidok.http;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Rule;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
@@ -44,30 +45,30 @@ public class HttpConnectionTest
       new URL("http", "localhost", wireMockRule.port(), PATH));
   }
 
-  @org.junit.Test
+  @Test
   public void testGetBody() throws Exception
   {
     setUp(aResponse().withBody(BODY_BYTES));
-    assertEquals(con.getBody(), BODY);
+    assertEquals(BODY, con.getBody());
   }
 
-  @org.junit.Test
+  @Test
   public void testGetBodyDeflate() throws Exception
   {
     setUp(aResponse()
       .withBody(deflate(BODY_BYTES, true))
       .withHeader("Content-Encoding", "deflate"));
-    assertEquals(con.getBody(), BODY);
+    assertEquals(BODY, con.getBody());
   }
 
   /*
-  @org.junit.Test
+  @Test
   public void testGetBodyDeflateRaw() throws Exception
   {
     setUp(aResponse()
       .withBody(deflate(BODY_BYTES, false))
       .withHeader("Content-Encoding", "deflate"));
-    assertEquals(con.getBody(), BODY);
+    assertEquals(BODY, con.getBody());
   }
   */
 
@@ -88,7 +89,7 @@ public class HttpConnectionTest
     return dst.toByteArray();
   }
 
-  @org.junit.Test
+  @Test
   public void testGetBodyGzip() throws Exception
   {
     ByteArrayOutputStream buf = new ByteArrayOutputStream();
@@ -102,7 +103,7 @@ public class HttpConnectionTest
     assertEquals(BODY, con.getBody());
   }
 
-  @org.junit.Test
+  @Test
   public void testGetResponseContentType() throws Exception
   {
     setUp(aResponse());
@@ -111,7 +112,7 @@ public class HttpConnectionTest
     assertTrue(con.c.getContentLengthLong() <= 0);
   }
 
-  @org.junit.Test
+  @Test
   public void testGetResponseMimeType1() throws Exception
   {
     setUp(aResponse());
@@ -119,7 +120,7 @@ public class HttpConnectionTest
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 
-  @org.junit.Test
+  @Test
   public void testGetResponseMimeType2() throws Exception
   {
     setUp(aResponse());
@@ -127,7 +128,7 @@ public class HttpConnectionTest
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 
-  @org.junit.Test
+  @Test
   public void testGetResponseMimeType3() throws Exception
   {
     setUp(aResponse());
@@ -135,7 +136,7 @@ public class HttpConnectionTest
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 
-  @org.junit.Test
+  @Test
   public void testGetResponseMimeType4() throws Exception
   {
     setUp(aResponse());
