@@ -4,6 +4,9 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.REST;
+import com.getflourish.stt2.Response;
+import com.getflourish.stt2.STT;
+import com.getflourish.stt2.TranscriptionResultHandler;
 import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
@@ -22,7 +25,7 @@ import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
 
 
-public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResultHandler
+public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResultHandler, TranscriptionResultHandler
 {
   private CircularLayer[] layers;
 
@@ -49,6 +52,8 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   private MinimFFTProcessor fftProcessor;
 
   final Chromasthetiator chromasthetiator = new Chromasthetiator(this, this);
+
+  private STT stt;
 
 
   public Kaleidoscope()
@@ -80,6 +85,11 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     setupImages();
     setupLayers();
     setupChromasthetiator();
+
+    stt = new STT(this, null);
+    stt.setDebug(true);
+    stt.setLanguage("en");
+    audioDispatcher.addAudioProcessor(stt);
 
     audioDispatcherThread.start();
   }
@@ -223,12 +233,6 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     }
   }
 
-
-  public static void main(String... args)
-  {
-    new Kaleidoscope().runSketch(args);
-  }
-
   @Override
   public void handleChromatikResult( JSONArray queryResult, List<PImage> resultSet )
   {
@@ -241,5 +245,23 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
           layer.currentImage = resultSet.get(j++);
       }
     }
+  }
+
+  @Override
+  public void keyPressed()
+  {
+    stt.begin();
+  }
+
+  @Override
+  public void keyReleased()
+  {
+    stt.end();
+  }
+
+  @Override
+  public void handleTranscriptionResult( Response.Result result )
+  {
+    println("STT result: " + result.alternative[0].transcript);
   }
 }

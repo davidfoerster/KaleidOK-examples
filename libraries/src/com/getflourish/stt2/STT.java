@@ -2,6 +2,7 @@ package com.getflourish.stt2;
 
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
+import com.getflourish.stt2.mock.MockTranscriptionThread;
 import com.getflourish.stt2.util.Timer;
 import javaFlacEncoder.FLACEncoder;
 import javaFlacEncoder.FLACOutputStream;
@@ -41,7 +42,8 @@ public class STT implements AudioProcessor
 
   public STT( TranscriptionResultHandler resultHandler, String accessKey )
   {
-    transcriptionThread = new TranscriptionThread(accessKey, resultHandler);
+    transcriptionThread = new MockTranscriptionThread(accessKey, resultHandler);
+    //transcriptionThread = new TranscriptionThread(accessKey, resultHandler);
     transcriptionThread.start();
 
     //setAutoRecording(false);
