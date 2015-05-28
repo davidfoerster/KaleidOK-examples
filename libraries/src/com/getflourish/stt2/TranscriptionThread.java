@@ -53,7 +53,7 @@ public class TranscriptionThread extends Thread
     setUrlBase(apiBase, accessKey);
   }
 
-  private TranscriptionThread( TranscriptionResultHandler resultHandler )
+  protected TranscriptionThread( TranscriptionResultHandler resultHandler )
   {
     super("Speech transcription");
     this.resultHandler = resultHandler;
@@ -105,7 +105,7 @@ public class TranscriptionThread extends Thread
     }
   }
 
-  private void transcribe( InputStream audioInputStream )
+  protected void transcribe( InputStream audioInputStream )
     throws IOException, JsonSyntaxException
   {
     try {
@@ -122,7 +122,7 @@ public class TranscriptionThread extends Thread
     }
   }
 
-  private String fetchTranscriptionResult( InputStream audioInputStream )
+  protected String fetchTranscriptionResult( InputStream audioInputStream )
     throws IOException
   {
     URL url;
@@ -140,7 +140,7 @@ public class TranscriptionThread extends Thread
     return jsonCon.getBody();
   }
 
-  private Response parseTranscriptionResult( Reader source ) throws IOException
+  protected Response parseTranscriptionResult( Reader source ) throws IOException
   {
     Gson gson = new Gson(); // TODO: re-use Gson object
     JsonReader jsonReader = new JsonReader(source);
@@ -163,7 +163,7 @@ public class TranscriptionThread extends Thread
     }
   }
 
-  private void handleTranscriptionResponse( Response response )
+  protected void handleTranscriptionResponse( Response response )
   {
     if (response != null && response.result != null && response.result.length != 0) {
       Response.Result result = response.result[0];
@@ -194,13 +194,17 @@ public class TranscriptionThread extends Thread
     notify();
   }
 
-  private static void copyStream( InputStream input, OutputStream output )
+  protected static long copyStream( InputStream input, OutputStream output )
     throws IOException
   {
     byte[] buffer = new byte[64 << 10]; // TODO: re-use buffer
     int bytesRead;
-    while ((bytesRead = input.read(buffer)) >= 0)
+    long bytesTransferred = 0;
+    while ((bytesRead = input.read(buffer)) >= 0) {
       output.write(buffer, 0, bytesRead);
+      bytesTransferred += bytesRead;
+    }
+    return bytesTransferred;
   }
 
   private static String urlEncode( String s )

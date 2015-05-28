@@ -1,5 +1,6 @@
 package com.getflourish.stt2;
 
+import com.getflourish.stt2.mock.MockTranscriptionThread;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,24 +17,10 @@ import static org.junit.Assert.*;
 
 public class TranscriptionThreadTest
 {
-  public static final String transcriptionResult =
-    "{\"result\":[]}\n" +
-    "{\"result\":[{" +
-      "\"alternative\":[" +
-        "{\"transcript\":\"I like hot dogs\",\"confidence\":0.95803052}," +
-        "{\"transcript\":\"I like hotdogs\"}," +
-        "{\"transcript\":\"I like hot stocks\"}," +
-        "{\"transcript\":\"I'll like hotdogs\"}," +
-        "{\"transcript\":\"I like a hot stocks\"}" +
-      "]," +
-      "\"final\":true" +
-    "}]," +
-    "\"result_index\":0}\n";
-
   private StringReader transcriptionResultReader =
-    new StringReader(transcriptionResult) {{
+    new StringReader(MockTranscriptionThread.transcriptionResult) {{
       try {
-        mark(transcriptionResult.length());
+        mark(MockTranscriptionThread.transcriptionResult.length());
       } catch (IOException e) {
         throw new Error(e);
       }
