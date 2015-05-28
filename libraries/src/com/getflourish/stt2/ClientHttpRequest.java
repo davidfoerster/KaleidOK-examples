@@ -1,4 +1,4 @@
-package com.getflourish.stt;
+package com.getflourish.stt2;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -140,7 +140,7 @@ public class ClientHttpRequest
 
     writeln(type);
     newline();
-    pipe(is, this.os);
+    pipe(is, os);
     newline();
   }
 
