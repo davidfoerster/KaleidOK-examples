@@ -87,7 +87,7 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     setupChromasthetiator();
 
     stt = new STT(this, null);
-    stt.setDebug(true);
+    stt.setDebug(verbose > 0);
     stt.setLanguage("en");
     audioDispatcher.addAudioProcessor(stt);
 
