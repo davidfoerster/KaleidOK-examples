@@ -247,17 +247,21 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     }
   }
 
-  @Override
-  public void keyPressed()
-  {
-    stt.begin();
-  }
 
   @Override
-  public void keyReleased()
+  public void keyTyped()
   {
-    stt.end();
+    switch (key) {
+    case 'i':
+      stt.begin(false);
+      break;
+
+    case 'o':
+      stt.end(false);
+      break;
+    }
   }
+
 
   @Override
   public void handleTranscriptionResult( Response.Result result )
