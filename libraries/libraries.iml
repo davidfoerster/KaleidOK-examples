@@ -41,7 +41,7 @@
     <orderEntry type="library" name="Processing 3" level="application" />
     <orderEntry type="library" name="TarsosDSP" level="application" />
     <orderEntry type="library" name="Minim" level="application" />
-    <orderEntry type="library" name="javaFlacDecoder" level="application" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.3.1" level="project" />
+    <orderEntry type="module" module-name="javaFlacEncoder" />
   </component>
 </module>
