@@ -23,24 +23,38 @@ public class DummyAudioPlayer implements AudioProcessor
    */
   private double sampleLength = 0;
 
+  private void reset()
+  {
+    startTime = -1;
+    startSample = -1;
+    sampleLength = 0;
+  }
+
+  private void init( AudioEvent ev )
+  {
+    if (startTime < 0)
+      startTime = System.nanoTime();
+    startSample = ev.getSamplesProcessed();
+    sampleLength = 1e9 / ev.getSampleRate();
+  }
+
   @Override
   public boolean process( AudioEvent ev )
   {
     if (startSample >= 0) {
       // all times in nanoseconds
       final long delay =
-        (long)((ev.getSamplesProcessed() - startSample) * sampleLength + 0.5) +
+        (long)((ev.getSamplesProcessed() - startSample) * sampleLength) +
           startTime - System.nanoTime();
       if (delay >= 0) {
         LockSupport.parkNanos(delay);
       } else if (debug <= 0 && verbose >= 1) {
-        System.out.println("Warning: audio processing too slow by " + (-delay) + " ns");
+        System.out.format(
+          "Warning: Audio processing too slow by %.4g milliseconds.\n",
+          delay * -1e-6);
       }
     } else {
-      if (startTime < 0)
-        startTime = System.nanoTime();
-      startSample = ev.getSamplesProcessed();
-      sampleLength = 1e9 / ev.getSampleRate();
+      init(ev);
     }
     return true;
   }
@@ -48,7 +62,7 @@ public class DummyAudioPlayer implements AudioProcessor
   @Override
   public void processingFinished()
   {
-    // nothing to do
+    reset();
   }
 
 
