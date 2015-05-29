@@ -200,7 +200,14 @@ public class TranscriptionThread extends Thread
     byte[] buffer = new byte[64 << 10]; // TODO: re-use buffer
     int bytesRead;
     long bytesTransferred = 0;
-    while ((bytesRead = input.read(buffer)) >= 0) {
+    while (true) {
+      try {
+        bytesRead = input.read(buffer);
+      } catch (IOException ex) {
+        throw new Error(ex);
+      }
+      if (bytesRead < 0)
+        break;
       output.write(buffer, 0, bytesRead);
       bytesTransferred += bytesRead;
     }
