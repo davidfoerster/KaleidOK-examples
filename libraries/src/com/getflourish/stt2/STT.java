@@ -224,7 +224,8 @@ public class STT implements AudioProcessor
   {
     if (status == RECORDING)
     {
-      final int[] audioInt = convertTo16Bit(audioEvent);
+      int[] audioInt = convertTo16Bit(audioEvent, audioConversionBuffer);
+      audioConversionBuffer = audioInt;
       try {
         ensureEncoderReady(audioEvent);
         encoder.addSamples(audioInt, audioInt.length);
@@ -271,13 +272,20 @@ public class STT implements AudioProcessor
     }
   }
 
-  private int[] convertTo16Bit( AudioEvent ev )
+  private int[] audioConversionBuffer = null;
+
+  private static int[] convertTo16Bit( AudioEvent ev, int[] conversionBuffer )
   {
     final float[] audioFloat = ev.getFloatBuffer();
-    final int[] audioInt =
-      new int[audioFloat.length - ev.getOverlap()]; // TODO: re-use buffer
+    final int len = audioFloat.length - ev.getOverlap();
+    final int[] audioInt;
+    if (conversionBuffer != null && len <= conversionBuffer.length) {
+      audioInt = conversionBuffer;
+    } else {
+      audioInt = new int[len];
+    }
     final int offset = ev.getOverlap() / 2;
-    for (int i = 0; i < audioInt.length; i++)
+    for (int i = 0; i < len; i++)
       audioInt[i] = (int) (audioFloat[i + offset] * Short.MAX_VALUE);
     return audioInt;
   }
