@@ -16,6 +16,9 @@ public class MockTranscriptionThread extends TranscriptionThread
   public MockTranscriptionThread( String accessKey, TranscriptionResultHandler resultHandler )
   {
     super(resultHandler);
+    System.out.println("Notice: You set your Google API access key to \"" +
+      accessKey + "\"; speech transcription is performed by " +
+      this.getClass().getCanonicalName() + '.');
   }
 
   @Override

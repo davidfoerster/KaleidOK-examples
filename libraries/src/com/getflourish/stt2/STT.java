@@ -42,8 +42,10 @@ public class STT implements AudioProcessor
 
   public STT( TranscriptionResultHandler resultHandler, String accessKey )
   {
-    transcriptionThread = new MockTranscriptionThread(accessKey, resultHandler);
-    //transcriptionThread = new TranscriptionThread(accessKey, resultHandler);
+    transcriptionThread =
+      ("!MOCK".equals(accessKey)) ?
+        new MockTranscriptionThread(accessKey, resultHandler) :
+        new TranscriptionThread(accessKey, resultHandler);
     transcriptionThread.start();
 
     //setAutoRecording(false);
