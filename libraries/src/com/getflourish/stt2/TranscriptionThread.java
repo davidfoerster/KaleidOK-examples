@@ -35,7 +35,7 @@ public class TranscriptionThread extends Thread
   public static final URL DEFAULT_API_BASE;
   static {
     try {
-      DEFAULT_API_BASE = new URL("https", "www.google.com", "/speech-api/v2");
+      DEFAULT_API_BASE = new URL("https", "www.google.com", "/speech-api/v2/");
     } catch (MalformedURLException e) {
       throw new Error(e);
     }
@@ -68,6 +68,7 @@ public class TranscriptionThread extends Thread
     if (apiBase.getQuery() != null || apiBase.getRef() != null)
       throw new IllegalArgumentException("URL base must nut contain a query or a fragment part");
 
+    this.apiBase = apiBase;
     urlStub = "recognize?output=json&key=" + urlEncode(accessKey);
   }
 
@@ -116,7 +117,7 @@ public class TranscriptionThread extends Thread
       handleTranscriptionResponse(response);
     } catch (IOException ex) {
       if (debug) {
-        System.out.println("I/O ERROR: Network connection failure");
+        System.err.println("I/O ERROR: Network connection failure");
       }
       throw ex;
     }
@@ -127,17 +128,31 @@ public class TranscriptionThread extends Thread
   {
     URL url;
     try {
-      url = new URL(apiBase, urlStub + "&language=" + urlEncode(language));
+      url = new URL(apiBase, urlStub + "&lang=" + urlEncode(language));
     } catch (MalformedURLException e) {
       throw new Error(e);
     }
+    // TODO: Move all this stuff into HttpURLConnection class
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    con.setRequestMethod("POST");
     con.setRequestProperty("Content-Type",
       String.format("%s; rate=%.0f;", uploadMimeType, uploadSampleRate));
+    con.setDoInput(true);
+    con.setDoOutput(true);
     JsonHttpConnection jsonCon = new JsonHttpConnection(con);
     jsonCon.connect();
-    copyStream(audioInputStream, con.getOutputStream());
-    return jsonCon.getBody();
+
+    OutputStream conOut = con.getOutputStream();
+    long n = copyStream(audioInputStream, conOut);
+    conOut.close();
+    //System.out.println("Sent " + n + " bytes to " + url);
+    //System.out.println(con.getResponseCode() + " " + con.getResponseMessage());
+
+    String responseBody = jsonCon.getBody();
+    con.disconnect();
+    //System.out.println("Received " + n + " bytes from " + url);
+    //System.out.println(responseBody);
+    return responseBody;
   }
 
   protected Response parseTranscriptionResult( Reader source ) throws IOException
