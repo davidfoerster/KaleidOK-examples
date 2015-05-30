@@ -57,29 +57,22 @@ public final class DebugManager
   private static void fromPropertyGetter( PropertyGetter pg )
   {
     final String base = DebugManager.class.getCanonicalName() + '.';
-    final Class<?>[] paramTypes = new Class<?>[]{ String.class };
-    final Object[] params = new Object[1];
 
     for (Field f: DebugManager.class.getDeclaredFields())
     {
       int mod = f.getModifiers();
       if (Modifier.isPublic(mod) && Modifier.isStatic(mod))
       {
-        params[0] = pg.get(base + f.getName());
-        if (params[0] != null)
-        {
+        String strValue = pg.get(base + f.getName());
+        if (strValue != null) {
           Class<?> clazz = f.getType();
           if (clazz.isPrimitive())
             clazz = PRIMITIVES_TO_WRAPPERS.get(clazz);
           try {
-            Object val = (clazz != String.class) ?
-              clazz.getMethod("valueOf", paramTypes).invoke(null, params) :
-              params[0];
-            f.set(null, val);
-          } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | IllegalArgumentException | NullPointerException ex) {
-            throw new UnsupportedOperationException(
-              clazz.getName() + " cannot be created with #valueOf(String)",
-              ex);
+            f.set(null, DefaultValueParser.valueOf(strValue, clazz));
+          } catch (IllegalAccessException ex) {
+            // we already checked for that
+            throw new Error(ex);
           }
         }
       }
