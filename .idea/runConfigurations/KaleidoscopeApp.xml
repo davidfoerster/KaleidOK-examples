@@ -3,11 +3,20 @@
     <module name="Kaleidoscope" />
     <option name="HTML_USED" value="false" />
     <option name="MAIN_CLASS_NAME" value="kaleidok.examples.kaleidoscope.KaleidoscopeApp" />
-    <option name="WIDTH" value="400" />
-    <option name="HEIGHT" value="300" />
+    <option name="WIDTH" value="1000" />
+    <option name="HEIGHT" value="1050" />
     <option name="POLICY_FILE" value="file://$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
     <option name="VM_PARAMETERS" value="-ea" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+    <parameter name="kaleidok.util.DebugManager.verbose" value="1" />
+    <parameter name="kaleidok.util.DebugManager.wireframe" value="0" />
+    <parameter name="kaleidok.examples.kaleidoscope.text" value="Happiness and despair" />
+    <parameter name="com.flickr.api.key" value="@api-key.flickr.txt" />
+    <parameter name="kaleidok.examples.kaleidoscope.audio.samplerate" value="32000" />
+    <parameter name="kaleidok.examples.kaleidoscope.audio.buffersize" value="2048" />
+    <parameter name="kaleidok.examples.kaleidoscope.audio.overlap" value="1024" />
+    <parameter name="kaleidok.examples.kaleidoscope.audio.input.play" value="false" />
+    <parameter name="com.google.developer.api.key" value="@api-key.google.txt" />
     <method />
   </configuration>
 </component>
