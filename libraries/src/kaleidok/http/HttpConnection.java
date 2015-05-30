@@ -89,9 +89,9 @@ public class HttpConnection
   {
     if (inputStream == null) {
       connect();
-      if (c.getResponseCode() != HttpURLConnection.HTTP_OK)
+      /*if (c.getResponseCode() != HttpURLConnection.HTTP_OK)
         throw new IOException(
-          "HTTP server returned status code " + c.getResponseCode());
+          "HTTP server returned: " + c.getResponseMessage());*/
 
       if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty()) {
         String mimeType = getResponseMimeType();
