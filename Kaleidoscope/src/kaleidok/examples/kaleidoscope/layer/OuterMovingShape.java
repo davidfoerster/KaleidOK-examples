@@ -1,10 +1,8 @@
 package kaleidok.examples.kaleidoscope.layer;
 
-import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
+import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
-import be.tarsos.dsp.pitch.PitchProcessor;
-import kaleidok.examples.kaleidoscope.Kaleidoscope;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -15,16 +13,9 @@ public class OuterMovingShape extends CircularLayer
 {
   private double angle = 0, step = 0;
 
-  public OuterMovingShape(PApplet parent, PImage img, int segmentCount, int radius,
-    AudioDispatcher audioDispatcher)
+  public OuterMovingShape( PApplet parent, PImage img, int segmentCount, int radius )
   {
     super(parent, img, segmentCount, 0, radius);
-
-    PitchProcessor pitchProcessor =
-      new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
-        audioDispatcher.getFormat().getSampleRate(), Kaleidoscope.audioBufferSize,
-        new PitchDetectionHandler());
-    audioDispatcher.addAudioProcessor(pitchProcessor);
   }
 
   public void run()
@@ -55,7 +46,12 @@ public class OuterMovingShape extends CircularLayer
     parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
   }
 
-  private class PitchDetectionHandler implements be.tarsos.dsp.pitch.PitchDetectionHandler
+  public PitchDetectionHandler getPitchDetectionHandler()
+  {
+    return new MyPitchDetectionHandler();
+  }
+
+  private class MyPitchDetectionHandler implements PitchDetectionHandler
   {
     private long lastPitchDetectionTime = -1;
 

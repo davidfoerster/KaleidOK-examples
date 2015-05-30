@@ -4,6 +4,7 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.dsp.io.jvm.AudioPlayer;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
+import be.tarsos.dsp.pitch.PitchProcessor;
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.REST;
 import com.getflourish.stt2.Response;
@@ -49,6 +50,7 @@ public class Kaleidoscope extends PApplet
   public static final int DEFAULT_AUDIO_SAMPLERATE = 32000;
   public static final int DEFAULT_AUDIO_BUFFERSIZE = 1 << 11;
 
+  private int audioBufferSize;
   private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
 
@@ -149,6 +151,7 @@ public class Kaleidoscope extends PApplet
         paramBase + "buffersize", DEFAULT_AUDIO_BUFFERSIZE);
       if (bufferSize <= 0 || !isPowerOfTwo(bufferSize))
         throw new AssertionError(paramBase + "buffersize" + " must be a power of 2");
+      audioBufferSize = bufferSize;
 
       int bufferOverlap = DefaultValueParser.parseInt(this,
        paramBase + "bufferoverlap", bufferSize / 2);
@@ -203,12 +206,18 @@ public class Kaleidoscope extends PApplet
 
   private CircularLayer[] getLayers()
   {
-    if (layers == null) {
+    if (layers == null)
+    {
+      outerMovingShape = new OuterMovingShape(this, images[4], 16, 300);
+      audioDispatcher.addAudioProcessor(new PitchProcessor(
+        PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
+        audioDispatcher.getFormat().getSampleRate(), audioBufferSize,
+        outerMovingShape.getPitchDetectionHandler()));
+
       layers = new CircularLayer[]{
         spectrogramLayer =
           new SpectrogramLayer(this, images[0], 256, 125, 290, fftProcessor),
-        outerMovingShape =
-          new OuterMovingShape(this, images[4], 16, 300, audioDispatcher),
+        outerMovingShape,
         foobarLayer =
           new FoobarLayer(this, images[3], 16, 125, 275),
         centreLayer =
