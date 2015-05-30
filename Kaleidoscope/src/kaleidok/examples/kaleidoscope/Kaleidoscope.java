@@ -2,6 +2,8 @@ package kaleidok.examples.kaleidoscope;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
+import be.tarsos.dsp.io.jvm.AudioPlayer;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.REST;
 import com.getflourish.stt2.Response;
@@ -13,19 +15,23 @@ import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
 import kaleidok.examples.kaleidoscope.layer.*;
+import kaleidok.util.*;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
 
 import javax.sound.sampled.*;
+import java.applet.Applet;
 import java.io.IOException;
 import java.util.List;
 
 import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
+import static kaleidok.util.Math.isPowerOfTwo;
 
 
-public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResultHandler, TranscriptionResultHandler
+public class Kaleidoscope extends PApplet
+  implements Chromasthetiator.SearchResultHandler, TranscriptionResultHandler
 {
   private CircularLayer[] layers;
 
@@ -40,20 +46,20 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   public FoobarLayer foobarLayer;
   public CentreMovingShape centreLayer;
 
-  public static final int audioBufferSize = 1 << 11;
-  public static final int audioOverlap = audioBufferSize / 2;
-  public static final int audioSampleRate = 22050;
+  public static final int DEFAULT_AUDIO_SAMPLERATE = 32000;
+  public static final int DEFAULT_AUDIO_BUFFERSIZE = 1 << 11;
 
-  private final String audioSource;
   private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
 
   private VolumeLevelProcessor volumeLevelProcessor;
   private MinimFFTProcessor fftProcessor;
 
-  final Chromasthetiator chromasthetiator = new Chromasthetiator(this, this);
+  private Chromasthetiator chromasthetiator;
 
   private STT stt;
+
+  private final Applet parent;
 
 
   public Kaleidoscope()
@@ -61,10 +67,9 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     this(null);
   }
 
-  public Kaleidoscope( String audioSource )
+  public Kaleidoscope( Applet parent )
   {
-    super();
-    this.audioSource = audioSource;
+    this.parent = parent;
   }
 
   @Override
@@ -75,38 +80,35 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     smooth(4);
 
     try {
-      setupAudioDispatcher();
-    } catch (LineUnavailableException | UnsupportedAudioFileException | IOException ex) {
+      makeAudioDispatcher();
+      getImages();
+      getLayers();
+      getChromasthetiator();
+      getSTT();
+      makeAudioDispatcherThread().start();
+    }
+    catch (LineUnavailableException | UnsupportedAudioFileException | IOException ex) {
       ex.printStackTrace();
       exit();
-      return;
     }
-
-    setupImages();
-    setupLayers();
-    setupChromasthetiator();
-
-    stt = new STT(this, null);
-    stt.setDebug(verbose > 0);
-    stt.setLanguage("en");
-    audioDispatcher.addAudioProcessor(stt);
-
-    audioDispatcherThread.start();
   }
 
-  private void setupImages()
+  private PImage[] getImages()
   {
-    // load the images from the _Images folder (relative path from this kaleidoscope's folder)
-    images = new PImage[]{
-      loadImage("images/one.jpg", true),
-      loadImage("images/two.jpg", true),
-      loadImage("images/three.jpg", true),
-      loadImage("images/four.jpg", true),
-      loadImage("images/five.jpg", true)
-    };
+    if (images == null) {
+      // load the images from the _Images folder (relative path from this kaleidoscope's folder)
+      images = new PImage[]{
+        loadImage("images/one.jpg", true),
+        loadImage("images/two.jpg", true),
+        loadImage("images/three.jpg", true),
+        loadImage("images/four.jpg", true),
+        loadImage("images/five.jpg", true)
+      };
 
-    bgImageIndex = (int) random(images.length); // randomly choose the bgImageIndex
-    bgImage = images[bgImageIndex];
+      bgImageIndex = (int) random(images.length); // randomly choose the bgImageIndex
+      bgImage = images[bgImageIndex];
+    }
+    return images;
   }
 
   public PImage loadImage( String path, boolean throwOnFailure )
@@ -118,57 +120,126 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
     throw new RuntimeException("Couldn't load image: " + path);
   }
 
-  private void setupAudioDispatcher()
+  private STT getSTT() throws IOException
+  {
+    if (stt == null) {
+      stt = new STT(this,
+        parseStringOrFile(getParameter("com.google.developer.api.key"), '@'));
+      stt.setDebug(verbose > 0);
+      stt.setLanguage((String) getParameter(
+        STT.class.getCanonicalName() + ".language", "en"));
+      audioDispatcher.addAudioProcessor(stt);
+    }
+    return stt;
+  }
+
+  private AudioDispatcher makeAudioDispatcher()
     throws LineUnavailableException, IOException, UnsupportedAudioFileException
   {
-    Runnable dispatcherRunnable;
+    if (audioDispatcher == null) {
+      String paramBase = this.getClass().getPackage().getName() + ".audio.";
+      String audioSource = getParameter(paramBase + "input");
 
-    if (audioSource == null) {
-      audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
-        audioSampleRate, audioBufferSize, audioOverlap);
-      dispatcherRunnable = audioDispatcher;
-    } else {
-      AudioInputStream ais =
-        AudioSystem.getAudioInputStream(createInputRaw(audioSource));
-      audioDispatcher =
-        new AudioDispatcher(new ContinuousAudioInputStream(ais),
-          audioBufferSize, audioOverlap);
-      dispatcherRunnable =
-        new DummyAudioPlayer().addToDispatcher(audioDispatcher);
+      int sampleRate = DefaultValueParser.parseInt(this,
+        paramBase + "samplerate", DEFAULT_AUDIO_SAMPLERATE);
+      if (sampleRate <= 0)
+        throw new AssertionError(paramBase + "samplerate" + " must be positive");
+
+      int bufferSize = DefaultValueParser.parseInt(this,
+        paramBase + "buffersize", DEFAULT_AUDIO_BUFFERSIZE);
+      if (bufferSize <= 0 || !isPowerOfTwo(bufferSize))
+        throw new AssertionError(paramBase + "buffersize" + " must be a power of 2");
+
+      int bufferOverlap = DefaultValueParser.parseInt(this,
+       paramBase + "bufferoverlap", bufferSize / 2);
+      if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
+        throw new AssertionError(paramBase + "bufferoverlap" + " must be positive and less than buffersize");
+      if (bufferOverlap > 0 && !isPowerOfTwo(bufferSize))
+        throw new AssertionError(paramBase + "bufferoverlap" + " must be a power of 2");
+
+      Runnable dispatcherRunnable;
+
+      if (audioSource == null) {
+        audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
+          sampleRate, bufferSize, bufferOverlap);
+        dispatcherRunnable = audioDispatcher;
+      } else {
+        AudioInputStream ais =
+          AudioSystem.getAudioInputStream(createInputRaw(audioSource));
+        audioDispatcher =
+          new AudioDispatcher(new ContinuousAudioInputStream(ais),
+            bufferSize, bufferOverlap);
+
+        boolean play =
+          DefaultValueParser.parseBoolean(this, paramBase + "input.play", false);
+        if (play) {
+          dispatcherRunnable = audioDispatcher;
+          audioDispatcher.addAudioProcessor(new AudioPlayer(
+            JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
+            bufferSize));
+        } else {
+          dispatcherRunnable =
+            new DummyAudioPlayer().addToDispatcher(audioDispatcher);
+        }
+      }
+
+      audioDispatcher.addAudioProcessor(
+        volumeLevelProcessor = new VolumeLevelProcessor());
+      audioDispatcher.addAudioProcessor(
+        fftProcessor = new MinimFFTProcessor(bufferSize));
+
+      audioDispatcherThread =
+        new Thread(dispatcherRunnable, "Audio dispatching");
     }
-
-    audioDispatcher.addAudioProcessor(
-      volumeLevelProcessor = new VolumeLevelProcessor());
-    audioDispatcher.addAudioProcessor(
-      fftProcessor = new MinimFFTProcessor(audioBufferSize));
-
-    audioDispatcherThread =
-      new Thread(dispatcherRunnable, "Audio dispatching");
+    return audioDispatcher;
   }
 
-  private void setupLayers()
+  private Thread makeAudioDispatcherThread()
+    throws UnsupportedAudioFileException, IOException, LineUnavailableException
   {
-    layers = new CircularLayer[]{
-      spectrogramLayer =
-        new SpectrogramLayer(this, images[0], 256, 125, 290, fftProcessor),
-      outerMovingShape =
-        new OuterMovingShape(this, images[4], 16, 300, audioDispatcher),
-      foobarLayer =
-        new FoobarLayer(this, images[3], 16, 125, 275),
-      centreLayer =
-        new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
-      null
-    };
+    makeAudioDispatcher();
+    return audioDispatcherThread;
   }
 
-  private void setupChromasthetiator()
+  private CircularLayer[] getLayers()
   {
-    String[] keys = loadStrings("api-key.flickr.txt");
-    Flickr flickr = new Flickr(keys[0], keys[1], new REST());
-    chromasthetiator.setFlickrApi(flickr);
+    if (layers == null) {
+      layers = new CircularLayer[]{
+        spectrogramLayer =
+          new SpectrogramLayer(this, images[0], 256, 125, 290, fftProcessor),
+        outerMovingShape =
+          new OuterMovingShape(this, images[4], 16, 300, audioDispatcher),
+        foobarLayer =
+          new FoobarLayer(this, images[3], 16, 125, 275),
+        centreLayer =
+          new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
+        null
+      };
+    }
+    return layers;
+  }
 
-    //chromasthetiator.chromatikQuery.nhits = 1;
-    chromasthetiator.setup();
+  Chromasthetiator getChromasthetiator() throws IOException
+  {
+    if (chromasthetiator == null) {
+      chromasthetiator = new Chromasthetiator(this, this);
+
+      String data = parseStringOrFile(getParameter("com.flickr.api.key"), '@');
+      if (data != null) {
+        String[] keys = data.split(":|\r?\n", 2);
+        chromasthetiator.setFlickrApi(
+          new Flickr(keys[0], keys[1], new REST()));
+      }
+
+      chromasthetiator.maxKeywords = DefaultValueParser.parseInt(this,
+        chromasthetiator.getClass().getPackage().getName() + ".maxKeywords",
+        chromasthetiator.maxKeywords);
+
+      //chromasthetiator.chromatikQuery.nhits = 1;
+
+      chromasthetiator.setup();
+    }
+    return chromasthetiator;
   }
 
 
@@ -267,5 +338,30 @@ public class Kaleidoscope extends PApplet implements Chromasthetiator.SearchResu
   public void handleTranscriptionResult( Response.Result result )
   {
     println("STT result: " + result.alternative[0].transcript);
+  }
+
+
+  @Override
+  public String getParameter( String name )
+  {
+    return (parent != null) ? parent.getParameter(name) : null;
+  }
+
+  private Object getParameter( String name, Object defaultValue )
+  {
+    return DefaultValueParser.parse(getParameter(name), defaultValue);
+  }
+
+  private String parseStringOrFile( String s, char filePrefix )
+    throws IOException
+  {
+    if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {
+      byte[] data = loadBytes(s.substring(1));
+      int len = data.length;
+      while (len > 0 && (data[len-1] == '\n' || data[len-1] == '\r'))
+        len--;
+      s = new String(data, 0, len);
+    }
+    return s;
   }
 }

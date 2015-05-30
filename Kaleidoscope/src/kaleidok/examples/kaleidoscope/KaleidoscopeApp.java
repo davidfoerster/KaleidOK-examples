@@ -5,6 +5,7 @@ import kaleidok.util.DebugManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 
 public class KaleidoscopeApp extends JApplet
@@ -43,8 +44,12 @@ public class KaleidoscopeApp extends JApplet
   private Kaleidoscope getSketch()
   {
     if (sketch == null) {
-      sketch = new Kaleidoscope(getParameter("audio.input"));
-      sketch.chromasthetiator.keywordsDoc = getKeywordField().getDocument();
+      sketch = new Kaleidoscope(this);
+      try {
+        sketch.getChromasthetiator().keywordsDoc = getKeywordField().getDocument();
+      } catch (IOException e) {
+        throw new Error(e);
+      }
       sketch.init();
     }
     return sketch;
@@ -61,14 +66,15 @@ public class KaleidoscopeApp extends JApplet
   private JTextField getMessageField()
   {
     if (messageField == null) {
-      messageField = new JTextField("happiness");
+      messageField = new JTextField(getParameter(
+        this.getClass().getPackage().getName() + ".text"));
       messageField.setAction(new AbstractAction()
       {
         @Override
         public void actionPerformed( ActionEvent ev )
         {
           try {
-            sketch.chromasthetiator.issueQuery(((JTextField) ev.getSource()).getText());
+            sketch.getChromasthetiator().issueQuery(((JTextField) ev.getSource()).getText());
           } catch (Exception ex) {
             ex.printStackTrace();
           }

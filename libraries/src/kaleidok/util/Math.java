@@ -85,4 +85,12 @@ public final class Math
   {
     return log(x) * LN2_INV;
   }
+
+
+  public static boolean isPowerOfTwo( long number )
+  {
+    if (number > 0)
+      return (number & (number - 1)) == 0;
+    throw new IllegalArgumentException("number is negative");
+  }
 }
