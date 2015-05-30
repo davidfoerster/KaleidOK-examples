@@ -346,7 +346,11 @@ public class Kaleidoscope extends PApplet
   @Override
   public void handleTranscriptionResult( Response.Result result )
   {
-    println("STT result: " + result.alternative[0].transcript);
+    try {
+      getChromasthetiator().issueQuery(result.alternative[0].transcript);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
 
