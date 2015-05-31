@@ -327,7 +327,6 @@ public class Kaleidoscope extends PApplet
     }
   }
 
-
   @Override
   public void keyTyped()
   {
@@ -346,12 +345,33 @@ public class Kaleidoscope extends PApplet
   @Override
   public void handleTranscriptionResult( Response.Result result )
   {
-    try {
-      getChromasthetiator().issueQuery(result.alternative[0].transcript);
-    } catch (Exception e) {
-      e.printStackTrace();
+    if (verbose >= 1)
+      println("STT returned: " + result.alternative[0].transcript);
+
+    if (!isIgnoreTranscriptionResult()) {
+      try {
+        getChromasthetiator().issueQuery(result.alternative[0].transcript);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
+
+  private boolean isIgnoreTranscriptionResult()
+  {
+    if (isIgnoreTranscriptionResult == null) {
+      isIgnoreTranscriptionResult = DefaultValueParser.parseBoolean(this,
+        this.getClass().getPackage().getName() + ".ignoreTranscription",
+        false);
+      if (isIgnoreTranscriptionResult) {
+        System.out.println(
+          "Notice: Speech transcription results are configured to be ignored.");
+      }
+    }
+    return isIgnoreTranscriptionResult;
+  }
+
+  private Boolean isIgnoreTranscriptionResult = null;
 
 
   @Override
@@ -369,7 +389,9 @@ public class Kaleidoscope extends PApplet
     throws IOException
   {
     if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {
-      byte[] data = loadBytes(s.substring(1));
+      byte[] data =
+        (s.length() == 2 && s.charAt(1) == '-') ?
+          loadBytes(System.in) : loadBytes(s.substring(1));
       int len = data.length;
       while (len > 0 && (data[len-1] == '\n' || data[len-1] == '\r'))
         len--;
