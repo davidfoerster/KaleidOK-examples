@@ -262,6 +262,7 @@ public class STT implements AudioProcessor
     ensureEncoderConfigured(ev);
 
     if (outputStream == null) {
+      // TODO: write directly to output stream of the network connection
       PipedOutputStream outputStream = new PipedOutputStream();
       transcriptionThread.attachInput(
         new PipedInputStream(outputStream), "audio/x-flac",
