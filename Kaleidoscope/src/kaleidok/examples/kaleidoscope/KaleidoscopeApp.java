@@ -1,32 +1,51 @@
 package kaleidok.examples.kaleidoscope;
 
-import kaleidok.util.DebugManager;
+import kaleidok.processing.PAppletFactory;
+import kaleidok.processing.ProcessingSketchAppletWrapper;
+import kaleidok.util.DefaultValueParser;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 
 
-public class KaleidoscopeApp extends JApplet
+public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
 {
-  private Kaleidoscope sketch;
+  private JTextField keywordField = null, messageField = null;
 
-  private JTextField keywordField, messageField;
-
+  @Override
   public void init()
   {
-    DebugManager.fromApplet(this);
-    initComponents();
+    sketchFactory = new PAppletFactory<Kaleidoscope>()
+      {
+        @Override
+        public Kaleidoscope createInstance( JApplet parent ) throws InstantiationException
+        {
+          return new Kaleidoscope(parent);
+        }
+      };
+
+    super.init();
+    initWindowPosition();
   }
 
-  private void initComponents()
+  private void initWindowPosition()
   {
-    Kaleidoscope sketch = getSketch();
+    String paramBase = getClass().getPackage().getName() + '.';
+    int screenIndex = DefaultValueParser.parseInt(
+      getParameter(paramBase + "screen"), -1);
+    boolean fullscreen = DefaultValueParser.parseBoolean(
+      getParameter(paramBase + "fullscreen"), false);
+    if (screenIndex >= 0 || fullscreen)
+      getRootPane().moveToScreen(screenIndex, fullscreen);
+  }
+
+  @Override
+  protected void initComponents()
+  {
     JTextField keywordField = getKeywordField(),
       messageField = getMessageField();
 
-    add(sketch, BorderLayout.CENTER);
     JPanel textFieldPanels = new JPanel();
     textFieldPanels.setLayout(new BoxLayout(textFieldPanels, BoxLayout.PAGE_AXIS));
     textFieldPanels.add(messageField);
@@ -34,20 +53,6 @@ public class KaleidoscopeApp extends JApplet
     add(textFieldPanels, BorderLayout.SOUTH);
 
     messageField.requestFocusInWindow();
-  }
-
-  private Kaleidoscope getSketch()
-  {
-    if (sketch == null) {
-      sketch = new Kaleidoscope(this);
-      try {
-        sketch.getChromasthetiator().keywordsDoc = getKeywordField().getDocument();
-      } catch (IOException e) {
-        throw new Error(e);
-      }
-      sketch.init();
-    }
-    return sketch;
   }
 
   private JTextField getKeywordField()
@@ -69,7 +74,7 @@ public class KaleidoscopeApp extends JApplet
         public void actionPerformed( ActionEvent ev )
         {
           try {
-            sketch.getChromasthetiator().issueQuery(((JTextField) ev.getSource()).getText());
+            getSketch().getChromasthetiator().issueQuery(((JTextField) ev.getSource()).getText());
           } catch (Exception ex) {
             ex.printStackTrace();
           }
@@ -79,16 +84,4 @@ public class KaleidoscopeApp extends JApplet
     return messageField;
   }
 
-  @Override
-  public void start()
-  {
-    sketch.start();
-  }
-
-  @Override
-  public void stop()
-  {
-    if (sketch != null)
-      sketch.stop();
-  }
 }

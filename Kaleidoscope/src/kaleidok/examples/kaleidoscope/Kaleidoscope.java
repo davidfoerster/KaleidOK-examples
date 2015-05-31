@@ -16,13 +16,16 @@ import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
 import kaleidok.examples.kaleidoscope.layer.*;
+import kaleidok.processing.ExtPApplet;
 import kaleidok.util.*;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
 
 import javax.sound.sampled.*;
+import javax.swing.*;
 import java.applet.Applet;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.List;
 
@@ -31,7 +34,7 @@ import static kaleidok.util.DebugManager.verbose;
 import static kaleidok.util.Math.isPowerOfTwo;
 
 
-public class Kaleidoscope extends PApplet
+public class Kaleidoscope extends ExtPApplet
   implements Chromasthetiator.SearchResultHandler, TranscriptionResultHandler
 {
   private CircularLayer[] layers;
@@ -61,17 +64,10 @@ public class Kaleidoscope extends PApplet
 
   private STT stt;
 
-  private final Applet parent;
 
-
-  public Kaleidoscope()
+  public Kaleidoscope( JApplet parent )
   {
-    this(null);
-  }
-
-  public Kaleidoscope( Applet parent )
-  {
-    this.parent = parent;
+    super(parent);
   }
 
   @Override
@@ -374,17 +370,6 @@ public class Kaleidoscope extends PApplet
   private Boolean isIgnoreTranscriptionResult = null;
 
 
-  @Override
-  public String getParameter( String name )
-  {
-    return (parent != null) ? parent.getParameter(name) : null;
-  }
-
-  private Object getParameter( String name, Object defaultValue )
-  {
-    return DefaultValueParser.parse(getParameter(name), defaultValue);
-  }
-
   private String parseStringOrFile( String s, char filePrefix )
     throws IOException
   {
@@ -399,4 +384,5 @@ public class Kaleidoscope extends PApplet
     }
     return s;
   }
+
 }
