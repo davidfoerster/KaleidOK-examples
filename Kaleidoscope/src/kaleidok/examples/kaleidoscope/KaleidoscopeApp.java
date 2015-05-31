@@ -25,11 +25,6 @@ public class KaleidoscopeApp extends JApplet
     Kaleidoscope sketch = getSketch();
     JTextField keywordField = getKeywordField(),
       messageField = getMessageField();
-    double preferredHeight =
-      keywordField.getPreferredSize().getHeight() +
-      messageField.getPreferredSize().getHeight();
-
-    setSize(1000, 1000 + (int) preferredHeight);
 
     add(sketch, BorderLayout.CENTER);
     JPanel textFieldPanels = new JPanel();
