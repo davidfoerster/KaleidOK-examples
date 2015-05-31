@@ -3,7 +3,6 @@ package kaleidok.util;
 import java.applet.Applet;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +17,33 @@ public final class DebugManager
   public static int debug = 0;
   static {
     String prefix = "-agentlib:jdwp";
-    for (String arg: ManagementFactory.getRuntimeMXBean().getInputArguments()) {
-      if (arg.startsWith(prefix) && (arg.length() == prefix.length() || arg.charAt(prefix.length()) == '=')) {
+    for (String arg:
+      ManagementFactory.getRuntimeMXBean().getInputArguments())
+    {
+      if (arg.startsWith(prefix) &&
+        (arg.length() == prefix.length() || arg.charAt(prefix.length()) == '='))
+      {
         debug = 1;
         break;
+      }
+    }
+  }
+
+
+  private static Object source = null;
+
+  private static void checkAlreadyInitialized( Object source )
+  {
+    if (DebugManager.source != null) {
+      if (source != DebugManager.source) {
+        throw new IllegalStateException(
+          DebugManager.class.getCanonicalName() +
+            " was already initialized earlier from the different source " +
+            DebugManager.source);
+      } else if (verbose >= 1) {
+        System.err.println(
+          "Warning: Re-initializing " + DebugManager.class.getCanonicalName() +
+            " from the same object \"" + source + "\" as earlier.");
       }
     }
   }
@@ -31,6 +53,7 @@ public final class DebugManager
 
   public static void fromSystem()
   {
+    checkAlreadyInitialized(System.class);
     fromPropertyGetter(new PropertyGetter()
     {
       @Override
@@ -43,6 +66,7 @@ public final class DebugManager
 
   public static void fromApplet( final Applet a )
   {
+    checkAlreadyInitialized(a);
     fromPropertyGetter(new PropertyGetter()
     {
       @Override
