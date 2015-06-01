@@ -21,6 +21,8 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   @Override
   public void init()
   {
+    removeAppletViewerMenuBar();
+
     T sketch;
     try {
       sketch = getSketchThrows();
@@ -46,6 +48,16 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   public FullscreenRootPane getRootPane()
   {
     return (FullscreenRootPane) super.getRootPane();
+  }
+
+  private void removeAppletViewerMenuBar()
+  {
+    Container current = this, parent;
+    while ((parent = current.getParent()) != null) {
+      current = parent;
+      if (current instanceof Frame)
+        ((Frame) current).setMenuBar(null);
+    }
   }
 
   public T getSketch()
