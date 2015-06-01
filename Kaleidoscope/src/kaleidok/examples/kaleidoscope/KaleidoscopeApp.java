@@ -5,7 +5,7 @@ import kaleidok.processing.ProcessingSketchAppletWrapper;
 import kaleidok.util.DefaultValueParser;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 
 

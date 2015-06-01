@@ -3,8 +3,12 @@ package kaleidok.processing;
 import kaleidok.swing.FullscreenAction;
 import kaleidok.swing.FullscreenRootPane;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JApplet;
+import javax.swing.JRootPane;
+import javax.swing.KeyStroke;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Frame;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 

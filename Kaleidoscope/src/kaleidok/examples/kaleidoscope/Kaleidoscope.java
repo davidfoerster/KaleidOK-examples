@@ -17,15 +17,12 @@ import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.ExtPApplet;
-import kaleidok.util.*;
-import processing.core.PApplet;
+import kaleidok.util.DefaultValueParser;
 import processing.core.PImage;
 import processing.data.JSONArray;
 
 import javax.sound.sampled.*;
-import javax.swing.*;
-import java.applet.Applet;
-import java.awt.event.KeyEvent;
+import javax.swing.JApplet;
 import java.io.IOException;
 import java.util.List;
 

@@ -1,6 +1,7 @@
 package kaleidok.swing;
 
-import javax.swing.*;
+import javax.swing.JRootPane;
+import javax.swing.KeyStroke;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;

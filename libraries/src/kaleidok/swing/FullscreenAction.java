@@ -1,7 +1,8 @@
 package kaleidok.swing;
 
 import java.awt.event.ActionEvent;
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
 
 
 public class FullscreenAction extends AbstractAction
