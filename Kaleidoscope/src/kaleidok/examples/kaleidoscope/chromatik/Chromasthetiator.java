@@ -189,7 +189,7 @@ public class Chromasthetiator implements UpdateHandler
         try {
           Collection<Size> sizes = flickrPhotos.getSizes(photoId);
           if (!sizes.isEmpty()) {
-            Size maxSize = Collections.max(sizes, PhotoSizeComparator.getInstance());
+            Size maxSize = Collections.max(sizes, PhotoSizeComparator.INSTANCE);
             PImage img = parent.loadImage(maxSize.getSource());
             if (img != null && img.width > 0 && img.height > 0) {
               System.out.println(getImageTitle(imgInfo) + ' ' + '(' + maxSize.getSource() + ')');
@@ -206,16 +206,9 @@ public class Chromasthetiator implements UpdateHandler
 
   public static class PhotoSizeComparator implements Comparator<Size>
   {
-    private static PhotoSizeComparator instance = null;
+    public static final PhotoSizeComparator INSTANCE = new PhotoSizeComparator();
 
-    public static PhotoSizeComparator getInstance()
-    {
-      if (instance == null)
-        instance = new PhotoSizeComparator();
-      return instance;
-    }
-
-    private PhotoSizeComparator() { }
+    protected PhotoSizeComparator() { }
 
     @Override
     public int compare( Size o1, Size o2 )
@@ -307,7 +300,7 @@ public class Chromasthetiator implements UpdateHandler
       return Collections.EMPTY_LIST;
 
     ArrayList<String> resultWords = new ArrayList<>(maxCount);
-    Comparator<AffectWord> comp = AffectWord.SquareWeightSumComparator.getInstance();
+    Comparator<AffectWord> comp = AffectWord.SquareWeightSumComparator.INSTANCE;
 
     if (maxCount == 1) {
       resultWords.add(Collections.max(affectWords, comp).getWord());
