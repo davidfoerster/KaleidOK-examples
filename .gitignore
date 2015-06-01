@@ -38,7 +38,6 @@ Thumbs.db
 ### IDE files
 .idea/workspace.xml
 .idea/tasks.xml
-.idea/dictionaries/
 
 ### Private files
 api-key*.txt
