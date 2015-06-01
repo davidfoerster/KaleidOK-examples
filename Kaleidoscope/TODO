@@ -1,23 +1,6 @@
  - noise filter; figure out how to get rid of intense low frequencies
 
- - asynchronous synesthetiation and image downloads
-
- - figure out how to display images ((re-)placement, transition)
-
- - choose and use feature from Tarsos or minim audio for foobar layer
-
  - mock Chromatik client (optional)
-
-TarsosDSP:
- - enable overlapping FFT windows (trivial)
- - logarithmic averaging of Fourier amplitudes (medium)
-
-Minim:
- - implement overlapping FFT windows (medium)
- - implement pitch detection algorithm (hard)
-
-STT:
- - Re-implement STT to use Java audio framework instead of Minim. While at it, improve the library architecture (threading and stuff). (medium)
 
 Sphinx:
  - get it to work properly
