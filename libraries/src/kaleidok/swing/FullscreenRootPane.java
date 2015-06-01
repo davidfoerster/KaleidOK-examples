@@ -64,7 +64,7 @@ public class FullscreenRootPane extends JRootPane
     }
   }
 
-  private static void setFullscreenWindow( GraphicsDevice dev, Window w, boolean fullscreen )
+  private void setFullscreenWindow( GraphicsDevice dev, Window w, boolean fullscreen )
   {
     if (w instanceof Frame) {
       final Frame frame = (Frame) w;
@@ -78,7 +78,9 @@ public class FullscreenRootPane extends JRootPane
         frame.removeFocusListener(FullscreenFocusListener.INSTANCE);
       }
     }
+
     dev.setFullScreenWindow(fullscreen ? w : null);
+    getContentPane().requestFocusInWindow();
   }
 
   private static class FullscreenFocusListener implements FocusListener

@@ -21,8 +21,6 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   @Override
   public void init()
   {
-    initRootPane();
-
     T sketch;
     try {
       sketch = getSketchThrows();
@@ -37,16 +35,17 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   protected void initComponents() { }
 
   @Override
+  protected JRootPane createRootPane()
+  {
+    FullscreenRootPane rootPane = new FullscreenRootPane();
+    rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, fullscreenKeystroke);
+    return rootPane;
+  }
+
+  @Override
   public FullscreenRootPane getRootPane()
   {
     return (FullscreenRootPane) super.getRootPane();
-  }
-
-  private void initRootPane()
-  {
-    FullscreenRootPane rootPane = new FullscreenRootPane();
-    setRootPane(rootPane);
-    rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, fullscreenKeystroke);
   }
 
   public T getSketch()
