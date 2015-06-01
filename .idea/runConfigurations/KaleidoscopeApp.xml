@@ -17,6 +17,8 @@
     <parameter name="kaleidok.examples.kaleidoscope.audio.overlap" value="1024" />
     <parameter name="kaleidok.examples.kaleidoscope.audio.input.play" value="false" />
     <parameter name="com.google.developer.api.key" value="@api-key.google.txt" />
+    <parameter name="kaleidok.examples.kaleidoscope.screen" value="-1" />
+    <parameter name="kaleidok.examples.kaleidoscope.fullscreen" value="false" />
     <method />
   </configuration>
 </component>
