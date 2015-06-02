@@ -129,22 +129,7 @@ public class TranscriptionThread extends Thread
   protected String fetchTranscriptionResult( InputStream audioInputStream )
     throws IOException
   {
-    URL url;
-    try {
-      url = new URL(apiBase, urlStub + "&lang=" + urlEncode(language));
-    } catch (MalformedURLException e) {
-      throw new Error(e);
-    }
-    // TODO: Move all this stuff into HttpURLConnection class
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-    con.setRequestMethod("POST");
-    con.setRequestProperty("Content-Type",
-      String.format("%s; rate=%.0f;", uploadMimeType, uploadSampleRate));
-    con.setDoInput(true);
-    con.setDoOutput(true);
-    JsonHttpConnection jsonCon = new JsonHttpConnection(con);
-    jsonCon.connect();
-
+    JsonHttpConnection con = openConnection();
     OutputStream conOut = con.getOutputStream();
     //long n =
       copyStream(audioInputStream, conOut);
@@ -152,11 +137,28 @@ public class TranscriptionThread extends Thread
     //System.out.println("Sent " + n + " bytes to " + url);
     //System.out.println(con.getResponseCode() + " " + con.getResponseMessage());
 
-    String responseBody = jsonCon.getBody();
+    String responseBody = con.getBody();
     con.disconnect();
     //System.out.println("Received " + n + " bytes from " + url);
     //System.out.println(responseBody);
     return responseBody;
+  }
+
+  protected JsonHttpConnection openConnection() throws IOException
+  {
+    URL url;
+    try {
+      url = new URL(apiBase, urlStub + "&lang=" + urlEncode(language));
+    } catch (MalformedURLException e) {
+      throw new Error(e);
+    }
+    JsonHttpConnection con = JsonHttpConnection.openURL(url);
+    con.setRequestMethod("POST");
+    con.setRequestProperty("Content-Type",
+      String.format("%s; rate=%.0f;", uploadMimeType, uploadSampleRate));
+    con.setDoOutput(true);
+    con.connect();
+    return con;
   }
 
   protected Response parseTranscriptionResult( Reader source ) throws IOException

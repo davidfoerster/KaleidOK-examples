@@ -279,15 +279,15 @@ public class STT implements AudioProcessor
   {
     final float[] audioFloat = ev.getFloatBuffer();
     final int len = audioFloat.length - ev.getOverlap();
-    final int[] audioInt;
-    if (conversionBuffer != null && len <= conversionBuffer.length) {
-      audioInt = conversionBuffer;
-    } else {
-      audioInt = new int[len];
-    }
+    final int[] audioInt =
+      (conversionBuffer != null && len <= conversionBuffer.length) ?
+        conversionBuffer :
+        new int[len];
     final int offset = ev.getOverlap() / 2;
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) {
+      assert Math.abs(audioFloat[i + offset]) <= 1;
       audioInt[i] = (int) (audioFloat[i + offset] * Short.MAX_VALUE);
+    }
     return audioInt;
   }
 
