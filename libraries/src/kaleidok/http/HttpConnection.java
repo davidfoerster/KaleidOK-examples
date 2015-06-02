@@ -1,5 +1,7 @@
 package kaleidok.http;
 
+import kaleidok.io.Readers;
+
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -59,7 +61,7 @@ public class HttpConnection
   {
     checkHttpProtocol(url);
     Constructor<? extends HttpConnection> ctor =
-      clazz.getConstructor(HttpURLConnection.class);
+      clazz.getConstructor(constructorArgumentTypes);
     return ctor.newInstance(url.openConnection());
   }
 
@@ -70,6 +72,9 @@ public class HttpConnection
     if (!(p.startsWith(h) && (pl == hl || (pl == hl + 1 && p.charAt(hl) == 's'))))
       throw new IOException("Unsupported protocol: " + url.getProtocol());
   }
+
+  private static final Class<?>[] constructorArgumentTypes =
+    new Class<?>[]{ HttpURLConnection.class };
 
   /**
    * @see HttpURLConnection#connect()
@@ -345,23 +350,11 @@ public class HttpConnection
       if (len > Integer.MAX_VALUE)
         throw new IOException("Content length exceeds " + Integer.MAX_VALUE);
 
-      StringBuilder sb;
-      if (len >= 0) {
-        sb = new StringBuilder((int) len);
-      } else {
-        sb = new StringBuilder();
-        len = Long.MAX_VALUE;
-      }
       Reader r = getReader();
-      char[] buf = new char[(int) Math.min(len, 1 << 16)];
-      while (true) {
-        int count = r.read(buf);
-        if (count < 0)
-          break;
-        sb.append(buf, 0, count);
-      }
+      body = Readers.readAll(r, null);
+
       r.close();
-      body = sb.toString();
+      disconnect();
     }
 
     return body;
