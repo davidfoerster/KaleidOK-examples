@@ -4,6 +4,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -70,6 +71,9 @@ public class HttpConnection
       throw new IOException("Unsupported protocol: " + url.getProtocol());
   }
 
+  /**
+   * @see HttpURLConnection#connect()
+   */
   public void connect() throws IOException
   {
     if (connected)
@@ -85,6 +89,110 @@ public class HttpConnection
     connected = true;
   }
 
+  /**
+   * @see HttpURLConnection#setConnectTimeout(int)
+   */
+  public void setConnectTimeout( int timeout )
+  {
+    c.setConnectTimeout(timeout);
+  }
+
+  /**
+   * @see HttpURLConnection#getConnectTimeout()
+   */
+  public int getConnectTimeout()
+  {
+    return c.getConnectTimeout();
+  }
+
+  /**
+   * @see HttpURLConnection#setReadTimeout(int)
+   */
+  public void setReadTimeout( int timeout )
+  {
+    c.setReadTimeout(timeout);
+  }
+
+  /**
+   * @see HttpURLConnection#getReadTimeout()
+   */
+  public int getReadTimeout()
+  {
+    return c.getReadTimeout();
+  }
+
+  /**
+   * @see HttpURLConnection#getURL()
+   */
+  public URL getURL()
+  {
+    return c.getURL();
+  }
+
+  /**
+   * @see HttpURLConnection#getContentLength()
+   */
+  public int getContentLength()
+  {
+    return c.getContentLength();
+  }
+
+  /**
+   * @see HttpURLConnection#getContentLengthLong()
+   */
+  public long getContentLengthLong()
+  {
+    return c.getContentLengthLong();
+  }
+
+  /**
+   * @see HttpURLConnection#getContentEncoding()
+   */
+  public String getContentEncoding()
+  {
+    return c.getContentEncoding();
+  }
+
+  /**
+   * @see HttpURLConnection#getContentType()
+   */
+  public String getContentType()
+  {
+    return c.getContentType();
+  }
+
+  /**
+   * @see HttpURLConnection#getHeaderField(String)
+   */
+  public String getHeaderField( String name )
+  {
+    return c.getHeaderField(name);
+  }
+
+  public Map<String, List<String>> getHeaderFields()
+  {
+    return c.getHeaderFields();
+  }
+
+  /**
+   * @see HttpURLConnection#getHeaderFieldInt(String, int)
+   */
+  public int getHeaderFieldInt( String name, int Default )
+  {
+    return c.getHeaderFieldInt(name, Default);
+  }
+
+  /**
+   * @see HttpURLConnection#getHeaderFieldLong(String, long)
+   */
+  public long getHeaderFieldLong( String name, long Default )
+  {
+    return c.getHeaderFieldLong(name, Default);
+  }
+
+  /**
+   * @see HttpURLConnection#getInputStream()
+   */
   public InputStream getInputStream() throws IOException
   {
     if (inputStream == null) {
@@ -99,9 +207,9 @@ public class HttpConnection
           throw new IOException("Unsupported response MIME type: " + mimeType);
       }
 
-      String contentEncoding = c.getContentEncoding();
+      String contentEncoding = getContentEncoding();
       if (contentEncoding == null) {
-        contentEncoding = c.getHeaderField("transfer-encoding");
+        contentEncoding = getHeaderField("transfer-encoding");
         if ("chunked".equals(contentEncoding))
           contentEncoding = null;
       }
@@ -128,6 +236,92 @@ public class HttpConnection
     return inputStream;
   }
 
+  /**
+   * @see HttpURLConnection#getOutputStream()
+   */
+  public OutputStream getOutputStream() throws IOException
+  {
+    connect();
+    return c.getOutputStream();
+  }
+
+  /**
+   * @see HttpURLConnection#setDoOutput(boolean)
+   */
+  public void setDoOutput( boolean b )
+  {
+    c.setDoOutput(b);
+  }
+
+  /**
+   * @see HttpURLConnection#setDoInput(boolean)
+   */
+  public void setDoInput( boolean b )
+  {
+    c.setDoInput(b);
+  }
+
+  /**
+   * @see HttpURLConnection#getDoInput()
+   */
+  public boolean getDoInput()
+  {
+    return c.getDoInput();
+  }
+
+  /**
+   * @see HttpURLConnection#getDoOutput()
+   */
+  public boolean getDoOutput()
+  {
+    return c.getDoOutput();
+  }
+
+  /**
+   * @see HttpURLConnection#setUseCaches(boolean)
+   */
+  public void setUseCaches( boolean b )
+  {
+    c.setUseCaches(b);
+  }
+
+  /**
+   * @see HttpURLConnection#getUseCaches()
+   */
+  public boolean getUseCaches()
+  {
+    return c.getUseCaches();
+  }
+
+  /**
+   * @see HttpURLConnection#setRequestProperty(String, String)
+   */
+  public void setRequestProperty( String key, String value )
+  {
+    c.setRequestProperty(key, value);
+  }
+
+  /**
+   * @see HttpURLConnection#addRequestProperty(String, String)
+   */
+  public void addRequestProperty( String key, String value )
+  {
+    c.addRequestProperty(key, value);
+  }
+
+  /**
+   * @see HttpURLConnection#getRequestProperty(String)
+   */
+  public String getRequestProperty( String key )
+  {
+    return c.getRequestProperty(key);
+  }
+
+  public Map<String, List<String>> getRequestProperties()
+  {
+    return c.getRequestProperties();
+  }
+
   public Reader getReader() throws IOException
   {
     if (reader == null) {
@@ -145,7 +339,7 @@ public class HttpConnection
     if (body == null)
     {
       connect();
-      long len = c.getContentLength();
+      long len = getContentLength();
       if (len == 0)
         return "";
       if (len > Integer.MAX_VALUE)
@@ -158,7 +352,6 @@ public class HttpConnection
         sb = new StringBuilder();
         len = Long.MAX_VALUE;
       }
-
       Reader r = getReader();
       char[] buf = new char[(int) Math.min(len, 1 << 16)];
       while (true) {
@@ -167,7 +360,6 @@ public class HttpConnection
           break;
         sb.append(buf, 0, count);
       }
-
       r.close();
       body = sb.toString();
     }
@@ -229,4 +421,83 @@ public class HttpConnection
     }};
 
   protected static final String CHARSET = "charset";
+
+  /**
+   * @see HttpURLConnection#setRequestMethod(String)
+   */
+  public void setRequestMethod( String method ) throws ProtocolException
+  {
+    c.setRequestMethod(method);
+  }
+
+  /**
+   * @see HttpURLConnection#getRequestMethod()
+   */
+  public String getRequestMethod()
+  {
+    return c.getRequestMethod();
+  }
+
+  /**
+   * @see HttpURLConnection#getResponseCode()
+   */
+  public int getResponseCode() throws IOException
+  {
+    connect();
+    return c.getResponseCode();
+  }
+
+  /**
+   * @see HttpURLConnection#getResponseMessage()
+   */
+  public String getResponseMessage() throws IOException
+  {
+    connect();
+    return c.getResponseMessage();
+  }
+
+  /**
+   * @see HttpURLConnection#getHeaderFieldKey(int)
+   */
+  public String getHeaderFieldKey( int n )
+  {
+    return c.getHeaderFieldKey(n);
+  }
+
+  /**
+   * @see HttpURLConnection#getHeaderField(int)
+   */
+  public String getHeaderField( int n )
+  {
+    return c.getHeaderField(n);
+  }
+
+  /**
+   * @see HttpURLConnection#disconnect()
+   */
+  public void disconnect()
+  {
+    c.disconnect();
+  }
+
+  /**
+   * @see HttpURLConnection#getErrorStream()
+   */
+  public InputStream getErrorStream()
+  {
+    return c.getErrorStream();
+  }
+
+  public int getState()
+  {
+    return state;
+  }
+
+  /**
+   * @see HttpURLConnection#setChunkedStreamingMode(int)
+   */
+  public void setChunkedStreamingMode( int chunklen )
+  {
+    c.setChunkedStreamingMode(chunklen);
+  }
 }
