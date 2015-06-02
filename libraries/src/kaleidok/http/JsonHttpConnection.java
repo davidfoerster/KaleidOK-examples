@@ -17,6 +17,7 @@ public class JsonHttpConnection extends HttpConnection
   {
     super(c, MIME_TYPE_MAP);
     defaultCharset = DEFAULT_CHARSET;
+    setDoInput(true);
   }
 
   public static JsonHttpConnection openURL( URL url ) throws IOException
