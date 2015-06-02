@@ -9,7 +9,7 @@
  2. Similarly [request a Google API access key](https://www.chromium.org/developers/how-tos/api-keys)
     and provide it to Kaleidoscope.
 
- 2. Some libraries need to be set up, but I'm not going into that now.
+ 3. Some libraries need to be set up, but I'm not going into that now.
 
 
 ## Usage
