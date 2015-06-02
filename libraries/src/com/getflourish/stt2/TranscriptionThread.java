@@ -41,6 +41,10 @@ public class TranscriptionThread extends Thread
     }
   }
 
+  private final Gson gson = new Gson();
+
+  private final byte[] copyBuffer = new byte[64 << 10];
+
 
   TranscriptionThread( String accessKey, TranscriptionResultHandler resultHandler )
   {
@@ -66,7 +70,7 @@ public class TranscriptionThread extends Thread
     if (apiBase.getHost() == null)
       throw new IllegalArgumentException("No host specified");
     if (apiBase.getQuery() != null || apiBase.getRef() != null)
-      throw new IllegalArgumentException("URL base must nut contain a query or a fragment part");
+      throw new IllegalArgumentException("URL base must not contain a query or a fragment part");
 
     this.apiBase = apiBase;
     urlStub = "recognize?output=json&key=" + urlEncode(accessKey);
@@ -143,7 +147,8 @@ public class TranscriptionThread extends Thread
     jsonCon.connect();
 
     OutputStream conOut = con.getOutputStream();
-    long n = copyStream(audioInputStream, conOut);
+    //long n =
+      copyStream(audioInputStream, conOut);
     conOut.close();
     //System.out.println("Sent " + n + " bytes to " + url);
     //System.out.println(con.getResponseCode() + " " + con.getResponseMessage());
@@ -157,7 +162,6 @@ public class TranscriptionThread extends Thread
 
   protected Response parseTranscriptionResult( Reader source ) throws IOException
   {
-    Gson gson = new Gson(); // TODO: re-use Gson object
     JsonReader jsonReader = new JsonReader(source);
     jsonReader.setLenient(true);
     try {
@@ -209,10 +213,10 @@ public class TranscriptionThread extends Thread
     notify();
   }
 
-  protected static long copyStream( InputStream input, OutputStream output )
+  protected long copyStream( InputStream input, OutputStream output )
     throws IOException
   {
-    byte[] buffer = new byte[64 << 10]; // TODO: re-use buffer
+    byte[] buffer = this.copyBuffer;
     int bytesRead;
     long bytesTransferred = 0;
     while (true) {
