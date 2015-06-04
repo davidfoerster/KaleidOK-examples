@@ -34,7 +34,12 @@ public class HttpConnection
 
   protected String body;
 
-  private boolean connected = false;
+  public static int
+    UNCONNECTED = 0,
+    CONNECTED = 1,
+    DISCONNECTED = 2;
+
+  private int state = UNCONNECTED;
 
   public HttpConnection( HttpURLConnection c )
   {
@@ -81,8 +86,10 @@ public class HttpConnection
    */
   public void connect() throws IOException
   {
-    if (connected)
+    if (state == CONNECTED)
       return;
+    if (state != UNCONNECTED)
+      throw new IllegalStateException();
 
     if (acceptedMimeTypes != null) {
       String accept = acceptedMimeTypes.toString();
@@ -91,7 +98,7 @@ public class HttpConnection
     }
 
     c.connect();
-    connected = true;
+    state = CONNECTED;
   }
 
   /**
@@ -480,6 +487,7 @@ public class HttpConnection
   public void disconnect()
   {
     c.disconnect();
+    state = DISCONNECTED;
   }
 
   /**
