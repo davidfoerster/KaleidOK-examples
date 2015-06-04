@@ -9,6 +9,7 @@ import javax.swing.KeyStroke;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 
 public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
@@ -121,6 +122,18 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   public void stop()
   {
     sketch.stop();
+  }
+
+
+  static {
+    String strTmpDir = System.getenv("TMPDIR");
+    if (strTmpDir == null || strTmpDir.isEmpty())
+      strTmpDir = System.getenv("TMP");
+    if (strTmpDir != null && !strTmpDir.isEmpty()) {
+      File fTmpDir = new File(strTmpDir);
+      if (fTmpDir.isDirectory() && fTmpDir.canWrite())
+        System.setProperty("java.io.tmpdir", strTmpDir);
+    }
   }
 
 }
