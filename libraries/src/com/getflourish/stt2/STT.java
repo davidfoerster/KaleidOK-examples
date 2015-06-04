@@ -1,18 +1,11 @@
 package com.getflourish.stt2;
 
-import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
 import com.getflourish.stt2.mock.MockTranscriptionThread;
 import com.getflourish.stt2.util.Timer;
-import javaFlacEncoder.FLACEncoder;
-import javaFlacEncoder.FLACOutputStream;
-import javaFlacEncoder.FLACStreamOutputStream;
-import javaFlacEncoder.StreamConfiguration;
-
-import java.io.IOException;
 
 
-public class STT implements AudioProcessor
+public class STT
 {
   public static final int LISTENING = 1;
   public static final int RECORDING = 2;
@@ -26,10 +19,7 @@ public class STT implements AudioProcessor
   private int  status = -1, lastStatus = -1;
   private String statusText = "", lastStatusText = "";
 
-  private StreamConfiguration streamConfiguration = null;
-  private FLACEncoder encoder = new FLACEncoder();
-  private final TranscriptionThread transcriptionThread;
-  private FlacTranscriptionTask transcriptionTask = null;
+  private final AudioTranscriptionProcessor processor;
 
   private int interval = 500;
   private final Timer recordingTimer;
@@ -40,11 +30,10 @@ public class STT implements AudioProcessor
 
   public STT( TranscriptionResultHandler resultHandler, String accessKey )
   {
-    transcriptionThread =
+    processor = new AudioTranscriptionProcessor(this,
       ("!MOCK".equals(accessKey)) ?
         new MockTranscriptionThread(accessKey, resultHandler) :
-        new TranscriptionThread(accessKey, resultHandler);
-    transcriptionThread.start();
+        new TranscriptionThread(accessKey, resultHandler));
 
     //setAutoRecording(false);
 
@@ -52,9 +41,14 @@ public class STT implements AudioProcessor
     recordingTimer.start();
   }
 
+  public AudioProcessor getAudioProcessor()
+  {
+    return processor;
+  }
+
   public void setLanguage( String language )
   {
-    transcriptionThread.language = language;
+    processor.setLanguage(language);
   }
 
   public void begin( boolean doThrow )
@@ -93,7 +87,8 @@ public class STT implements AudioProcessor
   */
 
   public void setDebug( boolean b ) {
-    transcriptionThread.debug = debug = b;
+    debug = b;
+    processor.setDebug(b);
   }
 
   /*
@@ -104,26 +99,26 @@ public class STT implements AudioProcessor
 
     if (status != lastStatus)
     {
-      dispatchTranscriptionEvent(transcriptionThread.getUtterance(),
-        transcriptionThread.getConfidence(), transcriptionThread.getLanguage(),
+      dispatchTranscriptionEvent(thread.getUtterance(),
+        thread.getConfidence(), thread.getLanguage(),
         status);
       lastStatus = status;
     }
 
-    if (transcriptionThread.isResultAvailable())
+    if (thread.isResultAvailable())
     {
       // Why dispatch the same event twice?
-      dispatchTranscriptionEvent(transcriptionThread.getUtterance(),
-        transcriptionThread.getConfidence(), transcriptionThread.getLanguage(),
-        transcriptionThread.getStatus());
+      dispatchTranscriptionEvent(thread.getUtterance(),
+        thread.getConfidence(), thread.getLanguage(),
+        thread.getStatus());
 
       statusText = "Listening";
       status = LISTENING;
       // Why dispatch the same event a third time?
-      dispatchTranscriptionEvent(transcriptionThread.getUtterance(),
-        transcriptionThread.getConfidence(), transcriptionThread.getLanguage(), status);
+      dispatchTranscriptionEvent(thread.getUtterance(),
+        thread.getConfidence(), thread.getLanguage(), status);
       lastStatus = status;
-      transcriptionThread.interrupt();
+      thread.interrupt();
     }
 
     if (debug && !statusText.equals(lastStatusText))
@@ -180,6 +175,7 @@ public class STT implements AudioProcessor
   {
     statusText = "Recording";
     status = RECORDING;
+    processor.shouldRecord = true;
     startListening();
 
     if (debug)
@@ -200,6 +196,7 @@ public class STT implements AudioProcessor
   {
     statusText = "Transcribing";
     status = TRANSCRIBING;
+    processor.shouldRecord = false;
     isRecording = false;
 
     if (debug) {
@@ -214,147 +211,5 @@ public class STT implements AudioProcessor
   {
     // TODO: stop and then restart "recorder"
     recordingTimer.start();
-  }
-
-  // TODO: Move to separate (inner) class
-  @Override
-  public boolean process( AudioEvent audioEvent )
-  {
-    if (status == RECORDING)
-    {
-      int[] audioInt = convertTo16Bit(audioEvent, audioConversionBuffer);
-      audioConversionBuffer = audioInt;
-      try {
-        ensureEncoderReady(audioEvent);
-        encoder.addSamples(audioInt, audioInt.length);
-        encoder.t_encodeSamples(
-          encoder.fullBlockSamplesAvailableToEncode(),
-          false, Integer.MAX_VALUE);
-      }
-      catch (IOException ex) {
-        ex.printStackTrace();
-        if (transcriptionTask != null) {
-          transcriptionTask.finalizeTask();
-          transcriptionTask = null;
-        }
-        end(false);
-      }
-    }
-    else
-    {
-      finishEncoding();
-    }
-    return true;
-  }
-
-  private void ensureEncoderConfigured( AudioEvent ev )
-  {
-    if (streamConfiguration == null) {
-      int blockSize = ev.getBufferSize() - ev.getOverlap();
-      streamConfiguration =
-        new StreamConfiguration(1, blockSize,
-          Math.max(blockSize, StreamConfiguration.DEFAULT_MAX_BLOCK_SIZE),
-          (int) ev.getSampleRate(), Short.SIZE);
-      encoder.setStreamConfiguration(streamConfiguration);
-      encoder.setThreadCount(1);
-    }
-  }
-
-  private void ensureEncoderReady( AudioEvent ev ) throws IOException
-  {
-    ensureEncoderConfigured(ev);
-
-    if (transcriptionTask == null) {
-      transcriptionTask = new FlacTranscriptionTask(ev.getSampleRate());
-    }
-  }
-
-  private int[] audioConversionBuffer = null;
-
-  private static int[] convertTo16Bit( AudioEvent ev, int[] conversionBuffer )
-  {
-    final float[] audioFloat = ev.getFloatBuffer();
-    final int len = audioFloat.length - ev.getOverlap();
-    final int[] audioInt =
-      (conversionBuffer != null && len <= conversionBuffer.length) ?
-        conversionBuffer :
-        new int[len];
-    final int offset = ev.getOverlap() / 2;
-    for (int i = 0; i < len; i++) {
-      assert Math.abs(audioFloat[i + offset]) <= 1;
-      audioInt[i] = (int) (audioFloat[i + offset] * Short.MAX_VALUE);
-    }
-    return audioInt;
-  }
-
-  private void finishEncoding()
-  {
-    if (transcriptionTask != null) {
-      try {
-        transcriptionTask.finishEncoding();
-      } catch (IOException ex) {
-        ex.printStackTrace();
-      } finally {
-        transcriptionTask = null;
-      }
-    }
-  }
-
-  @Override
-  public void processingFinished()
-  {
-    //volumeThresholdTracker.processingFinished();
-    finishEncoding();
-  }
-
-  private static boolean assertShorter( long startTime, long maxDuration, String message )
-  {
-    if (System.nanoTime() - startTime < maxDuration)
-      return true;
-    //throw new AssertionError(message);
-    System.err.println(message);
-    return false;
-  }
-
-
-  private class FlacTranscriptionTask extends TranscriptionTask
-  {
-    private final FLACOutputStream outputStream;
-
-    public FlacTranscriptionTask( float sampleRate ) throws IOException
-    {
-      super(transcriptionThread, "audio/x-flac", sampleRate);
-      outputStream = new FLACStreamOutputStream(getOutputStream());
-      encoder.setOutputStream(outputStream);
-      encoder.openFLACStream();
-    }
-
-    public void finishEncoding() throws IOException
-    {
-      assert !isScheduled();
-      int availableSamples = encoder.samplesAvailableToEncode();
-      if (debug) {
-        double availableLength = (double) availableSamples / streamConfiguration.getSampleRate();
-        System.out.format("%.4g seconds left to encode after recording finished\n", availableLength);
-      }
-
-      long now = System.nanoTime();
-      encoder.t_encodeSamples(availableSamples, true, availableSamples);
-      if (debug)
-        assertShorter(now, 10 * 1000000L, "encoding remaining samples took too long");
-      schedule();
-    }
-
-    @Override
-    public void finalizeTask()
-    {
-      try {
-        outputStream.close();
-      } catch (IOException ex) {
-        ex.printStackTrace();
-      } finally {
-        super.finalizeTask();
-      }
-    }
   }
 }

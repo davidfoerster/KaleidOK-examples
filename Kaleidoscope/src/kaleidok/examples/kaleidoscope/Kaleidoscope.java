@@ -123,7 +123,7 @@ public class Kaleidoscope extends ExtPApplet
       stt.setDebug(verbose > 0);
       stt.setLanguage((String) getParameter(
         STT.class.getCanonicalName() + ".language", "en"));
-      audioDispatcher.addAudioProcessor(stt);
+      audioDispatcher.addAudioProcessor(stt.getAudioProcessor());
     }
     return stt;
   }
