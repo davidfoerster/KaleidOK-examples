@@ -388,8 +388,10 @@ public class HttpConnection
 
     while (delimPos >= 0) {
       int offset = delimPos + 1;
-      while (ct.charAt(offset) == ' ')
+      while (offset < ct.length() && ct.charAt(offset) == ' ')
         offset++;
+      if (offset >= ct.length())
+        break;
 
       delimPos = ct.indexOf(';', offset);
 
