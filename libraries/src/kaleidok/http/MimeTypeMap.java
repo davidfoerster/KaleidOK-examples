@@ -131,19 +131,21 @@ public class MimeTypeMap extends HashMap<String, Float>
     if (!wildcards || WILDCARD.equals(mime))
       return null;
 
-    int p = mime.indexOf('/');
-    if (p < 0)
-      throw new IllegalArgumentException("Invalid MIME type: " + mime);
-    assert mime.indexOf('/', p + 1) < 0;
-    if (mime.length() != p + 2 || mime.charAt(p + 1) != '*') {
-      char[] buf = new char[p + 2];
-      mime.getChars(0, p, buf, 0);
-      buf[p] = '/';
-      buf[p + 1] = '*';
-      mime = new String(buf);
-      q = get(mime);
-      if (q != null)
-        return (q > 0) ? mime : null;
+    if (mime != null) {
+      int p = mime.indexOf('/');
+      if (p < 0)
+        throw new IllegalArgumentException("Invalid MIME type: " + mime);
+      assert mime.indexOf('/', p + 1) < 0;
+      if (mime.length() != p + 2 || mime.charAt(p + 1) != '*') {
+        char[] buf = new char[p + 2];
+        mime.getChars(0, p, buf, 0);
+        buf[p] = '/';
+        buf[p + 1] = '*';
+        mime = new String(buf);
+        q = get(mime);
+        if (q != null)
+          return (q > 0) ? mime : null;
+      }
     }
 
     q = get(WILDCARD);
