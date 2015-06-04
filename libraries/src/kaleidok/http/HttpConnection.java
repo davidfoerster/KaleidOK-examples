@@ -202,40 +202,44 @@ public class HttpConnection
   {
     if (inputStream == null) {
       connect();
-      /*if (c.getResponseCode() != HttpURLConnection.HTTP_OK)
-        throw new IOException(
-          "HTTP server returned: " + c.getResponseMessage());*/
 
-      if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty()) {
-        String mimeType = getResponseMimeType();
-        if (acceptedMimeTypes.allows(mimeType) == null)
-          throw new IOException("Unsupported response MIME type: " + mimeType);
-      }
+      try {
+        if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty()) {
+          String mimeType = getResponseMimeType();
+          if (acceptedMimeTypes.allows(mimeType) == null)
+            throw new IOException("Unsupported response MIME type: " + mimeType);
+        }
 
-      String contentEncoding = getContentEncoding();
-      if (contentEncoding == null) {
-        contentEncoding = getHeaderField("transfer-encoding");
-        if ("chunked".equals(contentEncoding))
-          contentEncoding = null;
-      }
+        String contentEncoding = c.getContentEncoding();
+        if (contentEncoding == null) {
+          contentEncoding = c.getHeaderField("transfer-encoding");
+          if ("chunked".equals(contentEncoding))
+            contentEncoding = null;
+        }
 
-      Class<? extends FilterInputStream> dec = decoders.get(contentEncoding);
-      if (dec == null) {
-        if (!decoders.containsKey(contentEncoding))
-          throw new IOException(
-            "Unsupported content-encoding: " + contentEncoding);
-        inputStream = c.getInputStream();
-      } else try {
-        Constructor<? extends FilterInputStream> ctor =
-          dec.getConstructor(InputStream.class);
-        inputStream = ctor.newInstance(c.getInputStream());
-      } catch (InvocationTargetException ex) {
-        Throwable cause = ex.getCause();
-        if (cause instanceof IOException)
-          throw (IOException) cause;
-        throw new Error(cause);
-      } catch (ReflectiveOperationException ex) {
-        throw new Error(ex);
+        Class<? extends FilterInputStream> dec = decoders.get(contentEncoding);
+        if (dec == null) {
+          if (!decoders.containsKey(contentEncoding))
+            throw new IOException(
+              "Unsupported content-encoding: " + contentEncoding);
+          inputStream = c.getInputStream();
+        } else try {
+          Constructor<? extends FilterInputStream> ctor =
+            dec.getConstructor(InputStream.class);
+          inputStream = ctor.newInstance(c.getInputStream());
+        } catch (InvocationTargetException ex) {
+          disconnect();
+          Throwable cause = ex.getCause();
+          if (cause instanceof IOException)
+            throw (IOException) cause;
+          throw new Error(cause);
+        } catch (ReflectiveOperationException ex) {
+          disconnect();
+          throw new Error(ex);
+        }
+      } catch (Throwable ex) {
+        disconnect();
+        throw ex;
       }
     }
     return inputStream;
@@ -344,17 +348,22 @@ public class HttpConnection
     if (body == null)
     {
       connect();
-      long len = getContentLength();
-      if (len == 0)
-        return "";
-      if (len > Integer.MAX_VALUE)
-        throw new IOException("Content length exceeds " + Integer.MAX_VALUE);
+      try {
+        long len = c.getContentLength();
+        if (len == 0)
+          return "";
+        if (len > Integer.MAX_VALUE)
+          throw new IOException("Content length exceeds " + Integer.MAX_VALUE);
 
-      Reader r = getReader();
-      body = Readers.readAll(r, null);
-
-      r.close();
-      disconnect();
+        Reader r = getReader();
+        try {
+          body = Readers.readAll(r, null);
+        } finally {
+          r.close();
+        }
+      } finally {
+        disconnect();
+      }
     }
 
     return body;
