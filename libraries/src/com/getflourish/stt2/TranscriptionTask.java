@@ -64,11 +64,7 @@ public class TranscriptionTask
   {
     Response response;
     try {
-      String resultBody = fetchTranscriptionResult();
-      connection.disconnect();
-      response = (resultBody != null) ?
-        parseTranscriptionResult(new StringReader(resultBody)) :
-        null;
+      response = parseTranscriptionResult(connection.getReader());
     } catch (IOException ex) {
       if (tt.debug) {
         System.err.println("I/O ERROR: Network connection failure");
@@ -78,16 +74,6 @@ public class TranscriptionTask
       finalizeTask();
     }
     handleTranscriptionResponse(response);
-  }
-
-  protected String fetchTranscriptionResult()
-    throws IOException
-  {
-    System.out.println("Expecting to receive " + connection.getContentLengthLong() + " bytes from server.");
-    String responseBody =
-      connection.getBody(); // TODO: use the Reader directly instead of buffering the entire response body
-    System.out.println(responseBody);
-    return responseBody;
   }
 
   protected Response parseTranscriptionResult( Reader source ) throws IOException
