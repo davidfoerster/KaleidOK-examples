@@ -10,8 +10,6 @@ import javaFlacEncoder.FLACStreamOutputStream;
 import javaFlacEncoder.StreamConfiguration;
 
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 
 
 public class STT implements AudioProcessor
@@ -30,8 +28,8 @@ public class STT implements AudioProcessor
 
   private StreamConfiguration streamConfiguration = null;
   private FLACEncoder encoder = new FLACEncoder();
-  private FLACOutputStream outputStream;
   private final TranscriptionThread transcriptionThread;
+  private FlacTranscriptionTask transcriptionTask = null;
 
   private int interval = 500;
   private final Timer recordingTimer;
@@ -233,8 +231,13 @@ public class STT implements AudioProcessor
           encoder.fullBlockSamplesAvailableToEncode(),
           false, Integer.MAX_VALUE);
       }
-      catch (IOException ex1) {
-        handleIoException(ex1);
+      catch (IOException ex) {
+        ex.printStackTrace();
+        if (transcriptionTask != null) {
+          transcriptionTask.finalizeTask();
+          transcriptionTask = null;
+        }
+        end(false);
       }
     }
     else
@@ -261,15 +264,8 @@ public class STT implements AudioProcessor
   {
     ensureEncoderConfigured(ev);
 
-    if (outputStream == null) {
-      // TODO: write directly to output stream of the network connection
-      PipedOutputStream outputStream = new PipedOutputStream();
-      transcriptionThread.attachInput(
-        new PipedInputStream(outputStream), "audio/x-flac",
-        ev.getSampleRate());
-      this.outputStream = new FLACStreamOutputStream(outputStream);
-      encoder.setOutputStream(this.outputStream);
-      encoder.openFLACStream();
+    if (transcriptionTask == null) {
+      transcriptionTask = new FlacTranscriptionTask(ev.getSampleRate());
     }
   }
 
@@ -291,38 +287,16 @@ public class STT implements AudioProcessor
     return audioInt;
   }
 
-  private void handleIoException( IOException ex1 )
-  {
-    ex1.printStackTrace();
-    if (outputStream != null) {
-      try {
-        outputStream.close();
-        outputStream = null;
-      } catch (IOException ex2) {
-        ex2.printStackTrace();
-      }
-    }
-    end(false);
-  }
-
   private void finishEncoding()
   {
-    if (outputStream != null) {
+    if (transcriptionTask != null) {
       try {
-        int availableSamples = encoder.samplesAvailableToEncode();
-        if (debug) {
-          double availableLength = (double) availableSamples / streamConfiguration.getSampleRate();
-          System.out.format("%.4g seconds left to encode after recording finished\n", availableLength);
-        }
-
-        long now = System.nanoTime();
-        encoder.t_encodeSamples(availableSamples, true, Integer.MAX_VALUE); // TODO: dispatch to other thread
-        if (debug)
-          assertShorter(now, 10 * 1000000L, "encoding remaining samples took too long");
+        transcriptionTask.finishEncoding();
       } catch (IOException ex) {
         ex.printStackTrace();
+      } finally {
+        transcriptionTask = null;
       }
-      outputStream = null;
     }
   }
 
@@ -340,5 +314,47 @@ public class STT implements AudioProcessor
     //throw new AssertionError(message);
     System.err.println(message);
     return false;
+  }
+
+
+  private class FlacTranscriptionTask extends TranscriptionTask
+  {
+    private final FLACOutputStream outputStream;
+
+    public FlacTranscriptionTask( float sampleRate ) throws IOException
+    {
+      super(transcriptionThread, "audio/x-flac", sampleRate);
+      outputStream = new FLACStreamOutputStream(getOutputStream());
+      encoder.setOutputStream(outputStream);
+      encoder.openFLACStream();
+    }
+
+    public void finishEncoding() throws IOException
+    {
+      assert !isScheduled();
+      int availableSamples = encoder.samplesAvailableToEncode();
+      if (debug) {
+        double availableLength = (double) availableSamples / streamConfiguration.getSampleRate();
+        System.out.format("%.4g seconds left to encode after recording finished\n", availableLength);
+      }
+
+      long now = System.nanoTime();
+      encoder.t_encodeSamples(availableSamples, true, availableSamples);
+      if (debug)
+        assertShorter(now, 10 * 1000000L, "encoding remaining samples took too long");
+      schedule();
+    }
+
+    @Override
+    public void finalizeTask()
+    {
+      try {
+        outputStream.close();
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      } finally {
+        super.finalizeTask();
+      }
+    }
   }
 }

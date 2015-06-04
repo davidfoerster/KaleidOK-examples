@@ -1,35 +1,33 @@
 package com.getflourish.stt2;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonReader;
-import kaleidok.http.JsonHttpConnection;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 
 public class TranscriptionThread extends Thread
 {
   public String language = null;
 
-  private URL apiBase;
+  protected URL apiBase;
 
-  private String urlStub;
+  protected String urlStub;
 
-  // TODO: Put these 3 into a separate object and use an interface to attach it
-  private InputStream uploadInputStream;
+  protected BlockingQueue<TranscriptionTask> taskQueue =
+    new ArrayBlockingQueue<>(3, false);
 
-  private String uploadMimeType;
-
-  private float uploadSampleRate;
-
-  private TranscriptionResultHandler resultHandler;
+  protected TranscriptionResultHandler resultHandler;
 
   public boolean debug = false;
+
+  protected final Gson gson = new Gson();
 
   public static final URL DEFAULT_API_BASE;
   static {
@@ -40,17 +38,12 @@ public class TranscriptionThread extends Thread
     }
   }
 
-  private final Gson gson = new Gson();
-
-  private final byte[] copyBuffer = new byte[64 << 10];
-
-
-  TranscriptionThread( String accessKey, TranscriptionResultHandler resultHandler )
+  public TranscriptionThread( String accessKey, TranscriptionResultHandler resultHandler )
   {
     this(DEFAULT_API_BASE, accessKey, resultHandler);
   }
 
-  TranscriptionThread( URL apiBase, String accessKey, TranscriptionResultHandler resultHandler )
+  public TranscriptionThread( URL apiBase, String accessKey, TranscriptionResultHandler resultHandler )
   {
     this(resultHandler);
     setUrlBase(apiBase, accessKey);
@@ -75,29 +68,27 @@ public class TranscriptionThread extends Thread
     urlStub = "recognize?output=json&key=" + urlEncode(accessKey);
   }
 
+  public TranscriptionTask createTask( String mimeType, float sampleRate )
+    throws IOException
+  {
+    return new TranscriptionTask(this, mimeType, sampleRate);
+  }
+
   @Override
   public void run()
   {
     try {
-      InputStream uploadInputStream = null;
+      TranscriptionTask task;
       while (resultHandler != null) {
-        try {
-          synchronized (this) {
-            while (this.uploadInputStream == null) {
-              try {
-                wait();
-              } catch (InterruptedException ex) {
-                // go on...
-              }
-            }
-            uploadInputStream = this.uploadInputStream;
-            this.uploadInputStream = null;
+        task = null;
+        do {
+          try {
+            task = taskQueue.take();
+          } catch (InterruptedException e) {
+            // go on...
           }
-          transcribe(uploadInputStream);
-        } finally {
-          if (uploadInputStream != null)
-            uploadInputStream.close();
-        }
+        } while (task == null);
+        task.transcribe();
       }
     } catch (IOException | JsonSyntaxException ex) {
       UncaughtExceptionHandler h = getUncaughtExceptionHandler();
@@ -109,132 +100,7 @@ public class TranscriptionThread extends Thread
     }
   }
 
-  protected void transcribe( InputStream audioInputStream )
-    throws IOException, JsonSyntaxException
-  {
-    try {
-      String resultBody = fetchTranscriptionResult(audioInputStream);
-      Response response = (resultBody != null) ?
-        parseTranscriptionResult(new StringReader(resultBody)) :
-        null;
-      handleTranscriptionResponse(response);
-    } catch (IOException ex) {
-      if (debug) {
-        System.err.println("I/O ERROR: Network connection failure");
-      }
-      throw ex;
-    }
-  }
-
-  protected String fetchTranscriptionResult( InputStream audioInputStream )
-    throws IOException
-  {
-    JsonHttpConnection con = openConnection();
-    OutputStream conOut = con.getOutputStream();
-    //long n =
-      copyStream(audioInputStream, conOut);
-    conOut.close();
-    //System.out.println("Sent " + n + " bytes to " + url);
-    //System.out.println(con.getResponseCode() + " " + con.getResponseMessage());
-
-    String responseBody = con.getBody();
-    con.disconnect();
-    //System.out.println("Received " + n + " bytes from " + url);
-    //System.out.println(responseBody);
-    return responseBody;
-  }
-
-  protected JsonHttpConnection openConnection() throws IOException
-  {
-    URL url;
-    try {
-      url = new URL(apiBase, urlStub + "&lang=" + urlEncode(language));
-    } catch (MalformedURLException e) {
-      throw new Error(e);
-    }
-    JsonHttpConnection con = JsonHttpConnection.openURL(url);
-    con.setRequestMethod("POST");
-    con.setRequestProperty("Content-Type",
-      String.format("%s; rate=%.0f;", uploadMimeType, uploadSampleRate));
-    con.setDoOutput(true);
-    con.connect();
-    return con;
-  }
-
-  protected Response parseTranscriptionResult( Reader source ) throws IOException
-  {
-    JsonReader jsonReader = new JsonReader(source);
-    jsonReader.setLenient(true);
-    try {
-      Response response;
-      do {
-        response = gson.fromJson(jsonReader, Response.class);
-      } while (response != null && (response.result == null || response.result.length == 0));
-      return response;
-    } catch (JsonSyntaxException ex) {
-      if (debug) {
-        System.out.println("PARSE ERROR: Speech could not be interpreted.");
-      }
-      throw ex;
-    } catch (JsonIOException ex) {
-      throw new IOException(ex);
-    } finally {
-      jsonReader.close();
-    }
-  }
-
-  protected void handleTranscriptionResponse( Response response )
-  {
-    if (response != null && response.result != null && response.result.length != 0) {
-      Response.Result result = response.result[0];
-      assert response.result.length == 1;
-      if (debug) {
-        Response.Result.Alternative alternative = result.alternative[0];
-        System.out.println(
-          "Recognized: " + alternative.transcript +
-            " (confidence: " + alternative.confidence + ')');
-      }
-      if (result != null) {
-        resultHandler.handleTranscriptionResult(result);
-      } else if (debug) {
-        System.out.println("Speech could not be interpreted! Try to shorten the recording.");
-      }
-    }
-  }
-
-  public synchronized void attachInput( InputStream in, String mimeType, float sampleRate )
-  {
-    if (uploadInputStream != null)
-      throw new IllegalStateException("There's another stream to transcribe already");
-
-    uploadInputStream = in;
-    uploadMimeType = mimeType;
-    uploadSampleRate = sampleRate;
-
-    notify();
-  }
-
-  protected long copyStream( InputStream input, OutputStream output )
-    throws IOException
-  {
-    byte[] buffer = this.copyBuffer;
-    int bytesRead;
-    long bytesTransferred = 0;
-    while (true) {
-      try {
-        bytesRead = input.read(buffer);
-      } catch (IOException ex) {
-        throw new Error(ex);
-      }
-      if (bytesRead < 0)
-        break;
-      output.write(buffer, 0, bytesRead);
-      bytesTransferred += bytesRead;
-    }
-    return bytesTransferred;
-  }
-
-  private static String urlEncode( String s )
+  protected static String urlEncode( String s )
   {
     try {
       return URLEncoder.encode(s, "US-ASCII");
