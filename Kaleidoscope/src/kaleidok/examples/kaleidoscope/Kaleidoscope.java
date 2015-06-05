@@ -135,23 +135,26 @@ public class Kaleidoscope extends ExtPApplet
       String paramBase = this.getClass().getPackage().getName() + ".audio.";
       String audioSource = getParameter(paramBase + "input");
 
+      String param =  paramBase + "samplerate";
       int sampleRate = DefaultValueParser.parseInt(this,
-        paramBase + "samplerate", DEFAULT_AUDIO_SAMPLERATE);
+        param, DEFAULT_AUDIO_SAMPLERATE);
       if (sampleRate <= 0)
-        throw new AssertionError(paramBase + "samplerate" + " must be positive");
+        throw new AssertionError(param + " must be positive");
 
+      param = paramBase + "buffersize";
       int bufferSize = DefaultValueParser.parseInt(this,
-        paramBase + "buffersize", DEFAULT_AUDIO_BUFFERSIZE);
+        param, DEFAULT_AUDIO_BUFFERSIZE);
       if (bufferSize <= 0 || !isPowerOfTwo(bufferSize))
-        throw new AssertionError(paramBase + "buffersize" + " must be a power of 2");
+        throw new AssertionError(param + " must be a power of 2");
       audioBufferSize = bufferSize;
 
+      param = paramBase + "bufferoverlap";
       int bufferOverlap = DefaultValueParser.parseInt(this,
-       paramBase + "bufferoverlap", bufferSize / 2);
+       param, bufferSize / 2);
       if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
-        throw new AssertionError(paramBase + "bufferoverlap" + " must be positive and less than buffersize");
+        throw new AssertionError(param + " must be positive and less than buffersize");
       if (bufferOverlap > 0 && !isPowerOfTwo(bufferSize))
-        throw new AssertionError(paramBase + "bufferoverlap" + " must be a power of 2");
+        throw new AssertionError(param + " must be a power of 2");
 
       Runnable dispatcherRunnable;
 
