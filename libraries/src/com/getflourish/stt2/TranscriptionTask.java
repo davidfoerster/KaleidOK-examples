@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -19,6 +20,8 @@ public class TranscriptionTask
   private TranscriptionThread tt;
 
   private final JsonHttpConnection connection;
+
+  private OutputStream outputStream = null;
 
   private boolean scheduled = false;
 
@@ -43,7 +46,10 @@ public class TranscriptionTask
 
   public OutputStream getOutputStream() throws IOException
   {
-    return connection.getOutputStream();
+    if (outputStream == null) {
+      outputStream = connection.getOutputStream();
+    }
+    return outputStream;
   }
 
   public void schedule()
@@ -120,8 +126,14 @@ public class TranscriptionTask
   public void finalizeTask()
   {
     if (connection.getState() == HttpConnection.CONNECTED) {
-      if (connection.getDoOutput()) try {
-        connection.getOutputStream().close();
+      if (outputStream != null) try {
+        outputStream.close();
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
+      try {
+        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
+          connection.getInputStream().close();
       } catch (IOException ex) {
         ex.printStackTrace();
       }
