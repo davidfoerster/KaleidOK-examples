@@ -24,10 +24,27 @@ public final class DefaultValueParser
   }
 
 
+  private static final String[] BOOLEAN_WORDS = {
+      "true", "false", "yes", "no", "on", "off", "enabled", "disabled"
+    };
+
+  public static boolean parseBoolean( String s )
+  {
+    if (s != null && !s.isEmpty()) {
+      if (Character.isDigit(s.charAt(0)))
+        return Integer.parseInt(s) != 0;
+      for (int i = 0; i < BOOLEAN_WORDS.length; i++) {
+        if (BOOLEAN_WORDS[i].equalsIgnoreCase(s))
+          return i % 2 == 0;
+      }
+    }
+    throw new IllegalArgumentException(s);
+  }
+
   public static boolean parseBoolean( String s, boolean defaultValue )
   {
     return (s != null && !s.isEmpty()) ?
-      Boolean.parseBoolean(s) :
+      parseBoolean(s) :
       defaultValue;
   }
 
