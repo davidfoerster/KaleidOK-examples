@@ -132,14 +132,15 @@ class AudioTranscriptionProcessor implements AudioProcessor
       assert !isScheduled();
       int availableSamples = encoder.samplesAvailableToEncode();
       if (debug) {
-        double availableLength = (double) availableSamples / streamConfiguration.getSampleRate();
-        System.out.format("%.4g seconds left to encode after recording finished\n", availableLength);
+        System.out.format(
+          "%.4g seconds left to encode after recording finished.\n",
+          (double) availableSamples / streamConfiguration.getSampleRate());
       }
 
-      long now = System.nanoTime();
+      long now = debug ? System.nanoTime() : 0;
       encoder.t_encodeSamples(availableSamples, true, availableSamples);
       if (debug)
-        assertShorter(now, 10 * 1000000L, "encoding remaining samples took too long");
+        assertShorter(now, 10 * 1000L*1000L, "Encoding remaining samples took too long");
       schedule();
     }
 
@@ -159,10 +160,11 @@ class AudioTranscriptionProcessor implements AudioProcessor
 
   private static boolean assertShorter( long startTime, long maxDuration, String message )
   {
-    if (System.nanoTime() - startTime < maxDuration)
+    long duration = System.nanoTime() - startTime;
+    if (duration < maxDuration)
       return true;
-    //throw new AssertionError(message);
-    System.err.println(message);
+
+    System.err.format("%s: %.4g seconds\n", message, duration * 1e-9);
     return false;
   }
 

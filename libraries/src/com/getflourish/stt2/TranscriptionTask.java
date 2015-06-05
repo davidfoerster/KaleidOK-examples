@@ -17,7 +17,7 @@ import java.net.URL;
 
 public class TranscriptionTask
 {
-  private TranscriptionThread tt;
+  private final TranscriptionThread tt;
 
   private final JsonHttpConnection connection;
 
