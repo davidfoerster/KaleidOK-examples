@@ -36,10 +36,17 @@ public class Chromasthetiator implements UpdateHandler
    */
   public int maxColors = 2;
 
+  /**
+   * Maximum amount of keywords to select from affect words, if no search terms
+   * are defined by {@link #keywordsDoc}
+   */
   public int maxKeywords = 0;
 
   // other instance attributes:
 
+  /**
+   * A document object tha holds the currently defined search terms
+   */
   public Document keywordsDoc;
 
   private final PApplet parent;
