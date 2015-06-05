@@ -50,7 +50,7 @@ public class DummyAudioPlayer implements AudioProcessor
         LockSupport.parkNanos(delay);
       } else if (debug <= 0 && verbose >= 1) {
         System.out.format(
-          "Warning: Audio processing too slow by %.4g milliseconds.\n",
+          "Warning: Audio processing too slow by %.4g milliseconds.%n",
           delay * -1e-6);
       }
     } else {

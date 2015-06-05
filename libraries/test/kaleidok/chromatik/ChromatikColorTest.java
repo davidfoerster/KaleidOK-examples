@@ -39,7 +39,7 @@ public class ChromatikColorTest
     for (int i = 0; i < ChromatikColor.COLORS.length; i++) {
       int c1 = ChromatikColor.COLORS[i];
       ChromatikColor c2 = new ChromatikColor(c1);
-      System.out.printf("%#08x => %#08x %c (%s)\n", c1, c2.value, (c1 == c2.value) ? ' ' : '!', c2.groupName);
+      System.out.format("%#08x => %#08x %c (%s)%n", c1, c2.value, (c1 == c2.value) ? ' ' : '!', c2.groupName);
 
       if ((i + 1) % ChromatikColor.HUE_COLS == 0)
         System.out.println();

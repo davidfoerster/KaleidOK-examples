@@ -133,7 +133,7 @@ class AudioTranscriptionProcessor implements AudioProcessor
       int availableSamples = encoder.samplesAvailableToEncode();
       if (debug) {
         System.out.format(
-          "%.4g seconds left to encode after recording finished.\n",
+          "%.4g seconds left to encode after recording finished.%n",
           (double) availableSamples / streamConfiguration.getSampleRate());
       }
 
@@ -164,7 +164,7 @@ class AudioTranscriptionProcessor implements AudioProcessor
     if (duration < maxDuration)
       return true;
 
-    System.err.format("%s: %.4g seconds\n", message, duration * 1e-9);
+    System.err.format("%s: %.4g seconds%n", message, duration * 1e-9);
     return false;
   }
 
