@@ -146,7 +146,7 @@ public class HttpConnection
    */
   public int getContentLength()
   {
-    return c.getContentLength();
+    return (getContentEncoding() == null) ? c.getContentLength() : -1;
   }
 
   /**
@@ -154,7 +154,7 @@ public class HttpConnection
    */
   public long getContentLengthLong()
   {
-    return c.getContentLengthLong();
+    return (getContentEncoding() == null) ? c.getContentLengthLong() : -1;
   }
 
   /**
@@ -217,18 +217,8 @@ public class HttpConnection
             throw new IOException("Unsupported response MIME type: " + mimeType);
         }
 
-        String contentEncoding = c.getContentEncoding();
-        if (contentEncoding == null) {
-          contentEncoding = c.getHeaderField("transfer-encoding");
-          if ("chunked".equals(contentEncoding))
-            contentEncoding = null;
-        }
-
-        Class<? extends FilterInputStream> dec = decoders.get(contentEncoding);
+        Class<? extends FilterInputStream> dec = getInputFilterClass();
         if (dec == null) {
-          if (!decoders.containsKey(contentEncoding))
-            throw new IOException(
-              "Unsupported content-encoding: " + contentEncoding);
           inputStream = c.getInputStream();
         } else try {
           Constructor<? extends FilterInputStream> ctor =
@@ -250,6 +240,24 @@ public class HttpConnection
       }
     }
     return inputStream;
+  }
+
+  private Class<? extends FilterInputStream> getInputFilterClass()
+    throws IOException
+  {
+    String contentEncoding = c.getContentEncoding();
+    if (contentEncoding == null) {
+      contentEncoding = c.getHeaderField("transfer-encoding");
+      if ("chunked".equals(contentEncoding))
+        contentEncoding = null;
+    }
+
+    Class<? extends FilterInputStream> dec = decoders.get(contentEncoding);
+    if (dec != null || decoders.containsKey(null))
+      return dec;
+
+    throw new IOException(
+      "Unsupported content-encoding: " + contentEncoding);
   }
 
   /**
@@ -356,12 +364,6 @@ public class HttpConnection
     {
       connect();
       try {
-        long len = c.getContentLength();
-        if (len == 0)
-          return "";
-        if (len > Integer.MAX_VALUE)
-          throw new IOException("Content length exceeds " + Integer.MAX_VALUE);
-
         Reader r = getReader();
         try {
           body = Readers.readAll(r, null);
