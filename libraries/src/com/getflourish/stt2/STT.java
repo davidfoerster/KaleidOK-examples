@@ -1,8 +1,10 @@
 package com.getflourish.stt2;
 
-import be.tarsos.dsp.AudioProcessor;
-import com.getflourish.stt2.mock.MockTranscriptionThread;
+import com.getflourish.stt2.mock.MockTranscriptionService;
 import com.getflourish.stt2.util.Timer;
+import kaleidok.concurrent.Callback;
+
+import java.net.URL;
 
 
 public class STT
@@ -19,6 +21,7 @@ public class STT
   private int  status = -1, lastStatus = -1;
   private String statusText = "", lastStatusText = "";
 
+  protected final TranscriptionService service;
   private final AudioTranscriptionProcessor processor;
 
   private int interval = 500;
@@ -26,14 +29,16 @@ public class STT
 
   //private final VolumeThresholdTracker volumeThresholdTracker = new VolumeThresholdTracker(); // TODO: integration
 
-  private boolean debug;
 
-  public STT( TranscriptionResultHandler resultHandler, String accessKey )
+  public static boolean debug;
+
+
+  public STT( Callback<Response> resultHandler, String accessKey )
   {
-    processor = new AudioTranscriptionProcessor(this,
-      ("!MOCK".equals(accessKey)) ?
-        new MockTranscriptionThread(accessKey, resultHandler) :
-        new TranscriptionThread(accessKey, resultHandler));
+    service = accessKey.startsWith("!MOCK") ?
+      new MockTranscriptionService(accessKey, resultHandler) :
+      new TranscriptionService(accessKey, resultHandler);
+    processor = new AudioTranscriptionProcessor(this, service);
 
     //setAutoRecording(false);
 
@@ -41,17 +46,48 @@ public class STT
     recordingTimer.start();
   }
 
-  public AudioProcessor getAudioProcessor()
+  public AudioTranscriptionProcessor getAudioProcessor()
   {
     return processor;
   }
 
-  public void setLanguage( String language )
+  public URL getApiBase()
   {
-    processor.setLanguage(language);
+    return service.getApiBase();
   }
 
-  public void begin( boolean doThrow )
+  public void setApiBase( URL apiBase )
+  {
+    service.setApiBase(apiBase);
+  }
+
+  public String getAccessKey()
+  {
+    return service.getAccessKey();
+  }
+
+  public void setAccessKey( String accessKey )
+  {
+    service.setAccessKey(accessKey);
+  }
+
+  public String getLanguage()
+  {
+    return service.getLanguage();
+  }
+
+  public void setLanguage( String language )
+  {
+    service.setLanguage(language);
+  }
+
+  public void shutdown()
+  {
+    // TODO
+    service.shutdownNow();
+  }
+
+  public synchronized void begin( boolean doThrow )
   {
     if (isActive) {
       if (doThrow)
@@ -84,14 +120,7 @@ public class STT
   {
     volumeThresholdTracker.setAutoThreshold(enabled);
   }
-  */
 
-  public void setDebug( boolean b ) {
-    debug = b;
-    processor.setDebug(b);
-  }
-
-  /*
   private void draw()
   {
     if (shouldAutoRecord)
@@ -129,7 +158,7 @@ public class STT
   }
   */
 
-  public void end( boolean doThrow )
+  public synchronized void end( boolean doThrow )
   {
     if (!isActive) {
       if (doThrow)
@@ -171,7 +200,7 @@ public class STT
   }
   */
 
-  private void onBegin()
+  private synchronized void onBegin()
   {
     statusText = "Recording";
     status = RECORDING;
@@ -192,7 +221,7 @@ public class STT
   }
   */
 
-  public void onSpeechFinish()
+  public synchronized void onSpeechFinish()
   {
     statusText = "Transcribing";
     status = TRANSCRIBING;

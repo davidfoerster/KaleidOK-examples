@@ -9,11 +9,11 @@ import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.REST;
 import com.getflourish.stt2.Response;
 import com.getflourish.stt2.STT;
-import com.getflourish.stt2.TranscriptionResultHandler;
 import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
+import kaleidok.concurrent.Callback;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.ExtPApplet;
@@ -32,7 +32,7 @@ import static kaleidok.util.Math.isPowerOfTwo;
 
 
 public class Kaleidoscope extends ExtPApplet
-  implements Chromasthetiator.SearchResultHandler, TranscriptionResultHandler
+  implements Chromasthetiator.SearchResultHandler, Callback<Response>
 {
   private CircularLayer[] layers;
 
@@ -118,9 +118,9 @@ public class Kaleidoscope extends ExtPApplet
   private STT getSTT() throws IOException
   {
     if (stt == null) {
+      STT.debug = verbose >= 1;
       stt = new STT(this,
         parseStringOrFile(getParameter("com.google.developer.api.key"), '@'));
-      stt.setDebug(verbose > 0);
       stt.setLanguage((String) getParameter(
         STT.class.getCanonicalName() + ".language", "en"));
       audioDispatcher.addAudioProcessor(stt.getAudioProcessor());
@@ -247,6 +247,12 @@ public class Kaleidoscope extends ExtPApplet
     return chromasthetiator;
   }
 
+  @Override
+  public void destroy()
+  {
+    stt.shutdown();
+    super.destroy();
+  }
 
   @Override
   public void draw()
@@ -339,8 +345,10 @@ public class Kaleidoscope extends ExtPApplet
 
 
   @Override
-  public void handleTranscriptionResult( Response.Result result )
+  public void call( Response response )
   {
+    Response.Result result = response.result[0];
+
     if (verbose >= 1)
       println("STT returned: " + result.alternative[0].transcript);
 

@@ -111,14 +111,6 @@ public class Chromasthetiator implements UpdateHandler
     SearchResultHandler searchResultHandler = this.searchResultHandler;
     if (searchResultHandler != null)
       searchResultHandler.handleChromatikResult(queryResult, resultSet);
-
-    /*
-     * The Processing API says, we shouldn't call draw() directly, but this is
-     * called from inside draw() already, so the redraw flag is deleted
-     * afterwards and in this case it doesn't hurt to just call draw() again.
-     */
-    //redraw();
-    //draw();
   }
 
   private void updateQuery()

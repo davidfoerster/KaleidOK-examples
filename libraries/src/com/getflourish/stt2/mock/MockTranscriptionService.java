@@ -1,16 +1,17 @@
 package com.getflourish.stt2.mock;
 
-import com.getflourish.stt2.TranscriptionResultHandler;
-import com.getflourish.stt2.TranscriptionThread;
+import com.getflourish.stt2.Response;
+import com.getflourish.stt2.TranscriptionService;
 import com.sun.net.httpserver.HttpServer;
+import kaleidok.concurrent.Callback;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 
-public class MockTranscriptionThread extends TranscriptionThread
+public class MockTranscriptionService extends TranscriptionService
 {
   public static final URL MOCK_API_BASE;
   static {
@@ -33,7 +34,7 @@ public class MockTranscriptionThread extends TranscriptionThread
     }
   }
 
-  public MockTranscriptionThread( String accessKey, TranscriptionResultHandler resultHandler )
+  public MockTranscriptionService( String accessKey, Callback<Response> resultHandler )
   {
     super(MOCK_API_BASE, accessKey, resultHandler);
     try {

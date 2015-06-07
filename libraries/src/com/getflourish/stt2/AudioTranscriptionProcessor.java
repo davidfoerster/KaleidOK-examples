@@ -12,38 +12,22 @@ import java.io.IOException;
 
 class AudioTranscriptionProcessor implements AudioProcessor
 {
-  private STT stt;
+  private final STT stt;
 
   private StreamConfiguration streamConfiguration = null;
 
   private FLACEncoder encoder = new FLACEncoder();
 
-  private final TranscriptionThread thread;
-
-  private FlacTranscriptionTask task = null;
+  private FlacTranscription task = null;
 
   private int[] audioConversionBuffer = null;
 
   public boolean shouldRecord = false;
 
-  private boolean debug = false;
-
-  protected AudioTranscriptionProcessor( STT stt, TranscriptionThread transcriptionThread )
+  protected AudioTranscriptionProcessor( STT stt, TranscriptionService service )
   {
     this.stt = stt;
-    this.thread = transcriptionThread;
-    transcriptionThread.start();
-  }
-
-  public void setDebug( boolean debug )
-  {
-    this.debug = debug;
-    thread.debug = debug;
-  }
-
-  public void setLanguage( String language )
-  {
-    thread.language = language;
+    new Thread(service, "Speech transcription").start();
   }
 
   @Override
@@ -61,7 +45,7 @@ class AudioTranscriptionProcessor implements AudioProcessor
       } catch (IOException ex) {
         ex.printStackTrace();
         if (task != null) {
-          task.finalizeTask();
+          task.dispose();
           task = null;
         }
         stt.end(false);
@@ -90,7 +74,7 @@ class AudioTranscriptionProcessor implements AudioProcessor
     ensureEncoderConfigured(ev);
 
     if (task == null) {
-      task = new FlacTranscriptionTask(ev.getSampleRate());
+      task = new FlacTranscription(ev.getSampleRate());
     }
   }
 
@@ -115,13 +99,14 @@ class AudioTranscriptionProcessor implements AudioProcessor
   }
 
 
-  private class FlacTranscriptionTask extends TranscriptionTask
+  private class FlacTranscription extends Transcription
   {
     private final FLACOutputStream outputStream;
 
-    public FlacTranscriptionTask( float sampleRate ) throws IOException
+    public FlacTranscription( float sampleRate ) throws IOException
     {
-      super(thread, "audio/x-flac", sampleRate);
+      super(stt.service.getServiceUrl(), "audio/x-flac", sampleRate);
+      callback = stt.service.resultHandler;
       outputStream = new FLACStreamOutputStream(getOutputStream());
       encoder.setOutputStream(outputStream);
       encoder.openFLACStream();
@@ -129,30 +114,32 @@ class AudioTranscriptionProcessor implements AudioProcessor
 
     public void finishEncoding() throws IOException
     {
-      assert !isScheduled();
+      assert !stt.service.executor.contains(this);
+
       int availableSamples = encoder.samplesAvailableToEncode();
-      if (debug) {
+      if (STT.debug) {
         System.out.format(
           "%.4g seconds left to encode after recording finished.%n",
           (double) availableSamples / streamConfiguration.getSampleRate());
       }
 
-      long now = debug ? System.nanoTime() : 0;
+      long now = STT.debug ? System.nanoTime() : 0;
       encoder.t_encodeSamples(availableSamples, true, availableSamples);
-      if (debug)
+      if (STT.debug)
         assertShorter(now, 10 * 1000L*1000L, "Encoding remaining samples took too long");
-      schedule();
+
+      stt.service.add(this);
     }
 
     @Override
-    public void finalizeTask()
+    public void dispose()
     {
       try {
         outputStream.close();
       } catch (IOException ex) {
         ex.printStackTrace();
       } finally {
-        super.finalizeTask();
+        super.dispose();
       }
     }
   }
