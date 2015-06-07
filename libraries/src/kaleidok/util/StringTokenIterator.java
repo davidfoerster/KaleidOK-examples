@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 
-public class StringPartsIterator implements Iterable<String>, Iterator<String>
+public class StringTokenIterator implements Iterable<String>, Iterator<String>
 {
   public final String source;
 
@@ -12,7 +12,7 @@ public class StringPartsIterator implements Iterable<String>, Iterator<String>
 
   private int begin = -1, end = -1;
 
-  public StringPartsIterator( String source, char delimiter )
+  public StringTokenIterator( String source, char delimiter )
   {
     this.source = source;
     this.delimiter = delimiter;

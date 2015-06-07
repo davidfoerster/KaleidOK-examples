@@ -1,6 +1,6 @@
 package kaleidok.http;
 
-import kaleidok.util.StringPartsIterator;
+import kaleidok.util.StringTokenIterator;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -23,9 +23,9 @@ public final class Parsers
 
     Map<String, String> qm = new HashMap<>(8);
     try {
-      for (String strParam : new StringPartsIterator(q, '&')) {
+      for (String strParam : new StringTokenIterator(q, '&')) {
         if (!strParam.isEmpty()) {
-          StringPartsIterator itParam = new StringPartsIterator(strParam, '=');
+          StringTokenIterator itParam = new StringTokenIterator(strParam, '=');
           String name = URLDecoder.decode(itParam.next(), chs.name()),
             value = itParam.hasNext() ?
               URLDecoder.decode(strParam.substring(itParam.getBegin()), chs.name()) :
@@ -46,7 +46,7 @@ public final class Parsers
     Map<String, String> hm = new HashMap<>(4);
     for (String strParam : h.split(";\\s*", 0)) {
       if (!strParam.isEmpty()) {
-        StringPartsIterator itParam = new StringPartsIterator(strParam, '=');
+        StringTokenIterator itParam = new StringTokenIterator(strParam, '=');
         String name = itParam.next(),
           value = itParam.hasNext() ? strParam.substring(itParam.getBegin()) : null;
         if (value == null) {
