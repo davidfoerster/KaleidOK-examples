@@ -2,6 +2,7 @@ package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.Kaleidoscope;
+import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -13,15 +14,15 @@ public class CentreMovingShape extends CircularLayer
 
   private VolumeLevelProcessor volumeLevelProcessor;
 
-  public CentreMovingShape( Kaleidoscope parent, PImage img, int segmentCount, int radius,
+  public CentreMovingShape( Kaleidoscope parent, PImageFuture img, int segmentCount, int radius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
     super(parent, img, segmentCount, 0, radius);
     this.volumeLevelProcessor = volumeLevelProcessor;
 
-    imageIndex = (int) parent.random(parent.images.length);
+    imageIndex = (int) parent.random(parent.images.size());
     if (img == null)
-      currentImage = parent.images[imageIndex];
+      currentImage = parent.images.get(imageIndex);
   }
 
   public void run()
@@ -35,8 +36,9 @@ public class CentreMovingShape extends CircularLayer
     parent.rotate(parent.frameCount * -0.002f); // rotate around this center --anticlockwise
 
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
-    if (wireframe < 1) {
-      parent.texture(currentImage); // set the texture to use
+    PImage img;
+    if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
+      parent.texture(img); // set the texture to use
       parent.noStroke(); // turn off stroke
     } else {
       parent.noFill();
@@ -55,8 +57,8 @@ public class CentreMovingShape extends CircularLayer
   public void nextImage()
   {
     Kaleidoscope parent = (Kaleidoscope) this.parent;
-    imageIndex = (imageIndex + 1) % parent.images.length;
-    currentImage = parent.images[imageIndex];
+    imageIndex = (imageIndex + 1) % parent.images.size();
+    currentImage = parent.images.get(imageIndex);
   }
 
 }

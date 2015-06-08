@@ -17,6 +17,7 @@ import kaleidok.concurrent.Callback;
 import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.ExtPApplet;
+import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
 import processing.core.PImage;
 import processing.data.JSONArray;
@@ -24,7 +25,9 @@ import processing.data.JSONArray;
 import javax.sound.sampled.*;
 import javax.swing.JApplet;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
@@ -36,9 +39,9 @@ public class Kaleidoscope extends ExtPApplet
 {
   private CircularLayer[] layers;
 
-  public PImage[] images; // array to hold 4 input images
+  public List<PImageFuture> images; // list to hold input images
 
-  public PImage bgImage;
+  public PImageFuture bgImage;
 
   private int bgImageIndex; // variable to keep track of the current image
 
@@ -74,48 +77,61 @@ public class Kaleidoscope extends ExtPApplet
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
     smooth(4);
 
+    getImages();
+    AudioDispatcher audioDispatcher;
     try {
-      makeAudioDispatcher();
-      getImages();
-      getLayers();
       getChromasthetiator();
-      getSTT();
-      makeAudioDispatcherThread().start();
+      audioDispatcher = makeAudioDispatcher();
+      makeSTT(audioDispatcher);
     }
     catch (LineUnavailableException | UnsupportedAudioFileException | IOException ex) {
       ex.printStackTrace();
       exit();
+      return;
     }
+    getLayers(audioDispatcher, fftProcessor, volumeLevelProcessor);
+    audioDispatcherThread.start();
   }
 
-  private PImage[] getImages()
+  private List<PImageFuture> getImages()
   {
     if (images == null) {
       // load the images from the _Images folder (relative path from this kaleidoscope's folder)
-      images = new PImage[]{
-        loadImage("images/one.jpg", true),
-        loadImage("images/two.jpg", true),
-        loadImage("images/three.jpg", true),
-        loadImage("images/four.jpg", true),
-        loadImage("images/five.jpg", true)
-      };
+      images = new ArrayList<PImageFuture>(8) {{
+        add(getImageFuture("images/one.jpg"));
+        add(getImageFuture("images/two.jpg"));
+        add(getImageFuture("images/three.jpg"));
+        add(getImageFuture("images/four.jpg"));
+        add(getImageFuture("images/five.jpg"));
+      }};
 
-      bgImageIndex = (int) random(images.length); // randomly choose the bgImageIndex
-      bgImage = images[bgImageIndex];
+      bgImageIndex = (int) random(images.size()); // randomly choose the bgImageIndex
+      bgImage = images.get(bgImageIndex);
     }
     return images;
   }
 
-  public PImage loadImage( String path, boolean throwOnFailure )
-    throws RuntimeException
+  private void waitForImages()
   {
-    PImage img = super.loadImage(path);
-    if (!throwOnFailure || (img != null && img.width > 0 && img.height > 0))
-      return img;
-    throw new RuntimeException("Couldn't load image: " + path);
+    for (PImageFuture futureImg: getImages()) {
+      try {
+        PImage img;
+        while (true) {
+          try {
+            img = futureImg.get();
+            break;
+          } catch (InterruptedException ex) {
+            // go on...
+          }
+        }
+        assert img != null && img.width > 0 && img.height > 0;
+      } catch (ExecutionException ex) {
+        throw new RuntimeException(ex.getCause());
+      }
+    }
   }
 
-  private STT getSTT() throws IOException
+  private STT makeSTT( AudioDispatcher audioDispatcher ) throws IOException
   {
     if (stt == null) {
       STT.debug = verbose >= 1;
@@ -187,24 +203,34 @@ public class Kaleidoscope extends ExtPApplet
       audioDispatcher.addAudioProcessor(
         fftProcessor = new MinimFFTProcessor(bufferSize));
 
-      audioDispatcherThread =
-        new Thread(dispatcherRunnable, "Audio dispatching");
+      makeAudioDispatcherThread(dispatcherRunnable);
     }
     return audioDispatcher;
   }
 
-  private Thread makeAudioDispatcherThread()
-    throws UnsupportedAudioFileException, IOException, LineUnavailableException
+  private Thread makeAudioDispatcherThread( final Runnable dispatcher )
   {
-    makeAudioDispatcher();
+    if (audioDispatcherThread == null) {
+      audioDispatcherThread = new Thread(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            waitForImages();
+            dispatcher.run();
+          }
+        },
+        "Audio dispatching");
+    }
     return audioDispatcherThread;
   }
 
-  private CircularLayer[] getLayers()
+  private CircularLayer[] getLayers( AudioDispatcher audioDispatcher,
+    MinimFFTProcessor fftProcessor, VolumeLevelProcessor volumeLevelProcessor )
   {
     if (layers == null)
     {
-      outerMovingShape = new OuterMovingShape(this, images[4], 16, 300);
+      outerMovingShape = new OuterMovingShape(this, images.get(4), 16, 300);
       audioDispatcher.addAudioProcessor(new PitchProcessor(
         PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
         audioDispatcher.getFormat().getSampleRate(), audioBufferSize,
@@ -212,10 +238,10 @@ public class Kaleidoscope extends ExtPApplet
 
       layers = new CircularLayer[]{
         spectrogramLayer =
-          new SpectrogramLayer(this, images[0], 256, 125, 290, fftProcessor),
+          new SpectrogramLayer(this, images.get(0), 256, 125, 290, fftProcessor),
         outerMovingShape,
         foobarLayer =
-          new FoobarLayer(this, images[3], 16, 125, 275),
+          new FoobarLayer(this, images.get(3), 16, 125, 275),
         centreLayer =
           new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
         null
@@ -272,7 +298,8 @@ public class Kaleidoscope extends ExtPApplet
 
   private void drawBackgroundTexture()
   {
-    if (wireframe < 1) {
+    PImage bgImage;
+    if (wireframe < 1 && (bgImage = this.bgImage.getNoThrow()) != null) {
       // background image
       image(bgImage, 0, 0, width,
         (float) width / height * bgImage.height); // resize-display image correctly to cover the whole screen
@@ -309,8 +336,8 @@ public class Kaleidoscope extends ExtPApplet
       break;
 
     case RIGHT:
-      bgImageIndex = (bgImageIndex + 1) % images.length;
-      bgImage = images[bgImageIndex];
+      bgImageIndex = (bgImageIndex + 1) % images.size();
+      bgImage = images.get(bgImageIndex);
       break;
     }
   }
@@ -318,6 +345,8 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void handleChromatikResult( JSONArray queryResult, List<PImage> resultSet )
   {
+    // TODO: Adapt to PImageFuture
+    /*
     if (!resultSet.isEmpty()) {
       int i = 0, j = 0;
       bgImage = resultSet.get(j++);
@@ -327,6 +356,7 @@ public class Kaleidoscope extends ExtPApplet
           layer.currentImage = resultSet.get(j++);
       }
     }
+    */
   }
 
   @Override

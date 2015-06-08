@@ -1,5 +1,6 @@
 package kaleidok.examples.kaleidoscope.layer;
 
+import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -12,11 +13,11 @@ public abstract class CircularLayer implements Runnable
 
   public float innerRadius, outerRadius;
 
-  public PImage currentImage;
+  public PImageFuture currentImage;
 
   private final float[] xL, yL;
 
-  public CircularLayer(PApplet parent, PImage img, int segmentCount, int innerRadius, int outerRadius)
+  public CircularLayer(PApplet parent, PImageFuture img, int segmentCount, int innerRadius, int outerRadius)
   {
     this.parent = parent;
     this.currentImage = img;
@@ -46,11 +47,17 @@ public abstract class CircularLayer implements Runnable
   {
     float x = xL[index] * diam; // pre-calculated x direction times diameter
     float y = yL[index] * diam; // pre-calculated y direction times diameter
-    // calculate texture coordinates based on the xy position
-    float tx = x / currentImage.width + 0.5f;
-    float ty = y / currentImage.height + 0.5f;
-    // draw vertex with the calculated position and texture coordinates
-    parent.vertex(x, y, tx, ty);
+
+    PImage img = currentImage.getNoThrow();
+    if (img == null) {
+      parent.vertex(x, y);
+    } else {
+      // calculate texture coordinates based on the xy position
+      float tx = x / img.width + 0.5f;
+      float ty = y / img.height + 0.5f;
+      // draw vertex with the calculated position and texture coordinates
+      parent.vertex(x, y, tx, ty);
+    }
   }
 
   protected void drawCircleSegment(int index)

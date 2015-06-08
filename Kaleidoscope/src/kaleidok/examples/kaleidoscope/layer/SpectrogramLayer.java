@@ -1,6 +1,7 @@
 package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.audio.processor.MinimFFTProcessor;
+import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -14,7 +15,7 @@ public class SpectrogramLayer extends CircularLayer
 {
 	private final MinimFFTProcessor avgSpectrum;
 
-	public SpectrogramLayer( PApplet parent, PImage img, int segmentCount,
+	public SpectrogramLayer( PApplet parent, PImageFuture img, int segmentCount,
     int innerRadius, int outerRadius, MinimFFTProcessor spectrum )
 	{
 		super(parent, img, segmentCount, innerRadius, outerRadius);
@@ -36,9 +37,10 @@ public class SpectrogramLayer extends CircularLayer
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
 		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
     parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
-		if (wireframe < 1) {
+		PImage img;
+		if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
       parent.noStroke();
-      parent.texture(currentImage); // set the texture to use
+      parent.texture(img); // set the texture to use
     } else {
       parent.noFill();
       parent.stroke(255, 0, 0);

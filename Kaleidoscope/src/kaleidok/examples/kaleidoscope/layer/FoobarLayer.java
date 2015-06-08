@@ -1,5 +1,6 @@
 package kaleidok.examples.kaleidoscope.layer;
 
+import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -9,7 +10,7 @@ import static kaleidok.util.DebugManager.wireframe;
 public class FoobarLayer extends CircularLayer
 {
 
-	public FoobarLayer(PApplet parent, PImage img, int segmentCount, int innerRadius, int outerRadius)
+	public FoobarLayer(PApplet parent, PImageFuture img, int segmentCount, int innerRadius, int outerRadius)
 	{
 		super(parent, img, segmentCount, innerRadius, outerRadius);
 	}
@@ -25,8 +26,9 @@ public class FoobarLayer extends CircularLayer
 
 		parent.stroke(255); // set stroke to white
 		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
-		if (wireframe < 1) {
-			parent.texture(currentImage); // set the texture to use
+		PImage img;
+		if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
+			parent.texture(img); // set the texture to use
 		} else {
 			parent.noFill();
 		}

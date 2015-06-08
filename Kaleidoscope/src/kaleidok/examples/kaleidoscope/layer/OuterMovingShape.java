@@ -3,6 +3,7 @@ package kaleidok.examples.kaleidoscope.layer;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
+import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -13,7 +14,7 @@ public class OuterMovingShape extends CircularLayer
 {
   private double angle = 0, step = 0;
 
-  public OuterMovingShape( PApplet parent, PImage img, int segmentCount, int radius )
+  public OuterMovingShape( PApplet parent, PImageFuture img, int segmentCount, int radius )
   {
     super(parent, img, segmentCount, 0, radius);
   }
@@ -29,8 +30,9 @@ public class OuterMovingShape extends CircularLayer
     parent.rotate((float) angle); // rotate around this center
 
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
-    if (wireframe < 1) {
-      parent.texture(currentImage); // set the texture to use
+    PImage img;
+    if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
+      parent.texture(img); // set the texture to use
       parent.noStroke(); // turn off stroke
     } else {
       parent.noFill();
