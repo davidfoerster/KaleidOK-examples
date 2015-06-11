@@ -1,11 +1,10 @@
 package kaleidok.examples.kaleidoscope;
 
 import be.tarsos.dsp.AudioDispatcher;
-import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
-import be.tarsos.dsp.io.jvm.AudioPlayer;
-import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
+import be.tarsos.dsp.io.jvm.*;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import com.flickr4java.flickr.Flickr;
+import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.REST;
 import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.STT;
@@ -13,21 +12,25 @@ import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
+import kaleidok.chromatik.Chromasthetiator;
+import kaleidok.chromatik.ChromatikResponse;
 import kaleidok.concurrent.Callback;
-import kaleidok.examples.kaleidoscope.chromatik.Chromasthetiator;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
 import processing.core.PImage;
-import processing.data.JSONArray;
 
 import javax.sound.sampled.*;
 import javax.swing.JApplet;
+import java.awt.Image;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
@@ -35,7 +38,6 @@ import static kaleidok.util.Math.isPowerOfTwo;
 
 
 public class Kaleidoscope extends ExtPApplet
-  implements Chromasthetiator.SearchResultHandler
 {
   private CircularLayer[] layers;
 
@@ -253,7 +255,9 @@ public class Kaleidoscope extends ExtPApplet
   Chromasthetiator getChromasthetiator() throws IOException
   {
     if (chromasthetiator == null) {
-      chromasthetiator = new Chromasthetiator(this, this);
+      Chromasthetiator.verbose = verbose;
+      chromasthetiator =
+        new Chromasthetiator(this, new ChromatikResponseHandler());
 
       String data = parseStringOrFile(getParameter("com.flickr.api.key"), '@');
       if (data != null) {
@@ -266,9 +270,7 @@ public class Kaleidoscope extends ExtPApplet
         chromasthetiator.getClass().getPackage().getName() + ".maxKeywords",
         chromasthetiator.maxKeywords);
 
-      //chromasthetiator.chromatikQuery.nhits = 1;
-
-      chromasthetiator.setup();
+      chromasthetiator.chromatikQuery.nhits = 1;
     }
     return chromasthetiator;
   }
@@ -342,21 +344,40 @@ public class Kaleidoscope extends ExtPApplet
     }
   }
 
-  @Override
-  public void handleChromatikResult( JSONArray queryResult, List<PImage> resultSet )
+  private class ChromatikResponseHandler implements Callback<ChromatikResponse>
   {
-    // TODO: Adapt to PImageFuture
-    /*
-    if (!resultSet.isEmpty()) {
-      int i = 0, j = 0;
-      bgImage = resultSet.get(j++);
-      while (i < layers.length && j < resultSet.size()) {
-        CircularLayer layer = layers[i++];
-        if (layer != null)
-          layer.currentImage = resultSet.get(j++);
+    @Override
+    public void call( ChromatikResponse response )
+    {
+      if (response.results.length != 0) {
+        Iterator<ChromatikResponse.Result> it =
+          Arrays.asList(response.results).iterator();
+        bgImage = getNextLargestImage(it, bgImage);
+        for (CircularLayer layer: layers) {
+          if (layer != null) {
+            PImageFuture img = getNextLargestImage(it, null);
+            if (img == null)
+              break;
+            layer.currentImage = img;
+          }
+        }
       }
     }
-    */
+  }
+
+  private static PImageFuture getNextLargestImage(
+    Iterator<ChromatikResponse.Result> it, PImageFuture defaultImage )
+  {
+    while (it.hasNext()) {
+      try {
+        Future<Image> img = it.next().flickrPhoto.getLargestImage();
+        if (img != null)
+          return new PImageFuture(img);
+      } catch (FlickrException ex) {
+        ex.printStackTrace();
+      }
+    }
+    return defaultImage;
   }
 
   @Override
