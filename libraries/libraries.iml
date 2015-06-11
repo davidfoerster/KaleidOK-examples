@@ -43,5 +43,7 @@
     <orderEntry type="library" name="Minim" level="application" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.3.1" level="project" />
     <orderEntry type="module" module-name="javaFlacEncoder" />
+    <orderEntry type="library" name="com.flickr4java:flickr4java:2.12" level="project" />
+    <orderEntry type="module" module-name="Synesketch" />
   </component>
 </module>
