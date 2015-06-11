@@ -1,7 +1,7 @@
 package com.getflourish.stt2;
 
 
-public class Response
+public class SttResponse
 {
   public Result[] result;
 

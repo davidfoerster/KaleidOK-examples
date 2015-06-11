@@ -16,7 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 
-public class Transcription extends CallbackRunnable<Response>
+public class Transcription extends CallbackRunnable<SttResponse>
 {
   private final JsonHttpConnection connection;
 
@@ -50,10 +50,10 @@ public class Transcription extends CallbackRunnable<Response>
   }
 
   @Override
-  public Response call() throws IOException
+  public SttResponse call() throws IOException
   {
     try {
-      Response response;
+      SttResponse response;
       if (!STT.debug) {
         response = parse(connection.getReader());
       } else {
@@ -70,13 +70,13 @@ public class Transcription extends CallbackRunnable<Response>
     }
   }
 
-  protected Response parse( Reader source ) throws IOException
+  protected SttResponse parse( Reader source ) throws IOException
   {
     JsonReader jsonReader = new JsonReader(source);
     try {
-      Response response;
+      SttResponse response;
       do {
-        response = gson.fromJson(jsonReader, Response.class);
+        response = gson.fromJson(jsonReader, SttResponse.class);
       } while (response != null && response.isEmpty());
       return response;
     } catch (JsonSyntaxException ex) {
@@ -89,12 +89,12 @@ public class Transcription extends CallbackRunnable<Response>
     }
   }
 
-  protected void logResponse( Response response )
+  protected void logResponse( SttResponse response )
   {
     if (response != null) {
-      Response.Result result = response.result[0];
+      SttResponse.Result result = response.result[0];
       assert response.result.length == 1;
-      Response.Result.Alternative alternative = result.alternative[0];
+      SttResponse.Result.Alternative alternative = result.alternative[0];
       System.out.println(
         "Recognized: " + alternative.transcript +
           " (confidence: " + alternative.confidence + ')');

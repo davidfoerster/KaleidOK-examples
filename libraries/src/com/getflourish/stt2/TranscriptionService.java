@@ -15,7 +15,7 @@ public class TranscriptionService implements Runnable
 
   private String accessKey, language;
 
-  public Callback<Response> resultHandler;
+  public Callback<SttResponse> resultHandler;
 
   protected final SerialExecutorService executor =
     new SerialExecutorService(3);
@@ -31,18 +31,18 @@ public class TranscriptionService implements Runnable
   }
 
 
-  public TranscriptionService( String accessKey, Callback<Response> resultHandler )
+  public TranscriptionService( String accessKey, Callback<SttResponse> resultHandler )
   {
     this(DEFAULT_API_BASE, accessKey, resultHandler);
   }
 
-  public TranscriptionService( URL apiBase, String accessKey, Callback<Response> resultHandler )
+  public TranscriptionService( URL apiBase, String accessKey, Callback<SttResponse> resultHandler )
   {
     this(resultHandler);
     setServiceUrl(apiBase, accessKey, "en");
   }
 
-  protected TranscriptionService( Callback<Response> resultHandler )
+  protected TranscriptionService( Callback<SttResponse> resultHandler )
   {
     this.resultHandler = resultHandler;
   }

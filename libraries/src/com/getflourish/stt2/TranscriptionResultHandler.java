@@ -2,5 +2,5 @@ package com.getflourish.stt2;
 
 public interface TranscriptionResultHandler
 {
-  void handleTranscriptionResult(Response.Result result);
+  void handleTranscriptionResult(SttResponse.Result result);
 }

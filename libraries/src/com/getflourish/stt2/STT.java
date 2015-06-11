@@ -33,7 +33,7 @@ public class STT
   public static boolean debug;
 
 
-  public STT( Callback<Response> resultHandler, String accessKey )
+  public STT( Callback<SttResponse> resultHandler, String accessKey )
   {
     service = accessKey.startsWith("!MOCK") ?
       new MockTranscriptionService(accessKey, resultHandler) :

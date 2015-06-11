@@ -7,7 +7,7 @@ import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.REST;
-import com.getflourish.stt2.Response;
+import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.STT;
 import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
@@ -35,7 +35,7 @@ import static kaleidok.util.Math.isPowerOfTwo;
 
 
 public class Kaleidoscope extends ExtPApplet
-  implements Chromasthetiator.SearchResultHandler, Callback<Response>
+  implements Chromasthetiator.SearchResultHandler
 {
   private CircularLayer[] layers;
 
@@ -135,7 +135,7 @@ public class Kaleidoscope extends ExtPApplet
   {
     if (stt == null) {
       STT.debug = verbose >= 1;
-      stt = new STT(this,
+      stt = new STT(new SttResponseHandler(),
         parseStringOrFile(getParameter("com.google.developer.api.key"), '@'));
       stt.setLanguage((String) getParameter(
         STT.class.getCanonicalName() + ".language", "en"));
@@ -374,19 +374,22 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  @Override
-  public void call( Response response )
+  private class SttResponseHandler implements Callback<SttResponse>
   {
-    Response.Result result = response.result[0];
+    @Override
+    public void call( SttResponse response )
+    {
+      SttResponse.Result result = response.result[0];
 
-    if (verbose >= 1)
-      println("STT returned: " + result.alternative[0].transcript);
+      if (verbose >= 1)
+        println("STT returned: " + result.alternative[0].transcript);
 
-    if (!isIgnoreTranscriptionResult()) {
-      try {
-        getChromasthetiator().issueQuery(result.alternative[0].transcript);
-      } catch (Exception e) {
-        e.printStackTrace();
+      if (!isIgnoreTranscriptionResult()) {
+        try {
+          getChromasthetiator().issueQuery(result.alternative[0].transcript);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
     }
   }
