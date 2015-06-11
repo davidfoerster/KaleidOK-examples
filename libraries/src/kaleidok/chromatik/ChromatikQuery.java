@@ -1,7 +1,10 @@
 package kaleidok.chromatik;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
+import com.google.gson.stream.JsonReader;
 import kaleidok.http.JsonHttpConnection;
-import processing.data.JSONArray;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -49,6 +52,12 @@ public class ChromatikQuery
 
   private StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
 
+  private static final Gson gson = new GsonBuilder()
+    .registerTypeAdapter(
+      ChromatikResponse.class, ChromatikResponseDeserializer.INSTANCE)
+    .excludeFieldsWithoutExposeAnnotation()
+    .create();
+
   /**
    * Constructs a query object with the default result set size and no
    * keywords.
@@ -83,14 +92,16 @@ public class ChromatikQuery
    * Issues the query as specified and returns the result object.
    * @return  Query result
    */
-  public JSONArray getResult()
+  public ChromatikResponse getResult()
   {
     try {
       URL url = getUrl();
       //System.err.println(url.toString());
-      return JsonHttpConnection.openURL(url).getArray();
-    } catch (IOException e) {
-      e.printStackTrace();
+      return gson.fromJson(
+        new JsonReader(JsonHttpConnection.openURL(url).getReader()),
+        ChromatikResponse.class);
+    } catch (IOException | JsonParseException ex) {
+      ex.printStackTrace();
       return null;
     }
   }
