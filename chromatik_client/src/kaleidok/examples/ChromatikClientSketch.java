@@ -2,10 +2,9 @@ package kaleidok.examples;
 
 import kaleidok.chromatik.ChromatikColor;
 import kaleidok.chromatik.ChromatikQuery;
+import kaleidok.chromatik.ChromatikResponse;
 import processing.core.PApplet;
 import processing.core.PImage;
-import processing.data.JSONArray;
-import processing.data.JSONObject;
 
 import java.util.Map;
 
@@ -30,7 +29,7 @@ public class ChromatikClientSketch extends PApplet
     println("query: " + q.getQueryString());
     drawQuery(q);
 
-    JSONArray resultSet = q.getResult();
+    ChromatikResponse resultSet = q.getResult();
     if (q == null) {
       exit();
       return;
@@ -82,28 +81,22 @@ public class ChromatikClientSketch extends PApplet
 
   /**
    * Fetches and draws the images of a query result set.
-   * @param a A result object of a {@link ChromatikQuery}
+   * @param response A result object of a {@link ChromatikQuery}
    * @see kaleidok.chromatik.ChromatikQuery#getResult()
    */
-  private void drawResultSet( JSONArray a )
+  private void drawResultSet( ChromatikResponse response )
   {
-    // get number of elements in array
-    int length = a.size();
-
     // array index 0 contains number total search hits
-    println("Hits: " + a.getInt(0));
+    println("Hits: " + response.hits);
 
     int imgXpos = 5;
-    // loop over result set, starting from index 1(!)
-    for (int i = 1; i < length; i++) {
-      // get image object at index i
-      JSONObject imgInfo = a.getJSONObject(i);
-
+    // loop over result set
+    for (ChromatikResponse.Result imgInfo: response.results) {
       // the image title is stored with the key "title"
-      String title = imgInfo.getString("title", "<untitled>");
+      String title = (imgInfo.title != null) ? imgInfo.title : "<untitled>";
 
       // the thumbnail URL is stored under "squarethumbnailurl"
-      String thumbnailUrl = imgInfo.getString("squarethumbnailurl");
+      String thumbnailUrl = imgInfo.squarethumbnailurl;
       println(title + '(' + ' ' + thumbnailUrl + ')');
 
       // download image
