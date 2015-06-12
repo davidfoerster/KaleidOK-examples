@@ -27,7 +27,7 @@ public class SerialExecutorService implements Executor, Runnable
     if (r == null)
       throw new NullPointerException();
     if (tasks == null)
-      throw new RejectedExecutionException("Service has been shut down");
+      throw new IllegalStateException("shut down");
     tasks.add(r);
   }
 
@@ -62,9 +62,17 @@ public class SerialExecutorService implements Executor, Runnable
     }
   }
 
+  public boolean isShutdown()
+  {
+    return tasks == null;
+  }
+
   public boolean contains( Runnable r )
   {
     BlockingQueue<Runnable> tasks = this.tasks;
-    return tasks != null && tasks.contains(r);
+    if (tasks != null)
+      return tasks.contains(r);
+
+    throw new IllegalStateException("shut down");
   }
 }
