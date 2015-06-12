@@ -14,6 +14,7 @@ import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.chromatik.Chromasthetiator;
 import kaleidok.chromatik.ChromatikResponse;
+import kaleidok.chromatik.FlickrPhoto;
 import kaleidok.concurrent.Callback;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.ExtPApplet;
@@ -270,7 +271,7 @@ public class Kaleidoscope extends ExtPApplet
         chromasthetiator.getClass().getPackage().getName() + ".maxKeywords",
         chromasthetiator.maxKeywords);
 
-      chromasthetiator.chromatikQuery.nhits = 1;
+      chromasthetiator.chromatikQuery.nhits = 10;
     }
     return chromasthetiator;
   }
@@ -369,8 +370,9 @@ public class Kaleidoscope extends ExtPApplet
     Iterator<ChromatikResponse.Result> it, PImageFuture defaultImage )
   {
     while (it.hasNext()) {
+      FlickrPhoto photo = it.next().flickrPhoto;
       try {
-        Future<Image> img = it.next().flickrPhoto.getLargestImage();
+        Future<Image> img = photo.getLargestImage();
         if (img != null)
           return new PImageFuture(img);
       } catch (FlickrException ex) {

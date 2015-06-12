@@ -212,10 +212,20 @@ public class Chromasthetiator implements UpdateHandler
       if (sizes == null) {
         try {
           sizes = flickrPhotos.getSizes(getId());
-          setSizes(sizes);
         } catch (FlickrException ex) {
-          ex.printStackTrace();
+          switch (Integer.parseInt(ex.getErrorCode())) {
+          case 1: // Photo not found
+          case 2: // Permission denied
+            sizes = Collections.EMPTY_LIST;
+            System.err.println(ex.getLocalizedMessage() + ' ' + '(' + getMediumUrl() + ')');
+            break;
+
+          default:
+            ex.printStackTrace();
+            break;
+          }
         }
+        setSizes(sizes);
       }
       return sizes;
     }
