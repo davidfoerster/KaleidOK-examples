@@ -223,7 +223,7 @@ public class Chromasthetiator implements UpdateHandler
 
           default:
             ex.printStackTrace();
-            break;
+            return null;
           }
         }
         setSizes(sizes);
