@@ -7,7 +7,7 @@ import java.util.concurrent.*;
 
 public class SerialExecutorService implements Executor, Runnable
 {
-  private BlockingQueue<Runnable> tasks;
+  private volatile BlockingQueue<Runnable> tasks;
 
   public SerialExecutorService( int capacity )
   {
@@ -49,11 +49,12 @@ public class SerialExecutorService implements Executor, Runnable
 
   public synchronized void shutdownNow()
   {
+    BlockingQueue<Runnable> tasks = this.tasks;
     if (tasks != null) {
       Collection<Runnable> remaining = new ArrayList<>(tasks.size());
       tasks.drainTo(remaining);
       tasks.add(null);
-      tasks = null;
+      this.tasks = null;
 
       for (Runnable t: remaining) {
         if (t instanceof CallbackRunnable)

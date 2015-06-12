@@ -22,7 +22,7 @@ class AudioTranscriptionProcessor implements AudioProcessor
 
   private int[] audioConversionBuffer = null;
 
-  public boolean shouldRecord = false;
+  public volatile boolean shouldRecord = false;
 
   protected AudioTranscriptionProcessor( STT stt, TranscriptionService service )
   {

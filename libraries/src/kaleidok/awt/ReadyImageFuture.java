@@ -15,7 +15,7 @@ public abstract class ReadyImageFuture extends NotifyFuture<Image>
 {
   protected final Image image;
 
-  protected int statusFlags;
+  protected volatile int statusFlags;
 
   public static ReadyImageFuture createInstance( Image image )
   {
