@@ -29,17 +29,20 @@ public abstract class NotifyFuture<V> implements Future<V>
       throw new IllegalArgumentException(String.valueOf(timeout));
     } else if (!isDone()) {
       assert unit.convert(Long.MAX_VALUE, NANOSECONDS) >= timeout;
+      timeout = unit.toNanos(timeout);
+      // unit = NANOSECONDS;
       long now = System.nanoTime();
-      assert now <= Long.MAX_VALUE - unit.toNanos(timeout);
-      final long endTime = now + unit.toNanos(timeout);
+      assert now <= Long.MAX_VALUE - timeout;
+      final long endTime = now + timeout;
 
       synchronized (this) {
         if (!isDone()) {
-          for (; now < endTime; now = System.nanoTime()) {
+          now = System.nanoTime();
+          do {
             wait(Math.max(NANOSECONDS.toMillis(endTime - now), 1));
             if (isDone())
               return;
-          }
+          } while ((now = System.nanoTime()) < endTime);
           throw new TimeoutException();
         }
       }
