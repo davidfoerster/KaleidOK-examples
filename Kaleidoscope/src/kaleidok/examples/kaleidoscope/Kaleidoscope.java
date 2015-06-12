@@ -399,6 +399,8 @@ public class Kaleidoscope extends ExtPApplet
 
   private class SttResponseHandler implements Callback<SttResponse>
   {
+    private Boolean isIgnoreTranscriptionResult = null;
+
     @Override
     public void call( SttResponse response )
     {
@@ -415,23 +417,22 @@ public class Kaleidoscope extends ExtPApplet
         }
       }
     }
-  }
 
-  private boolean isIgnoreTranscriptionResult()
-  {
-    if (isIgnoreTranscriptionResult == null) {
-      isIgnoreTranscriptionResult = DefaultValueParser.parseBoolean(this,
-        this.getClass().getPackage().getName() + ".ignoreTranscription",
-        false);
-      if (isIgnoreTranscriptionResult) {
-        System.out.println(
-          "Notice: Speech transcription results are configured to be ignored.");
+    private boolean isIgnoreTranscriptionResult()
+    {
+      if (isIgnoreTranscriptionResult == null) {
+        isIgnoreTranscriptionResult =
+          DefaultValueParser.parseBoolean(Kaleidoscope.this,
+            this.getClass().getPackage().getName() + ".ignoreTranscription",
+            false);
+        if (isIgnoreTranscriptionResult) {
+          System.out.println(
+            "Notice: Speech transcription results are configured to be ignored.");
+        }
       }
+      return isIgnoreTranscriptionResult;
     }
-    return isIgnoreTranscriptionResult;
   }
-
-  private Boolean isIgnoreTranscriptionResult = null;
 
 
   private String parseStringOrFile( String s, char filePrefix )
