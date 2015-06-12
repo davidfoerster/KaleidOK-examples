@@ -101,6 +101,7 @@ public class Chromasthetiator implements UpdateHandler
     chromatikQuery.keywords = getQueryKeywords(emoState);
     getQueryOptions(emoState, chromatikQuery.opts);
 
+    // TODO: Don't do this in the event handler thread
     ChromatikResponse queryResult = chromatikQuery.getResult();
     addFlickrPhotos(queryResult);
 

@@ -411,6 +411,7 @@ public class Kaleidoscope extends ExtPApplet
 
       if (!isIgnoreTranscriptionResult()) {
         try {
+          // TODO: Don't do this in the event handler thread
           getChromasthetiator().issueQuery(result.alternative[0].transcript);
         } catch (Exception e) {
           e.printStackTrace();

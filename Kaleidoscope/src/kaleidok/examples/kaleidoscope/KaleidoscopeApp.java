@@ -74,6 +74,7 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
         public void actionPerformed( ActionEvent ev )
         {
           try {
+            // TODO: Don't do this in the event handler thread
             getSketch().getChromasthetiator().issueQuery(((JTextField) ev.getSource()).getText());
           } catch (Exception ex) {
             ex.printStackTrace();
