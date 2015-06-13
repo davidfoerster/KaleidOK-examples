@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -77,7 +78,7 @@ public class HttpConnection
     String p = url.getProtocol(), h = HTTP_PROTOCOL;
     int pl = p.length(), hl = h.length();
     if (!(p.startsWith(h) && (pl == hl || (pl == hl + 1 && p.charAt(hl) == 's'))))
-      throw new IOException("Unsupported protocol: " + url.getProtocol());
+      throw new IOException("Unsupported protocol: " + p);
   }
 
   private static final Class<?>[] constructorArgumentTypes =
@@ -86,7 +87,7 @@ public class HttpConnection
   /**
    * @see HttpURLConnection#connect()
    */
-  public void connect() throws IOException
+  public synchronized void connect() throws IOException
   {
     if (state == CONNECTED)
       return;
@@ -207,7 +208,7 @@ public class HttpConnection
   /**
    * @see HttpURLConnection#getInputStream()
    */
-  public InputStream getInputStream() throws IOException
+  public synchronized InputStream getInputStream() throws IOException
   {
     if (inputStream == null) {
       connect();
@@ -348,7 +349,7 @@ public class HttpConnection
     return c.getRequestProperties();
   }
 
-  public Reader getReader() throws IOException
+  public synchronized Reader getReader() throws IOException
   {
     if (reader == null) {
       Charset charset = getResponseCharset(true);
@@ -362,22 +363,36 @@ public class HttpConnection
 
   public String getBody() throws IOException
   {
-    if (body == null)
-    {
-      connect();
-      try {
-        try (Reader r = getReader()) {
-          body = Readers.readAll(r, null);
+    if (body == null) {
+      synchronized (this) {
+        if (body == null) {
+          connect();
+          try {
+            try (Reader r = getReader()) {
+              body = Readers.readAll(r, null);
+            }
+          } finally {
+            disconnect();
+          }
         }
-      } finally {
-        disconnect();
       }
     }
-
     return body;
   }
 
-  private void parseContentType() throws IOException
+  public Callable<String> getBodyAsCallable()
+  {
+    return new Callable<String>()
+      {
+        @Override
+        public String call() throws Exception
+        {
+          return getBody();
+        }
+      };
+  }
+
+  private synchronized void parseContentType() throws IOException
   {
     connect();
     String ct = c.getContentType();
