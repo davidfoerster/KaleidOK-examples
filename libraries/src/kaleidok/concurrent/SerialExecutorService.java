@@ -51,6 +51,7 @@ public class SerialExecutorService implements Executor, Runnable
   {
     BlockingQueue<Runnable> tasks = this.tasks;
     if (tasks != null) {
+      //noinspection MismatchedQueryAndUpdateOfCollection
       Collection<Runnable> remaining = new ArrayList<>(tasks.size());
       tasks.drainTo(remaining);
       tasks.add(null);

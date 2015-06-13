@@ -128,6 +128,7 @@ public class ChromatikQueryTest
     assertEquals("10", p.get("nhits"));
 
     List<String> opts = getOpts(p);
+    assertNotNull(opts);
     assertNull(opts.get(0));
     assertEquals("color:Blue/1313ac/42{s=200000}", opts.get(1));
     assertEquals("color:Red/e51919/7{s=200000}", opts.get(2));

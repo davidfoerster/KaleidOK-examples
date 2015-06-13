@@ -176,8 +176,10 @@ public class Chromasthetiator implements UpdateHandler
   {
     if (maxCount < 0 || maxCount > affectWords.size())
       maxCount = affectWords.size();
-    if (maxCount == 0)
+    if (maxCount == 0) {
+      //noinspection unchecked
       return Collections.EMPTY_LIST;
+    }
 
     ArrayList<String> resultWords = new ArrayList<>(maxCount);
     Comparator<AffectWord> comp = AffectWord.SquareWeightSumComparator.INSTANCE;
@@ -215,6 +217,7 @@ public class Chromasthetiator implements UpdateHandler
           switch (Integer.parseInt(ex.getErrorCode())) {
           case 1: // Photo not found
           case 2: // Permission denied
+            //noinspection unchecked
             sizes = Collections.EMPTY_LIST;
             System.err.println(ex.getLocalizedMessage() + ' ' + '(' + getMediumUrl() + ')');
             break;

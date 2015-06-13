@@ -18,7 +18,7 @@ public class ChromatikResponseDeserializer implements JsonDeserializer
   {
     assert type instanceof Class && ChromatikResponse.class.isAssignableFrom((Class<?>) type);
 
-    JsonArray a = (JsonArray) jsonElement;
+    JsonArray a = jsonElement.getAsJsonArray();
     ChromatikResponse response = new ChromatikResponse();
     response.hits = a.get(0).getAsInt();
     final ChromatikResponse.Result[] results =
