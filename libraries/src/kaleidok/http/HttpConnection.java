@@ -9,7 +9,9 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -220,23 +222,23 @@ public class HttpConnection
         Class<? extends FilterInputStream> dec = getInputFilterClass();
         if (dec == null) {
           inputStream = c.getInputStream();
-        } else try {
-          Constructor<? extends FilterInputStream> ctor =
-            dec.getConstructor(InputStream.class);
-          inputStream = ctor.newInstance(c.getInputStream());
-        } catch (InvocationTargetException ex) {
-          disconnect();
-          Throwable cause = ex.getCause();
-          if (cause instanceof IOException)
-            throw (IOException) cause;
-          throw new Error(cause);
-        } catch (ReflectiveOperationException ex) {
-          disconnect();
-          throw new Error(ex);
+        } else {
+          try {
+            Constructor<? extends FilterInputStream> ctor =
+              dec.getConstructor(InputStream.class);
+            inputStream = ctor.newInstance(c.getInputStream());
+          } catch (InvocationTargetException ex) {
+            Throwable cause = ex.getCause();
+            if (cause instanceof IOException)
+              throw (IOException) cause;
+            throw new Error(cause); // FilterInputStream constructors shouldn't throw anything except IOException
+          } catch (ReflectiveOperationException ex) {
+            throw new Error(ex);
+          }
         }
-      } catch (Throwable ex) {
-        disconnect();
-        throw ex;
+      } finally {
+        if (inputStream == null)
+          disconnect();
       }
     }
     return inputStream;
@@ -487,8 +489,8 @@ public class HttpConnection
    */
   public void disconnect()
   {
-    c.disconnect();
     state = DISCONNECTED;
+    c.disconnect();
   }
 
   /**
