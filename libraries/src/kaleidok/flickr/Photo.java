@@ -2,9 +2,6 @@ package kaleidok.flickr;
 
 import com.flickr4java.flickr.photos.Size;
 
-import javax.imageio.ImageIO;
-import java.awt.Image;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.*;

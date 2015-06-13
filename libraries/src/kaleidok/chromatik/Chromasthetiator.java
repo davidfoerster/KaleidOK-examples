@@ -17,8 +17,6 @@ import java.applet.Applet;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.Arrays;
-import java.util.List;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;

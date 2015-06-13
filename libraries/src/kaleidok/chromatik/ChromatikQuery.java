@@ -43,7 +43,7 @@ public class ChromatikQuery
    * object and use it as the key to the option entry. The value is the
    * weight of that color as a {@link java.lang.Number} object between 0 and 1.
    */
-  public Map<Object, Object> opts = new HashMap<Object, Object>();
+  public Map<Object, Object> opts = new HashMap<>();
 
   /**
    * The protocol, host, and path component of the query URL

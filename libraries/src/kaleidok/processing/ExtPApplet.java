@@ -85,19 +85,6 @@ public class ExtPApplet extends PApplet
     super.keyPressed(e);
   }
 
-  @Override
-  public void keyReleased( KeyEvent e )
-  {
-    super.keyReleased(e);
-  }
-
-  @Override
-  public void keyTyped( KeyEvent e )
-  {
-    super.keyTyped(e);
-  }
-
-
   public PImageFuture getImageFuture( String path )
   {
     URL url;

@@ -36,7 +36,6 @@ public class Transcription extends CallbackRunnable<SttResponse>
   }
 
   protected Transcription( JsonHttpConnection connection )
-    throws IOException
   {
     this.connection = connection;
   }

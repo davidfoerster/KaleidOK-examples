@@ -15,7 +15,7 @@ public class ChromatikQueryTest
     String qs = q.getQueryString();
     assertTrue(qs.startsWith("?"));
 
-    HashMap<String, String> m = new HashMap<String, String>();
+    HashMap<String, String> m = new HashMap<>();
     for (String p: qs.substring(1).split("&")) {
       int split = p.indexOf('=');
       String key, value;
@@ -48,7 +48,7 @@ public class ChromatikQueryTest
       String[] a = q
         .substring(split + splitter.length(), q.length() - 1)
         .split(" +");
-      opts = new ArrayList<String>(a.length + 1);
+      opts = new ArrayList<>(a.length + 1);
       if (split > 0) {
         assertEquals(' ', q.charAt(split - 1));
         opts.add(q.substring(0, split - 1));
@@ -58,7 +58,7 @@ public class ChromatikQueryTest
       Arrays.sort(a);
       opts.addAll(Arrays.asList(a));
     } else {
-      opts = new ArrayList<String>(1);
+      opts = new ArrayList<>(1);
       opts.add(q);
     }
     return opts;
