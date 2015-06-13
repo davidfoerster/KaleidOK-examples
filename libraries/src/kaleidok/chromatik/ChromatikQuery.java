@@ -36,6 +36,11 @@ public class ChromatikQuery
   public String keywords;
 
   /**
+   * The protocol, host, and path component of the query URL
+   */
+  public URL baseUrl;
+
+  /**
    * Search option map. Possible option keys include "saturation", "darkness",
    * and "rights".
    *
@@ -44,11 +49,6 @@ public class ChromatikQuery
    * weight of that color as a {@link java.lang.Number} object between 0 and 1.
    */
   public Map<Object, Object> opts = new HashMap<>();
-
-  /**
-   * The protocol, host, and path component of the query URL
-   */
-  public String urlPath = DEFAULT_URL_PATH;
 
   private StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
 
@@ -79,6 +79,7 @@ public class ChromatikQuery
   {
     this.nhits = nhits;
     this.keywords = (keywords != null) ? keywords : "";
+    this.baseUrl = DEFAULT_URL;
 
     if (colors != null && colors.length != 0)
     {
@@ -115,7 +116,7 @@ public class ChromatikQuery
   public URL getUrl()
   {
     try {
-      return new URL(toString());
+      return new URL(baseUrl, getQueryString());
     } catch (MalformedURLException e) {
       throw new Error(e);
     }
@@ -128,13 +129,13 @@ public class ChromatikQuery
    */
   public String getQueryString()
   {
-    return buildQueryString().substring(urlPath.length());
+    return buildQueryString().toString();
   }
 
   private StringBuilder buildQueryString()
   {
     sb.setLength(0);
-    sb.append(urlPath).append(QUERY_PATHDELIM)
+    sb.append(QUERY_PATHDELIM)
       .append(QUERY_START).append(QUERY_NAMEDELIM).append(start)
       .append(QUERY_PARAMDELIM)
       .append(QUERY_NHITS).append(QUERY_NAMEDELIM).append(nhits);
@@ -196,7 +197,7 @@ public class ChromatikQuery
   @Override
   public String toString()
   {
-    return buildQueryString().toString();
+    return baseUrl.toString() + buildQueryString();
   }
 
   private static final String
@@ -214,8 +215,16 @@ public class ChromatikQuery
     QUERY_NAMEDELIM = '=',
     QUERY_SPACE = '+';
 
+  public static final URL DEFAULT_URL;
+  static {
+    try {
+      DEFAULT_URL = new URL("http://chromatik.labs.exalead.com/searchphotos");
+    } catch (MalformedURLException ex) {
+      throw new Error(ex);
+    }
+  }
+
   public static final String
-    DEFAULT_URL_PATH = "http://chromatik.labs.exalead.com/searchphotos",
     QUERY_OPT_COLOR = "color",
     QUERY_OPT_COLORGROUP = "colorgroup",
     QUERY_OPT_SATURATION = "saturation",
