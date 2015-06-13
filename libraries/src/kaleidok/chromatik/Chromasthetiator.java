@@ -99,8 +99,14 @@ public class Chromasthetiator implements UpdateHandler
     chromatikQuery.keywords = getQueryKeywords(emoState);
     getQueryOptions(emoState, chromatikQuery.opts);
 
-    // TODO: Don't do this in the event handler thread
-    ChromatikResponse queryResult = chromatikQuery.getResult();
+    ChromatikResponse queryResult;
+    try {
+      // TODO: Don't do this in the event handler thread
+      queryResult = chromatikQuery.getResult();
+    } catch (IOException ex) {
+      ex.printStackTrace();
+      return;
+    }
     addFlickrPhotos(queryResult);
 
     Callback<ChromatikResponse> searchResultHandler = this.searchResultHandler;

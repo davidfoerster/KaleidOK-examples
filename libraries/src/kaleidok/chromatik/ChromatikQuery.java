@@ -2,8 +2,6 @@ package kaleidok.chromatik;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
-import com.google.gson.stream.JsonReader;
 import kaleidok.http.JsonHttpConnection;
 
 import java.io.IOException;
@@ -93,18 +91,17 @@ public class ChromatikQuery
    * Issues the query as specified and returns the result object.
    * @return  Query result
    */
-  public ChromatikResponse getResult()
+  public ChromatikResponse getResult() throws IOException
   {
-    try {
-      URL url = getUrl();
-      //System.err.println(url.toString());
-      return gson.fromJson(
-        new JsonReader(JsonHttpConnection.openURL(url).getReader()),
-        ChromatikResponse.class);
-    } catch (IOException | JsonParseException ex) {
-      ex.printStackTrace();
-      return null;
-    }
+    URL url = getUrl();
+    //System.err.println(url.toString());
+    return fetch(url);
+  }
+
+  protected static ChromatikResponse fetch( URL url ) throws IOException
+  {
+    return JsonHttpConnection.openURL(url)
+      .get(ChromatikResponse.class, gson);
   }
 
   /**

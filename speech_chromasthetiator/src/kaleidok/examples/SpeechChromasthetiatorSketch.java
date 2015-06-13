@@ -18,6 +18,7 @@ import synesketch.emotion.SynesthetiatorEmotion;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -193,7 +194,12 @@ public class SpeechChromasthetiatorSketch extends PApplet
   {
     synState = (EmotionalState) state;
     updateQuery();
-    updateResultSet(chromatikQuery.getResult());
+    try {
+      updateResultSet(chromatikQuery.getResult());
+    } catch (IOException ex) {
+      ex.printStackTrace();
+      return;
+    }
 
     /*
      * The Processing API says, we shouldn't call draw() directly, but this is
