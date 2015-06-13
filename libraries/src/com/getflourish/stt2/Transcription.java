@@ -72,8 +72,7 @@ public class Transcription extends CallbackRunnable<SttResponse>
 
   protected SttResponse parse( Reader source ) throws IOException
   {
-    JsonReader jsonReader = new JsonReader(source);
-    try {
+    try (JsonReader jsonReader = new JsonReader(source)) {
       SttResponse response;
       do {
         response = gson.fromJson(jsonReader, SttResponse.class);
@@ -84,8 +83,6 @@ public class Transcription extends CallbackRunnable<SttResponse>
         "PARSE ERROR: Speech could not be interpreted.", ex);
     } catch (JsonIOException ex) {
       throw new IOException(ex);
-    } finally {
-      jsonReader.close();
     }
   }
 

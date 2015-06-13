@@ -66,25 +66,19 @@ public class MockSpeechToTextHandler implements HttpHandler
     float sampleRate = Float.parseFloat(contentType.get("rate"));
     assertTrue(sampleRate > 0 && !Float.isInfinite(sampleRate));
 
-    InputStream in = t.getRequestBody();
     long inLen;
-    try {
+    try (InputStream in = t.getRequestBody()) {
       inLen =
         Files.copy(in, getTempFileName(this, ".flac"),
           StandardCopyOption.REPLACE_EXISTING);
-    } finally {
-      in.close();
     }
     System.out.println("Server received " + inLen + " bytes on request to " + t.getRequestURI());
     assertTrue(inLen > 86);
 
     setContentType(t, "application/json");
     t.sendResponseHeaders(HttpURLConnection.HTTP_OK, transcriptionResult.length);
-    OutputStream out = t.getResponseBody();
-    try {
+    try (OutputStream out = t.getResponseBody()) {
       out.write(transcriptionResult);
-    } finally {
-      out.close();
     }
 
     return true;
@@ -118,12 +112,8 @@ public class MockSpeechToTextHandler implements HttpHandler
     if (t.getResponseCode() < 0) {
       setContentType(t, "text/plain");
       t.sendResponseHeaders(responseCode, 0);
-      PrintStream out =
-        new PrintStream(t.getResponseBody(), false, DEFAULT_CHARSET.name());
-      try {
+      try (PrintStream out = new PrintStream(t.getResponseBody(), false, DEFAULT_CHARSET.name())) {
         ex.printStackTrace(out);
-      } finally {
-        out.close();
       }
     }
   }

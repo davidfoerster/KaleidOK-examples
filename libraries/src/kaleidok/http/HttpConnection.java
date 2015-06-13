@@ -364,11 +364,8 @@ public class HttpConnection
     {
       connect();
       try {
-        Reader r = getReader();
-        try {
+        try (Reader r = getReader()) {
           body = Readers.readAll(r, null);
-        } finally {
-          r.close();
         }
       } finally {
         disconnect();
