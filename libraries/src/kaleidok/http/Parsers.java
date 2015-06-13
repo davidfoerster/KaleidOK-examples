@@ -44,7 +44,7 @@ public final class Parsers
   public static Map<String, String> getHeaderValueMap( String h )
   {
     Map<String, String> hm = new HashMap<>(4);
-    for (String strParam : h.split(";\\s*", 0)) {
+    for (String strParam : h.split("\\s*;\\s*", 0)) {
       if (!strParam.isEmpty()) {
         StringTokenIterator itParam = new StringTokenIterator(strParam, '=');
         String name = itParam.next(),
