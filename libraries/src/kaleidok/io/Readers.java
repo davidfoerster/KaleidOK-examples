@@ -17,28 +17,27 @@ public final class Readers
     if (charBuf == null)
       charBuf = new char[BUFFERSIZE_MIN];
 
-    int bytesRead = 0;
-    while (true) {
-      if (bytesRead < charBuf.length - BUFFERSIZE_MIN) {
+    int current, total = 0;
+    while ((current = r.read(charBuf, total, charBuf.length - total)) >= 0)
+    {
+      total += current;
+
+      if (total > charBuf.length - BUFFERSIZE_MIN) {
         int newSize;
         if (charBuf.length <= Integer.MAX_VALUE / 2) {
-          newSize = charBuf.length * 2;
-        } else {
-          if (bytesRead == Integer.MAX_VALUE)
-            throw new IOException("Maximum buffer size exceeded");
+          newSize = Math.max(charBuf.length * 2, BUFFERSIZE_MIN);
+        } else if (total != Integer.MAX_VALUE) {
+          if (charBuf.length == Integer.MAX_VALUE)
+            continue;
           newSize = Integer.MAX_VALUE;
+        } else {
+          throw new IOException("Maximum buffer size exceeded");
         }
-        if (newSize > charBuf.length)
-          charBuf = Arrays.copyOf(charBuf, newSize);
+        charBuf = Arrays.copyOf(charBuf, newSize);
       }
-
-      int count = r.read(charBuf, bytesRead, charBuf.length - bytesRead);
-      if (count < 0)
-        break;
-      bytesRead += count;
     }
 
-    return (bytesRead != 0) ? new String(charBuf, 0, bytesRead) : "";
+    return (total != 0) ? new String(charBuf, 0, total) : "";
   }
 
 }
