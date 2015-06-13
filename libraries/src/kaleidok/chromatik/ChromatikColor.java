@@ -50,7 +50,7 @@ public class ChromatikColor
 
       /*
        * Find brightness bin index (black = 0, white = hueNames.length-1).
-       * Chromatik's darkest accepted gray value is 21 (roughly 255/12).
+       * Chromatik’s darkest accepted gray value is 21 (roughly 255/12).
        */
       int brBin = max(round(hsb[2] * HUE_COLS), 1);
 
@@ -72,7 +72,7 @@ public class ChromatikColor
       int hueBin = round(hsb[0] * HUE_COLS) % HUE_COLS;
 
       /*
-       * The row of in Chromatik's color selector is the bin index with the
+       * The row of in Chromatik’s color selector is the bin index with the
        * closest distance in the vector space of saturation and brightness.
        */
       float sat = hsb[1] * 255, br = hsb[2] * 255;

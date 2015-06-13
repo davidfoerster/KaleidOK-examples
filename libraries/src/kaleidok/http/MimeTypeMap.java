@@ -107,7 +107,7 @@ public class MimeTypeMap extends HashMap<String, Float>
    * Equivalent to {@link #allows(String, boolean)} with allowed wildcards.
    *
    * @param mime  A MIME type
-   * @return  Matching entry key that allowd {@code mime}.
+   * @return  Matching entry key that allowed {@code mime}.
    * @see #allows(String, boolean)
    */
   public String allows( String mime ) {

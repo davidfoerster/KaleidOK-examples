@@ -25,18 +25,18 @@ class ReadyImageFutureImpl extends ReadyImageFuture implements ImageObserver
   }
 
   @Override
-  public boolean imageUpdate( Image img, int infoflags, int x, int y, int width, int height )
+  public boolean imageUpdate( Image img, int infoFlags, int x, int y, int width, int height )
   {
     // Assume that flags are never deleted during subsequent updates.
-    //assert (statusFlags & ~infoflags) == 0;
+    //assert (statusFlags & ~infoFlags) == 0;
 
     if (isDone()) {
-      statusFlags = infoflags;
+      statusFlags = infoFlags;
       return false;
     }
 
-    statusFlags = infoflags;
-    if (isDone(infoflags)) {
+    statusFlags = infoFlags;
+    if (isDone(infoFlags)) {
       synchronized (this) {
         notifyAll();
       }
