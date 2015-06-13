@@ -1,6 +1,5 @@
 package com.getflourish.stt2;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
@@ -21,8 +20,6 @@ public class Transcription extends CallbackRunnable<SttResponse>
   private final JsonHttpConnection connection;
 
   private OutputStream outputStream = null;
-
-  private static final Gson gson = new Gson();
 
   protected Transcription( URL url, String mimeType, float sampleRate )
     throws IOException
@@ -74,7 +71,8 @@ public class Transcription extends CallbackRunnable<SttResponse>
     try (JsonReader jsonReader = new JsonReader(source)) {
       SttResponse response;
       do {
-        response = gson.fromJson(jsonReader, SttResponse.class);
+        response =
+          JsonHttpConnection.getGson().fromJson(jsonReader, SttResponse.class);
       } while (response != null && response.isEmpty());
       return response;
     } catch (JsonSyntaxException ex) {

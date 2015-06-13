@@ -1,7 +1,8 @@
 package kaleidok.http;
 
-import processing.data.JSONArray;
-import processing.data.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -29,22 +30,62 @@ public class JsonHttpConnection extends HttpConnection
     }
   }
 
-  public JSONArray getArray() throws IOException
+  public JsonElement get() throws IOException
   {
     if (json == null) {
-      json = new JSONArray(getReader());
-      reader.close();
+      try (Reader reader = getReader()) {
+        JsonElement json = getJsonParser().parse(reader);
+        this.json = json;
+        return json;
+      }
     }
-    return (json instanceof JSONArray) ? (JSONArray) json : null;
+    if (!(json instanceof JsonElement))
+      throw getPreviouslyParsedException();
+    return (JsonElement) json;
   }
 
-  public JSONObject getObject() throws IOException
+  public <T> T get( Class<T> clazz ) throws IOException
+  {
+    return get(clazz, getGson());
+  }
+
+  public <T> T get( Class<T> clazz, Gson gson ) throws IOException
   {
     if (json == null) {
-      json = new JSONObject(getReader());
-      reader.close();
+      try (Reader reader = getReader()) {
+        T json = gson.fromJson(reader, clazz);
+        this.json = json;
+        return json;
+      }
     }
-    return (json instanceof JSONObject) ? (JSONObject) json : null;
+    if (!clazz.isAssignableFrom(json.getClass()))
+      throw getPreviouslyParsedException();
+    //noinspection unchecked
+    return (T) json;
+  }
+
+  private IllegalStateException getPreviouslyParsedException()
+  {
+    return new IllegalStateException(
+      "Already parsed stream to " + json.getClass().getCanonicalName());
+  }
+
+  private static JsonParser JSON_PARSER = null;
+
+  public static JsonParser getJsonParser()
+  {
+    if (JSON_PARSER == null)
+      JSON_PARSER = new JsonParser();
+    return JSON_PARSER;
+  }
+
+  private static Gson gson = null;
+
+  public static Gson getGson()
+  {
+    if (gson == null)
+      gson = new Gson();
+    return gson;
   }
 
   public static final MimeTypeMap MIME_TYPE_MAP = new MimeTypeMap() {{
