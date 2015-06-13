@@ -7,7 +7,6 @@ import com.google.gson.JsonParser;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
 
 
 public class JsonHttpConnection extends HttpConnection
@@ -17,7 +16,7 @@ public class JsonHttpConnection extends HttpConnection
   public JsonHttpConnection( HttpURLConnection c )
   {
     super(c, MIME_TYPE_MAP);
-    defaultCharset = DEFAULT_CHARSET;
+    defaultCharset = URLEncoding.DEFAULT_CHARSET;
     setDoInput(true);
   }
 
@@ -95,6 +94,4 @@ public class JsonHttpConnection extends HttpConnection
     put(MimeTypeMap.WILDCARD, 0.1f);
     freeze();
   }};
-
-  public static final Charset DEFAULT_CHARSET = Charset.forName("utf-8");
 }

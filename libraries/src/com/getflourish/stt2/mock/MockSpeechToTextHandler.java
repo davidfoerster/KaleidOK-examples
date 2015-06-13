@@ -12,7 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.Map;
 
-import static kaleidok.http.JsonHttpConnection.DEFAULT_CHARSET;
+import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
 
 
 public class MockSpeechToTextHandler implements HttpHandler

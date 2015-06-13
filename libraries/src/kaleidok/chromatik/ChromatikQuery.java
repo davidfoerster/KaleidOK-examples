@@ -12,7 +12,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import static processing.core.PApplet.urlEncode;
+import static kaleidok.http.URLEncoding.encode;
 
 
 /**
@@ -142,7 +142,7 @@ public class ChromatikQuery
     if (!keywords.isEmpty() || !opts.isEmpty())
     {
       sb.append(QUERY_PARAMDELIM).append(QUERY_QUERY)
-        .append(QUERY_NAMEDELIM).append(urlEncode(keywords));
+        .append(QUERY_NAMEDELIM).append(encode(keywords));
 
       if (!opts.isEmpty())
       {
@@ -174,8 +174,8 @@ public class ChromatikQuery
           }
           else
           {
-            sb.append(urlEncode(o.getKey().toString())).append(QUERY_OPT_NAMEDELIM)
-              .append(urlEncode(o.getValue().toString()));
+            sb.append(encode(o.getKey().toString())).append(QUERY_OPT_NAMEDELIM)
+              .append(encode(o.getValue().toString()));
           }
         }
         sb.append(')');
