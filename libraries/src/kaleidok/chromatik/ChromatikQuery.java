@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import static kaleidok.http.URLEncoding.encode;
 
@@ -102,6 +103,27 @@ public class ChromatikQuery
   {
     return JsonHttpConnection.openURL(url)
       .get(ChromatikResponse.class, gson);
+  }
+
+  public Callable<ChromatikResponse> asCallable()
+  {
+    return new ChromatikResponseCallable(getUrl());
+  }
+
+  private static class ChromatikResponseCallable implements Callable<ChromatikResponse>
+  {
+    private final URL url;
+
+    public ChromatikResponseCallable( URL url )
+    {
+      this.url = url;
+    }
+
+    @Override
+    public ChromatikResponse call() throws IOException
+    {
+      return fetch(url);
+    }
   }
 
   /**
