@@ -6,6 +6,7 @@ import kaleidok.chromatik.ChromatikResponse;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import java.io.IOException;
 import java.util.Map;
 
 
@@ -29,8 +30,11 @@ public class ChromatikClientSketch extends PApplet
     println("query: " + q.getQueryString());
     drawQuery(q);
 
-    ChromatikResponse resultSet = q.getResult();
-    if (q == null) {
+    ChromatikResponse resultSet;
+    try {
+      resultSet = q.getResult();
+    } catch (IOException ex) {
+      ex.printStackTrace();
       exit();
       return;
     }
