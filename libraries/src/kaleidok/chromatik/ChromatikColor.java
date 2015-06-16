@@ -1,5 +1,7 @@
 package kaleidok.chromatik;
 
+import kaleidok.util.Strings;
+
 import static java.lang.Math.max;
 import static java.lang.Math.round;
 import static kaleidok.util.Math.square;
@@ -109,7 +111,7 @@ public class ChromatikColor
   public String toString()
   {
     char[] a = new char[groupName.length() + 9];
-    Utils.toHex(value, a, 0, 6);
+    Strings.toHex(value, a, 0, 6);
     a[6] = ' ';
     a[7] = '(';
     groupName.getChars(0, groupName.length(), a, 8);

@@ -3,6 +3,7 @@ package kaleidok.chromatik;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import kaleidok.http.JsonHttpConnection;
+import kaleidok.util.Strings;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -186,7 +187,7 @@ public class ChromatikQuery
 
             sb.append(QUERY_OPT_COLOR).append(QUERY_OPT_NAMEDELIM)
               .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
-              .append(Utils.toHex(c.value, hexStrBuf))
+              .append(Strings.toHex(c.value, hexStrBuf))
               .append(QUERY_OPT_VALUEDELIM).append(weight)
               .append(QUERY_OPT_COLOR_SUFFIX).append(QUERY_SPACE)
               .append(QUERY_OPT_COLORGROUP).append(QUERY_OPT_NAMEDELIM)
