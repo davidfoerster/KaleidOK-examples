@@ -3,10 +3,10 @@ package com.getflourish.stt2;
 import kaleidok.concurrent.Callback;
 import kaleidok.concurrent.SerialExecutorService;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
+
+import static kaleidok.http.URLEncoding.appendEncoded;
 
 
 public class TranscriptionService implements Runnable
@@ -85,10 +85,14 @@ public class TranscriptionService implements Runnable
 
   protected void setServiceUrl( URL apiBase, String accessKey, String language )
   {
+    StringBuilder urlSpec = new StringBuilder(
+      URL_SPEC_PREFIX.length() + language.length() +
+      URL_SPEC_KEY_BIT.length() + accessKey.length());
+    appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
+    appendEncoded(language, urlSpec.append(URL_SPEC_KEY_BIT));
+
     try {
-      this.serviceUrl = new URL(apiBase, "recognize?output=json" +
-        "&lang=" + urlEncode(language) +
-        "&key=" + urlEncode(accessKey));
+      this.serviceUrl = new URL(apiBase, urlSpec.toString());
       this.apiBase = apiBase;
       this.accessKey = accessKey;
       this.language = language;
@@ -97,14 +101,9 @@ public class TranscriptionService implements Runnable
     }
   }
 
-  protected static String urlEncode( String s )
-  {
-    try {
-      return URLEncoder.encode(s, "US-ASCII");
-    } catch (UnsupportedEncodingException e) {
-      throw new Error(e);
-    }
-  }
+  private static final String
+    URL_SPEC_PREFIX = "recognize?output=json&lang=",
+    URL_SPEC_KEY_BIT = "&key=";
 
   public void add( Transcription task )
   {

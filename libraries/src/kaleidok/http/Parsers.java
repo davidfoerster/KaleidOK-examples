@@ -2,12 +2,12 @@ package kaleidok.http;
 
 import kaleidok.util.StringTokenIterator;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+
+import static kaleidok.http.URLEncoding.decode;
 
 
 public final class Parsers
@@ -22,21 +22,17 @@ public final class Parsers
       return null;
 
     Map<String, String> qm = new HashMap<>(8);
-    try {
-      for (String strParam : new StringTokenIterator(q, '&')) {
-        if (!strParam.isEmpty()) {
-          StringTokenIterator itParam = new StringTokenIterator(strParam, '=');
-          String name = URLDecoder.decode(itParam.next(), chs.name()),
-            value = itParam.hasNext() ?
-              URLDecoder.decode(strParam.substring(itParam.getBegin()), chs.name()) :
-              null;
-          if (qm.containsKey(name))
-            throw new IllegalArgumentException("Query parameter appears multiple times: " + name);
-          qm.put(name, value);
-        }
+    for (String strParam : new StringTokenIterator(q, '&')) {
+      if (!strParam.isEmpty()) {
+        StringTokenIterator itParam = new StringTokenIterator(strParam, '=');
+        String name = decode(itParam.next(), chs),
+          value = itParam.hasNext() ?
+            decode(strParam.substring(itParam.getBegin()), chs) :
+            null;
+        if (qm.containsKey(name))
+          throw new IllegalArgumentException("Query parameter appears multiple times: " + name);
+        qm.put(name, value);
       }
-    } catch (UnsupportedEncodingException ex) {
-      throw new Error("Provided Charset has the name of an unknown encoding", ex);
     }
     return qm;
   }

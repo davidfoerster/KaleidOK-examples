@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static kaleidok.http.URLEncoding.encode;
+import static kaleidok.http.URLEncoding.appendEncoded;
 
 
 /**
@@ -162,7 +162,8 @@ public class ChromatikQuery
     if (!keywords.isEmpty() || !opts.isEmpty())
     {
       sb.append(QUERY_PARAMDELIM).append(QUERY_QUERY)
-        .append(QUERY_NAMEDELIM).append(encode(keywords));
+        .append(QUERY_NAMEDELIM);
+      appendEncoded(keywords, sb);
 
       if (!opts.isEmpty())
       {
@@ -194,8 +195,8 @@ public class ChromatikQuery
           }
           else
           {
-            sb.append(encode(o.getKey().toString())).append(QUERY_OPT_NAMEDELIM)
-              .append(encode(o.getValue().toString()));
+            appendEncoded(o.getKey().toString(), sb).append(QUERY_OPT_NAMEDELIM);
+            appendEncoded(o.getValue().toString(), sb);
           }
         }
         sb.append(')');
