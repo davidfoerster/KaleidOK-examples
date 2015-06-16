@@ -1,4 +1,4 @@
-package kaleidok.chromatik;
+package kaleidok.chromatik.data;
 
 import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.photos.Size;

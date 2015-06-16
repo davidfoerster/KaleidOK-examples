@@ -1,5 +1,6 @@
 package kaleidok.chromatik;
 
+import kaleidok.chromatik.data.ChromatikColor;
 import org.junit.Test;
 import processing.core.PApplet;
 

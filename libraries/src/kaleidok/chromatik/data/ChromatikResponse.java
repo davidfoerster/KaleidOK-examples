@@ -1,4 +1,4 @@
-package kaleidok.chromatik;
+package kaleidok.chromatik.data;
 
 import com.google.gson.annotations.Expose;
 

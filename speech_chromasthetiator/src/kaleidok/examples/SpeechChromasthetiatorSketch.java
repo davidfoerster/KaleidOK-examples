@@ -1,13 +1,11 @@
 package kaleidok.examples;
 
-import kaleidok.chromatik.ChromatikColor;
+import kaleidok.chromatik.data.ChromatikColor;
 import kaleidok.chromatik.ChromatikQuery;
 import com.getflourish.stt.STT;
-import kaleidok.chromatik.ChromatikResponse;
+import kaleidok.chromatik.data.ChromatikResponse;
 import processing.core.PApplet;
 import processing.core.PImage;
-import processing.data.JSONArray;
-import processing.data.JSONObject;
 import synesketch.SynesketchState;
 import synesketch.Synesthetiator;
 import synesketch.art.util.SynesketchPalette;

@@ -1,4 +1,6 @@
-package kaleidok.chromatik;
+package kaleidok.chromatik.data;
+
+import kaleidok.chromatik.data.ChromatikColor;
 
 import static org.junit.Assert.*;
 

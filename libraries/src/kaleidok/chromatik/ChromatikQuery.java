@@ -2,6 +2,9 @@ package kaleidok.chromatik;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import kaleidok.chromatik.data.ChromatikColor;
+import kaleidok.chromatik.data.ChromatikResponse;
+import kaleidok.chromatik.data.ChromatikResponseDeserializer;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.util.Strings;
 

@@ -1,8 +1,8 @@
 package kaleidok.examples;
 
-import kaleidok.chromatik.ChromatikColor;
+import kaleidok.chromatik.data.ChromatikColor;
 import kaleidok.chromatik.ChromatikQuery;
-import kaleidok.chromatik.ChromatikResponse;
+import kaleidok.chromatik.data.ChromatikResponse;
 import processing.core.PApplet;
 import processing.core.PImage;
 

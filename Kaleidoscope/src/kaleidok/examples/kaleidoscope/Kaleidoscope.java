@@ -12,9 +12,10 @@ import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
+import kaleidok.chromatik.CallbackChromasthetiator;
 import kaleidok.chromatik.Chromasthetiator;
-import kaleidok.chromatik.ChromatikResponse;
-import kaleidok.chromatik.FlickrPhoto;
+import kaleidok.chromatik.data.ChromatikResponse;
+import kaleidok.chromatik.data.FlickrPhoto;
 import kaleidok.concurrent.Callback;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.ExtPApplet;
@@ -63,7 +64,7 @@ public class Kaleidoscope extends ExtPApplet
   private VolumeLevelProcessor volumeLevelProcessor;
   private MinimFFTProcessor fftProcessor;
 
-  private Chromasthetiator chromasthetiator;
+  private CallbackChromasthetiator chromasthetiator;
 
   private STT stt;
 
@@ -253,12 +254,12 @@ public class Kaleidoscope extends ExtPApplet
     return layers;
   }
 
-  Chromasthetiator getChromasthetiator() throws IOException
+  CallbackChromasthetiator getChromasthetiator() throws IOException
   {
     if (chromasthetiator == null) {
       Chromasthetiator.verbose = verbose;
       chromasthetiator =
-        new Chromasthetiator(this, new ChromatikResponseHandler());
+        new CallbackChromasthetiator(this, new ChromatikResponseHandler());
 
       String data = parseStringOrFile(getParameter("com.flickr.api.key"), '@');
       if (data != null) {

@@ -5,9 +5,10 @@ import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.photos.PhotosInterface;
 import com.flickr4java.flickr.photos.Size;
 import kaleidok.awt.ReadyImageFuture;
-import kaleidok.concurrent.Callback;
+import kaleidok.chromatik.data.ChromatikColor;
+import kaleidok.chromatik.data.ChromatikResponse;
+import kaleidok.chromatik.data.FlickrPhoto;
 import kaleidok.util.Strings;
-import synesketch.*;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
 
@@ -23,10 +24,12 @@ import static java.lang.Math.sqrt;
 import static kaleidok.util.Arrays.shuffle;
 
 
-public class Chromasthetiator implements UpdateHandler
+public class Chromasthetiator
 {
   // Configuration:
   public static int verbose = 0;
+
+  protected final Applet parent;
 
   /**
    * Maximum amount of colors to use in the query to Chromatik
@@ -40,38 +43,55 @@ public class Chromasthetiator implements UpdateHandler
   public int maxKeywords = 0;
 
   // other instance attributes:
-
   /**
    * A document object tha holds the currently defined search terms
    */
   public Document keywordsDoc;
 
-
-  private final Applet parent;
-
   public ChromatikQuery chromatikQuery;
 
-  public Callback<ChromatikResponse> searchResultHandler = null;
+  protected SynesthetiatorEmotion synesthetiator;
 
-  private Synesthetiator synesthetiator;
-
-  private SynesketchPalette palettes;
+  protected SynesketchPalette palettes;
 
   private PhotosInterface flickrPhotos = null;
 
 
-  public Chromasthetiator( Applet parent, Callback<ChromatikResponse> srh )
-    throws IOException
+  public Chromasthetiator( Applet parent ) throws IOException
   {
-
     this.parent = parent;
-    this.searchResultHandler = srh;
 
-    synesthetiator = new SynesthetiatorEmotion(this);
     palettes = new SynesketchPalette("standard");
+    synesthetiator = new SynesthetiatorEmotion();
 
     chromatikQuery = new ChromatikQuery();
     chromatikQuery.nhits = 10;
+  }
+
+
+  private static List<String> findStrongestAffectWords(
+    Collection<AffectWord> affectWords, int maxCount)
+  {
+    if (maxCount < 0 || maxCount > affectWords.size())
+      maxCount = affectWords.size();
+    if (maxCount == 0) {
+      //noinspection unchecked
+      return Collections.EMPTY_LIST;
+    }
+
+    ArrayList<String> resultWords = new ArrayList<>(maxCount);
+    Comparator<AffectWord> comp = AffectWord.SquareWeightSumComparator.INSTANCE;
+
+    if (maxCount == 1) {
+      resultWords.add(Collections.max(affectWords, comp).getWord());
+    } else {
+      AffectWord[] a = affectWords.toArray(new AffectWord[affectWords.size()]);
+      Arrays.sort(a, comp);
+      final int limit = affectWords.size() - maxCount;
+      for (int i = affectWords.size() - 1; i >= limit; i--)
+        resultWords.add(a[i].getWord());
+    }
+    return resultWords;
   }
 
 
@@ -81,37 +101,19 @@ public class Chromasthetiator implements UpdateHandler
   }
 
 
-  public void issueQuery( String text ) throws Exception
+  public ChromatikResponse query( String text ) throws IOException
   {
-    synesthetiator.synesthetise(text);
-  }
-
-
-  /**
-   * Callback method for {@link #synesthetiator}
-   *
-   * @param synState  The emotion analysis result
-   */
-  public void synesketchUpdate( SynesketchState synState )
-  {
-    EmotionalState emoState = (EmotionalState) synState;
+    EmotionalState emoState = synesthetiator.synesthetiseDirect(text);
     ChromatikQuery chromatikQuery = this.chromatikQuery;
     chromatikQuery.keywords = getQueryKeywords(emoState);
     getQueryOptions(emoState, chromatikQuery.opts);
 
     ChromatikResponse queryResult;
-    try {
-      // TODO: Don't do this in the event handler thread
-      queryResult = chromatikQuery.getResult();
-    } catch (IOException ex) {
-      ex.printStackTrace();
-      return;
-    }
+    // TODO: Don't do this in the event handler thread
+    queryResult = chromatikQuery.getResult();
     addFlickrPhotos(queryResult);
 
-    Callback<ChromatikResponse> searchResultHandler = this.searchResultHandler;
-    if (searchResultHandler != null)
-      searchResultHandler.call(queryResult);
+    return queryResult;
   }
 
 
@@ -179,33 +181,7 @@ public class Chromasthetiator implements UpdateHandler
   }
 
 
-  private static List<String> findStrongestAffectWords(
-    Collection<AffectWord> affectWords, int maxCount)
-  {
-    if (maxCount < 0 || maxCount > affectWords.size())
-      maxCount = affectWords.size();
-    if (maxCount == 0) {
-      //noinspection unchecked
-      return Collections.EMPTY_LIST;
-    }
-
-    ArrayList<String> resultWords = new ArrayList<>(maxCount);
-    Comparator<AffectWord> comp = AffectWord.SquareWeightSumComparator.INSTANCE;
-
-    if (maxCount == 1) {
-      resultWords.add(Collections.max(affectWords, comp).getWord());
-    } else {
-      AffectWord[] a = affectWords.toArray(new AffectWord[affectWords.size()]);
-      Arrays.sort(a, comp);
-      final int limit = affectWords.size() - maxCount;
-      for (int i = affectWords.size() - 1; i >= limit; i--)
-        resultWords.add(a[i].getWord());
-    }
-    return resultWords;
-  }
-
-
-  private class FlickrPhotoImpl extends kaleidok.chromatik.FlickrPhoto
+  private class FlickrPhotoImpl extends FlickrPhoto
   {
     public FlickrPhotoImpl() { }
 
