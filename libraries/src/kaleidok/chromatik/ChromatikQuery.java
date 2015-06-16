@@ -136,8 +136,8 @@ public class ChromatikQuery
   {
     try {
       return new URL(baseUrl, getQueryString());
-    } catch (MalformedURLException e) {
-      throw new Error(e);
+    } catch (MalformedURLException ex) {
+      throw new AssertionError(ex);
     }
   }
 
@@ -240,7 +240,7 @@ public class ChromatikQuery
     try {
       DEFAULT_URL = new URL("http://chromatik.labs.exalead.com/searchphotos");
     } catch (MalformedURLException ex) {
-      throw new Error(ex);
+      throw new AssertionError(ex);
     }
   }
 

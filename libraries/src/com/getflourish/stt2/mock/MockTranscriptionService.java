@@ -19,7 +19,7 @@ public class MockTranscriptionService extends TranscriptionService
       MOCK_API_BASE = new URL(
         "http", "localhost", 8081, DEFAULT_API_BASE.getPath());
     } catch (MalformedURLException ex) {
-      throw new Error(ex);
+      throw new AssertionError(ex);
     }
   }
 

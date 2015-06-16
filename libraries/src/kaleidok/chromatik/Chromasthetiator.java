@@ -123,7 +123,7 @@ public class Chromasthetiator implements UpdateHandler
         return keywordsDoc.getText(0, keywordsDoc.getLength());
       } catch (BadLocationException e) {
         // this really shouldn't happen with the chosen location
-        throw new Error(e);
+        throw new AssertionError(ex);
       }
     }
 

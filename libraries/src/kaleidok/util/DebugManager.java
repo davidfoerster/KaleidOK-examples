@@ -96,7 +96,7 @@ public final class DebugManager
             f.set(null, DefaultValueParser.valueOf(strValue, clazz));
           } catch (IllegalAccessException ex) {
             // we already checked for that
-            throw new Error(ex);
+            throw new AssertionError(ex);
           }
         }
       }

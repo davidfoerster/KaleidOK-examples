@@ -25,8 +25,8 @@ public class TranscriptionService implements Runnable
   static {
     try {
       DEFAULT_API_BASE = new URL("https", "www.google.com", "/speech-api/v2/");
-    } catch (MalformedURLException e) {
-      throw new Error(e);
+    } catch (MalformedURLException ex) {
+      throw new AssertionError(ex);
     }
   }
 
@@ -97,7 +97,7 @@ public class TranscriptionService implements Runnable
       this.accessKey = accessKey;
       this.language = language;
     } catch (MalformedURLException ex) {
-      throw new Error(ex);
+      throw new AssertionError(ex);
     }
   }
 

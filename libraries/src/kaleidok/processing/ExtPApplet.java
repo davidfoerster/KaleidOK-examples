@@ -51,7 +51,7 @@ public class ExtPApplet extends PApplet
         try {
           documentBase = new URL(documentBase, documentBase.getPath() + "data/");
         } catch (MalformedURLException ex) {
-          throw new Error(ex);
+          throw new AssertionError(ex);
         }
       }
       this.documentBase = documentBase;

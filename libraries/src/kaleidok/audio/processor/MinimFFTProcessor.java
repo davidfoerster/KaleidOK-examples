@@ -59,7 +59,7 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
         break;
 
       default:
-        throw new Error("avgType has an unexpected value");
+        throw new AssertionError("avgType has an unexpected value");
       }
     }
   }
