@@ -238,7 +238,7 @@ public class ChromatikQuery
   public static final URL DEFAULT_URL;
   static {
     try {
-      DEFAULT_URL = new URL("http://chromatik.labs.exalead.com/searchphotos");
+      DEFAULT_URL = new URL("http", "chromatik.labs.exalead.com", "/searchphotos");
     } catch (MalformedURLException ex) {
       throw new AssertionError(ex);
     }

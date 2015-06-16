@@ -80,14 +80,14 @@ public final class DebugManager
 
   private static void fromPropertyGetter( PropertyGetter pg )
   {
-    final String base = DebugManager.class.getCanonicalName() + '.';
+    final String className = DebugManager.class.getCanonicalName();
 
     for (Field f: DebugManager.class.getDeclaredFields())
     {
       int mod = f.getModifiers();
       if (Modifier.isPublic(mod) && Modifier.isStatic(mod))
       {
-        String strValue = pg.get(base + f.getName());
+        String strValue = pg.get(className + '.' + f.getName());
         if (strValue != null) {
           Class<?> clazz = f.getType();
           if (clazz.isPrimitive())

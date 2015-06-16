@@ -118,10 +118,12 @@ public class Chromasthetiator implements UpdateHandler
   private String getQueryKeywords( EmotionalState synState )
   {
     Document keywordsDoc = this.keywordsDoc;
-    if (keywordsDoc != null && keywordsDoc.getLength() != 0) {
+    if (keywordsDoc != null) {
       try {
-        return keywordsDoc.getText(0, keywordsDoc.getLength());
-      } catch (BadLocationException e) {
+        String keywords =  keywordsDoc.getText(0, keywordsDoc.getLength());
+        if (!keywords.isEmpty())
+          return keywords;
+      } catch (BadLocationException ex) {
         // this really shouldn't happen with the chosen location
         throw new AssertionError(ex);
       }
