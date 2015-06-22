@@ -13,10 +13,10 @@ import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
-import kaleidok.chromatik.CallbackChromasthetiator;
-import kaleidok.chromatik.Chromasthetiator;
-import kaleidok.chromatik.data.ChromatikResponse;
-import kaleidok.chromatik.data.FlickrPhoto;
+import kaleidok.chromatik.ChromasthetiationService;
+import kaleidok.chromatik.ChromasthetiatorBase;
+import kaleidok.chromatik.DocumentChromasthetiator;
+import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.concurrent.Callback;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.ExtPApplet;
@@ -31,11 +31,9 @@ import javax.swing.JApplet;
 import java.awt.Image;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
@@ -69,7 +67,8 @@ public class Kaleidoscope extends ExtPApplet
   private VolumeLevelProcessor volumeLevelProcessor;
   private MinimFFTProcessor fftProcessor;
 
-  private CallbackChromasthetiator chromasthetiator;
+  private DocumentChromasthetiator chromasthetiator;
+  private ChromasthetiationService chromasthetiationService;
 
   private STT stt;
 
@@ -88,6 +87,7 @@ public class Kaleidoscope extends ExtPApplet
 
     getImages();
     getChromasthetiator();
+    getChromasthetiationService();
     getLayers();
     getSTT();
     audioDispatcherThread.start();
@@ -262,12 +262,11 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  CallbackChromasthetiator getChromasthetiator() throws IOException
+  private DocumentChromasthetiator getChromasthetiator()
   {
     if (chromasthetiator == null) {
-      Chromasthetiator.verbose = verbose;
-      chromasthetiator =
-        new CallbackChromasthetiator(this, new ChromatikResponseHandler());
+      ChromasthetiatorBase.verbose = verbose;
+      chromasthetiator = new DocumentChromasthetiator(this);
 
       String data = parseStringOrFile(getParameter("com.flickr.api.key"), '@');
       if (data != null) {
@@ -283,6 +282,15 @@ public class Kaleidoscope extends ExtPApplet
       chromasthetiator.chromatikQuery.nhits = 10;
     }
     return chromasthetiator;
+  }
+
+
+  private ChromasthetiationService getChromasthetiationService()
+  {
+    if (chromasthetiationService == null) {
+      chromasthetiationService = new ChromasthetiationService(4); // TODO: Make thread count configurable
+    }
+    return chromasthetiationService;
   }
 
   @Override
@@ -354,42 +362,55 @@ public class Kaleidoscope extends ExtPApplet
     }
   }
 
-  private class ChromatikResponseHandler implements Callback<ChromatikResponse>
+
+  public void chromasthetiate( String text )
   {
+    getChromasthetiationService().submit(text, getChromasthetiator(),
+      null, chromasthetiationCallback, getLayers().length + 1);
+  }
+
+
+  private final ChromasthetiationCallback chromasthetiationCallback =
+    new ChromasthetiationCallback();
+
+  private class ChromasthetiationCallback
+    extends AbstractFutureCallback<Image>
+  {
+    private final AtomicInteger imageListIndex = new AtomicInteger(0);
+
     @Override
-    public void call( ChromatikResponse response )
+    public void completed( Image image )
     {
-      if (response.results.length != 0) {
-        Iterator<ChromatikResponse.Result> it =
-          Arrays.asList(response.results).iterator();
-        bgImage = getNextLargestImage(it, bgImage);
-        for (CircularLayer layer: layers) {
-          if (layer != null) {
-            PImageFuture img = getNextLargestImage(it, null);
-            if (img == null)
-              break;
-            layer.currentImage = img;
-          }
+      assert image.getWidth(null) > 0 && image.getHeight(null) > 0;
+      PImageFuture fImage = new PImageFuture(new PImage(image));
+
+      CircularLayer[] layers = getLayers();
+      int idx = imageListIndex.getAndIncrement() % (layers.length + 1) - 1;
+      if (idx >= 0) {
+        layers[idx].currentImage = fImage;
+      } else {
+        bgImage = fImage;
+      }
+    }
+
+    @Override
+    public void failed( Exception ex )
+    {
+      if (ex == null) {
+        System.out.println("Aborted!");
+      } else if (ex instanceof FlickrException) {
+        switch (Integer.parseInt(((FlickrException) ex).getErrorCode())) {
+        case 1: // Photo not found
+        case 2: // Permission denied
+          //noinspection unchecked
+          System.err.println(ex.getLocalizedMessage());
+          return;
         }
       }
+      super.failed(ex);
     }
   }
 
-  private static PImageFuture getNextLargestImage(
-    Iterator<ChromatikResponse.Result> it, PImageFuture defaultImage )
-  {
-    while (it.hasNext()) {
-      FlickrPhoto photo = it.next().flickrPhoto;
-      try {
-        Future<Image> img = photo.getLargestImage();
-        if (img != null)
-          return new PImageFuture(img);
-      } catch (FlickrException ex) {
-        ex.printStackTrace();
-      }
-    }
-    return defaultImage;
-  }
 
   @Override
   public void keyTyped()
@@ -418,14 +439,8 @@ public class Kaleidoscope extends ExtPApplet
       if (verbose >= 1)
         println("STT returned: " + result.alternative[0].transcript);
 
-      if (!isIgnoreTranscriptionResult()) {
-        try {
-          // TODO: Don't do this in the event handler thread
-          getChromasthetiator().issueQuery(result.alternative[0].transcript);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
+      if (!isIgnoreTranscriptionResult())
+        chromasthetiate(result.alternative[0].transcript);
     }
 
     private boolean isIgnoreTranscriptionResult()
