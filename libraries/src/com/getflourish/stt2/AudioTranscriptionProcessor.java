@@ -27,7 +27,10 @@ class AudioTranscriptionProcessor implements AudioProcessor
   protected AudioTranscriptionProcessor( STT stt, TranscriptionService service )
   {
     this.stt = stt;
-    new Thread(service, "Speech transcription").start();
+
+    Thread serviceThread = new Thread(service, "Speech transcription");
+    serviceThread.setDaemon(true);
+    serviceThread.start();
   }
 
   @Override
