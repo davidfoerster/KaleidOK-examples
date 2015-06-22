@@ -164,7 +164,7 @@ public final class URLEncoding
         {
           enc = charset.newEncoder()
             .onMalformedInput(REPORT)
-            .onUnmappableCharacter(REPORT);
+            .onUnmappableCharacter(REPLACE);
 
           int remaining = s.remaining() + 1;
           dst.ensureCapacity(

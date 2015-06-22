@@ -138,10 +138,13 @@ public class URLEncodingTest
     String surrogatePair = new String(toChars(MAX_CODE_POINT));
     assertEquals(2, surrogatePair.length());
 
+    // Disabled, since unmappable characters should be replaced, not reported
+    /*
     encodeExpectIllegalArgumentException("…",
-      Charset.forName("ISO-8859-1"), UnmappableCharacterException.class);
+      ISO_8859_1, UnmappableCharacterException.class);
     encodeExpectIllegalArgumentException(surrogatePair,
-      Charset.forName("ISO-8859-1"), UnmappableCharacterException.class);
+      ISO_8859_1, UnmappableCharacterException.class);
+    */
 
     encodeExpectIllegalArgumentException(surrogatePair.substring(0, 1),
       UTF_8, MalformedInputException.class);
