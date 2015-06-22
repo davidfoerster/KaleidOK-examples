@@ -10,6 +10,8 @@
     <JAVADOC>
       <root url="jar://$MAVEN_REPOSITORY$/com/flickr4java/flickr4java/2.12/flickr4java-2.12-javadoc.jar!/" />
     </JAVADOC>
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/flickr4java/flickr4java/2.12/flickr4java-2.12-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
