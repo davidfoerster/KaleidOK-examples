@@ -1,6 +1,7 @@
 package kaleidok.awt;
 
 import kaleidok.concurrent.NotifyFuture;
+import org.apache.http.concurrent.FutureCallback;
 
 import java.awt.Component;
 import java.awt.Image;
@@ -20,6 +21,8 @@ public abstract class ReadyImageFuture extends NotifyFuture<Image>
 
   protected final Image image;
 
+  protected volatile FutureCallback<Image> callback = null;
+
   protected volatile int statusFlags;
 
 
@@ -30,24 +33,35 @@ public abstract class ReadyImageFuture extends NotifyFuture<Image>
 
   public static ReadyImageFuture createInstance( Component comp, Image image )
   {
-    return createInstance(comp, image, -1, -1);
+    return createInstance(comp, image, null);
   }
 
-  public static ReadyImageFuture createInstance( Component comp, Image image, int width, int height )
+  public static ReadyImageFuture createInstance( Component parent, Image image,
+    FutureCallback<Image> callback )
   {
-    return new ReadyImageFutureImpl(comp, image, width, height);
+    return createInstance(parent, image, -1, -1, callback);
   }
+
+  public static ReadyImageFuture createInstance( Component comp, Image image,
+    int width, int height, FutureCallback<Image> callback )
+  {
+    return new ReadyImageFutureImpl(comp, image, width, height, callback);
+  }
+
 
   public ReadyImageFuture( Image image )
   {
     this.image = image;
   }
 
-  public ReadyImageFuture( Component comp, Image image, int width, int height )
+  public ReadyImageFuture( Component comp, Image image, int width, int height,
+    FutureCallback<Image> callback )
   {
     this(image);
+    this.callback = callback;
     prepareImpl(comp, width, height);
   }
+
 
   protected abstract boolean prepareImpl( Component comp, int width, int height );
 
@@ -111,5 +125,20 @@ public abstract class ReadyImageFuture extends NotifyFuture<Image>
     if (isCancelled())
       throw new CancellationException();
     return isSuccessful() ? image : null;
+  }
+
+
+  protected void notifyFutureCallback( Image image, int infoFlags )
+  {
+    FutureCallback<Image> cb = this.callback;
+    if (cb != null) {
+      if ((infoFlags & SUCCESS) != 0) {
+        cb.completed(image);
+      } else if ((infoFlags & ABORT) != 0) {
+        cb.cancelled();
+      } else if ((infoFlags & ERROR) != 0) {
+        cb.failed(null);
+      }
+    }
   }
 }
