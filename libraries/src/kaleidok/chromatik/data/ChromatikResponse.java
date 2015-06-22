@@ -1,6 +1,7 @@
 package kaleidok.chromatik.data;
 
 import com.google.gson.annotations.Expose;
+import kaleidok.flickr.Photo;
 
 
 public class ChromatikResponse
@@ -26,6 +27,6 @@ public class ChromatikResponse
     @Expose
     public String thumbnailurl, squarethumbnailurl;
 
-    public FlickrPhoto flickrPhoto;
+    public Photo flickrPhoto;
   }
 }

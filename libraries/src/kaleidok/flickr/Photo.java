@@ -1,5 +1,6 @@
 package kaleidok.flickr;
 
+import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.photos.Size;
 
 import java.util.Collection;
@@ -7,7 +8,7 @@ import java.util.Collections;
 import java.util.regex.*;
 
 
-public class Photo extends com.flickr4java.flickr.photos.Photo
+public abstract class Photo extends com.flickr4java.flickr.photos.Photo
 {
   public Photo() { }
 
@@ -66,4 +67,6 @@ public class Photo extends com.flickr4java.flickr.photos.Photo
       Collections.max(sizes, PhotoSizeComparator.INSTANCE) :
       null;
   }
+
+  public abstract Collection<Size> getSizesThrow() throws FlickrException;
 }
