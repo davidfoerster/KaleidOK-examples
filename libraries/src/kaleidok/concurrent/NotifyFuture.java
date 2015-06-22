@@ -26,7 +26,7 @@ public abstract class NotifyFuture<V> implements Future<V>
     if (timeout == 0) {
       waitFor();
     } else if (timeout < 0) {
-      throw new IllegalArgumentException(String.valueOf(timeout));
+      throw new IllegalArgumentException("Negative timeout: " + timeout);
     } else if (!isDone()) {
       assert unit.convert(Long.MAX_VALUE, NANOSECONDS) >= timeout;
       timeout = unit.toNanos(timeout);
@@ -40,10 +40,9 @@ public abstract class NotifyFuture<V> implements Future<V>
           now = System.nanoTime();
           do {
             wait(Math.max(NANOSECONDS.toMillis(endTime - now), 1));
-            if (isDone())
-              return;
-          } while ((now = System.nanoTime()) < endTime);
-          throw new TimeoutException();
+          } while (!isDone() && (now = System.nanoTime()) < endTime);
+          if (now >= endTime)
+            throw new TimeoutException();
         }
       }
     }
