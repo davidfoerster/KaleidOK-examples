@@ -79,7 +79,9 @@ public class PImageFuture implements Future<PImage>
     if (isDone()) {
       try {
         return get();
-      } catch (InterruptedException | ExecutionException ignored) {
+      } catch (InterruptedException | ExecutionException ex) {
+        // This shouldn't happen, if isDone() returned true.
+        throw new AssertionError(ex);
       }
     }
     return null;

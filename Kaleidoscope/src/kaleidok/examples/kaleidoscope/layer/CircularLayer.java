@@ -13,7 +13,7 @@ public abstract class CircularLayer implements Runnable
 
   public float innerRadius, outerRadius;
 
-  public PImageFuture currentImage;
+  public volatile PImageFuture currentImage;
 
   private final float[] xL, yL;
 

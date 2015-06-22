@@ -13,6 +13,10 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
 {
   private JTextField keywordField = null, messageField = null;
 
+  private final String paramBase =
+    this.getClass().getPackage().getName() + '.';
+
+
   @Override
   public void init()
   {
@@ -31,7 +35,6 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
 
   private void initWindowPosition()
   {
-    String paramBase = getClass().getPackage().getName() + '.';
     int screenIndex = DefaultValueParser.parseInt(
       getParameter(paramBase + "screen"), -1);
     boolean fullscreen = DefaultValueParser.parseBoolean(
@@ -66,19 +69,13 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   private JTextField getMessageField()
   {
     if (messageField == null) {
-      messageField = new JTextField(getParameter(
-        this.getClass().getPackage().getName() + ".text"));
+      messageField = new JTextField(getParameter(paramBase + "text"));
       messageField.setAction(new AbstractAction()
       {
         @Override
         public void actionPerformed( ActionEvent ev )
         {
-          try {
-            // TODO: Don't do this in the event handler thread
-            getSketch().getChromasthetiator().issueQuery(((JTextField) ev.getSource()).getText());
-          } catch (Exception ex) {
-            ex.printStackTrace();
-          }
+          getSketch().chromasthetiate(messageField.getText());
         }
       });
     }

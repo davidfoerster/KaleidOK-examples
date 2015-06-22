@@ -45,7 +45,7 @@ public class Kaleidoscope extends ExtPApplet
 
   public List<PImageFuture> images; // list to hold input images
 
-  public PImageFuture bgImage;
+  public volatile PImageFuture bgImage;
 
   private int bgImageIndex; // variable to keep track of the current image
 

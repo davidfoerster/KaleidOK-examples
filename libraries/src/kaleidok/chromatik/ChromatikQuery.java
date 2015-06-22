@@ -53,13 +53,15 @@ public class ChromatikQuery
    */
   public Map<Object, Object> opts = new HashMap<>();
 
-  private StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
 
-  private static final Gson gson = new GsonBuilder()
+  private transient StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
+
+  protected static final Gson gson = new GsonBuilder()
     .registerTypeAdapter(
       ChromatikResponse.class, ChromatikResponseDeserializer.INSTANCE)
     .excludeFieldsWithoutExposeAnnotation()
     .create();
+
 
   /**
    * Constructs a query object with the default result set size and no
@@ -69,6 +71,7 @@ public class ChromatikQuery
   {
     this(QUERY_NHITS_DEFAULT, null, (int[]) null);
   }
+
 
   /**
    * Constructs a query object with preset parameters.
