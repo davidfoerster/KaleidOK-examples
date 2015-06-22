@@ -1,7 +1,8 @@
 package kaleidok.examples.kaleidoscope;
 
 import be.tarsos.dsp.AudioDispatcher;
-import be.tarsos.dsp.io.jvm.*;
+import be.tarsos.dsp.io.jvm.AudioPlayer;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import com.flickr4java.flickr.Flickr;
 import com.flickr4java.flickr.FlickrException;
@@ -23,7 +24,9 @@ import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
 import processing.core.PImage;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JApplet;
 import java.awt.Image;
 import java.io.IOException;
@@ -34,6 +37,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
+import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
 import static kaleidok.util.Math.isPowerOfTwo;
@@ -82,18 +87,9 @@ public class Kaleidoscope extends ExtPApplet
     smooth(4);
 
     getImages();
-    AudioDispatcher audioDispatcher;
-    try {
-      getChromasthetiator();
-      audioDispatcher = makeAudioDispatcher();
-      makeSTT(audioDispatcher);
-    }
-    catch (LineUnavailableException | UnsupportedAudioFileException | IOException ex) {
-      ex.printStackTrace();
-      exit();
-      return;
-    }
-    getLayers(audioDispatcher, fftProcessor, volumeLevelProcessor);
+    getChromasthetiator();
+    getLayers();
+    getSTT();
     audioDispatcherThread.start();
   }
 
@@ -135,7 +131,7 @@ public class Kaleidoscope extends ExtPApplet
     }
   }
 
-  private STT makeSTT( AudioDispatcher audioDispatcher ) throws IOException
+  private STT getSTT()
   {
     if (stt == null) {
       STT.debug = verbose >= 1;
@@ -143,13 +139,12 @@ public class Kaleidoscope extends ExtPApplet
         parseStringOrFile(getParameter("com.google.developer.api.key"), '@'));
       stt.setLanguage((String) getParameter(
         STT.class.getCanonicalName() + ".language", "en"));
-      audioDispatcher.addAudioProcessor(stt.getAudioProcessor());
+      getAudioDispatcher().addAudioProcessor(stt.getAudioProcessor());
     }
     return stt;
   }
 
-  private AudioDispatcher makeAudioDispatcher()
-    throws LineUnavailableException, IOException, UnsupportedAudioFileException
+  private AudioDispatcher getAudioDispatcher()
   {
     if (audioDispatcher == null) {
       String paramBase = this.getClass().getPackage().getName() + ".audio.";
@@ -178,28 +173,32 @@ public class Kaleidoscope extends ExtPApplet
 
       Runnable dispatcherRunnable;
 
-      if (audioSource == null) {
-        audioDispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
-          sampleRate, bufferSize, bufferOverlap);
-        dispatcherRunnable = audioDispatcher;
-      } else {
-        AudioInputStream ais =
-          AudioSystem.getAudioInputStream(createInputRaw(audioSource));
-        audioDispatcher =
-          new AudioDispatcher(new ContinuousAudioInputStream(ais),
-            bufferSize, bufferOverlap);
-
-        boolean play =
-          DefaultValueParser.parseBoolean(this, paramBase + "input.play", false);
-        if (play) {
+      try {
+        if (audioSource == null) {
+          audioDispatcher =
+            fromDefaultMicrophone(sampleRate, bufferSize, bufferOverlap);
           dispatcherRunnable = audioDispatcher;
-          audioDispatcher.addAudioProcessor(new AudioPlayer(
-            JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
-            bufferSize));
         } else {
-          dispatcherRunnable =
-            new DummyAudioPlayer().addToDispatcher(audioDispatcher);
+          AudioInputStream ais =
+            getAudioInputStream(createInputRaw(audioSource));
+          audioDispatcher =
+            new AudioDispatcher(new ContinuousAudioInputStream(ais),
+              bufferSize, bufferOverlap);
+
+          boolean play =
+            DefaultValueParser.parseBoolean(this, paramBase + "input.play", false);
+          if (play) {
+            dispatcherRunnable = audioDispatcher;
+            audioDispatcher.addAudioProcessor(new AudioPlayer(
+              JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
+              bufferSize));
+          } else {
+            dispatcherRunnable =
+              new DummyAudioPlayer().addToDispatcher(audioDispatcher);
+          }
         }
+      } catch (IOException | UnsupportedAudioFileException | LineUnavailableException ex) {
+        throw new Error(ex);
       }
 
       audioDispatcher.addAudioProcessor(
@@ -212,7 +211,7 @@ public class Kaleidoscope extends ExtPApplet
     return audioDispatcher;
   }
 
-  private Thread makeAudioDispatcherThread( final Runnable dispatcher )
+  private void makeAudioDispatcherThread( final Runnable dispatcher )
   {
     if (audioDispatcherThread == null) {
       audioDispatcherThread = new Thread(new Runnable()
@@ -226,33 +225,42 @@ public class Kaleidoscope extends ExtPApplet
         },
         "Audio dispatching");
     }
-    return audioDispatcherThread;
   }
 
-  private CircularLayer[] getLayers( AudioDispatcher audioDispatcher,
-    MinimFFTProcessor fftProcessor, VolumeLevelProcessor volumeLevelProcessor )
+  private CircularLayer[] getLayers()
   {
     if (layers == null)
     {
-      outerMovingShape = new OuterMovingShape(this, images.get(4), 16, 300);
-      audioDispatcher.addAudioProcessor(new PitchProcessor(
-        PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
-        audioDispatcher.getFormat().getSampleRate(), audioBufferSize,
-        outerMovingShape.getPitchDetectionHandler()));
+      getAudioDispatcher();
 
       layers = new CircularLayer[]{
         spectrogramLayer =
           new SpectrogramLayer(this, images.get(0), 256, 125, 290, fftProcessor),
-        outerMovingShape,
+        getOuterMovingShape(),
         foobarLayer =
           new FoobarLayer(this, images.get(3), 16, 125, 275),
         centreLayer =
-          new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor),
-        null
+          new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor)
       };
     }
     return layers;
   }
+
+  private OuterMovingShape getOuterMovingShape()
+  {
+    if (outerMovingShape == null) {
+      OuterMovingShape outerMovingShape =
+        new OuterMovingShape(this, getImages().get(4), 16, 300);
+      AudioDispatcher audioDispatcher = getAudioDispatcher();
+      audioDispatcher.addAudioProcessor(new PitchProcessor(
+        PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
+        audioDispatcher.getFormat().getSampleRate(), audioBufferSize,
+        outerMovingShape.getPitchDetectionHandler()));
+      this.outerMovingShape = outerMovingShape;
+    }
+    return outerMovingShape;
+  }
+
 
   CallbackChromasthetiator getChromasthetiator() throws IOException
   {
@@ -438,7 +446,6 @@ public class Kaleidoscope extends ExtPApplet
 
 
   private String parseStringOrFile( String s, char filePrefix )
-    throws IOException
   {
     if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {
       s = new String((s.length() == 2 && s.charAt(1) == '-') ?
