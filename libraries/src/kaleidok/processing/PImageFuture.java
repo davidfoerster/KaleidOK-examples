@@ -17,6 +17,12 @@ public class PImageFuture implements Future<PImage>
 
   private PImage image = null;
 
+  public PImageFuture( PImage image )
+  {
+    this.underlying = null;
+    this.image = image;
+  }
+
   public PImageFuture( Future<Image> underlying )
   {
     this.underlying = underlying;
@@ -29,46 +35,51 @@ public class PImageFuture implements Future<PImage>
 
   public PImageFuture( Component comp, Image image, int width, int height )
   {
-    this(ReadyImageFuture.createInstance(comp, image, width, height));
+    this(ReadyImageFuture.createInstance(comp, image, width, height, null));
   }
 
   @Override
   public boolean cancel( boolean mayInterruptIfRunning )
   {
-    return underlying.cancel(mayInterruptIfRunning);
+    return underlying != null && underlying.cancel(mayInterruptIfRunning);
   }
 
   @Override
   public boolean isCancelled()
   {
-    return underlying.isCancelled();
+    return underlying != null && underlying.isCancelled();
   }
 
   @Override
   public boolean isDone()
   {
-    return underlying.isDone();
+    return underlying == null || underlying.isDone();
   }
 
   @Override
   public PImage get() throws InterruptedException, ExecutionException
   {
-    return getPImage(underlying.get());
+    return (underlying != null) ? getPImage(underlying.get()) : image;
   }
 
   @Override
   public PImage get( long timeout, TimeUnit unit )
     throws InterruptedException, ExecutionException, TimeoutException
   {
-    return getPImage(underlying.get(timeout, unit));
+    return (underlying != null) ? getPImage(underlying.get(timeout, unit)) : image;
   }
 
   private PImage getPImage( Image image )
   {
     if (image == null)
       return null;
-    if (this.image == null)
-      this.image = new PImage(image);
+    if (this.image == null) {
+      synchronized (this) {
+        if (this.image == null) {
+          this.image = new PImage(image);
+        }
+      }
+    }
     return this.image;
   }
 
