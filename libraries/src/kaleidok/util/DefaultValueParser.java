@@ -31,14 +31,19 @@ public final class DefaultValueParser
   public static boolean parseBoolean( String s )
   {
     if (s != null && !s.isEmpty()) {
-      if (Character.isDigit(s.charAt(0)))
-        return Integer.parseInt(s) != 0;
+      if (Character.isDigit(s.charAt(0))) {
+        try {
+          return Integer.parseInt(s) != 0;
+        } catch (NumberFormatException ex) {
+          throw new IllegalArgumentException("Not a boolean: " + s, ex);
+        }
+      }
       for (int i = 0; i < BOOLEAN_WORDS.length; i++) {
         if (BOOLEAN_WORDS[i].equalsIgnoreCase(s))
           return i % 2 == 0;
       }
     }
-    throw new IllegalArgumentException(s);
+    throw new IllegalArgumentException("Not a boolean: " + s);
   }
 
   public static boolean parseBoolean( String s, boolean defaultValue )
