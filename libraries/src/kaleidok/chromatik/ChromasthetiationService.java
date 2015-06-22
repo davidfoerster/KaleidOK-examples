@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChromasthetiationService
 {
+  public static int DEFAULT_THREAD_POOL_SIZE = 4;
+
   private final Executor executor;
 
   private final JsonAsync jsonAsync;

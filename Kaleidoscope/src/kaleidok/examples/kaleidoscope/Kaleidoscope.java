@@ -288,10 +288,20 @@ public class Kaleidoscope extends ExtPApplet
   private ChromasthetiationService getChromasthetiationService()
   {
     if (chromasthetiationService == null) {
-      chromasthetiationService = new ChromasthetiationService(4); // TODO: Make thread count configurable
+      chromasthetiationService =
+        new ChromasthetiationService(getChromasthetiationThreadPoolSize());
     }
     return chromasthetiationService;
   }
+
+
+  private int getChromasthetiationThreadPoolSize()
+  {
+    return DefaultValueParser.parseInt(this,
+      ChromasthetiationService.class.getCanonicalName() + ".threads",
+      ChromasthetiationService.DEFAULT_THREAD_POOL_SIZE);
+  }
+
 
   @Override
   public void destroy()
@@ -299,6 +309,7 @@ public class Kaleidoscope extends ExtPApplet
     stt.shutdown();
     super.destroy();
   }
+
 
   @Override
   public void draw()

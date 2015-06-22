@@ -19,6 +19,7 @@
     <parameter name="com.google.developer.api.key" value="@api-key.google.txt" />
     <parameter name="kaleidok.examples.kaleidoscope.screen" value="-1" />
     <parameter name="kaleidok.examples.kaleidoscope.fullscreen" value="false" />
+    <parameter name="kaleidok.chromatik.ChromasthetiationService.threads" value="4" />
     <method />
   </configuration>
 </component>
