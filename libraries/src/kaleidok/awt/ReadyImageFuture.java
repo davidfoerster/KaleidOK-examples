@@ -13,9 +13,15 @@ import static java.awt.image.ImageObserver.*;
 
 public abstract class ReadyImageFuture extends NotifyFuture<Image>
 {
+  public static final int
+    SUCCESS = ALLBITS | FRAMEBITS,
+    DONE = SUCCESS | ERROR | ABORT;
+
+
   protected final Image image;
 
   protected volatile int statusFlags;
+
 
   public static ReadyImageFuture createInstance( Image image )
   {
@@ -52,7 +58,7 @@ public abstract class ReadyImageFuture extends NotifyFuture<Image>
 
   public boolean prepare( Component comp, int width, int height )
   {
-    return (statusFlags & (ALLBITS | FRAMEBITS | ERROR)) != 0 ||
+    return (statusFlags & (SUCCESS | ERROR)) != 0 ||
       prepareImpl(comp, width, height);
   }
 
@@ -76,19 +82,14 @@ public abstract class ReadyImageFuture extends NotifyFuture<Image>
   @Override
   public boolean isDone()
   {
-    return isDone(statusFlags);
+    return (statusFlags & DONE) != 0;
   }
 
   public boolean isSuccessful()
   {
-    return (statusFlags & (ALLBITS | FRAMEBITS)) != 0;
+    return (statusFlags & SUCCESS) != 0;
   }
 
-  public static boolean isDone( int statusFlags )
-  {
-
-    return (statusFlags & (ALLBITS | FRAMEBITS | ERROR | ABORT)) != 0;
-  }
 
   @Override
   public Image get() throws InterruptedException

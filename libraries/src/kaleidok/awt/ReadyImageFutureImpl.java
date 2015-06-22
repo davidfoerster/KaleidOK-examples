@@ -20,13 +20,16 @@ class ReadyImageFutureImpl extends ReadyImageFuture implements ImageObserver
   protected boolean prepareImpl( Component comp, int width, int height )
   {
     boolean done = comp.prepareImage(image, width, height, this);
-    statusFlags = done ? ALLBITS | FRAMEBITS | SOMEBITS | WIDTH | HEIGHT | PROPERTIES : 0;
+    statusFlags = done ? SUCCESS | WIDTH | HEIGHT | PROPERTIES : 0;
     return done;
   }
 
   @Override
   public boolean imageUpdate( Image img, int infoFlags, int x, int y, int width, int height )
   {
+    if (img != this.image)
+      return true;
+
     // Assume that flags are never deleted during subsequent updates.
     //assert (statusFlags & ~infoFlags) == 0;
 
@@ -36,7 +39,7 @@ class ReadyImageFutureImpl extends ReadyImageFuture implements ImageObserver
     }
 
     statusFlags = infoFlags;
-    if (isDone(infoFlags)) {
+    if ((infoFlags & DONE) != 0) {
       synchronized (this) {
         notifyAll();
       }
