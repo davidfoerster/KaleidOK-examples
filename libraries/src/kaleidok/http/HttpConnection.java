@@ -1,20 +1,17 @@
 package kaleidok.http;
 
+import kaleidok.http.Parsers.ContentType;
 import kaleidok.io.Readers;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.InflaterInputStream;
 
 
 public class HttpConnection
@@ -27,9 +24,7 @@ public class HttpConnection
 
   public Charset defaultCharset;
 
-  protected String responseMimeType;
-
-  protected Charset responseCharset;
+  protected ContentType responseContentType;
 
   protected InputStream inputStream;
 
@@ -213,6 +208,7 @@ public class HttpConnection
     if (inputStream == null) {
       connect();
 
+      InputStream rawInputStream = null;
       try {
         if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty()) {
           String mimeType = getResponseMimeType();
@@ -220,47 +216,25 @@ public class HttpConnection
             throw new IOException("Unsupported response MIME type: " + mimeType);
         }
 
-        Class<? extends FilterInputStream> dec = getInputFilterClass();
-        if (dec == null) {
-          inputStream = c.getInputStream();
-        } else {
-          try {
-            Constructor<? extends FilterInputStream> ctor =
-              dec.getConstructor(InputStream.class);
-            inputStream = ctor.newInstance(c.getInputStream());
-          } catch (InvocationTargetException ex) {
-            Throwable cause = ex.getCause();
-            if (cause instanceof IOException)
-              throw (IOException) cause;
-            throw new Error(cause); // FilterInputStream constructors shouldn't throw anything except IOException
-          } catch (ReflectiveOperationException ex) {
-            throw new Error(ex);
-          }
+        String contentEncoding = c.getContentEncoding();
+        if (contentEncoding == null) {
+          contentEncoding = c.getHeaderField("transfer-encoding");
+          if ("chunked".equals(contentEncoding))
+            contentEncoding = null;
         }
+
+        rawInputStream = c.getInputStream();
+        inputStream = Parsers.decompressStream(rawInputStream, contentEncoding);
+
       } finally {
-        if (inputStream == null)
+        if (inputStream == null) {
+          if (rawInputStream != null)
+            rawInputStream.close();
           disconnect();
+        }
       }
     }
     return inputStream;
-  }
-
-  private Class<? extends FilterInputStream> getInputFilterClass()
-    throws IOException
-  {
-    String contentEncoding = c.getContentEncoding();
-    if (contentEncoding == null) {
-      contentEncoding = c.getHeaderField("transfer-encoding");
-      if ("chunked".equals(contentEncoding))
-        contentEncoding = null;
-    }
-
-    Class<? extends FilterInputStream> dec = decoders.get(contentEncoding);
-    if (dec != null || decoders.containsKey(null))
-      return dec;
-
-    throw new IOException(
-      "Unsupported content-encoding: " + contentEncoding);
   }
 
   /**
@@ -395,59 +369,28 @@ public class HttpConnection
   private synchronized void parseContentType() throws IOException
   {
     connect();
-    String ct = c.getContentType();
-    if (ct == null)
-      return;
-
-    int delimPos = ct.indexOf(';');
-    responseMimeType = (delimPos >= 0) ? ct.substring(0, delimPos) : ct;
-
-    while (delimPos >= 0) {
-      int offset = delimPos + 1;
-      while (offset < ct.length() && ct.charAt(offset) == ' ')
-        offset++;
-      if (offset >= ct.length())
-        break;
-
-      delimPos = ct.indexOf(';', offset);
-
-      if (ct.startsWith(CHARSET, offset) &&
-        ct.charAt(offset + CHARSET.length()) == '=') {
-        try {
-          responseCharset = Charset.forName(
-            ct.substring(offset + CHARSET.length() + 1,
-              (delimPos >= 0) ? delimPos : ct.length()));
-        } catch (IllegalArgumentException ex) {
-          throw new IOException(ex);
-        }
-      }
+    try {
+      responseContentType = Parsers.getContentType(c);
+    } catch (IllegalArgumentException ex) {
+      throw new IOException(ex);
     }
   }
 
   public String getResponseMimeType() throws IOException
   {
-    if (responseMimeType == null)
+    if (responseContentType == null)
       parseContentType();
-    return responseMimeType;
+    return responseContentType.mimeType;
   }
 
   public Charset getResponseCharset( boolean allowDefault ) throws IOException
   {
-    if (responseMimeType == null)
+    if (responseContentType == null)
       parseContentType();
-    return (responseCharset != null || !allowDefault) ?
-      responseCharset :
+    return (responseContentType.charset != null || !allowDefault) ?
+      responseContentType.charset :
       defaultCharset;
   }
-
-  protected static final Map<String, Class<? extends FilterInputStream>> decoders =
-    new HashMap<String, Class<? extends FilterInputStream>>() {{
-      put(null, null);
-      put("deflate", InflaterInputStream.class);
-      put("gzip", GZIPInputStream.class);
-    }};
-
-  protected static final String CHARSET = "charset";
 
   /**
    * @see HttpURLConnection#setRequestMethod(String)
