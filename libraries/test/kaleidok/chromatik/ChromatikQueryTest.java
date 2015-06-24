@@ -1,9 +1,9 @@
 package kaleidok.chromatik;
 
 import kaleidok.chromatik.data.ChromatikColor;
+import kaleidok.http.URLEncoding;
 import kaleidok.util.StringTokenIterator;
 import org.junit.Test;
-import processing.core.PApplet;
 
 import java.util.*;
 
@@ -23,10 +23,10 @@ public class ChromatikQueryTest
       int split = p.indexOf('=');
       String key, value;
       if (split >= 0) {
-        key = PApplet.urlDecode(p.substring(0, split));
-        value = PApplet.urlDecode(p.substring(split + 1));
+        key = URLEncoding.decode(p.substring(0, split));
+        value = URLEncoding.decode(p.substring(split + 1));
       } else {
-        key = PApplet.urlDecode(p);
+        key = URLEncoding.decode(p);
         value = null;
       }
 
