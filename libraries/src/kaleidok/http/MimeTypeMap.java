@@ -130,6 +130,8 @@ public class MimeTypeMap extends HashMap<String, Float>
    */
   public String allows( String mime, boolean wildcards )
   {
+    assert mime == null || MIME_TYPE_PATTERN.matcher(mime).matches();
+
     Float q = get(mime);
     if (q != null)
       return (q > 0) ? mime : null;
@@ -137,16 +139,10 @@ public class MimeTypeMap extends HashMap<String, Float>
       return null;
 
     if (mime != null) {
-      int p = mime.indexOf('/');
-      if (p < 0)
-        throw new IllegalArgumentException("Invalid MIME type: " + mime);
-      assert mime.indexOf('/', p + 1) < 0;
-      if (mime.length() != p + 2 || mime.charAt(p + 1) != '*') {
-        char[] buf = new char[p + 2];
-        mime.getChars(0, p, buf, 0);
-        buf[p] = '/';
-        buf[p + 1] = '*';
-        mime = new String(buf);
+      int p = mime.indexOf('/') + 1;
+      assert p > 0 && p < mime.length();
+      if (mime.charAt(p) != '*') {
+        mime = mime.substring(0, p) + '*';
         q = get(mime);
         if (q != null)
           return (q > 0) ? mime : null;
@@ -223,7 +219,7 @@ public class MimeTypeMap extends HashMap<String, Float>
   }
 
   public static final Pattern MIME_TYPE_PATTERN = Pattern.compile(
-    "^(?:\\*/\\*|[a-z\\.-]+/(\\*|[a-z\\.-]+))$");
+    "^(?:\\*/\\*|[a-z\\.-]+/(?:\\*|[a-z\\.-]+))$");
 
   private static final NumberFormat qFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
   static {
