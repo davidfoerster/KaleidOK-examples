@@ -132,10 +132,10 @@ public class JsonHttpConnection extends HttpConnection
   }
 
   public static final MimeTypeMap MIME_TYPE_MAP = new MimeTypeMap() {{
-    put("application/json", MimeTypeMap.ONE);
+    put("application/json", ONE);
     put("text/json", 0.9f);
     put("text/javascript", 0.5f);
-    put(MimeTypeMap.WILDCARD, 0.1f);
+    put(WILDCARD, 0.1f);
     freeze();
   }};
 }
