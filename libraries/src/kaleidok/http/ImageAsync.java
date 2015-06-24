@@ -74,12 +74,15 @@ public class ImageAsync extends AsyncBase
   }
 
 
-  public static final MimeTypeMap IMAGE_MIMETYPE_MAP =
-    new MimeTypeMap() {{
-      for (String mimeType: ImageIO.getReaderMIMETypes())
-        put(mimeType, null);
-      freeze();
-    }};
+  public static final MimeTypeMap IMAGE_MIMETYPE_MAP;
+  static {
+    final String[] imageMimeTypes = ImageIO.getReaderMIMETypes();
+    IMAGE_MIMETYPE_MAP =
+      new MimeTypeMap(imageMimeTypes.length + (imageMimeTypes.length + 1) / 2);
+    for (String mimeType: imageMimeTypes)
+      IMAGE_MIMETYPE_MAP.put(mimeType, null);
+    IMAGE_MIMETYPE_MAP.freeze();
+  }
 
   protected static final ResponseMimeTypeChecker imageMimeTypeChecker =
     new ResponseMimeTypeChecker(IMAGE_MIMETYPE_MAP);

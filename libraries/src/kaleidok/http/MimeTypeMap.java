@@ -35,6 +35,11 @@ public class MimeTypeMap extends HashMap<String, Float>
    */
   public MimeTypeMap() { }
 
+  public MimeTypeMap( int initialCapacity )
+  {
+    super(initialCapacity);
+  }
+
   /**
    * Constructs a new MIME type set.
    *
