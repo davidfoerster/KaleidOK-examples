@@ -28,7 +28,11 @@ public class MimeTypeMap extends HashMap<String, Float>
    */
   public static final Float ONE = 1.f;
 
+
   private boolean frozen = false;
+
+  private String acceptString = null;
+
 
   /**
    * Constructs an empty MIME type set.
@@ -165,6 +169,9 @@ public class MimeTypeMap extends HashMap<String, Float>
     if (isEmpty() || (size() == 1 && ONE.equals(get(WILDCARD))))
       return "";
 
+    if (frozen && this.acceptString != null)
+      return this.acceptString;
+
     StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, Float> e: entrySet()) {
       assert MIME_TYPE_PATTERN.matcher(e.getKey()).matches();
@@ -181,7 +188,10 @@ public class MimeTypeMap extends HashMap<String, Float>
         sb.append(";q=").append(qs);
       }
     }
-    return (sb.length() != 0) ? sb.toString() : "";
+    String acceptString = (sb.length() != 0) ? sb.toString() : "";
+    if (frozen)
+      this.acceptString = acceptString;
+    return acceptString;
   }
 
   /**
