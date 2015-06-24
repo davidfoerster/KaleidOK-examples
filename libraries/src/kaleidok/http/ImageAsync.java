@@ -1,5 +1,6 @@
 package kaleidok.http;
 
+import kaleidok.awt.ImageTracker;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Executor;
@@ -9,8 +10,6 @@ import org.apache.http.util.EntityUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.util.concurrent.Future;
 
@@ -51,64 +50,11 @@ public class ImageAsync extends AsyncBase
       throws IOException
     {
       httpResponse = imageMimeTypeChecker.handleResponse(httpResponse);
-      Toolkit tk = Toolkit.getDefaultToolkit();
-      Image img = tk.createImage(EntityUtils.toByteArray(httpResponse.getEntity()));
-
-      int infoFlags;
-      if (tk.prepareImage(img, -1, -1, null)) {
-        infoFlags = tk.checkImage(img, -1, -1, null);
-      } else {
-        ImageReadyObserver obs = new ImageReadyObserver();
-        synchronized (obs) {
-          infoFlags = tk.checkImage(img, -1, -1, obs);
-          if ((infoFlags & ImageReadyObserver.DONE) == 0) {
-            while (true) {
-              try {
-                obs.wait();
-                infoFlags = obs.getInfoFlags();
-                break;
-              } catch (InterruptedException e) {
-                e.printStackTrace();
-              }
-            }
-          }
-        }
-      }
-
-      if ((infoFlags & ImageReadyObserver.SUCCESS) == 0) {
-        throw new IOException("Loading image failed");
-      }
-
-      return img;
-    }
-  }
-
-
-  private static class ImageReadyObserver implements ImageObserver
-  {
-    public static final int
-      SUCCESS = ALLBITS | FRAMEBITS,
-      DONE = SUCCESS | ERROR | ABORT;
-
-    private volatile int infoFlags = 0;
-
-    public int getInfoFlags()
-    {
-      return infoFlags;
-    }
-
-    @Override
-    public boolean imageUpdate( Image img, int infoFlags, int x, int y,
-      int width, int height )
-    {
-      this.infoFlags = infoFlags;
-      if ((infoFlags & DONE) != 0) {
-        synchronized (this) {
-          notifyAll();
-        }
-        return false;
-      }
-      return true;
+      Image img = ImageTracker.loadImage(
+        EntityUtils.toByteArray(httpResponse.getEntity()));
+      if (img != null)
+        return img;
+      throw new IOException("Loading image failed");
     }
   }
 
