@@ -61,7 +61,7 @@ public class LinearAverageSpectrum implements Spectrum
       }
       assert N != 0;
       bandwidth = (double) sampleRate / (N * 2);
-      binsPerBand = (double) spectrum.getSize() / N;
+      binsPerBand = (double) spectrum.size() / N;
     }
     return true;
   }
@@ -70,7 +70,7 @@ public class LinearAverageSpectrum implements Spectrum
   public float get( int n )
   {
     double begin = n * binsPerBand, end = begin + binsPerBand;
-    assert end <= spectrum.getSize();
+    assert end <= spectrum.size();
     int lowBin = (int) begin + 1, highBin = (int) end;
 
     double x;
@@ -78,7 +78,7 @@ public class LinearAverageSpectrum implements Spectrum
       x = 0;
       if (lowBin > 0)
         x += (lowBin - begin) * spectrum.get(lowBin - 1); // left side
-      if (highBin < spectrum.getSize())
+      if (highBin < spectrum.size())
         x += (end - highBin) * spectrum.get(highBin); // right side
       x += sum(spectrum, lowBin, highBin - lowBin);
     } else {
@@ -88,7 +88,7 @@ public class LinearAverageSpectrum implements Spectrum
   }
 
   @Override
-  public int getSize()
+  public int size()
   {
     return N;
   }

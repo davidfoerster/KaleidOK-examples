@@ -47,7 +47,7 @@ public class FFTProcessor implements AudioProcessor, Spectrum
   }
 
   @Override
-  public int getSize()
+  public int size()
   {
     return amplitudes.length;
   }

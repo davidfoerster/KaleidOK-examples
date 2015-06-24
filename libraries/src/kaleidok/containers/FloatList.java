@@ -2,7 +2,7 @@ package kaleidok.containers;
 
 public interface FloatList
 {
-  int getSize();
+  int size();
 
   float get(int i);
 }

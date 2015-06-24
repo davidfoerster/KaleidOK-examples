@@ -78,7 +78,7 @@ public class LogarithmicAverageSpectrum implements Spectrum
       x = 0;
       if (lowBin > 0)
         x += spectrum.get(lowBin - 1) / getWeightOfBinRange(begin, lowBin); // left side
-      if (highBin < spectrum.getSize())
+      if (highBin < spectrum.size())
         x += spectrum.get(highBin) / getWeightOfBinRange(highBin, end); // right side
       for (int i = lowBin; i < highBin; i++) {
         x += spectrum.get(i) * getWeightOfBin(i);
@@ -105,7 +105,7 @@ public class LogarithmicAverageSpectrum implements Spectrum
   }
 
   @Override
-  public int getSize()
+  public int size()
   {
     return N;
   }

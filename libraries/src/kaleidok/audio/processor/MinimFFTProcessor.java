@@ -95,7 +95,7 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
   }
 
   @Override
-  public int getSize()
+  public int size()
   {
     return bufferSize;
   }

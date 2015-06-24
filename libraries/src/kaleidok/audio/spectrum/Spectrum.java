@@ -7,7 +7,7 @@ public interface Spectrum extends FloatList
 {
   float get( int n );
 
-  int getSize();
+  int size();
 
   float getSampleRate();
 

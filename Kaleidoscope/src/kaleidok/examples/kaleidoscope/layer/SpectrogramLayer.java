@@ -32,7 +32,7 @@ public class SpectrogramLayer extends CircularLayer
     if (!avgSpectrum.isReady())
       return;
 
-    assert segmentCount <= avgSpectrum.getSize();
+    assert segmentCount <= avgSpectrum.size();
 
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
 		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center

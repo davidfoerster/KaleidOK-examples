@@ -44,16 +44,16 @@ public final class Math
 
   public static float sum( FloatList a )
   {
-    return (a.getSize() != 0) ? sum_noBoundsCheck(a, 0, a.getSize()) : 0;
+    return (a.size() != 0) ? sum_noBoundsCheck(a, 0, a.size()) : 0;
   }
 
   public static float sum( FloatList a, int offset, int len )
   {
-    if (offset < 0 || offset > a.getSize())
+    if (offset < 0 || offset > a.size())
       throw new ArrayIndexOutOfBoundsException("offset");
     if (len < 0)
       throw new ArrayIndexOutOfBoundsException("len");
-    if (offset + len > a.getSize())
+    if (offset + len > a.size())
       throw new ArrayIndexOutOfBoundsException("offset+len");
 
     return (len != 0) ? sum_noBoundsCheck(a, offset, len) : 0;
@@ -62,7 +62,7 @@ public final class Math
   private static float sum_noBoundsCheck( FloatList a, int offset, int len )
   {
     assert offset >= 0 && len > 0;
-    assert offset + len <= a.getSize();
+    assert offset + len <= a.size();
 
     if (len == 1)
       return a.get(offset);
