@@ -168,7 +168,7 @@ public class Kaleidoscope extends ExtPApplet
        param, bufferSize / 2);
       if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
         throw new AssertionError(param + " must be positive and less than buffersize");
-      if (bufferOverlap > 0 && !isPowerOfTwo(bufferSize))
+      if (bufferOverlap > 0 && !isPowerOfTwo(bufferOverlap))
         throw new AssertionError(param + " must be a power of 2");
 
       Runnable dispatcherRunnable;
