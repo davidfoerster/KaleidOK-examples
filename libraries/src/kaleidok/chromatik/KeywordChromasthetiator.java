@@ -1,6 +1,6 @@
 package kaleidok.chromatik;
 
-class KeywordChromasthetiator extends ChromasthetiatorBase
+public class KeywordChromasthetiator extends ChromasthetiatorBase
 {
   private String keywords;
 

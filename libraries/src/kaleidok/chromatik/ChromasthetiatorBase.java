@@ -21,7 +21,7 @@ import static java.lang.Math.sqrt;
 import static kaleidok.util.Arrays.shuffle;
 
 
-public abstract class ChromasthetiatorBase implements Chromasthetiator
+public abstract class ChromasthetiatorBase
 {
   // Configuration:
 
@@ -85,7 +85,6 @@ public abstract class ChromasthetiatorBase implements Chromasthetiator
   }
 
 
-  @Override
   public ChromatikResponse query( String text ) throws IOException
   {
     EmotionalState emoState = synesthetiator.synesthetiseDirect(text);
