@@ -1,6 +1,7 @@
 package kaleidok.chromatik;
 
 import kaleidok.chromatik.data.ChromatikColor;
+import kaleidok.util.StringTokenIterator;
 import org.junit.Test;
 import processing.core.PApplet;
 
@@ -14,10 +15,11 @@ public class ChromatikQueryTest
   private Map<String, String> getParams( ChromatikQuery q )
   {
     String qs = q.getQueryString();
-    assertTrue(qs.startsWith("?"));
+    int qp = qs.indexOf('?');
+    assertTrue(qp >= 0);
 
     HashMap<String, String> m = new HashMap<>();
-    for (String p: qs.substring(1).split("&")) {
+    for (String p: new StringTokenIterator(qs.substring(qp + 1), '&')) {
       int split = p.indexOf('=');
       String key, value;
       if (split >= 0) {
