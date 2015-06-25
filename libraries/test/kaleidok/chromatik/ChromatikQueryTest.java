@@ -14,12 +14,9 @@ public class ChromatikQueryTest
 {
   private Map<String, String> getParams( ChromatikQuery q )
   {
-    String qs = q.getQueryString();
-    int qp = qs.indexOf('?');
-    assertTrue(qp >= 0);
-
+    String qs = q.getUri().getRawQuery();
     HashMap<String, String> m = new HashMap<>();
-    for (String p: new StringTokenIterator(qs.substring(qp + 1), '&')) {
+    for (String p: new StringTokenIterator(qs, '&')) {
       int split = p.indexOf('=');
       String key, value;
       if (split >= 0) {

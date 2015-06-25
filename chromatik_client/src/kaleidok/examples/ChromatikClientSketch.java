@@ -27,7 +27,7 @@ public class ChromatikClientSketch extends PApplet
     q.keywords = "";
     q.opts.put(new ChromatikColor(0xeb5252), 0.25f);
     q.opts.put(new ChromatikColor(0x9feb52), 0.18f);
-    println("query: " + q.getQueryString());
+    println("query: " + q.getUri().getRawQuery());
     drawQuery(q);
 
     ChromatikResponse resultSet;

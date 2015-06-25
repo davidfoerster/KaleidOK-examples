@@ -7,6 +7,7 @@ import kaleidok.chromatik.data.ChromatikResponse;
 import kaleidok.chromatik.data.ChromatikResponseDeserializer;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.util.Strings;
+import org.apache.http.client.utils.URIBuilder;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -16,8 +17,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
-import static kaleidok.http.URLEncoding.appendEncoded;
 
 
 /**
@@ -43,7 +42,7 @@ public class ChromatikQuery
   /**
    * The protocol, host, and path component of the query URL
    */
-  public URL baseUrl;
+  public URI baseUri;
 
   /**
    * Search option map. Possible option keys include "saturation", "darkness",
@@ -55,8 +54,6 @@ public class ChromatikQuery
    */
   public Map<Object, Object> opts = new HashMap<>();
 
-
-  private transient StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
 
   protected static final Gson gson = new GsonBuilder()
     .registerTypeAdapter(
@@ -87,7 +84,7 @@ public class ChromatikQuery
   {
     this.nhits = nhits;
     this.keywords = (keywords != null) ? keywords : "";
-    this.baseUrl = DEFAULT_URL;
+    this.baseUri = DEFAULT_URI;
 
     if (colors != null && colors.length != 0)
     {
@@ -103,7 +100,7 @@ public class ChromatikQuery
     start = other.start;
     nhits = other.nhits;
     keywords = other.keywords;
-    baseUrl = other.baseUrl;
+    baseUri = other.baseUri;
     opts = new HashMap<>(other.opts);
   }
 
@@ -157,7 +154,7 @@ public class ChromatikQuery
   public URL getUrl()
   {
     try {
-      return new URL(baseUrl, getQueryString());
+      return new URL(buildUri().toString());
     } catch (MalformedURLException ex) {
       throw new AssertionError(ex);
     }
@@ -166,88 +163,83 @@ public class ChromatikQuery
   public URI getUri()
   {
     try {
-      return getUrl().toURI();
+      return buildUri().build();
     } catch (URISyntaxException ex) {
       throw new AssertionError(ex);
     }
   }
 
 
-  /**
-   * Builds and returns just the query part of the URL string of this query.
-   *
-   * @return The current query string
-   */
-  public String getQueryString()
+  private URIBuilder buildUri()
   {
-    return buildQueryString().toString();
-  }
+    URIBuilder ub = new URIBuilder(baseUri)
+      .addParameter(QUERY_START, Integer.toString(start))
+      .addParameter(QUERY_NHITS, Integer.toString(nhits));
 
-  private StringBuilder buildQueryString()
-  {
-    // TODO: Use proper URI builder tool, if we depend on a library with one anyway.
-    sb.setLength(0);
-    sb.append("searchphotos").append('?')
-      .append(QUERY_START).append('=').append(start)
-      .append('&')
-      .append(QUERY_NHITS).append('=').append(nhits);
-
-    if (!keywords.isEmpty() || !opts.isEmpty())
+    String searchQuery = keywords;
+    if (!opts.isEmpty())
     {
-      sb.append('&').append(QUERY_QUERY).append('=');
-      appendEncoded(keywords, sb);
+      StringBuilder sb = new StringBuilder();
+      if (!searchQuery.isEmpty())
+        sb.append(searchQuery).append(' ');
 
-      if (!opts.isEmpty())
+      sb.append('(').append("OPT");
+      int totalWeight = 0;
+      char[] hexStrBuf = new char[6];
+      for (Map.Entry<Object, Object> o: opts.entrySet())
       {
-        if (!keywords.isEmpty())
-          sb.append(QUERY_SPACE_ENCODED);
-
-        sb.append('(').append("OPT");
-        int totalWeight = 0;
-        char[] hexStrBuf = new char[6];
-        for (Map.Entry<Object, Object> o: opts.entrySet())
+        sb.append(' ');
+        if (o.getKey() instanceof ChromatikColor)
         {
-          sb.append(QUERY_SPACE_ENCODED);
-          if (o.getKey() instanceof ChromatikColor)
-          {
-            ChromatikColor c = (ChromatikColor) o.getKey();
-            int weight = (int)(((Number) o.getValue()).floatValue() * 100);
-            if (weight <= 0 || weight > 100) {
-              throw new IllegalArgumentException(
-                "Color weight lies outside of (0, 100]: " + weight);
-            }
-            totalWeight += weight;
+          ChromatikColor c = (ChromatikColor) o.getKey();
+          int weight = (int)(((Number) o.getValue()).floatValue() * 100);
+          if (weight <= 0 || weight > 100) {
+            throw new IllegalArgumentException(
+              "Color weight lies outside of (0, 100]: " + weight);
+          }
+          totalWeight += weight;
 
-            sb.append(QUERY_OPT_COLOR).append(QUERY_OPT_NAMEDELIM)
-              .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
-              .append(Strings.toHex(c.value, hexStrBuf))
-              .append(QUERY_OPT_VALUEDELIM).append(weight)
-              .append("%7Bs=200000%7D").append(QUERY_SPACE_ENCODED)
-              .append(QUERY_OPT_COLORGROUP).append(QUERY_OPT_NAMEDELIM)
-              .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
-              .append(weight);
-          }
-          else
-          {
-            appendEncoded(toCharSequence(o.getKey()), sb);
-            sb.append(QUERY_OPT_NAMEDELIM);
-            appendEncoded(toCharSequence(o.getValue()), sb);
-          }
+          sb.append(QUERY_OPT_COLOR).append(QUERY_OPT_NAMEDELIM)
+            .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
+            .append(Strings.toHex(c.value, hexStrBuf))
+            .append(QUERY_OPT_VALUEDELIM).append(weight)
+            .append("{s=200000}").append(' ')
+            .append(QUERY_OPT_COLORGROUP).append(QUERY_OPT_NAMEDELIM)
+            .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
+            .append(weight);
         }
-        sb.append(')');
+        else
+        {
+          CharSequence key = toCharSequence(o.getKey()),
+            value = toCharSequence(o.getValue());
+          assert (key != null && key.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0) &&
+            (value == null || value.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0);
 
-        if (totalWeight > 100)
-          throw new IllegalArgumentException("Total color weight exceeds 100: " + totalWeight);
+          sb.append(key);
+          if (value != null)
+            sb.append(QUERY_OPT_NAMEDELIM).append(value);
+        }
       }
+      sb.append(')');
+      searchQuery = sb.toString();
+
+      if (totalWeight > 100)
+        throw new IllegalArgumentException("Total color weight exceeds 100: " + totalWeight);
     }
 
-    return sb;
+    if (!searchQuery.isEmpty())
+      ub.addParameter(QUERY_QUERY, searchQuery);
+
+    return ub;
   }
 
 
   private static CharSequence toCharSequence( Object o )
   {
-    return (o instanceof CharSequence) ? (CharSequence) o : o.toString();
+    return
+      (o == null) ? null :
+      (o instanceof CharSequence) ? (CharSequence) o :
+        o.toString();
   }
 
 
@@ -259,7 +251,7 @@ public class ChromatikQuery
   @Override
   public String toString()
   {
-    return baseUrl.toString() + buildQueryString();
+    return buildUri().toString();
   }
 
 
@@ -269,16 +261,16 @@ public class ChromatikQuery
     QUERY_QUERY = "q";
 
   private static final char
-    QUERY_SPACE_ENCODED = '+',
     QUERY_OPT_NAMEDELIM = ':',
     QUERY_OPT_VALUEDELIM = '/';
 
 
-  public static final URL DEFAULT_URL;
+  public static final URI DEFAULT_URI;
   static {
     try {
-      DEFAULT_URL = new URL("http", "chromatik.labs.exalead.com", "/");
-    } catch (MalformedURLException ex) {
+      DEFAULT_URI =
+        new URI("http", "chromatik.labs.exalead.com", "/searchphotos", null);
+    } catch (URISyntaxException ex) {
       throw new AssertionError(ex);
     }
   }
