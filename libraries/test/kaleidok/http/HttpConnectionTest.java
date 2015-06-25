@@ -2,6 +2,7 @@ package kaleidok.http;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import kaleidok.http.responsehandler.JsonMimeTypeChecker;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -140,7 +141,7 @@ public class HttpConnectionTest
   public void testGetResponseMimeType4() throws Exception
   {
     setUp(aResponse());
-    con.acceptedMimeTypes = JsonHttpConnection.MIME_TYPE_MAP;
+    con.acceptedMimeTypes = JsonMimeTypeChecker.MIME_TYPE_MAP;
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 }

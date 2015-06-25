@@ -1,17 +1,12 @@
 package kaleidok.http;
 
+import kaleidok.http.responsehandler.ResponseHandlerChain;
+import kaleidok.http.responsehandler.ResponseMimeTypeChecker;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Future;
 
 
@@ -71,83 +66,5 @@ public abstract class AsyncBase
   {
     underlying.use(concurrentExec);
     return this;
-  }
-
-
-  public static class ResponseHandlerChain<T>
-    implements ResponseHandler<T>
-  {
-    protected ResponseHandler<HttpResponse> first;
-
-    protected ResponseHandler<T> second;
-
-    public ResponseHandlerChain( ResponseHandler<HttpResponse> first,
-      ResponseHandler<T> second )
-    {
-      this.first = first;
-      this.second = second;
-    }
-
-    @Override
-    public T handleResponse( HttpResponse httpResponse ) throws IOException
-    {
-      return second.handleResponse(first.handleResponse(httpResponse));
-    }
-  }
-
-
-  protected static class ResponseMimeTypeChecker
-    implements ResponseHandler<HttpResponse>
-  {
-    protected final MimeTypeMap acceptedMimeTypes;
-
-    public ResponseMimeTypeChecker( MimeTypeMap acceptedMimeTypes )
-    {
-      this.acceptedMimeTypes = acceptedMimeTypes;
-    }
-
-    @Override
-    public HttpResponse handleResponse( HttpResponse httpResponse )
-      throws IOException
-    {
-      Parsers.ContentType ct = Parsers.getContentType(httpResponse);
-      if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty()) {
-        String mimeType = (ct != null) ? ct.mimeType : null;
-        if (acceptedMimeTypes.allows(mimeType) == null)
-          throw new ClientProtocolException("Unsupported response MIME type: " + mimeType);
-      }
-      return httpResponse;
-    }
-  }
-
-
-  public static class ReaderResponseHandler
-    implements ResponseHandler<Reader>
-  {
-    public static final ReaderResponseHandler UTF8_HANDLER =
-      new ReaderResponseHandler(StandardCharsets.UTF_8);
-
-    public final Charset defaultCharset;
-
-    public ReaderResponseHandler( Charset defaultCharset )
-    {
-      this.defaultCharset = defaultCharset;
-    }
-
-    @Override
-    public Reader handleResponse( HttpResponse httpResponse )
-      throws IOException
-    {
-      Parsers.ContentType ct = Parsers.getContentType(httpResponse);
-      Charset charset;
-      if (ct != null && ct.charset != null) {
-        charset = ct.charset;
-      } else if (defaultCharset != null) {
-        charset = defaultCharset;
-      } else {
-        throw new ClientProtocolException("Server returned invalid charset");
-      }
-      return new InputStreamReader(httpResponse.getEntity().getContent(), charset);
-    }
   }
 }

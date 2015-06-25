@@ -2,7 +2,9 @@ package kaleidok.http;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import kaleidok.http.responsehandler.JsonElementResponseHandler;
+import kaleidok.http.responsehandler.JsonMimeTypeChecker;
+import kaleidok.http.responsehandler.JsonResponseHandler;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -16,7 +18,7 @@ public class JsonHttpConnection extends HttpConnection
 
   public JsonHttpConnection( HttpURLConnection c )
   {
-    super(c, MIME_TYPE_MAP);
+    super(c, JsonMimeTypeChecker.MIME_TYPE_MAP);
     defaultCharset = URLEncoding.DEFAULT_CHARSET;
     setDoInput(true);
   }
@@ -36,7 +38,7 @@ public class JsonHttpConnection extends HttpConnection
       synchronized (this) {
         if (json == null) {
           try (Reader reader = getReader()) {
-            JsonElement json = getJsonParser().parse(reader);
+            JsonElement json = JsonElementResponseHandler.getDefaultJsonParser().parse(reader);
             this.json = json;
             return json;
           } finally {
@@ -52,7 +54,7 @@ public class JsonHttpConnection extends HttpConnection
 
   public <T> T get( Class<T> clazz ) throws IOException
   {
-    return get(clazz, getGson());
+    return get(clazz, JsonResponseHandler.getDefaultGson());
   }
 
   public <T> T get( Class<T> clazz, Gson gson ) throws IOException
@@ -97,7 +99,7 @@ public class JsonHttpConnection extends HttpConnection
 
   public <T> Callable<T> asCallable( Class<T> clazz )
   {
-    return asCallable(clazz, getGson());
+    return asCallable(clazz, JsonResponseHandler.getDefaultGson());
   }
 
   public <T> Callable<T> asCallable( final Class<T> clazz, final Gson gson )
@@ -111,31 +113,4 @@ public class JsonHttpConnection extends HttpConnection
         }
       };
   }
-
-
-  private static JsonParser JSON_PARSER = null;
-
-  public static JsonParser getJsonParser()
-  {
-    if (JSON_PARSER == null)
-      JSON_PARSER = new JsonParser();
-    return JSON_PARSER;
-  }
-
-  private static Gson gson = null;
-
-  public static Gson getGson()
-  {
-    if (gson == null)
-      gson = new Gson();
-    return gson;
-  }
-
-  public static final MimeTypeMap MIME_TYPE_MAP = new MimeTypeMap() {{
-    put("application/json", ONE);
-    put("text/json", 0.9f);
-    put("text/javascript", 0.5f);
-    put(WILDCARD, 0.1f);
-    freeze();
-  }};
 }

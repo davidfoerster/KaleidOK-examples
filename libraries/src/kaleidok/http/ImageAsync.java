@@ -1,16 +1,12 @@
 package kaleidok.http;
 
-import kaleidok.awt.ImageTracker;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ResponseHandler;
+import kaleidok.http.responsehandler.ImageMimeTypeChecker;
+import kaleidok.http.responsehandler.ImageResponseHandler;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.util.EntityUtils;
 
-import javax.imageio.ImageIO;
 import java.awt.Image;
-import java.io.IOException;
 import java.util.concurrent.Future;
 
 
@@ -18,7 +14,7 @@ public class ImageAsync extends AsyncBase
 {
   public ImageAsync()
   {
-    super(IMAGE_MIMETYPE_MAP);
+    super(ImageMimeTypeChecker.IMAGE_MIMETYPE_MAP);
   }
 
 
@@ -37,28 +33,6 @@ public class ImageAsync extends AsyncBase
   }
 
 
-  public static class ImageResponseHandler implements
-    ResponseHandler<Image>
-  {
-    public static final ImageResponseHandler INSTANCE =
-      new ImageResponseHandler();
-
-    protected ImageResponseHandler() { }
-
-    @Override
-    public Image handleResponse( HttpResponse httpResponse )
-      throws IOException
-    {
-      httpResponse = imageMimeTypeChecker.handleResponse(httpResponse);
-      Image img = ImageTracker.loadImage(
-        EntityUtils.toByteArray(httpResponse.getEntity()));
-      if (img != null)
-        return img;
-      throw new IOException("Loading image failed");
-    }
-  }
-
-
   @Override
   public Future<Image> execute( Request request )
   {
@@ -72,18 +46,4 @@ public class ImageAsync extends AsyncBase
     applyAcceptedMimeTypes(request);
     return underlying.execute(request, ImageResponseHandler.INSTANCE, callback);
   }
-
-
-  public static final MimeTypeMap IMAGE_MIMETYPE_MAP;
-  static {
-    final String[] imageMimeTypes = ImageIO.getReaderMIMETypes();
-    IMAGE_MIMETYPE_MAP =
-      new MimeTypeMap(imageMimeTypes.length + (imageMimeTypes.length + 1) / 2);
-    for (String mimeType: imageMimeTypes)
-      IMAGE_MIMETYPE_MAP.put(mimeType, null);
-    IMAGE_MIMETYPE_MAP.freeze();
-  }
-
-  protected static final ResponseMimeTypeChecker imageMimeTypeChecker =
-    new ResponseMimeTypeChecker(IMAGE_MIMETYPE_MAP);
 }

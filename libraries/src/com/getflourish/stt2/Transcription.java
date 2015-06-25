@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonReader;
 import kaleidok.concurrent.CallbackRunnable;
 import kaleidok.http.HttpConnection;
 import kaleidok.http.JsonHttpConnection;
+import kaleidok.http.responsehandler.JsonResponseHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -72,7 +73,7 @@ public class Transcription extends CallbackRunnable<SttResponse>
       SttResponse response;
       do {
         response =
-          JsonHttpConnection.getGson().fromJson(jsonReader, SttResponse.class);
+          JsonResponseHandler.getDefaultGson().fromJson(jsonReader, SttResponse.class);
       } while (response != null && response.isEmpty());
       return response;
     } catch (JsonSyntaxException ex) {

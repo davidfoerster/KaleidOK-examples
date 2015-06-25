@@ -75,8 +75,8 @@ public final class Parsers
 
   public static class ContentType
   {
-    String mimeType;
-    Charset charset;
+    public String mimeType;
+    public Charset charset;
   }
 
   public static ContentType getContentType( HttpURLConnection con )
