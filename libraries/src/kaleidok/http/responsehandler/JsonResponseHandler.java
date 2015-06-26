@@ -50,7 +50,7 @@ public class JsonResponseHandler<T> extends ReaderSource
   public T handleResponse( HttpResponse httpResponse ) throws IOException
   {
     try (Reader in = getReader(httpResponse)) {
-      return defaultGson.fromJson(in, targetClass);
+      return gson.fromJson(in, targetClass);
     }
   }
 }
