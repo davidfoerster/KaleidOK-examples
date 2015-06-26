@@ -15,6 +15,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -75,10 +77,24 @@ public final class Parsers
 
   public static class ContentType
   {
+    public static final ContentType EMPTY = new ContentType();
+
     public String mimeType;
     public Charset charset;
   }
 
+
+  /**
+   * Parses and returns the content type of an HTTP response.
+   *
+   * @param con An HTTP connection object
+   * @return A content type object holding the MIME type and the charset
+   *    specified in the HTTP response
+   *
+   * @throws IllegalCharsetNameException see {@link Charset#forName(String)}
+   * @throws IllegalArgumentException see {@link Charset#forName(String)}
+   * @throws UnsupportedCharsetException see {@link Charset#forName(String)}
+   */
   public static ContentType getContentType( HttpURLConnection con )
   {
     String s = con.getContentType();

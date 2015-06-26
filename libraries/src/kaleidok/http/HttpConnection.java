@@ -374,6 +374,8 @@ public class HttpConnection
     } catch (IllegalArgumentException ex) {
       throw new IOException(ex);
     }
+    if (responseContentType == null)
+      responseContentType = ContentType.EMPTY;
   }
 
   public String getResponseMimeType() throws IOException
