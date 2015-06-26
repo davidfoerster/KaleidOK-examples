@@ -10,7 +10,7 @@ import javaFlacEncoder.StreamConfiguration;
 import java.io.IOException;
 
 
-class AudioTranscriptionProcessor implements AudioProcessor
+public class AudioTranscriptionProcessor implements AudioProcessor
 {
   private final STT stt;
 

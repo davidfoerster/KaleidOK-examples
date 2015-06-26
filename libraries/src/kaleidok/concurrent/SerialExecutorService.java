@@ -56,11 +56,6 @@ public class SerialExecutorService implements Executor, Runnable
       tasks.drainTo(remaining);
       tasks.add(null);
       this.tasks = null;
-
-      for (Runnable t: remaining) {
-        if (t instanceof CallbackRunnable)
-          ((CallbackRunnable) t).dispose();
-      }
     }
   }
 

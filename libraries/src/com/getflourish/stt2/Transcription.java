@@ -3,7 +3,7 @@ package com.getflourish.stt2;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
-import kaleidok.concurrent.CallbackRunnable;
+import kaleidok.concurrent.Callback;
 import kaleidok.http.HttpConnection;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.http.responsehandler.JsonResponseHandler;
@@ -16,11 +16,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 
-public class Transcription extends CallbackRunnable<SttResponse>
+public class Transcription implements Runnable
 {
   private final JsonHttpConnection connection;
 
+  public Callback<SttResponse> callback;
+
   private OutputStream outputStream = null;
+
 
   protected Transcription( URL url, String mimeType, float sampleRate )
     throws IOException
@@ -38,6 +41,7 @@ public class Transcription extends CallbackRunnable<SttResponse>
     this.connection = connection;
   }
 
+
   public OutputStream getOutputStream() throws IOException
   {
     if (outputStream == null) {
@@ -46,8 +50,29 @@ public class Transcription extends CallbackRunnable<SttResponse>
     return outputStream;
   }
 
+
   @Override
-  public SttResponse call() throws IOException
+  public final void run()
+  {
+    try {
+      SttResponse result;
+      try {
+        result = transcribe();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        return;
+      }
+
+      Callback<SttResponse> callback = this.callback;
+      if (callback != null)
+        callback.call(result);
+    } finally {
+      dispose();
+    }
+  }
+
+
+  public SttResponse transcribe() throws IOException
   {
     try {
       SttResponse response;
@@ -67,6 +92,7 @@ public class Transcription extends CallbackRunnable<SttResponse>
     }
   }
 
+
   protected SttResponse parse( Reader source ) throws IOException
   {
     try (JsonReader jsonReader = new JsonReader(source)) {
@@ -84,6 +110,7 @@ public class Transcription extends CallbackRunnable<SttResponse>
     }
   }
 
+
   protected void logResponse( SttResponse response )
   {
     if (response != null) {
@@ -98,7 +125,7 @@ public class Transcription extends CallbackRunnable<SttResponse>
     }
   }
 
-  @Override
+
   public void dispose()
   {
     if (connection.getState() == HttpConnection.CONNECTED) {
