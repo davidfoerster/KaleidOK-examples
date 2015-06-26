@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="KaleidoscopeApp" type="Applet" factoryName="Applet">
+  <configuration default="false" name="KaleidoscopeApp (template)" type="Applet" factoryName="Applet">
     <module name="Kaleidoscope" />
     <option name="HTML_USED" value="false" />
     <option name="MAIN_CLASS_NAME" value="kaleidok.examples.kaleidoscope.KaleidoscopeApp" />
