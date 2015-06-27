@@ -11,10 +11,12 @@ import java.awt.event.ActionEvent;
 
 public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
 {
+  private JPanel textFieldPanel = null;
+
   private JTextField keywordField = null, messageField = null;
 
-  private final String paramBase =
-    this.getClass().getPackage().getName() + '.';
+  private static final String paramBase =
+    KaleidoscopeApp.class.getPackage().getName() + '.';
 
 
   @Override
@@ -46,16 +48,18 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   @Override
   protected void initComponents()
   {
-    JTextField keywordField = getKeywordField(),
-      messageField = getMessageField();
+    add(getTextFieldPanel(), BorderLayout.SOUTH);
+  }
 
-    JPanel textFieldPanels = new JPanel();
-    textFieldPanels.setLayout(new BoxLayout(textFieldPanels, BoxLayout.PAGE_AXIS));
-    textFieldPanels.add(messageField);
-    textFieldPanels.add(keywordField);
-    add(textFieldPanels, BorderLayout.SOUTH);
-
-    messageField.requestFocusInWindow();
+  private JPanel getTextFieldPanel()
+  {
+    if (textFieldPanel == null) {
+      textFieldPanel = new JPanel();
+      textFieldPanel.setLayout(new BoxLayout(textFieldPanel, BoxLayout.PAGE_AXIS));
+      textFieldPanel.add(getMessageField());
+      textFieldPanel.add(getKeywordField());
+    }
+    return textFieldPanel;
   }
 
   private JTextField getKeywordField()
