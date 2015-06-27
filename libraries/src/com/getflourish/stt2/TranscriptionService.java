@@ -89,7 +89,7 @@ public class TranscriptionService implements Runnable
       URL_SPEC_PREFIX.length() + language.length() +
       URL_SPEC_KEY_BIT.length() + accessKey.length());
     appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
-    appendEncoded(language, urlSpec.append(URL_SPEC_KEY_BIT));
+    appendEncoded(accessKey, urlSpec.append(URL_SPEC_KEY_BIT));
 
     try {
       this.serviceUrl = new URL(apiBase, urlSpec.toString());
