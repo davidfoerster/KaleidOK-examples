@@ -28,7 +28,9 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JApplet;
 import java.awt.Image;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -178,8 +180,10 @@ public class Kaleidoscope extends ExtPApplet
             fromDefaultMicrophone(sampleRate, bufferSize, bufferOverlap);
           dispatcherRunnable = audioDispatcher;
         } else {
-          AudioInputStream ais =
-            getAudioInputStream(createInputRaw(audioSource));
+          InputStream is = createInputRaw(audioSource);
+          if (is == null)
+            throw new FileNotFoundException(audioSource);
+          AudioInputStream ais = getAudioInputStream(is);
           audioDispatcher =
             new AudioDispatcher(new ContinuousAudioInputStream(ais),
               bufferSize, bufferOverlap);
