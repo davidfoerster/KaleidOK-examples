@@ -11,6 +11,9 @@ public class FullscreenRootPane extends JRootPane
 {
   private Window topLevelWindow = null;
 
+  private Rectangle windowedBounds = null;
+
+
   public Window getTopLevelWindow()
   {
     if (topLevelWindow == null) {
@@ -29,19 +32,25 @@ public class FullscreenRootPane extends JRootPane
     return (c instanceof Window) ? (Window) c : null;
   }
 
+
   public boolean isFullscreen()
   {
     Window w = getTopLevelWindow();
-    if (w == null)
-      return false;
+    return w != null && isFullscreen(w);
+  }
+
+  private static boolean isFullscreen( Window w )
+  {
     GraphicsDevice dev = w.getGraphicsConfiguration().getDevice();
     return dev != null && w == dev.getFullScreenWindow();
   }
+
 
   public void toggleFullscreen()
   {
     moveToScreen(-1, !isFullscreen());
   }
+
 
   public void moveToScreen( int i, boolean fullscreen )
   {
@@ -69,8 +78,13 @@ public class FullscreenRootPane extends JRootPane
     }
   }
 
+
   private void setFullscreenWindow( GraphicsDevice dev, Window w, boolean fullscreen )
   {
+    boolean previousFullscreenState = isFullscreen(w);
+    if (!previousFullscreenState)
+      windowedBounds = w.getBounds(windowedBounds);
+
     if (w instanceof Frame) {
       final Frame frame = (Frame) w;
       frame.removeNotify();
@@ -85,8 +99,13 @@ public class FullscreenRootPane extends JRootPane
     }
 
     dev.setFullScreenWindow(fullscreen ? w : null);
+
+    if (!fullscreen && previousFullscreenState && windowedBounds != null)
+      w.setBounds(windowedBounds);
+
     getContentPane().requestFocusInWindow();
   }
+
 
   private static class FullscreenFocusListener implements FocusListener
   {
@@ -107,6 +126,7 @@ public class FullscreenRootPane extends JRootPane
       ((Frame) ev.getSource()).setAlwaysOnTop(false);
     }
   }
+
 
   public FullscreenAction registerKeyAction( FullscreenAction.Mode mode, KeyStroke keyStroke )
   {
