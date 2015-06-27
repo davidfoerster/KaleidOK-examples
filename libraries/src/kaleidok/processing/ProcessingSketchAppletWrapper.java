@@ -2,14 +2,20 @@ package kaleidok.processing;
 
 import kaleidok.swing.FullscreenAction;
 import kaleidok.swing.FullscreenRootPane;
+import processing.core.PApplet;
 
 import javax.swing.JApplet;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Frame;
+import java.awt.Label;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+
+import static javax.swing.KeyStroke.getKeyStroke;
 
 
 public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
@@ -18,8 +24,16 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
 
   private T sketch = null;
 
+  private static final KeyStroke[] fullscreenKeystrokes = {
+    getKeyStroke(KeyEvent.VK_F11, 0),
+    getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK),
+    getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK),
+    getKeyStroke(KeyEvent.VK_F, KeyEvent.ALT_DOWN_MASK),
+  };
+
   private static final KeyStroke fullscreenKeystroke =
-    KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0);
+    fullscreenKeystrokes[(PApplet.platform == PApplet.MACOSX) ? 1 : 0];
+
 
   @Override
   public void init()
@@ -29,29 +43,35 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     T sketch;
     try {
       sketch = getSketchThrows();
-    } catch (InstantiationException e) {
-      throw new Error(e);
+    } catch (InstantiationException ex) {
+      throw new Error(ex);
     }
     add(sketch, BorderLayout.CENTER);
 
     initComponents();
   }
 
+
   protected void initComponents() { }
+
 
   @Override
   protected JRootPane createRootPane()
   {
     FullscreenRootPane rootPane = new FullscreenRootPane();
-    rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, fullscreenKeystroke);
+    //rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, fullscreenKeystroke);
+    for (KeyStroke stroke: fullscreenKeystrokes)
+      rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, stroke);
     return rootPane;
   }
+
 
   @Override
   public FullscreenRootPane getRootPane()
   {
     return (FullscreenRootPane) super.getRootPane();
   }
+
 
   private void fudgeAppletViewer()
   {
@@ -79,6 +99,7 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     }
   }
 
+
   public T getSketch()
   {
     if (sketch == null) try {
@@ -94,23 +115,44 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     if (sketch == null) {
       sketch = sketchFactory.createInstance(this);
       sketch.init();
-      sketch.addKeyListener(new KeyAdapter()
-        {
-          @Override
-          public void keyPressed( KeyEvent e )
-          {
-            if (e.getKeyCode() == fullscreenKeystroke.getKeyCode() &&
-              e.getModifiers() == fullscreenKeystroke.getModifiers())
-            {
-              getRootPane().toggleFullscreen();
-              e.consume();
-            }
-          }
-        });
+      sketch.addKeyListener(new SketchKeyListener());
       sketchFactory = null;
     }
     return sketch;
   }
+
+
+  private class SketchKeyListener extends KeyAdapter
+  {
+    @Override
+    public void keyPressed( KeyEvent ev )
+    {
+      for (KeyStroke stroke: fullscreenKeystrokes) {
+        if (stroke.getKeyEventType() == KeyEvent.KEY_PRESSED &&
+          hasKeyStroke(ev, stroke))
+        {
+          getRootPane().toggleFullscreen();
+          ev.consume();
+        }
+      }
+    }
+  }
+
+
+  private static boolean hasKeyStroke( KeyEvent ev, KeyStroke stroke )
+  {
+    return
+      (ev.getKeyCode() == stroke.getKeyCode()) &&
+      hasAllModifiers(ev, stroke);
+  }
+
+  private static boolean hasAllModifiers( KeyEvent ev, KeyStroke stroke )
+  {
+    return
+      ((ev.getModifiers() | ev.getModifiersEx()) & stroke.getModifiers())
+        == stroke.getModifiers();
+  }
+
 
   @Override
   public void start()
