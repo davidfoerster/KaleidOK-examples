@@ -116,7 +116,7 @@ public final class URLEncoding
   public static CharSequence encode( CharSequence _s, Charset charset, StringBuilder dst )
   {
     if (_s.length() == 0)
-      return _s;
+      return (dst != null) ? dst : _s;
 
     CharBuffer s;
     if (_s instanceof CharBuffer) {
@@ -142,17 +142,7 @@ public final class URLEncoding
         dst = new StringBuilder(
           s.position() - 1 + estimateEncoderOutputLength(s.remaining() + 1));
       }
-
-      if (s.hasArray()) {
-        dst.append(s.array(), s.arrayOffset() + currentRunOffset, s.position() - 1);
-      } else {
-        int p = s.position();
-        s.limit(p - 1);
-        s.position(currentRunOffset);
-        dst.append(s);
-        s.limit(s.capacity());
-        s.position(p);
-      }
+      appendTo(dst, _s, currentRunOffset, s.position() - 1);
 
       if (c == ' ')
       {
@@ -226,13 +216,10 @@ public final class URLEncoding
       currentRunOffset = s.position();
     }
 
-    if (dst == null)
-      return _s;
 
-    s.position(currentRunOffset);
-    dst.append(s);
-    return dst;
+    return (dst == null) ? _s : appendTo(dst, _s, currentRunOffset, _s.length());
   }
+
 
   private static final int CODER_MAX_CHARS_CAPACITY = 8;
 
@@ -241,6 +228,7 @@ public final class URLEncoding
     assert c >>> 4 == 0;
     return c + ((c < 10) ? '0' : ('A' - 10));
   }
+
 
   private static int estimateEncoderOutputLength( int inputLength )
   {
@@ -313,7 +301,7 @@ public final class URLEncoding
 
       if (dst == null)
         dst = new StringBuilder(estimateDecoderOutputLength(s, i));
-      dst.append(s, currentRunOffset, i - 1);
+      appendTo(dst, s, currentRunOffset, i - 1);
 
       if (c == SPACE_ESCAPER)
       {
@@ -410,8 +398,9 @@ public final class URLEncoding
       currentRunOffset = i;
     }
 
-    return (dst == null) ? s : dst.append(s, currentRunOffset, len);
+    return (dst == null) ? s : appendTo(dst, s, currentRunOffset, len);
   }
+
 
   private static int hexDigitValue( int c )
   {
@@ -420,6 +409,7 @@ public final class URLEncoding
     c &= ~LOWERCASE_BIT; // fast upper case
     return (c >= 'A' && c <= 'F') ? c - ('A' - 10) : -1;
   }
+
 
   private static int countEscapeSequences( CharSequence s, int begin, final int end )
   {
@@ -434,8 +424,22 @@ public final class URLEncoding
     return escapedCount;
   }
 
+
   private static int estimateDecoderOutputLength( CharSequence s, int offset )
   {
     return s.length() - countEscapeSequences(s, offset, s.length()) * 2;
+  }
+
+
+  private static StringBuilder appendTo( StringBuilder a, CharSequence csq,
+    int start, int end )
+  {
+    if (csq.length() > 1 && csq instanceof CharBuffer) {
+      CharBuffer cb = (CharBuffer) csq;
+      if (cb.hasArray()) {
+        return a.append(cb.array(), start + cb.arrayOffset() + cb.position(), end - start);
+      }
+    }
+    return a.append(csq, start, end);
   }
 }
