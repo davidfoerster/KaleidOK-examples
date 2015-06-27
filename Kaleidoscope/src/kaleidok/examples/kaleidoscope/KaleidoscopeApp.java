@@ -34,8 +34,8 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
         }
       };
 
-    super.init();
     initWindowPosition();
+    super.init();
   }
 
   private void initWindowPosition()

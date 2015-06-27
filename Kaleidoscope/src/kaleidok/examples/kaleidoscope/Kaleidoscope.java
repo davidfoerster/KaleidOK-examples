@@ -82,7 +82,17 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void setup()
   {
-    size(1000, 1000, OPENGL); // use the OpenGL renderer
+    int width = this.width, height = this.height;
+    if (width == 100 && height == 100) {
+      /*
+       * Default dimensions mean, the surrounding layout manager didn't resize
+       * this sketch yet; use more sensible default dimensions instead (and set
+       * them thereafter).
+       */
+      width = 1000;
+      height = 1000;
+    }
+    size(width, height, OPENGL); // keep size, but use the OpenGL renderer
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
     smooth(4);
 
