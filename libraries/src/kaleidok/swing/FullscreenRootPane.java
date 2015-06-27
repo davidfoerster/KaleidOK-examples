@@ -5,6 +5,8 @@ import javax.swing.KeyStroke;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.ArrayList;
+import java.util.Collection;
 
 
 public class FullscreenRootPane extends JRootPane
@@ -12,6 +14,9 @@ public class FullscreenRootPane extends JRootPane
   private Window topLevelWindow = null;
 
   private Rectangle windowedBounds = null;
+
+  private Collection<FullscreenEventListener> fullscreenListeners =
+    new ArrayList<>();
 
 
   public Window getTopLevelWindow()
@@ -99,11 +104,27 @@ public class FullscreenRootPane extends JRootPane
     }
 
     dev.setFullScreenWindow(fullscreen ? w : null);
+    getContentPane().requestFocusInWindow();
+
+    for (FullscreenEventListener listener: fullscreenListeners)
+      listener.handleFullscreenStateChange(w, fullscreen);
 
     if (!fullscreen && previousFullscreenState && windowedBounds != null)
       w.setBounds(windowedBounds);
+  }
 
-    getContentPane().requestFocusInWindow();
+
+  public void addFullscreenEventListener(
+    FullscreenEventListener fullscreenFocusListener )
+  {
+    if (fullscreenFocusListener != null)
+      fullscreenListeners.add(fullscreenFocusListener);
+  }
+
+  public boolean removeFullscreenEventListener(
+    FullscreenEventListener fullscreenFocusListener )
+  {
+    return fullscreenListeners.remove(fullscreenFocusListener);
   }
 
 
@@ -117,13 +138,18 @@ public class FullscreenRootPane extends JRootPane
     @Override
     public void focusGained( FocusEvent ev )
     {
-      ((Frame) ev.getSource()).setAlwaysOnTop(true);
+      setAlwaysOnTop(ev, true);
     }
 
     @Override
     public void focusLost( FocusEvent ev )
     {
-      ((Frame) ev.getSource()).setAlwaysOnTop(false);
+      setAlwaysOnTop(ev, false);
+    }
+
+    private void setAlwaysOnTop( FocusEvent ev, boolean alwaysOnTop )
+    {
+      ((Frame) ev.getSource()).setAlwaysOnTop(alwaysOnTop);
     }
   }
 
