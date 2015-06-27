@@ -2,14 +2,17 @@ package kaleidok.examples.kaleidoscope;
 
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchAppletWrapper;
+import kaleidok.swing.FullscreenEventListener;
 import kaleidok.util.DefaultValueParser;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 
 
 public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
+  implements FullscreenEventListener
 {
   private JPanel textFieldPanel = null;
 
@@ -49,6 +52,7 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   protected void initComponents()
   {
     add(getTextFieldPanel(), BorderLayout.SOUTH);
+    getRootPane().addFullscreenEventListener(this);
   }
 
   private JPanel getTextFieldPanel()
@@ -86,4 +90,10 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
     return messageField;
   }
 
+
+  @Override
+  public void handleFullscreenStateChange( Window w, boolean fullscreen )
+  {
+    getTextFieldPanel().setVisible(!fullscreen);
+  }
 }
