@@ -1,15 +1,20 @@
 package com.getflourish.stt2;
 
-import kaleidok.concurrent.SerialExecutorService;
+import kaleidok.concurrent.DaemonThreadFactory;
 import org.apache.http.concurrent.FutureCallback;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static kaleidok.http.URLEncoding.appendEncoded;
 
 
-public class TranscriptionService implements Runnable
+public class TranscriptionService
 {
   private URL apiBase, serviceUrl = null;
 
@@ -17,8 +22,12 @@ public class TranscriptionService implements Runnable
 
   public FutureCallback<SttResponse> resultHandler;
 
-  protected final SerialExecutorService executor =
-    new SerialExecutorService(3);
+  protected final ExecutorService executor =
+    new ThreadPoolExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
+      new ArrayBlockingQueue<Runnable>(3), executorThreadFactory);
+
+  protected final static ThreadFactory executorThreadFactory =
+    new DaemonThreadFactory("Speech transcription", true);
 
 
   public static final URL DEFAULT_API_BASE;
@@ -105,19 +114,20 @@ public class TranscriptionService implements Runnable
     URL_SPEC_PREFIX = "recognize?output=json&lang=",
     URL_SPEC_KEY_BIT = "&key=";
 
-  public void add( Transcription task )
+  public void execute( Transcription task )
   {
     executor.execute(task);
-  }
-
-  @Override
-  public void run()
-  {
-    executor.run();
   }
 
   public void shutdownNow()
   {
     executor.shutdownNow();
+  }
+
+
+  boolean assertNotInQueue( Transcription task )
+  {
+    return !(executor instanceof ThreadPoolExecutor) ||
+      !((ThreadPoolExecutor) executor).getQueue().contains(task);
   }
 }

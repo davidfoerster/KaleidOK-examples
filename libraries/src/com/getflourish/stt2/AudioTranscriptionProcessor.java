@@ -24,14 +24,12 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
   public volatile boolean shouldRecord = false;
 
-  protected AudioTranscriptionProcessor( STT stt, TranscriptionService service )
+
+  protected AudioTranscriptionProcessor( STT stt )
   {
     this.stt = stt;
-
-    Thread serviceThread = new Thread(service, "Speech transcription");
-    serviceThread.setDaemon(true);
-    serviceThread.start();
   }
+
 
   @Override
   public boolean process( AudioEvent audioEvent )
@@ -59,6 +57,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
     return true;
   }
 
+
   private void ensureEncoderConfigured( AudioEvent ev )
   {
     if (streamConfiguration == null) {
@@ -72,6 +71,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
     }
   }
 
+
   private void ensureEncoderReady( AudioEvent ev ) throws IOException
   {
     ensureEncoderConfigured(ev);
@@ -80,6 +80,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
       task = new FlacTranscription(ev.getSampleRate());
     }
   }
+
 
   private void finishEncoding()
   {
@@ -93,6 +94,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
       }
     }
   }
+
 
   @Override
   public void processingFinished()
@@ -117,7 +119,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
     public void finishEncoding() throws IOException
     {
-      assert !stt.service.executor.contains(this);
+      assert stt.service.assertNotInQueue(this);
 
       int availableSamples = encoder.samplesAvailableToEncode();
       if (STT.debug) {
@@ -131,8 +133,9 @@ public class AudioTranscriptionProcessor implements AudioProcessor
       if (STT.debug)
         assertShorter(now, 10 * 1000L*1000L, "Encoding remaining samples took too long");
 
-      stt.service.add(this);
+      stt.service.execute(this);
     }
+
 
     @Override
     public void dispose()
@@ -158,6 +161,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
     return false;
   }
 
+
   private static int[] convertTo16Bit( AudioEvent ev, int[] conversionBuffer )
   {
     final float[] audioFloat = ev.getFloatBuffer();
@@ -173,5 +177,4 @@ public class AudioTranscriptionProcessor implements AudioProcessor
     }
     return audioInt;
   }
-
 }

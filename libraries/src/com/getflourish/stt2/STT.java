@@ -38,7 +38,7 @@ public class STT
     service = accessKey.startsWith("!MOCK") ?
       new MockTranscriptionService(accessKey, resultHandler) :
       new TranscriptionService(accessKey, resultHandler);
-    processor = new AudioTranscriptionProcessor(this, service);
+    processor = new AudioTranscriptionProcessor(this);
 
     //setAutoRecording(false);
 
