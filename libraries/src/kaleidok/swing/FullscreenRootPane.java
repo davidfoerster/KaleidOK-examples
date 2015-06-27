@@ -63,24 +63,29 @@ public class FullscreenRootPane extends JRootPane
     if (w == null)
       throw new IllegalComponentStateException(this + " has no top-level window.");
 
-    if (i < 0) {
-      setFullscreenWindow(w.getGraphicsConfiguration().getDevice(), w, fullscreen);
-    } else {
+    if (i >= 0) {
       GraphicsDevice[] devs =
         GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-      if (i >= devs.length)
-        System.err.println("Warning: No screen with index " + i + " available; using default screen instead.");
-
-      GraphicsDevice dev = devs[i];
-      if (fullscreen) {
-        setFullscreenWindow(dev, w, true);
-      } else {
-        GraphicsConfiguration config = dev.getDefaultConfiguration();
-        if (!config.equals(w.getGraphicsConfiguration())) {
-          w.setLocation(config.getBounds().getLocation());
+      if (i < devs.length) {
+        GraphicsDevice dev = devs[i];
+        if (fullscreen) {
+          setFullscreenWindow(dev, w, true);
+        } else {
+          GraphicsConfiguration config = dev.getDefaultConfiguration();
+          if (!config.equals(w.getGraphicsConfiguration())) {
+            w.setLocation(config.getBounds().getLocation());
+          }
         }
+        return;
       }
+
+      System.err.println(
+        "Warning: No screen with index " + i +
+        " available; using default screen instead.");
     }
+
+    // use default screen
+    setFullscreenWindow(w.getGraphicsConfiguration().getDevice(), w, fullscreen);
   }
 
 
