@@ -17,7 +17,6 @@ import kaleidok.chromatik.ChromasthetiationService;
 import kaleidok.chromatik.ChromasthetiatorBase;
 import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
-import kaleidok.concurrent.Callback;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
@@ -438,12 +437,12 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private class SttResponseHandler implements Callback<SttResponse>
+  private class SttResponseHandler extends AbstractFutureCallback<SttResponse>
   {
     private Boolean isIgnoreTranscriptionResult = null;
 
     @Override
-    public void call( SttResponse response )
+    public void completed( SttResponse response )
     {
       SttResponse.Result result = response.result[0];
 

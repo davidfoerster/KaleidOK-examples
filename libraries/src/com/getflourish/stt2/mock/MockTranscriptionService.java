@@ -3,7 +3,7 @@ package com.getflourish.stt2.mock;
 import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.TranscriptionService;
 import com.sun.net.httpserver.HttpServer;
-import kaleidok.concurrent.Callback;
+import org.apache.http.concurrent.FutureCallback;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -34,7 +34,7 @@ public class MockTranscriptionService extends TranscriptionService
     }
   }
 
-  public MockTranscriptionService( String accessKey, Callback<SttResponse> resultHandler )
+  public MockTranscriptionService( String accessKey, FutureCallback<SttResponse> resultHandler )
   {
     super(MOCK_API_BASE, accessKey, resultHandler);
     try {

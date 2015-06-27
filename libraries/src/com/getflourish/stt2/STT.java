@@ -2,7 +2,7 @@ package com.getflourish.stt2;
 
 import com.getflourish.stt2.mock.MockTranscriptionService;
 import com.getflourish.stt2.util.Timer;
-import kaleidok.concurrent.Callback;
+import org.apache.http.concurrent.FutureCallback;
 
 import java.net.URL;
 
@@ -33,7 +33,7 @@ public class STT
   public static boolean debug;
 
 
-  public STT( Callback<SttResponse> resultHandler, String accessKey )
+  public STT( FutureCallback<SttResponse> resultHandler, String accessKey )
   {
     service = accessKey.startsWith("!MOCK") ?
       new MockTranscriptionService(accessKey, resultHandler) :

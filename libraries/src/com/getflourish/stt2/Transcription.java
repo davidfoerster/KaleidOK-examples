@@ -3,10 +3,10 @@ package com.getflourish.stt2;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
-import kaleidok.concurrent.Callback;
 import kaleidok.http.HttpConnection;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.http.responsehandler.JsonResponseHandler;
+import org.apache.http.concurrent.FutureCallback;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,7 +20,7 @@ public class Transcription implements Runnable
 {
   private final JsonHttpConnection connection;
 
-  public Callback<SttResponse> callback;
+  public FutureCallback<SttResponse> callback;
 
   private OutputStream outputStream = null;
 
@@ -54,21 +54,26 @@ public class Transcription implements Runnable
   @Override
   public final void run()
   {
+    FutureCallback<SttResponse> callback = this.callback;
+    SttResponse result;
     try {
-      SttResponse result;
       try {
         result = transcribe();
       } catch (Exception ex) {
-        ex.printStackTrace();
+        if (callback != null) {
+          callback.failed(ex);
+        } else {
+          Thread current = Thread.currentThread();
+          current.getUncaughtExceptionHandler().uncaughtException(current, ex);
+        }
         return;
       }
-
-      Callback<SttResponse> callback = this.callback;
-      if (callback != null)
-        callback.call(result);
     } finally {
       dispose();
     }
+
+    if (callback != null)
+      callback.completed(result);
   }
 
 

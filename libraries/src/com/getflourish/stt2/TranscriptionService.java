@@ -1,7 +1,7 @@
 package com.getflourish.stt2;
 
-import kaleidok.concurrent.Callback;
 import kaleidok.concurrent.SerialExecutorService;
+import org.apache.http.concurrent.FutureCallback;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,7 +15,7 @@ public class TranscriptionService implements Runnable
 
   private String accessKey, language;
 
-  public Callback<SttResponse> resultHandler;
+  public FutureCallback<SttResponse> resultHandler;
 
   protected final SerialExecutorService executor =
     new SerialExecutorService(3);
@@ -31,18 +31,18 @@ public class TranscriptionService implements Runnable
   }
 
 
-  public TranscriptionService( String accessKey, Callback<SttResponse> resultHandler )
+  public TranscriptionService( String accessKey, FutureCallback<SttResponse> resultHandler )
   {
     this(DEFAULT_API_BASE, accessKey, resultHandler);
   }
 
-  public TranscriptionService( URL apiBase, String accessKey, Callback<SttResponse> resultHandler )
+  public TranscriptionService( URL apiBase, String accessKey, FutureCallback<SttResponse> resultHandler )
   {
     this(resultHandler);
     setServiceUrl(apiBase, accessKey, "en");
   }
 
-  protected TranscriptionService( Callback<SttResponse> resultHandler )
+  protected TranscriptionService( FutureCallback<SttResponse> resultHandler )
   {
     this.resultHandler = resultHandler;
   }
