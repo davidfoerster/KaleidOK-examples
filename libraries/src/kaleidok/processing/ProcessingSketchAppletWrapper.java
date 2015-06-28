@@ -24,15 +24,11 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
 
   private T sketch = null;
 
-  private static final KeyStroke[] fullscreenKeystrokes = {
-    getKeyStroke(KeyEvent.VK_F11, 0),
-    getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK),
-    getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_DOWN_MASK),
-    getKeyStroke(KeyEvent.VK_F, KeyEvent.ALT_DOWN_MASK),
-  };
 
   private static final KeyStroke fullscreenKeystroke =
-    fullscreenKeystrokes[(PApplet.platform == PApplet.MACOSX) ? 1 : 0];
+    (PApplet.platform == PApplet.MACOSX) ?
+      getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK) :
+      getKeyStroke(KeyEvent.VK_F11, 0);
 
 
   @Override
@@ -59,9 +55,7 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   protected JRootPane createRootPane()
   {
     FullscreenRootPane rootPane = new FullscreenRootPane();
-    //rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, fullscreenKeystroke);
-    for (KeyStroke stroke: fullscreenKeystrokes)
-      rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, stroke);
+    rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, fullscreenKeystroke);
     return rootPane;
   }
 
@@ -127,13 +121,11 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     @Override
     public void keyPressed( KeyEvent ev )
     {
-      for (KeyStroke stroke: fullscreenKeystrokes) {
-        if (stroke.getKeyEventType() == KeyEvent.KEY_PRESSED &&
-          hasKeyStroke(ev, stroke))
-        {
-          getRootPane().toggleFullscreen();
-          ev.consume();
-        }
+      if (fullscreenKeystroke.getKeyEventType() == KeyEvent.KEY_PRESSED &&
+        hasKeyStroke(ev, fullscreenKeystroke))
+      {
+        getRootPane().toggleFullscreen();
+        ev.consume();
       }
     }
   }
