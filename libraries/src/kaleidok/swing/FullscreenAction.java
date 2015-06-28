@@ -2,7 +2,6 @@ package kaleidok.swing;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
-import javax.swing.KeyStroke;
 
 
 public class FullscreenAction extends AbstractAction
@@ -30,13 +29,6 @@ public class FullscreenAction extends AbstractAction
       source.moveToScreen(-1, mode == Mode.SET);
       break;
     }
-  }
-
-
-  public void registerKeyAction( FullscreenRootPane c, int condition, KeyStroke keyStroke )
-  {
-    c.getInputMap(condition).put(keyStroke, mode);
-    c.getActionMap().put(mode, this);
   }
 
 
