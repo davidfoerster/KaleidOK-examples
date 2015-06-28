@@ -3,8 +3,7 @@ package kaleidok.swing;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -165,6 +164,23 @@ public class FullscreenRootPane extends JRootPane
     getInputMap(WHEN_IN_FOCUSED_WINDOW).put(keyStroke, mode);
     getActionMap().put(mode, FullscreenAction.getInstance(mode));
   }
+
+
+  public KeyStrokeListener createKeyListener( FullscreenAction.Mode mode,
+    KeyStroke stroke )
+  {
+    final FullscreenAction action = FullscreenAction.getInstance(mode);
+    return new KeyStrokeListener(stroke)
+    {
+      @Override
+      protected void handleKey( KeyEvent ev )
+      {
+        action.actionPerformed(
+          new ActionEvent(FullscreenRootPane.this, ev.getID(), null,
+            ev.getWhen(), ev.getModifiers() | ev.getModifiersEx()));
+        ev.consume();
+      }
+    };
   }
 
 }

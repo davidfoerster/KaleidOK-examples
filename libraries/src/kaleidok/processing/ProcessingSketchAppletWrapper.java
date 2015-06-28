@@ -11,7 +11,6 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Frame;
 import java.awt.Label;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
@@ -109,40 +108,11 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     if (sketch == null) {
       sketch = sketchFactory.createInstance(this);
       sketch.init();
-      sketch.addKeyListener(new SketchKeyListener());
+      sketch.addKeyListener(getRootPane().createKeyListener(
+        FullscreenAction.Mode.TOGGLE, fullscreenKeystroke));
       sketchFactory = null;
     }
     return sketch;
-  }
-
-
-  private class SketchKeyListener extends KeyAdapter
-  {
-    @Override
-    public void keyPressed( KeyEvent ev )
-    {
-      if (fullscreenKeystroke.getKeyEventType() == KeyEvent.KEY_PRESSED &&
-        hasKeyStroke(ev, fullscreenKeystroke))
-      {
-        getRootPane().toggleFullscreen();
-        ev.consume();
-      }
-    }
-  }
-
-
-  private static boolean hasKeyStroke( KeyEvent ev, KeyStroke stroke )
-  {
-    return
-      (ev.getKeyCode() == stroke.getKeyCode()) &&
-      hasAllModifiers(ev, stroke);
-  }
-
-  private static boolean hasAllModifiers( KeyEvent ev, KeyStroke stroke )
-  {
-    return
-      ((ev.getModifiers() | ev.getModifiersEx()) & stroke.getModifiers())
-        == stroke.getModifiers();
   }
 
 
