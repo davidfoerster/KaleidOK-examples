@@ -161,7 +161,7 @@ public class FullscreenRootPane extends JRootPane
 
   public FullscreenAction registerKeyAction( FullscreenAction.Mode mode, KeyStroke keyStroke )
   {
-    FullscreenAction action = new FullscreenAction(mode);
+    FullscreenAction action = FullscreenAction.getInstance(mode);
     action.registerKeyAction(this, WHEN_IN_FOCUSED_WINDOW, keyStroke);
     return action;
   }

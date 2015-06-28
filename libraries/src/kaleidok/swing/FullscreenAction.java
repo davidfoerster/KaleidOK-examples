@@ -9,13 +9,12 @@ public class FullscreenAction extends AbstractAction
 {
   public final Mode mode;
 
-  // TODO: Cache instance for each mode
 
-  public FullscreenAction( Mode mode )
+  protected FullscreenAction( Mode mode )
   {
-    checkMode(mode);
     this.mode = mode;
   }
+
 
   @Override
   public void actionPerformed( ActionEvent e )
@@ -33,19 +32,25 @@ public class FullscreenAction extends AbstractAction
     }
   }
 
+
   public void registerKeyAction( FullscreenRootPane c, int condition, KeyStroke keyStroke )
   {
     c.getInputMap(condition).put(keyStroke, mode);
     c.getActionMap().put(mode, this);
   }
 
-  private static void checkMode( Mode mode )
-  {
-    if (mode == null)
-      throw new NullPointerException("mode");
-  }
-
 
   public enum Mode { TOGGLE, SET, UNSET }
+
+
+  private static final FullscreenAction[] INSTANCES = new FullscreenAction[3];
+
+  public static FullscreenAction getInstance( Mode mode )
+  {
+    int idx = mode.ordinal();
+    if (INSTANCES[idx] == null)
+      INSTANCES[idx] = new FullscreenAction(mode);
+    return INSTANCES[idx];
+  }
 
 }
