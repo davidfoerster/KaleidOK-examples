@@ -130,9 +130,20 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
 
 
   static {
-    String strTmpDir = System.getenv("TMPDIR");
-    if (strTmpDir == null || strTmpDir.isEmpty())
-      strTmpDir = System.getenv("TMP");
+    // Set temporary directory from environment variable(s)
+    String strTmpDir;
+    switch (PApplet.platform) {
+    case PApplet.WINDOWS:
+      strTmpDir = System.getenv("TEMP");
+      break;
+
+    default:
+      strTmpDir = System.getenv("TMPDIR");
+      if (strTmpDir == null || strTmpDir.isEmpty())
+        strTmpDir = System.getenv("TMP");
+      break;
+    }
+
     if (strTmpDir != null && !strTmpDir.isEmpty()) {
       File fTmpDir = new File(strTmpDir);
       if (fTmpDir.isDirectory() && fTmpDir.canWrite())
