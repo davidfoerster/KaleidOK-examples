@@ -237,6 +237,7 @@ public class Kaleidoscope extends ExtPApplet
           }
         },
         "Audio dispatching");
+      audioDispatcherThread.setDaemon(true);
     }
   }
 
