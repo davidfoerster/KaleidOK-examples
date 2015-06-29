@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import kaleidok.chromatik.data.ChromatikColor;
 import kaleidok.chromatik.data.ChromatikResponse;
-import kaleidok.chromatik.data.ChromatikResponseDeserializer;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.util.Strings;
 import org.apache.http.client.utils.URIBuilder;
@@ -57,7 +56,7 @@ public class ChromatikQuery
 
   protected static final Gson gson = new GsonBuilder()
     .registerTypeAdapter(
-      ChromatikResponse.class, ChromatikResponseDeserializer.INSTANCE)
+      ChromatikResponse.class, ChromatikResponse.Deserializer.INSTANCE)
     .excludeFieldsWithoutExposeAnnotation()
     .create();
 
