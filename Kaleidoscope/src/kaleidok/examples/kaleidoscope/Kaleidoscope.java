@@ -106,9 +106,7 @@ public class Kaleidoscope extends ExtPApplet
     audioDispatcherThread.start();
   }
 
-
   private static final int MIN_IMAGES = 5;
-
   private List<PImageFuture> getImages()
   {
     if (images == null)
@@ -150,7 +148,6 @@ public class Kaleidoscope extends ExtPApplet
         break;
       }
       bgImage = images.get(bgImageIndex);
-
       int imageCount = images.size();
       for (int i = images.size(); i < MIN_IMAGES; i++)
         images.add(images.get(i % imageCount));
