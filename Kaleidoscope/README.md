@@ -95,5 +95,11 @@ are optional and have sensible defaults.
    in the development environment). Kaleidoscope displays 5 different images
    initially.
 
+ * `kaleidok.examples.kaleidoscope.images.intial` –
+   A space-separated list of URLs to use as initial images. Relative URLs are
+   rooted in the `images` sub-directory of the applet path (inside `resources`
+   in the development environment). Kaleidoscope displays 5 different images
+   initially.
+
 
 [configuration]: #configuration
