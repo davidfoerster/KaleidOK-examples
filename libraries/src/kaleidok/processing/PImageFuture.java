@@ -13,9 +13,13 @@ import java.util.concurrent.TimeoutException;
 
 public class PImageFuture implements Future<PImage>
 {
+  public static final PImageFuture EMPTY = new PImageFuture((PImage) null);
+
+
   private final Future<Image> underlying;
 
   private PImage image = null;
+
 
   public PImageFuture( PImage image )
   {
@@ -38,11 +42,13 @@ public class PImageFuture implements Future<PImage>
     this(ReadyImageFuture.createInstance(comp, image, width, height, null));
   }
 
+
   @Override
   public boolean cancel( boolean mayInterruptIfRunning )
   {
     return underlying != null && underlying.cancel(mayInterruptIfRunning);
   }
+
 
   @Override
   public boolean isCancelled()
@@ -50,11 +56,13 @@ public class PImageFuture implements Future<PImage>
     return underlying != null && underlying.isCancelled();
   }
 
+
   @Override
   public boolean isDone()
   {
     return underlying == null || underlying.isDone();
   }
+
 
   @Override
   public PImage get() throws InterruptedException, ExecutionException
@@ -62,12 +70,14 @@ public class PImageFuture implements Future<PImage>
     return (underlying != null) ? getPImage(underlying.get()) : image;
   }
 
+
   @Override
   public PImage get( long timeout, TimeUnit unit )
     throws InterruptedException, ExecutionException, TimeoutException
   {
     return (underlying != null) ? getPImage(underlying.get(timeout, unit)) : image;
   }
+
 
   private PImage getPImage( Image image )
   {
@@ -82,6 +92,7 @@ public class PImageFuture implements Future<PImage>
     }
     return this.image;
   }
+
 
   public PImage getNoThrow()
   {

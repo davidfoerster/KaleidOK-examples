@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
+import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
 import static kaleidok.util.Math.isPowerOfTwo;
@@ -106,27 +107,56 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  private static final int MIN_IMAGES = 5;
 
   private List<PImageFuture> getImages()
   {
-    if (images == null) {
-      // load the images from the _Images folder (relative path from this kaleidoscope's folder)
-      images = new ArrayList<PImageFuture>(8) {{
-        add(getImageFuture("/images/one.jpg"));
-        add(getImageFuture("/images/two.jpg"));
-        add(getImageFuture("/images/three.jpg"));
-        add(getImageFuture("/images/four.jpg"));
-        add(getImageFuture("/images/five.jpg"));
-      }};
-      assert !images.contains(null);
+    if (images == null)
+    {
+      String imagesParam = getParameter(
+        this.getClass().getPackage().getName() + ".images.initial");
+      if (imagesParam == null) {
+        this.images = new ArrayList<>(MIN_IMAGES);
+      } else {
+        String[] images = imagesParam.split("\\s+");
+        this.images = new ArrayList<>(Math.max(images.length, MIN_IMAGES));
+        for (String strImage: images) {
+          if (!strImage.isEmpty()) {
+            if (strImage.charAt(0) != '/' && strImage.indexOf(':') < 0)
+              strImage = "/images/" + strImage;
+            PImageFuture image = getImageFuture(strImage);
+            if (image != null) {
+              this.images.add(image);
+            } else if (debug >= 1) {
+              throw new AssertionError(new FileNotFoundException(strImage));
+            } else {
+              System.err.println("Couldn't load image: " + strImage);
+            }
+          }
+        }
+      }
 
-      bgImageIndex = (int) random(images.size()); // randomly choose the bgImageIndex
+      switch (images.size()) {
+      case 0:
+        images.add(PImageFuture.EMPTY);
+        // fall through
+
+      case 1:
+        bgImageIndex = 0;
+        break;
+
+      default:
+        bgImageIndex = (int) random(images.size()); // randomly choose the bgImageIndex
+        break;
+      }
       bgImage = images.get(bgImageIndex);
 
+      int imageCount = images.size();
+      for (int i = images.size(); i < MIN_IMAGES; i++)
+        images.add(images.get(i % imageCount));
     }
     return images;
   }
-
 
   private void waitForImages()
   {
@@ -148,7 +178,6 @@ public class Kaleidoscope extends ExtPApplet
     }
   }
 
-
   private STT getSTT()
   {
     if (stt == null) {
@@ -161,7 +190,6 @@ public class Kaleidoscope extends ExtPApplet
     }
     return stt;
   }
-
 
   private AudioDispatcher getAudioDispatcher()
   {
@@ -257,6 +285,8 @@ public class Kaleidoscope extends ExtPApplet
       fftProcessor = new MinimFFTProcessor(getAudioBufferSize());
     return fftProcessor;
   }
+
+
   private void makeAudioDispatcherThread( final Runnable dispatcher )
   {
     if (audioDispatcherThread == null) {
@@ -273,7 +303,6 @@ public class Kaleidoscope extends ExtPApplet
       audioDispatcherThread.setDaemon(true);
     }
   }
-
 
   private CircularLayer[] getLayers()
   {
@@ -294,7 +323,6 @@ public class Kaleidoscope extends ExtPApplet
     }
     return layers;
   }
-
 
   private OuterMovingShape getOuterMovingShape()
   {

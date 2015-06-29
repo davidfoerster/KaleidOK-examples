@@ -91,5 +91,11 @@ are optional and have sensible defaults.
    Uses the specified file (if any) as audio input in a continuous loop instead of
    a microphone line; the sample rate is always that of the audio file.
 
+ * `kaleidok.examples.kaleidoscope.images.intial` –
+   A space-separated list of URLs to use as initial images. Relative URLs are
+   rooted in the `images` sub-directory of the applet path (inside `resources`
+   in the development environment). Kaleidoscope displays 5 different images
+   initially.
+
 
 [configuration]: #configuration
