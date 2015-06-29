@@ -10,7 +10,6 @@ import javax.swing.KeyStroke;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Frame;
-import java.awt.Label;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
@@ -72,22 +71,8 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     while ((parent = current.getParent()) != null) {
       current = parent;
       if (current instanceof Frame) {
-        fudgeAppletViewer((Frame) current);
+        FudgedAppletViewerFactory.fudgeAppletViewer((Frame) current);
         break;
-      }
-    }
-  }
-
-  private static void fudgeAppletViewer( Frame frame )
-  {
-    synchronized (frame.getTreeLock()) {
-      frame.setMenuBar(null);
-      int len = frame.getComponentCount();
-      for (int i = 0; i < len; i++) {
-        if (frame.getComponent(i) instanceof Label) {
-          frame.remove(i);
-          break;
-        }
       }
     }
   }
