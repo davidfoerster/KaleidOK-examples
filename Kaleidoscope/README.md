@@ -10,7 +10,6 @@
     and provide it to Kaleidoscope.
 
  2. Prepare a [configuration] for Kaleidoscope.
-
  3. Some libraries need to be set up, but I'm not going into that now.
 
 
@@ -44,7 +43,6 @@ The most convenient way to configure Kaleidoscope is through a properties file:
 
  2. Edit the properties files with any text editor. Most importantly, add the
     required API keys (see below).
-
 Kaleidoscope knows a few configuration options, that can be set through applet
 parameters. See the included run configuration for examples. Below is a
 description of some currently understood options. All parameters except API keys
