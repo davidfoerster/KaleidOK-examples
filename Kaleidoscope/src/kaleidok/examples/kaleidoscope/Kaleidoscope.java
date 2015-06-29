@@ -111,12 +111,13 @@ public class Kaleidoscope extends ExtPApplet
     if (images == null) {
       // load the images from the _Images folder (relative path from this kaleidoscope's folder)
       images = new ArrayList<PImageFuture>(8) {{
-        add(getImageFuture("images/one.jpg"));
-        add(getImageFuture("images/two.jpg"));
-        add(getImageFuture("images/three.jpg"));
-        add(getImageFuture("images/four.jpg"));
-        add(getImageFuture("images/five.jpg"));
+        add(getImageFuture("/images/one.jpg"));
+        add(getImageFuture("/images/two.jpg"));
+        add(getImageFuture("/images/three.jpg"));
+        add(getImageFuture("/images/four.jpg"));
+        add(getImageFuture("/images/five.jpg"));
       }};
+      assert !images.contains(null);
 
       bgImageIndex = (int) random(images.size()); // randomly choose the bgImageIndex
       bgImage = images.get(bgImageIndex);
