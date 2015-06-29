@@ -3,18 +3,21 @@
 ## Setup
 
  1. [Request a Flickr API key](https://www.flickr.com/services/api/keys/apply/)
-    and consult the *Configuration* section on where to put it for Kaleidoscope
+    and consult the [Configuration] section on where to put it for Kaleidoscope
     to find.
 
  2. Similarly [request a Google API access key](https://www.chromium.org/developers/how-tos/api-keys)
     and provide it to Kaleidoscope.
+
+ 2. Prepare a [configuration] for Kaleidoscope.
 
  3. Some libraries need to be set up, but I'm not going into that now.
 
 
 ## Usage
 
- 1. Run KaleidoscopeApp as Java applet or use the included run configuration.
+ 1. Run KaleidoscopeApp as stand-alone Java application or use the included run
+    configuration.
 
  2. Press <kbd>I</kbd> to start recording from the default microphone line and
     <kbd>O</kbd> to stop. The speech in recorded section is transcribed, the
@@ -31,6 +34,16 @@
 
 
 ## Configuration
+
+The most convenient way to configure Kaleidoscope is through a properties file:
+
+ 1. Create or place a properties file `KaleidoscopeApp.properties` inside the
+    package `kaleidok.examples.kaleidoscope` (inside the `src` directory). You
+    can use `KaleidoscopeApp.template.properties`, which you can find in the
+    same directory as this `README` file, as a template.
+
+ 2. Edit the properties files with any text editor. Most importantly, add the
+    required API keys (see below).
 
 Kaleidoscope knows a few configuration options, that can be set through applet
 parameters. See the included run configuration for examples. Below is a
@@ -57,10 +70,10 @@ are optional and have sensible defaults.
     Note: The above example does not contain a working key, just a randomly
     generated look-alike.
 
- * `kaleidok.util.DebugManager.verbose` –
+ * `kaleidok.util.debugmanager.verbose` –
    Verbosity level
 
- * `kaleidok.util.DebugManager.wireframe` –
+ * `kaleidok.util.debugmanager.wireframe` –
    Draw wireframe models instead of filled and textured surfaces.
 
  * `kaleidok.examples.kaleidoscope.text` –
@@ -76,4 +89,7 @@ are optional and have sensible defaults.
 
  * `kaleidok.examples.kaleidoscope.audio.input` –
    Uses the specified file (if any) as audio input in a continuous loop instead of
-   a microphone line; the sampelrate is always that of the audio file.
+   a microphone line; the sample rate is always that of the audio file.
+
+
+[configuration]: #configuration
