@@ -1,5 +1,7 @@
 package kaleidok.examples.kaleidoscope;
 
+import kaleidok.processing.AppletLauncher;
+import kaleidok.processing.FudgedAppletViewerFactory;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchAppletWrapper;
 import kaleidok.swing.FullscreenEventListener;
@@ -10,6 +12,10 @@ import java.awt.BorderLayout;
 import java.awt.GraphicsDevice;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Properties;
 
 
 public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
@@ -97,5 +103,27 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
     boolean fullscreen )
   {
     getTextFieldPanel().setVisible(!fullscreen);
+  }
+
+
+  public static void main( String... args ) throws IOException
+  {
+    Class<? extends JApplet> appletClass = KaleidoscopeApp.class;
+    Properties properties = new Properties();
+    if (args != null && args.length > 0 && args[0].equals("--params")) {
+      String paramsFile = args[1];
+      if (paramsFile.equals("-")) {
+        properties.load(System.in);
+      } else {
+        properties.load(new FileReader(paramsFile));
+      }
+
+      args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
+    } else {
+      properties.load(appletClass.getResourceAsStream(
+        appletClass.getSimpleName() + ".properties"));
+    }
+    new AppletLauncher(new FudgedAppletViewerFactory())
+      .launch(appletClass, properties, args);
   }
 }
