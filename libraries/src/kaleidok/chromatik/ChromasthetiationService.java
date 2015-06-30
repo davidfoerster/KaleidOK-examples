@@ -1,9 +1,12 @@
 package kaleidok.chromatik;
 
-import com.flickr4java.flickr.FlickrException;
-import com.flickr4java.flickr.photos.Size;
 import kaleidok.chromatik.data.ChromatikResponse;
 import kaleidok.concurrent.GroupedThreadFactory;
+import kaleidok.concurrent.NestedFutureCallback;
+import kaleidok.flickr.AsyncFlickr;
+import kaleidok.flickr.internal.FlickrBase;
+import kaleidok.flickr.FlickrException;
+import kaleidok.flickr.SizeMap;
 import kaleidok.http.ImageAsync;
 import kaleidok.http.JsonAsync;
 import org.apache.http.client.fluent.Request;
@@ -12,7 +15,6 @@ import synesketch.emotion.EmotionalState;
 
 import java.awt.Image;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -30,15 +32,22 @@ public class ChromasthetiationService
 
   private final ImageAsync imageAsync;
 
+  private final AsyncFlickr flickr;
+  private boolean hasFlickrApiKey = false;
+
 
   public ChromasthetiationService( Executor executor )
   {
     this.executor = executor;
     org.apache.http.client.fluent.Executor httpExecutor =
       org.apache.http.client.fluent.Executor.newInstance();
+
     jsonAsync = new JsonAsync().use(executor).use(httpExecutor);
     jsonAsync.gson = ChromatikQuery.gson;
+
     imageAsync = new ImageAsync().use(executor).use(httpExecutor);
+
+    flickr = new AsyncFlickr(null, null, executor, httpExecutor);
   }
 
   public ChromasthetiationService( int threadPoolSize )
@@ -71,7 +80,16 @@ public class ChromasthetiationService
   }
 
 
-  private class RunnableChromasthetiator extends KeywordChromasthetiator
+  protected synchronized void setFlickrApiKey( FlickrBase flickr )
+  {
+    if (flickr.getApiKey() != null) {
+      hasFlickrApiKey = true;
+      this.flickr.setApiKey(flickr.getApiKey(), flickr.getApiSecret());
+    }
+  }
+
+
+  private class RunnableChromasthetiator extends KeywordChromasthetiator<AsyncFlickr>
     implements Runnable, FutureCallback<ChromatikResponse>
   {
     private final String text;
@@ -83,11 +101,16 @@ public class ChromasthetiationService
     private final AtomicInteger remainingCount;
 
 
-    public RunnableChromasthetiator( ChromasthetiatorBase queryParams,
+    public RunnableChromasthetiator( ChromasthetiatorBase<?> queryParams,
       String text, FutureCallback<Future<Image>> futureImageCallback,
       FutureCallback<Image> imageCallback, int maxCount )
     {
       super(queryParams);
+
+      if (!hasFlickrApiKey)
+        setFlickrApiKey(queryParams.flickr);
+      flickr = ChromasthetiationService.this.flickr;
+
       this.text = text;
       this.futureImageCallback = futureImageCallback;
       this.imageCallback = imageCallback;
@@ -121,22 +144,24 @@ public class ChromasthetiationService
     }
 
 
-    protected boolean takeTicket()
+    protected int takeTickets( int count )
     {
       AtomicInteger remainingCount = this.remainingCount;
       if (remainingCount == null)
-        return true;
-      int n;
+        return count;
+      int current, taken;
       do {
-        n = remainingCount.get();
-      } while (n > 0 && !remainingCount.compareAndSet(n, n - 1));
-      assert n >= 0;
-      return n > 0;
+        current = remainingCount.get();
+        if (current <= 0)
+          return 0;
+        taken =  Math.min(count, current);
+      } while (!remainingCount.compareAndSet(current, current - taken));
+      return taken;
     }
 
-    protected boolean hasTicket()
+    protected boolean hasTickets( int count )
     {
-      return remainingCount == null || remainingCount.get() > 0;
+      return remainingCount == null || remainingCount.get() >= count;
     }
 
 
@@ -145,39 +170,41 @@ public class ChromasthetiationService
     {
       for (ChromatikResponse.Result imgInfo: response.results) {
         final FlickrPhoto flickrPhoto = new FlickrPhoto(imgInfo);
-        executor.execute(new Runnable()
-        {
-          @Override
-          public void run()
-          {
-            try {
-              boolean ticket = hasTicket();
-              if (ticket) {
-                // test image and prefetch available sizes
-                Collection<Size> sizes = flickrPhoto.getSizesThrow(); // TODO: Re-implement using Async (?)
-                assert sizes != null;
-                ticket = takeTicket();
+        if (hasTickets(1)) {
+          flickr.getPhotoSizes(flickrPhoto.id,
+            new NestedFutureCallback<SizeMap, ChromatikResponse>(this)
+            {
+              @Override
+              public void completed( SizeMap sizes )
+              {
+                flickrPhoto.setSizes(sizes);
+                int ticket = takeTickets(1);
+                if (verbose >= 3) {
+                  System.out.println("Received " + ticket +
+                    " downloading ticket for " + flickrPhoto.getMediumUrl());
+                }
+                if (ticket > 0) {
+                  Future<Image> fImage = imageAsync.execute(
+                    Request.Get(flickrPhoto.getLargestImageSize().source),
+                    imageCallback);
+                  if (futureImageCallback != null)
+                    futureImageCallback.completed(fImage);
+                } else {
+                  cancelled();
+                }
               }
 
-              if (verbose >= 3) {
-                System.out.println("Received " + (ticket ? 1 : 0) +
-                  " downloading ticket for " + flickrPhoto.getMediumUrl());
+              @Override
+              public void failed( Exception ex )
+              {
+                if (ex instanceof FlickrException) {
+                  ((FlickrException) ex).setPertainingObject(
+                    flickrPhoto.getMediumUrl());
+                }
+                super.failed(ex);
               }
-
-              if (ticket) {
-                Future<Image> fImage = imageAsync.execute(
-                  Request.Get(flickrPhoto.getLargestImageSize().getSource()),
-                  imageCallback);
-                if (futureImageCallback != null)
-                  futureImageCallback.completed(fImage);
-              } else {
-                cancelled();
-              }
-            } catch (FlickrException ex) {
-              failed(ex);
-            }
-          }
-        });
+            });
+        }
         imgInfo.flickrPhoto = flickrPhoto;
       }
     }

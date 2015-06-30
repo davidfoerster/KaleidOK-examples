@@ -1,12 +1,10 @@
 package kaleidok.chromatik;
 
-import com.flickr4java.flickr.Flickr;
-import com.flickr4java.flickr.FlickrException;
-import com.flickr4java.flickr.photos.PhotosInterface;
-import com.flickr4java.flickr.photos.Size;
 import kaleidok.chromatik.data.ChromatikColor;
 import kaleidok.chromatik.data.ChromatikResponse;
+import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
+import kaleidok.flickr.SizeMap;
 import kaleidok.util.Strings;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
@@ -14,14 +12,13 @@ import synesketch.emotion.*;
 import java.applet.Applet;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 import static kaleidok.util.Arrays.shuffle;
 
 
-public abstract class ChromasthetiatorBase
+public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr>
 {
   // Configuration:
 
@@ -48,7 +45,7 @@ public abstract class ChromasthetiatorBase
 
   protected SynesketchPalette palettes;
 
-  private PhotosInterface flickrPhotos = null;
+  protected Flickr flickr;
 
 
   public ChromasthetiatorBase( Applet parent )
@@ -67,7 +64,7 @@ public abstract class ChromasthetiatorBase
   }
 
 
-  protected ChromasthetiatorBase( ChromasthetiatorBase other )
+  protected ChromasthetiatorBase( ChromasthetiatorBase<?> other )
   {
     parent = other.parent;
     maxColors = other.maxColors;
@@ -75,13 +72,13 @@ public abstract class ChromasthetiatorBase
     chromatikQuery = new ChromatikQuery(other.chromatikQuery);
     synesthetiator = other.synesthetiator;
     palettes = other.palettes;
-    flickrPhotos = other.flickrPhotos;
+    flickr = (Flickr) other.flickr;
   }
 
 
   public void setFlickrApi( Flickr flickr )
   {
-    flickrPhotos = flickr.getPhotosInterface();
+    this.flickr = flickr;
   }
 
 
@@ -170,25 +167,26 @@ public abstract class ChromasthetiatorBase
 
 
     @Override
-    public Collection<Size> getSizes()
+    public SizeMap getSizes()
     {
-      Collection<Size> sizes = super.getSizes();
+      SizeMap sizes = super.getSizes();
       if (sizes == null) {
         try {
           sizes = getSizesThrow();
         } catch (FlickrException ex) {
-          switch (Integer.parseInt(ex.getErrorCode())) {
+          switch (ex.getErrorCode()) {
           case 1: // Photo not found
           case 2: // Permission denied
-            //noinspection unchecked
-            sizes = Collections.EMPTY_LIST;
-            System.err.println(ex.getLocalizedMessage() + ' ' + '(' + getMediumUrl() + ')');
+            System.err.println(ex.getLocalizedMessage());
+            sizes = new SizeMap();
             break;
 
           default:
             ex.printStackTrace();
-            return null;
+            break;
           }
+        } catch (IOException ex) {
+          ex.printStackTrace();
         }
       }
       return sizes;
@@ -196,15 +194,15 @@ public abstract class ChromasthetiatorBase
 
 
     @Override
-    public Collection<Size> getSizesThrow() throws FlickrException
+    public SizeMap getSizesThrow() throws FlickrException, IOException
     {
-      Collection<Size> sizes = super.getSizes();
+      SizeMap sizes = super.getSizes();
       if (sizes == null) {
         try {
-          sizes = flickrPhotos.getSizes(getId());
+          sizes = flickr.getPhotoSizes(id);
         } catch (FlickrException ex) {
-          throw new FlickrException(ex.getErrorCode(),
-            ex.getErrorMessage() + ':' + ' ' + getMediumUrl());
+          ex.setPertainingObject(getMediumUrl());
+          throw ex;
         }
         setSizes(sizes);
       }
