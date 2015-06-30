@@ -4,9 +4,6 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioPlayer;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.dsp.pitch.PitchProcessor;
-import com.flickr4java.flickr.Flickr;
-import com.flickr4java.flickr.FlickrException;
-import com.flickr4java.flickr.REST;
 import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.STT;
 import kaleidok.audio.ContinuousAudioInputStream;
@@ -18,6 +15,8 @@ import kaleidok.chromatik.ChromasthetiatorBase;
 import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.examples.kaleidoscope.layer.*;
+import kaleidok.flickr.Flickr;
+import kaleidok.flickr.FlickrException;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
@@ -346,8 +345,7 @@ public class Kaleidoscope extends ExtPApplet
       String data = parseStringOrFile(getParameter("com.flickr.api.key"), '@');
       if (data != null) {
         String[] keys = data.split(":|\r?\n", 2);
-        chromasthetiator.setFlickrApi(
-          new Flickr(keys[0], keys[1], new REST()));
+        chromasthetiator.setFlickrApi(new Flickr(keys[0], keys[1]));
       }
 
       chromasthetiator.maxKeywords = DefaultValueParser.parseInt(this,
@@ -485,10 +483,9 @@ public class Kaleidoscope extends ExtPApplet
       if (ex == null) {
         System.out.println("Aborted!");
       } else if (ex instanceof FlickrException) {
-        switch (Integer.parseInt(((FlickrException) ex).getErrorCode())) {
+        switch (((FlickrException) ex).getErrorCode()) {
         case 1: // Photo not found
         case 2: // Permission denied
-          //noinspection unchecked
           System.err.println(ex.getLocalizedMessage());
           return;
         }
