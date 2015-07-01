@@ -61,7 +61,7 @@ public class Kaleidoscope extends ExtPApplet
   public static final int DEFAULT_AUDIO_SAMPLERATE = 32000;
   public static final int DEFAULT_AUDIO_BUFFERSIZE = 1 << 11;
 
-  private int audioBufferSize;
+  private int audioBufferSize = 0;
   private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
 
@@ -104,6 +104,8 @@ public class Kaleidoscope extends ExtPApplet
     audioDispatcherThread.start();
   }
 
+
+
   private List<PImageFuture> getImages()
   {
     if (images == null) {
@@ -118,9 +120,11 @@ public class Kaleidoscope extends ExtPApplet
 
       bgImageIndex = (int) random(images.size()); // randomly choose the bgImageIndex
       bgImage = images.get(bgImageIndex);
+
     }
     return images;
   }
+
 
   private void waitForImages()
   {
@@ -142,6 +146,7 @@ public class Kaleidoscope extends ExtPApplet
     }
   }
 
+
   private STT getSTT()
   {
     if (stt == null) {
@@ -155,6 +160,7 @@ public class Kaleidoscope extends ExtPApplet
     return stt;
   }
 
+
   private AudioDispatcher getAudioDispatcher()
   {
     if (audioDispatcher == null) {
@@ -167,12 +173,7 @@ public class Kaleidoscope extends ExtPApplet
       if (sampleRate <= 0)
         throw new AssertionError(param + " must be positive");
 
-      param = paramBase + "buffersize";
-      int bufferSize = DefaultValueParser.parseInt(this,
-        param, DEFAULT_AUDIO_BUFFERSIZE);
-      if (bufferSize <= 0 || !isPowerOfTwo(bufferSize))
-        throw new AssertionError(param + " must be a power of 2");
-      audioBufferSize = bufferSize;
+      int bufferSize = getAudioBufferSize();
 
       param = paramBase + "bufferoverlap";
       int bufferOverlap = DefaultValueParser.parseInt(this,
@@ -214,16 +215,44 @@ public class Kaleidoscope extends ExtPApplet
         throw new Error(ex);
       }
 
-      audioDispatcher.addAudioProcessor(
-        volumeLevelProcessor = new VolumeLevelProcessor());
-      audioDispatcher.addAudioProcessor(
-        fftProcessor = new MinimFFTProcessor(bufferSize));
+      audioDispatcher.addAudioProcessor(getVolumeLevelProcessor());
+      audioDispatcher.addAudioProcessor(getFftProcessor());
 
       makeAudioDispatcherThread(dispatcherRunnable);
     }
     return audioDispatcher;
   }
 
+
+  public int getAudioBufferSize()
+  {
+    if (audioBufferSize <= 0) {
+      String param =
+        this.getClass().getPackage().getName() + ".audio.buffersize";
+      int bufferSize = DefaultValueParser.parseInt(this, param,
+        DEFAULT_AUDIO_BUFFERSIZE);
+      if (bufferSize <= 0 || !isPowerOfTwo(bufferSize))
+        throw new AssertionError(param + " must be a power of 2");
+      audioBufferSize = bufferSize;
+    }
+    return audioBufferSize;
+  }
+
+
+  public VolumeLevelProcessor getVolumeLevelProcessor()
+  {
+    if (volumeLevelProcessor == null)
+      volumeLevelProcessor = new VolumeLevelProcessor();
+    return volumeLevelProcessor;
+  }
+
+
+  public MinimFFTProcessor getFftProcessor()
+  {
+    if (fftProcessor == null)
+      fftProcessor = new MinimFFTProcessor(getAudioBufferSize());
+    return fftProcessor;
+  }
   private void makeAudioDispatcherThread( final Runnable dispatcher )
   {
     if (audioDispatcherThread == null) {
@@ -241,6 +270,7 @@ public class Kaleidoscope extends ExtPApplet
     }
   }
 
+
   private CircularLayer[] getLayers()
   {
     if (layers == null)
@@ -249,16 +279,18 @@ public class Kaleidoscope extends ExtPApplet
 
       layers = new CircularLayer[]{
         spectrogramLayer =
-          new SpectrogramLayer(this, images.get(0), 256, 125, 290, fftProcessor),
+          new SpectrogramLayer(this, images.get(0), 256, 125, 290,
+            getFftProcessor()),
         getOuterMovingShape(),
         foobarLayer =
           new FoobarLayer(this, images.get(3), 16, 125, 275),
         centreLayer =
-          new CentreMovingShape(this, null, 16, 150, volumeLevelProcessor)
+          new CentreMovingShape(this, null, 16, 150, getVolumeLevelProcessor())
       };
     }
     return layers;
   }
+
 
   private OuterMovingShape getOuterMovingShape()
   {
