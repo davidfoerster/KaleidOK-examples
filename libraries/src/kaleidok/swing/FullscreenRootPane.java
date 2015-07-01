@@ -111,24 +111,25 @@ public class FullscreenRootPane extends JRootPane
     getContentPane().requestFocusInWindow();
 
     for (FullscreenEventListener listener: fullscreenListeners)
-      listener.handleFullscreenStateChange(w, fullscreen);
+      listener.handleFullscreenStateChange(dev, w, fullscreen);
 
     if (!fullscreen && previousFullscreenState && windowedBounds != null)
       w.setBounds(windowedBounds);
   }
 
 
-  public void addFullscreenEventListener(
+  public boolean addFullscreenEventListener(
     FullscreenEventListener fullscreenFocusListener )
   {
-    if (fullscreenFocusListener != null)
+    return (fullscreenFocusListener != null) &&
       fullscreenListeners.add(fullscreenFocusListener);
   }
 
   public boolean removeFullscreenEventListener(
     FullscreenEventListener fullscreenFocusListener )
   {
-    return fullscreenListeners.remove(fullscreenFocusListener);
+    return (fullscreenFocusListener != null) &&
+      fullscreenListeners.remove(fullscreenFocusListener);
   }
 
 

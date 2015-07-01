@@ -7,6 +7,7 @@ import kaleidok.util.DefaultValueParser;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.GraphicsDevice;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 
@@ -92,7 +93,8 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
 
 
   @Override
-  public void handleFullscreenStateChange( Window w, boolean fullscreen )
+  public void handleFullscreenStateChange( GraphicsDevice dev, Window w,
+    boolean fullscreen )
   {
     getTextFieldPanel().setVisible(!fullscreen);
   }
