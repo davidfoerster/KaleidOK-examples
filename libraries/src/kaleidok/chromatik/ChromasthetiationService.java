@@ -4,6 +4,7 @@ import kaleidok.chromatik.data.ChromatikResponse;
 import kaleidok.concurrent.GroupedThreadFactory;
 import kaleidok.concurrent.NestedFutureCallback;
 import kaleidok.flickr.AsyncFlickr;
+import kaleidok.flickr.Size;
 import kaleidok.flickr.internal.FlickrBase;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.SizeMap;
@@ -181,7 +182,7 @@ public class ChromasthetiationService
                 int ticket = takeTickets(1);
                 if (verbose >= 3) {
                   System.out.println("Received " + ticket +
-                    " downloading ticket for " + flickrPhoto.getMediumUrl());
+                    " download tickets for " + flickrPhoto.getMediumUrl());
                 }
                 if (ticket > 0) {
                   Future<Image> fImage = imageAsync.execute(
@@ -200,6 +201,10 @@ public class ChromasthetiationService
                 if (ex instanceof FlickrException) {
                   ((FlickrException) ex).setPertainingObject(
                     flickrPhoto.getMediumUrl());
+                } else if (ex instanceof IOException) {
+                  Size s = flickrPhoto.getLargestImageSize();
+                  String url = (s != null) ? s.source : flickrPhoto.getMediumUrl();
+                  ex = new IOException("Couldn't load " + url, ex);
                 }
                 super.failed(ex);
               }
