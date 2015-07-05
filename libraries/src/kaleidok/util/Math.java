@@ -16,20 +16,13 @@ public final class Math
 
   public static float sumOfSquares( float[] a, int offset, int len )
   {
-    if (offset < 0 || offset > a.length)
-      throw new ArrayIndexOutOfBoundsException("offset");
-    if (len < 0)
-      throw new ArrayIndexOutOfBoundsException("len");
-    if (offset + len > a.length)
-      throw new ArrayIndexOutOfBoundsException("offset+len");
-
+    checkBounds(offset, len, a.length);
     return (len != 0) ? sumOfSquares_noBoundsCheck(a, offset, len) : 0;
   }
 
   private static float sumOfSquares_noBoundsCheck( float[] a, int offset, int len )
   {
-    assert offset >= 0 && len > 0;
-    assert offset + len <= a.length;
+    assert len != 0 && checkBounds(offset, len, a.length);
 
     if (len == 1) {
       float x = a[offset];
@@ -49,20 +42,13 @@ public final class Math
 
   public static float sum( FloatList a, int offset, int len )
   {
-    if (offset < 0 || offset > a.size())
-      throw new ArrayIndexOutOfBoundsException("offset");
-    if (len < 0)
-      throw new ArrayIndexOutOfBoundsException("len");
-    if (offset + len > a.size())
-      throw new ArrayIndexOutOfBoundsException("offset+len");
-
+    checkBounds(offset, len, a.size());
     return (len != 0) ? sum_noBoundsCheck(a, offset, len) : 0;
   }
 
   private static float sum_noBoundsCheck( FloatList a, int offset, int len )
   {
-    assert offset >= 0 && len > 0;
-    assert offset + len <= a.size();
+    assert len != 0 && checkBounds(offset, len, a.size());
 
     if (len == 1)
       return a.get(offset);
@@ -70,6 +56,23 @@ public final class Math
     int halfLen = len / 2;
     return sum_noBoundsCheck(a, offset, halfLen) +
       sum_noBoundsCheck(a, offset + halfLen, len - halfLen);
+  }
+
+
+  private static boolean checkBounds( int offset, int len, int bufSize )
+  {
+    if (offset < 0 || offset > bufSize)
+      throwArrayIndexOutOfBoundsException(offset);
+    if (len < 0)
+      throwArrayIndexOutOfBoundsException(len);
+    if ((long) offset + len > bufSize)
+      throwArrayIndexOutOfBoundsException((long) offset + len);
+    return true;
+  }
+
+  private static void throwArrayIndexOutOfBoundsException( long index )
+  {
+    throw new ArrayIndexOutOfBoundsException(Long.toString(index));
   }
 
 
