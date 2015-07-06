@@ -403,23 +403,6 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  @Override
-  public void mouseClicked()
-  {
-    switch (mouseButton) {
-    case LEFT:
-      if (centreLayer != null)
-        centreLayer.nextImage();
-      break;
-
-    case RIGHT:
-      bgImageIndex = (bgImageIndex + 1) % images.size();
-      bgImage = images.get(bgImageIndex);
-      break;
-    }
-  }
-
-
   public void chromasthetiate( String text )
   {
     getChromasthetiationService().submit(text, getChromasthetiator(),
