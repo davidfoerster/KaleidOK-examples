@@ -96,4 +96,10 @@ public final class Math
       return (number & (number - 1)) == 0;
     throw new IllegalArgumentException("number is negative");
   }
+
+
+  public static int divCeil( int divident, int divisor )
+  {
+    return (divident - 1) / divisor + 1;
+  }
 }
