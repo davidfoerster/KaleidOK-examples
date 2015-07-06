@@ -1,6 +1,6 @@
 package kaleidok.http.responsehandler;
 
-import kaleidok.http.Parsers;
+import kaleidok.http.util.Parsers;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;

@@ -3,6 +3,7 @@ package kaleidok.http;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import kaleidok.http.responsehandler.JsonMimeTypeChecker;
+import kaleidok.http.util.MimeTypeMap;
 import org.junit.Rule;
 import org.junit.Test;
 

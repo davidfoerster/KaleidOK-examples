@@ -2,7 +2,7 @@ package com.getflourish.stt2.mock;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import kaleidok.http.Parsers;
+import kaleidok.http.util.Parsers;
 
 import java.io.*;
 import java.net.HttpURLConnection;

@@ -1,6 +1,7 @@
-package kaleidok.http;
+package kaleidok.http.async;
 
 
+import kaleidok.http.util.MimeTypeMap;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.ContentResponseHandler;

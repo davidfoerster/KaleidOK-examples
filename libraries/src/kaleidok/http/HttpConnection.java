@@ -1,6 +1,8 @@
 package kaleidok.http;
 
-import kaleidok.http.Parsers.ContentType;
+import kaleidok.http.util.MimeTypeMap;
+import kaleidok.http.util.Parsers;
+import kaleidok.http.util.Parsers.ContentType;
 import kaleidok.io.Readers;
 
 import java.io.*;

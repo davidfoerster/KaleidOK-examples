@@ -1,4 +1,4 @@
-package kaleidok.http;
+package kaleidok.http.async;
 
 import kaleidok.http.responsehandler.ImageMimeTypeChecker;
 import kaleidok.http.responsehandler.ImageResponseHandler;

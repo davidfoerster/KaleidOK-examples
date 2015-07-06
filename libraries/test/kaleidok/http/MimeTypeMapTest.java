@@ -1,12 +1,13 @@
 package kaleidok.http;
 
+import kaleidok.http.util.MimeTypeMap;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static kaleidok.http.MimeTypeMap.WILDCARD;
+import static kaleidok.http.util.MimeTypeMap.WILDCARD;
 import static org.junit.Assert.*;
 
 
