@@ -1,4 +1,4 @@
-package kaleidok.http;
+package kaleidok.http.async;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

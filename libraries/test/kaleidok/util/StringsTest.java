@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 public class StringsTest
 {
   @Test
-  public void testToHexString1() throws Exception
+  public void testToHexString1()
   {
     char[] buf = new char[0];
     assertSame(buf, toHex(0, buf));
@@ -18,7 +18,7 @@ public class StringsTest
   }
 
   @Test
-  public void testToHexString2() throws Exception
+  public void testToHexString2()
   {
     assertEquals('0', toHex(0, new char[1])[0]);
     assertEquals('0', toHex(Long.MIN_VALUE, new char[1])[0]);
@@ -27,7 +27,7 @@ public class StringsTest
   }
 
   @Test
-  public void testToHexString3() throws Exception
+  public void testToHexString3()
   {
     assertEquals("0000000000000000", new String(toHex(0, null)));
     assertEquals("8000000000000000", new String(toHex(Long.MIN_VALUE, null)));
@@ -36,7 +36,7 @@ public class StringsTest
   }
 
   @Test
-  public void testToHexString4() throws Exception
+  public void testToHexString4()
   {
     assertEquals("000000", new String(toHex(0, new char[6])));
     assertEquals("000000", new String(toHex(Long.MIN_VALUE, new char[6])));
@@ -45,7 +45,7 @@ public class StringsTest
   }
 
   @Test
-  public void testToHexString5() throws Exception
+  public void testToHexString5()
   {
     assertEquals("00000000000000000", new String(toHex(0, new char[17])));
     assertEquals("08000000000000000", new String(toHex(Long.MIN_VALUE, new char[17])));

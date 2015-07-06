@@ -1,6 +1,6 @@
 package kaleidok.http.responsehandler;
 
-import kaleidok.http.MimeTypeMap;
+import kaleidok.http.util.MimeTypeMap;
 
 
 public class JsonMimeTypeChecker extends ResponseMimeTypeChecker

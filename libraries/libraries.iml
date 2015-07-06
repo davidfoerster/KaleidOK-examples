@@ -45,6 +45,5 @@
     <orderEntry type="module" module-name="javaFlacEncoder" />
     <orderEntry type="module" module-name="Synesketch" />
     <orderEntry type="library" name="org.apache.httpcomponents:fluent-hc:4.5" level="project" />
-    <orderEntry type="library" name="com.flickr4java:flickr4java:2.12" level="project" />
   </component>
 </module>

@@ -1,11 +1,13 @@
 package kaleidok.chromatik;
 
+import kaleidok.flickr.Flickr;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.applet.Applet;
 
 
-public class DocumentChromasthetiator extends ChromasthetiatorBase
+public class DocumentChromasthetiator extends ChromasthetiatorBase<Flickr>
 {
   /**
    * A document object tha holds the currently defined search terms

@@ -8,7 +8,9 @@ import javax.swing.JApplet;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 
@@ -87,18 +89,25 @@ public class ExtPApplet extends PApplet
 
   public PImageFuture getImageFuture( String path )
   {
-    URL url;
-    try {
-      url = new URL(path);
-    } catch (MalformedURLException ex) {
+    URL url = this.getClass().getResource(path);
+    if (url == null) {
       try {
         url = new URL(getDocumentBase(), path);
-      } catch (MalformedURLException e) {
+      } catch (MalformedURLException ex) {
         throw new IllegalArgumentException(ex);
       }
+      if (url.getProtocol().equals("file")) {
+        File file;
+        try {
+          file = new File(url.toURI());
+        } catch (URISyntaxException ex) {
+          throw new AssertionError(ex);
+        }
+        if (!file.isFile() || !file.canRead())
+          url = null;
+      }
     }
-
-    return getImageFuture(url);
+    return (url != null) ? getImageFuture(url) : null;
   }
 
   public PImageFuture getImageFuture( URL url )

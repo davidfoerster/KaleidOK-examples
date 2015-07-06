@@ -18,13 +18,13 @@ public class MathTest
   
 
   @Test
-  public void testSumOfSquares1() throws Exception
+  public void testSumOfSquares1()
   {
     assertEquals(expected, sumOfSquares(floatArray), delta);
   }
 
   @Test
-  public void testSumOfSquares2() throws Exception
+  public void testSumOfSquares2()
   {
     assertEquals(expected - square(floatArray[floatArray.length-1]),
       sumOfSquares(floatArray, 0, floatArray.length - 1), delta);
@@ -33,7 +33,7 @@ public class MathTest
   }
 
   @Test
-  public void testSumOfSquares3() throws Exception
+  public void testSumOfSquares3()
   {
     assertEquals(square(floatArray[0]), sumOfSquares(floatArray, 0, 1), 0f);
     assertEquals(square(floatArray[1]), sumOfSquares(floatArray, 1, 1), 0f);
@@ -42,7 +42,7 @@ public class MathTest
   }
 
   @Test
-  public void testSumOfSquares4() throws Exception
+  public void testSumOfSquares4()
   {
     assertEquals(0f, sumOfSquares(floatArray, 0, 0), 0f);
     assertEquals(0f, sumOfSquares(floatArray, floatArray.length / 2, 0), 0f);

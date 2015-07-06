@@ -1,4 +1,4 @@
-package kaleidok.http;
+package kaleidok.http.util;
 
 import java.text.NumberFormat;
 import java.util.HashMap;

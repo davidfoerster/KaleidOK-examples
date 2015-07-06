@@ -4,9 +4,6 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioPlayer;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.dsp.pitch.PitchProcessor;
-import com.flickr4java.flickr.Flickr;
-import com.flickr4java.flickr.FlickrException;
-import com.flickr4java.flickr.REST;
 import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.STT;
 import kaleidok.audio.ContinuousAudioInputStream;
@@ -18,6 +15,8 @@ import kaleidok.chromatik.ChromasthetiatorBase;
 import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.examples.kaleidoscope.layer.*;
+import kaleidok.flickr.Flickr;
+import kaleidok.flickr.FlickrException;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
@@ -28,6 +27,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JApplet;
 import java.awt.Image;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
+import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
 import static kaleidok.util.Math.isPowerOfTwo;
@@ -104,27 +105,54 @@ public class Kaleidoscope extends ExtPApplet
     audioDispatcherThread.start();
   }
 
-
-
+  private static final int MIN_IMAGES = 5;
   private List<PImageFuture> getImages()
   {
-    if (images == null) {
-      // load the images from the _Images folder (relative path from this kaleidoscope's folder)
-      images = new ArrayList<PImageFuture>(8) {{
-        add(getImageFuture("images/one.jpg"));
-        add(getImageFuture("images/two.jpg"));
-        add(getImageFuture("images/three.jpg"));
-        add(getImageFuture("images/four.jpg"));
-        add(getImageFuture("images/five.jpg"));
-      }};
+    if (images == null)
+    {
+      String imagesParam = getParameter(
+        this.getClass().getPackage().getName() + ".images.initial");
+      if (imagesParam == null) {
+        this.images = new ArrayList<>(MIN_IMAGES);
+      } else {
+        String[] images = imagesParam.split("\\s+");
+        this.images = new ArrayList<>(Math.max(images.length, MIN_IMAGES));
+        for (String strImage: images) {
+          if (!strImage.isEmpty()) {
+            if (strImage.charAt(0) != '/' && strImage.indexOf(':') < 0)
+              strImage = "/images/" + strImage;
+            PImageFuture image = getImageFuture(strImage);
+            if (image != null) {
+              this.images.add(image);
+            } else if (debug >= 1) {
+              throw new AssertionError(new FileNotFoundException(strImage));
+            } else {
+              System.err.println("Couldn't load image: " + strImage);
+            }
+          }
+        }
+      }
 
-      bgImageIndex = (int) random(images.size()); // randomly choose the bgImageIndex
+      switch (images.size()) {
+      case 0:
+        images.add(PImageFuture.EMPTY);
+        // fall through
+
+      case 1:
+        bgImageIndex = 0;
+        break;
+
+      default:
+        bgImageIndex = (int) random(images.size()); // randomly choose the bgImageIndex
+        break;
+      }
       bgImage = images.get(bgImageIndex);
-
+      int imageCount = images.size();
+      for (int i = images.size(); i < MIN_IMAGES; i++)
+        images.add(images.get(i % imageCount));
     }
     return images;
   }
-
 
   private void waitForImages()
   {
@@ -146,7 +174,6 @@ public class Kaleidoscope extends ExtPApplet
     }
   }
 
-
   private STT getSTT()
   {
     if (stt == null) {
@@ -159,7 +186,6 @@ public class Kaleidoscope extends ExtPApplet
     }
     return stt;
   }
-
 
   private AudioDispatcher getAudioDispatcher()
   {
@@ -194,6 +220,8 @@ public class Kaleidoscope extends ExtPApplet
           InputStream is = createInputRaw(audioSource);
           if (is == null)
             throw new FileNotFoundException(audioSource);
+          if (!is.markSupported())
+            is = new ByteArrayInputStream(loadBytes(is));
           AudioInputStream ais = getAudioInputStream(is);
           audioDispatcher =
             new AudioDispatcher(new ContinuousAudioInputStream(ais),
@@ -253,6 +281,8 @@ public class Kaleidoscope extends ExtPApplet
       fftProcessor = new MinimFFTProcessor(getAudioBufferSize());
     return fftProcessor;
   }
+
+
   private void makeAudioDispatcherThread( final Runnable dispatcher )
   {
     if (audioDispatcherThread == null) {
@@ -269,7 +299,6 @@ public class Kaleidoscope extends ExtPApplet
       audioDispatcherThread.setDaemon(true);
     }
   }
-
 
   private CircularLayer[] getLayers()
   {
@@ -290,7 +319,6 @@ public class Kaleidoscope extends ExtPApplet
     }
     return layers;
   }
-
 
   private OuterMovingShape getOuterMovingShape()
   {
@@ -317,8 +345,7 @@ public class Kaleidoscope extends ExtPApplet
       String data = parseStringOrFile(getParameter("com.flickr.api.key"), '@');
       if (data != null) {
         String[] keys = data.split(":|\r?\n", 2);
-        chromasthetiator.setFlickrApi(
-          new Flickr(keys[0], keys[1], new REST()));
+        chromasthetiator.setFlickrApi(new Flickr(keys[0], keys[1]));
       }
 
       chromasthetiator.maxKeywords = DefaultValueParser.parseInt(this,
@@ -439,10 +466,9 @@ public class Kaleidoscope extends ExtPApplet
       if (ex == null) {
         System.out.println("Aborted!");
       } else if (ex instanceof FlickrException) {
-        switch (Integer.parseInt(((FlickrException) ex).getErrorCode())) {
+        switch (((FlickrException) ex).getErrorCode()) {
         case 1: // Photo not found
         case 2: // Permission denied
-          //noinspection unchecked
           System.err.println(ex.getLocalizedMessage());
           return;
         }

@@ -14,7 +14,7 @@ public final class Readers
   public static String readAll( final Reader r, char[] charBuf )
     throws IOException
   {
-    if (charBuf == null)
+    if (charBuf == null || charBuf.length == 0)
       charBuf = new char[BUFFERSIZE_MIN];
 
     int current, total = 0;

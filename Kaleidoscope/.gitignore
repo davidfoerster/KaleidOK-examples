@@ -1,1 +1,2 @@
-src/data/images/
+resources/images/
+src/kaleidok/examples/kaleidoscope/*.properties

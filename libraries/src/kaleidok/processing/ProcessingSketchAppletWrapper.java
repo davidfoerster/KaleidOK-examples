@@ -10,9 +10,7 @@ import javax.swing.KeyStroke;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Frame;
-import java.awt.Label;
 import java.awt.event.KeyEvent;
-import java.io.File;
 
 import static javax.swing.KeyStroke.getKeyStroke;
 
@@ -72,22 +70,8 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     while ((parent = current.getParent()) != null) {
       current = parent;
       if (current instanceof Frame) {
-        fudgeAppletViewer((Frame) current);
+        FudgedAppletViewerFactory.fudgeAppletViewer((Frame) current);
         break;
-      }
-    }
-  }
-
-  private static void fudgeAppletViewer( Frame frame )
-  {
-    synchronized (frame.getTreeLock()) {
-      frame.setMenuBar(null);
-      int len = frame.getComponentCount();
-      for (int i = 0; i < len; i++) {
-        if (frame.getComponent(i) instanceof Label) {
-          frame.remove(i);
-          break;
-        }
       }
     }
   }
@@ -127,28 +111,4 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   {
     sketch.stop();
   }
-
-
-  static {
-    // Set temporary directory from environment variable(s)
-    String strTmpDir;
-    switch (PApplet.platform) {
-    case PApplet.WINDOWS:
-      strTmpDir = System.getenv("TEMP");
-      break;
-
-    default:
-      strTmpDir = System.getenv("TMPDIR");
-      if (strTmpDir == null || strTmpDir.isEmpty())
-        strTmpDir = System.getenv("TMP");
-      break;
-    }
-
-    if (strTmpDir != null && !strTmpDir.isEmpty()) {
-      File fTmpDir = new File(strTmpDir);
-      if (fTmpDir.isDirectory() && fTmpDir.canWrite())
-        System.setProperty("java.io.tmpdir", strTmpDir);
-    }
-  }
-
 }

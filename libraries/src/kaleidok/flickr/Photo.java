@@ -1,15 +1,16 @@
 package kaleidok.flickr;
 
-import com.flickr4java.flickr.FlickrException;
-import com.flickr4java.flickr.photos.Size;
-
-import java.util.Collection;
-import java.util.Collections;
+import java.io.IOException;
 import java.util.regex.*;
 
 
-public abstract class Photo extends com.flickr4java.flickr.photos.Photo
+public abstract class Photo
 {
+  public String farm, server, id, secret, extension;
+
+  private SizeMap sizes;
+
+
   public Photo() { }
 
   public Photo( CharSequence url )
@@ -17,56 +18,57 @@ public abstract class Photo extends com.flickr4java.flickr.photos.Photo
     fromUrl(url);
   }
 
+
   public static final Pattern URL_PATTERN = Pattern.compile(
     "^https?://farm(?<farm>\\d+)\\.static\\.?flickr\\.com/" +
     "(?<server>\\d+)/(?<photoId>\\d+)_(?<secret>\\p{XDigit}+)" +
-    "(?:_\\p{Alpha})?\\.(?:jpg|png|gif)$");
+    "(?:_\\p{Alpha})?\\.(?<ext>jpg|png|gif)$");
 
   public boolean fromUrl( CharSequence url )
   {
     Matcher m = URL_PATTERN.matcher(url);
     if (m.matches()) {
-      setFarm(m.group("farm"));
-      setServer(m.group("server"));
-      setId(m.group("photoId"));
-      setSecret(m.group("secret"));
+      farm = m.group("farm");
+      server = m.group("server");
+      id = m.group("photoId");
+      secret = m.group("secret");
+      extension = m.group("ext");
     }
     return m.matches();
   }
 
-  private Collection<Size> sizes;
 
-  public Collection<Size> getSizes()
+  public String getMediumUrl()
+  {
+    return "https://farm" + farm + ".static.flickr.com/" +
+      server + '/' + id + '_' + secret + '.' + extension;
+  }
+
+
+  public SizeMap getSizes()
   {
     return sizes;
   }
 
-  @Override
-  public void setSizes( Collection<Size> sizes )
+  public void setSizes( SizeMap sizes )
   {
     this.sizes = sizes;
-    super.setSizes(sizes);
   }
 
-  public Size getSize( int sizeId )
+
+  public Size getSize( Size.Label label )
   {
-    Collection<Size> sizes = getSizes();
-    if (sizes != null) {
-      for (Size size : sizes) {
-        if (size.getLabel() == sizeId)
-          return size;
-      }
-    }
-    return null;
+    SizeMap sizes = getSizes();
+    return (sizes != null) ? sizes.get(label) : null;
   }
 
   public Size getLargestImageSize()
   {
-    Collection<Size> sizes = getSizes();
+    SizeMap sizes = getSizes();
     return (sizes != null && !sizes.isEmpty()) ?
-      Collections.max(sizes, PhotoSizeComparator.INSTANCE) :
+      sizes.lastEntry().getValue() :
       null;
   }
 
-  public abstract Collection<Size> getSizesThrow() throws FlickrException;
+  public abstract SizeMap getSizesThrow() throws FlickrException, IOException;
 }

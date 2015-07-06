@@ -1,8 +1,7 @@
-package kaleidok.http;
+package kaleidok.http.util;
 
 import kaleidok.util.StringTokenIterator;
 import org.apache.http.HeaderElement;
-import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -10,7 +9,6 @@ import org.apache.http.client.ClientProtocolException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URI;
