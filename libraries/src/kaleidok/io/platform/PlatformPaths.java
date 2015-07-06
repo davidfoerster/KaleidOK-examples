@@ -1,7 +1,5 @@
 package kaleidok.io.platform;
 
-import processing.core.PApplet;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,24 +14,13 @@ public class PlatformPaths
 
   public static final PlatformPaths INSTANCE;
   static {
-    switch (PApplet.platform) {
-    case PApplet.WINDOWS:
-      INSTANCE = new WindowsPaths();
-      break;
-
-    case PApplet.MACOSX:
-      INSTANCE = new OsxPaths();
-      break;
-
-    case PApplet.LINUX:
-      INSTANCE = new LinuxPaths();
-      break;
-
-    case PApplet.OTHER:
-    default:
-      INSTANCE = new PlatformPaths();
-      break;
-    }
+    String os = System.getProperty("os.name").replace(" ", "");
+    INSTANCE =
+      os.startsWith("Windows") ? new WindowsPaths() :
+      os.startsWith("Linux") ? new LinuxPaths() :
+      os.startsWith("MacOSX") ? new OsxPaths() :
+      (os.startsWith("Solaris") || os.endsWith("BSD")) ? new UnixPaths() :
+        new PlatformPaths();
   }
 
 
