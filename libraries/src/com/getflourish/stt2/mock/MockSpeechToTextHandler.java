@@ -3,12 +3,17 @@ package com.getflourish.stt2.mock;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import kaleidok.http.util.Parsers;
+import kaleidok.io.platform.PlatformPaths;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.DateFormat;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -45,6 +50,7 @@ public class MockSpeechToTextHandler implements HttpHandler
     }
   }
 
+
   protected boolean handleRecognize( HttpExchange t ) throws IOException
   {
     if (!"POST".equals(t.getRequestMethod())) {
@@ -69,7 +75,7 @@ public class MockSpeechToTextHandler implements HttpHandler
     long inLen;
     try (InputStream in = t.getRequestBody()) {
       inLen =
-        Files.copy(in, getTempFileName(this, ".flac"),
+        Files.copy(in, createTempFile(this, ".flac"),
           StandardCopyOption.REPLACE_EXISTING);
     }
     System.out.println("Server received " + inLen + " bytes on request to " + t.getRequestURI());
@@ -84,15 +90,28 @@ public class MockSpeechToTextHandler implements HttpHandler
     return true;
   }
 
-  public static Path getTempFileName( Object namespace, String extension )
+
+  private static Path tempDir = null;
+
+  private static final Format tempFileFormat =
+    new SimpleDateFormat("yyyyMMdd-HHmmss.SSS-");
+
+  protected static Path createTempFile( Object namespace, String extension )
     throws IOException
   {
     Class<?> clazz = (namespace instanceof Class) ? (Class<?>) namespace : namespace.getClass();
-    return Files.createTempFile(
-      String.format("%s-%tY%<tm%<td-%<tH%<tM%<tS.%<tL-",
-        clazz.getSimpleName(), new Date()),
+    if (tempDir == null) {
+      tempDir = PlatformPaths.INSTANCE.getTempDir().resolve(clazz.getCanonicalName());
+      try {
+        Files.createDirectory(tempDir);
+      } catch (FileAlreadyExistsException ex) {
+        // go on...
+      }
+    }
+    return Files.createTempFile(tempDir, tempFileFormat.format(new Date()),
       extension);
   }
+
 
   protected static void assertTrue( boolean b )
   {
@@ -100,13 +119,15 @@ public class MockSpeechToTextHandler implements HttpHandler
       throw new IllegalArgumentException();
   }
 
+
   protected static void setContentType( HttpExchange t, String contentType )
   {
     t.getResponseHeaders().set(CONTENT_TYPE,
       contentType + "; charset=" + DEFAULT_CHARSET.name() + ';');
   }
 
-  public static void handleException( HttpExchange t, Throwable ex, int responseCode )
+
+  protected static void handleException( HttpExchange t, Throwable ex, int responseCode )
     throws IOException
   {
     if (t.getResponseCode() < 0) {
@@ -118,7 +139,9 @@ public class MockSpeechToTextHandler implements HttpHandler
     }
   }
 
+
   public static final String CONTENT_TYPE = "Content-Type";
+
 
   private static final byte[] transcriptionResult = (
     "{\"result\":[]}\n" +
