@@ -16,4 +16,14 @@ class UnixPaths extends PlatformPaths
       Paths.get(dir) :
       super.getTempDirImpl();
   }
+
+
+  @Override
+  protected Path getCacheDirImpl()
+  {
+    String dir = System.getenv("XDG_CACHE_HOME");
+    return (dir != null && !dir.isEmpty()) ?
+      Paths.get(dir) :
+      getHomeDir().resolve(".cache");
+  }
 }

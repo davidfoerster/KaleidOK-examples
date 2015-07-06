@@ -22,8 +22,11 @@ public class PlatformPaths
       break;
 
     case PApplet.MACOSX:
+      INSTANCE = new OsxPaths();
+      break;
+
     case PApplet.LINUX:
-      INSTANCE = new UnixPaths();
+      INSTANCE = new LinuxPaths();
       break;
 
     case PApplet.OTHER:
@@ -31,6 +34,21 @@ public class PlatformPaths
       INSTANCE = new PlatformPaths();
       break;
     }
+  }
+
+
+  private Path homeDir;
+
+  public Path getHomeDir()
+  {
+    if (homeDir == null)
+      homeDir = getHomeDirImpl();
+    return homeDir;
+  }
+
+  protected Path getHomeDirImpl()
+  {
+    return Paths.get(System.getProperty("user.home"));
   }
 
 
@@ -61,5 +79,20 @@ public class PlatformPaths
     throws IOException
   {
     return Files.createTempFile(getTempDir(), prefix, suffix, attrs);
+  }
+
+
+  private Path cacheDir;
+
+  public Path getCacheDir()
+  {
+    if (cacheDir == null)
+      cacheDir = getCacheDirImpl();
+    return cacheDir;
+  }
+
+  protected Path getCacheDirImpl()
+  {
+    throw new UnsupportedOperationException();
   }
 }

@@ -14,4 +14,12 @@ class WindowsPaths extends PlatformPaths
       Paths.get(dir) :
       super.getTempDirImpl();
   }
+
+
+  @Override
+  protected Path getCacheDirImpl()
+  {
+    String dir = System.getenv("LOCALAPPDATA");
+    return (dir != null && !dir.isEmpty()) ? Paths.get(dir) : getHomeDir();
+  }
 }
