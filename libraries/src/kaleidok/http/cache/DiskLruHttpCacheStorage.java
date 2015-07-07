@@ -29,6 +29,17 @@ import static kaleidok.util.Math.divCeil;
 
 public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
 {
+  /**
+   * The current collision resolution method simply replaces existing colliding
+   * cache entries, which is probably fine in a key space of 2^(5*64).
+   *
+   * A smarter method might be to use some kind of open addressing
+   * like linear probing. Separate chaining is possible through DiskLruCache's
+   * additional entry values, but a bit difficult to implement. Both methods
+   * have the drawback of defeating the LRU mechanism, as there is currently no
+   * unaccounted access to cache entries.
+   */
+
   private final DiskLruCache diskCache;
 
   /***
@@ -70,7 +81,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
     }
 
     try {
-      serialize(entry, editor.newOutputStream(0));
+      serialize(key, entry, editor.newOutputStream(0));
       editor.commit();
     } finally {
       editor.abortUnlessCommitted();
@@ -83,7 +94,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   {
     DiskLruCache.Snapshot snapshot = diskCache.get(toInternalKey(key));
     if (snapshot != null) try {
-      return deserialize(snapshot.getInputStream(0));
+      return deserialize(key, snapshot.getInputStream(0));
     } finally {
       snapshot.close();
     }
@@ -115,7 +126,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
       InputStream is = editor.newInputStream(0);
       HttpCacheEntry entry;
       if (is != null) {
-        entry = deserialize(is);
+        entry = deserialize(key, is);
         is.close();
       } else {
         entry = null;
@@ -123,7 +134,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
 
       entry = callback.update(entry);
       if (entry != null) {
-        serialize(entry, editor.newOutputStream(0));
+        serialize(key, entry, editor.newOutputStream(0));
         editor.commit();
         closed = true;
       } else {
@@ -158,24 +169,30 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   }
 
 
-  protected static void serialize( HttpCacheEntry entry, OutputStream os )
+  protected static void serialize( String externalKey, HttpCacheEntry entry,
+    OutputStream os )
     throws IOException
   {
     if (!(os instanceof BufferedOutputStream))
       os = new BufferedOutputStream(os);
     try (ObjectOutputStream oos = new ObjectOutputStream(os)) {
+      oos.writeObject(externalKey);
       oos.writeObject(entry);
     }
   }
 
 
-  protected static HttpCacheEntry deserialize( InputStream is )
+  protected static HttpCacheEntry deserialize( String externalKey,
+    InputStream is )
     throws IOException
   {
     if (!(is instanceof BufferedInputStream))
       is = new BufferedInputStream(is);
     try (ObjectInputStream ois = new ObjectInputStream(is)) {
-      return (HttpCacheEntry) ois.readObject();
+      String storedKey = (String) ois.readObject();
+      return (externalKey.equals(storedKey)) ?
+        (HttpCacheEntry) ois.readObject() :
+        null;
     } catch (ClassNotFoundException ex) {
       throw new AssertionError(ex);
     }
