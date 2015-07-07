@@ -2,6 +2,7 @@ package kaleidok.http.cache;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 import kaleidok.io.platform.PlatformPaths;
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.http.client.cache.HttpCacheEntry;
 import org.apache.http.client.cache.HttpCacheStorage;
 import org.apache.http.client.cache.HttpCacheUpdateCallback;
@@ -20,6 +21,8 @@ import java.lang.Math;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.Map;
 
 import static kaleidok.util.Math.divCeil;
 
@@ -27,6 +30,12 @@ import static kaleidok.util.Math.divCeil;
 public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
 {
   private final DiskLruCache diskCache;
+
+  /***
+   * Maps external to internal keys
+   */
+  private final Map<String, String> keyMap =
+    Collections.synchronizedMap(new LRUMap<String, String>(500));
 
 
   public DiskLruHttpCacheStorage( File directory, int appVersion,
@@ -85,7 +94,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   @Override
   public void removeEntry( String key ) throws IOException
   {
-    diskCache.remove(toInternalKey(key));
+    diskCache.remove(toInternalKey(key, true));
   }
 
 
@@ -129,10 +138,23 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   }
 
 
-  protected static String toInternalKey( CharSequence externalKey )
+  protected String toInternalKey( String externalKey )
   {
-    // TODO: Cache most recent internal keys
-    return ThreadLocalKeyHasher.INSTANCE.get().toInternalKey(externalKey);
+    return toInternalKey(externalKey, false);
+  }
+
+  protected String toInternalKey( String externalKey, boolean remove )
+  {
+    String internalKey = remove ?
+      keyMap.remove(externalKey) :
+      keyMap.get(externalKey);
+    if (internalKey == null) {
+      internalKey =
+        ThreadLocalKeyHasher.INSTANCE.get().toInternalKey(externalKey);
+      if (!remove)
+        keyMap.put(externalKey, internalKey);
+    }
+    return internalKey;
   }
 
 
@@ -192,12 +214,14 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   public void close() throws IOException
   {
     diskCache.close();
+    keyMap.clear();
   }
 
 
   public void delete() throws IOException
   {
     diskCache.delete();
+    keyMap.clear();
   }
 
 
