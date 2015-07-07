@@ -12,6 +12,8 @@ public class PlatformPaths
   protected PlatformPaths() { }
 
 
+  public static final FileAttribute<?>[] NO_ATTRIBUTES = new FileAttribute[0];
+
   public static final PlatformPaths INSTANCE;
   static {
     String os = System.getProperty("os.name").replace(" ", "");

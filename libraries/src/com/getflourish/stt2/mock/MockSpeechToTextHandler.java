@@ -11,7 +11,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.text.DateFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -109,7 +108,7 @@ public class MockSpeechToTextHandler implements HttpHandler
       }
     }
     return Files.createTempFile(tempDir, tempFileFormat.format(new Date()),
-      extension);
+      extension,  PlatformPaths.NO_ATTRIBUTES);
   }
 
 
