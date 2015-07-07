@@ -37,11 +37,10 @@ public class ChromasthetiationService
   private boolean hasFlickrApiKey = false;
 
 
-  public ChromasthetiationService( Executor executor )
+  public ChromasthetiationService( Executor executor,
+    org.apache.http.client.fluent.Executor httpExecutor )
   {
     this.executor = executor;
-    org.apache.http.client.fluent.Executor httpExecutor =
-      org.apache.http.client.fluent.Executor.newInstance();
 
     jsonAsync = new JsonAsync().use(executor).use(httpExecutor);
     jsonAsync.gson = ChromatikQuery.gson;
@@ -51,6 +50,13 @@ public class ChromasthetiationService
     flickr = new AsyncFlickr(null, null, executor, httpExecutor);
   }
 
+
+  public ChromasthetiationService( Executor executor )
+  {
+    this(executor, org.apache.http.client.fluent.Executor.newInstance());
+  }
+
+
   public ChromasthetiationService( int threadPoolSize )
   {
     this((threadPoolSize == 0) ?
@@ -58,10 +64,12 @@ public class ChromasthetiationService
       Executors.newFixedThreadPool(threadPoolSize, createThreadFactory()));
   }
 
+
   public ChromasthetiationService()
   {
     this(0);
   }
+
 
   private static ThreadFactory createThreadFactory()
   {

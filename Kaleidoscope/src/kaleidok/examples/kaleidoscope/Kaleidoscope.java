@@ -14,12 +14,18 @@ import kaleidok.chromatik.ChromasthetiationService;
 import kaleidok.chromatik.ChromasthetiatorBase;
 import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
+import kaleidok.concurrent.GroupedThreadFactory;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
+import kaleidok.http.cache.DiskLruHttpCacheStorage;
+import kaleidok.http.cache.ExecutorSchedulingStrategy;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.impl.client.cache.CacheConfig;
+import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import processing.core.PImage;
 
 import javax.sound.sampled.AudioInputStream;
@@ -34,6 +40,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
@@ -358,11 +368,54 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  public static final long DEFAULT_HTTP_CACHE_SIZE = 50L << 20;
+
+  private static final int HTTP_CACHE_APP_VERSION = 1;
+
   private ChromasthetiationService getChromasthetiationService()
   {
-    if (chromasthetiationService == null) {
-      chromasthetiationService =
-        new ChromasthetiationService(getChromasthetiationThreadPoolSize());
+    if (chromasthetiationService == null)
+    {
+      CachingHttpClientBuilder builder = CachingHttpClientBuilder.create();
+      builder
+        .disableConnectionState()
+        .disableCookieManagement();
+
+      int threadPoolSize = getChromasthetiationThreadPoolSize();
+      ThreadFactory threadFactory =
+        new GroupedThreadFactory("Chromastetiation", true);
+      ExecutorService executor = (threadPoolSize == 0) ?
+        Executors.newCachedThreadPool(threadFactory) :
+        Executors.newFixedThreadPool(threadPoolSize, threadFactory);
+      builder.setSchedulingStrategy(
+        new ExecutorSchedulingStrategy(executor));
+
+      long httpCacheSize = DEFAULT_HTTP_CACHE_SIZE;
+      CacheConfig cacheConfig = CacheConfig.custom()
+        .setMaxCacheEntries(Integer.MAX_VALUE)
+        .setMaxObjectSize(httpCacheSize / 2)
+        .setSharedCache(false)
+        .setAllow303Caching(true)
+        .setHeuristicCachingEnabled(true)
+        .setHeuristicCoefficient(0.5f)
+        .setHeuristicDefaultLifetime(TimeUnit.DAYS.toSeconds(28))
+        .setAsynchronousWorkersCore(0)
+        .build();
+
+      try {
+        builder.setHttpCacheStorage(new DiskLruHttpCacheStorage(
+          this.getClass().getCanonicalName(),
+          HTTP_CACHE_APP_VERSION, httpCacheSize));
+        // TODO: Add configuration property for HTTP cache size and base directory
+      } catch (IOException ex) {
+        if (debug >= 1)
+          throw new AssertionError(ex);
+        // else: use default cache storage
+      }
+
+      builder.setCacheConfig(cacheConfig);
+      chromasthetiationService = new ChromasthetiationService(
+        executor, Executor.newInstance(builder.build()));
     }
     return chromasthetiationService;
   }
