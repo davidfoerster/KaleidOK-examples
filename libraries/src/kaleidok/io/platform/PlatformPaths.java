@@ -84,4 +84,14 @@ public class PlatformPaths
   {
     throw new UnsupportedOperationException();
   }
+
+
+  public Path getCacheDir( String name, FileAttribute<?>... attrs )
+    throws IOException
+  {
+    if (name.isEmpty())
+      throw new IllegalArgumentException("Empty cache directory name");
+    return Files.createDirectories(
+      getCacheDir().resolve(name), attrs);
+  }
 }
