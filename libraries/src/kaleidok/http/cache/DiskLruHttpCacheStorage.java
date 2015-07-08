@@ -42,8 +42,11 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
 
   private final DiskLruCache diskCache;
 
-  /***
-   * Maps external to internal keys
+  /**
+   * Caches mapping from external to internal keys.
+   * <p>
+   * TODO: Use <a href="https://github.com/ben-manes/caffeine">Caffeine</a>
+   * instead of {@link LRUMap}, when switching to JDK 1.8.
    */
   private final Map<String, String> keyMap =
     Collections.synchronizedMap(new LRUMap<String, String>(500));
