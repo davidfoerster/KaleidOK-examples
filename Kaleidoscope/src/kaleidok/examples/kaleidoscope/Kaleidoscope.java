@@ -383,7 +383,7 @@ public class Kaleidoscope extends ExtPApplet
 
       int threadPoolSize = getChromasthetiationThreadPoolSize();
       ThreadFactory threadFactory =
-        new GroupedThreadFactory("Chromastetiation", true);
+        new GroupedThreadFactory("Chromasthetiation", true);
       ExecutorService executor = (threadPoolSize == 0) ?
         Executors.newCachedThreadPool(threadFactory) :
         Executors.newFixedThreadPool(threadPoolSize, threadFactory);
