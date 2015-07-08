@@ -277,7 +277,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  public VolumeLevelProcessor getVolumeLevelProcessor()
+  private VolumeLevelProcessor getVolumeLevelProcessor()
   {
     if (volumeLevelProcessor == null)
       volumeLevelProcessor = new VolumeLevelProcessor();
@@ -285,7 +285,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  public MinimFFTProcessor getFftProcessor()
+  private MinimFFTProcessor getFftProcessor()
   {
     if (fftProcessor == null)
       fftProcessor = new MinimFFTProcessor(getAudioBufferSize());
