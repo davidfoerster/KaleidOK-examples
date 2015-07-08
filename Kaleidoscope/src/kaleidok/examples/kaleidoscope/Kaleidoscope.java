@@ -33,10 +33,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JApplet;
 import java.awt.Image;
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -129,8 +126,12 @@ public class Kaleidoscope extends ExtPApplet
         this.images = new ArrayList<>(Math.max(images.length, MIN_IMAGES));
         for (String strImage: images) {
           if (!strImage.isEmpty()) {
-            if (strImage.charAt(0) != '/' && strImage.indexOf(':') < 0)
+            char c = strImage.charAt(0);
+            if (c != '/' && c != File.separatorChar &&
+              strImage.indexOf(':') < 0)
+            {
               strImage = "/images/" + strImage;
+            }
             PImageFuture image = getImageFuture(strImage);
             if (image != null) {
               this.images.add(image);
