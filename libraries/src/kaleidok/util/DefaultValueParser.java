@@ -24,6 +24,19 @@ public final class DefaultValueParser
   }
 
 
+  public static long parseLong( String s, long defaultValue )
+  {
+    return (s != null && !s.isEmpty()) ?
+      Long.parseLong(s) :
+      defaultValue;
+  }
+
+  public static long parseLong( Applet a, String name, long defaultValue )
+  {
+    return parseLong(a.getParameter(name), defaultValue);
+  }
+
+
   private static final String[] BOOLEAN_WORDS = {
       "true", "false", "yes", "no", "on", "off", "enabled", "disabled"
     };

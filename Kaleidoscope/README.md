@@ -101,5 +101,10 @@ are optional and have sensible defaults.
    in the development environment). Kaleidoscope displays 5 different images
    initially.
 
+ * `kaleidok.examples.kaleidoscope.caches.[path|size]` –
+   Path location and maximum size in bytes of Kaleidoscope's cache. Relative
+   paths are interpreted as subdirectories of your platform's default cache
+   directory.
+
 
 [configuration]: #configuration

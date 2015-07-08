@@ -20,6 +20,7 @@ import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.http.cache.DiskLruHttpCacheStorage;
 import kaleidok.http.cache.ExecutorSchedulingStrategy;
+import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
@@ -377,12 +378,24 @@ public class Kaleidoscope extends ExtPApplet
   {
     if (chromasthetiationService == null)
     {
+      int threadPoolSize = getChromasthetiationThreadPoolSize();
+
+      String cacheParamBase = this.getClass().getCanonicalName() + ".cache.";
+      long httpCacheSize = DefaultValueParser.parseLong(this,
+        cacheParamBase + "size", DEFAULT_HTTP_CACHE_SIZE);
+      File cacheDir = new File((String) getParameter(
+        cacheParamBase + "path", this.getClass().getCanonicalName()));
+      if (!cacheDir.isAbsolute()) {
+        cacheDir = new File(
+          PlatformPaths.INSTANCE.getCacheDir().toString(),
+          cacheDir.getPath());
+      }
+
       CachingHttpClientBuilder builder = CachingHttpClientBuilder.create();
       builder
         .disableConnectionState()
         .disableCookieManagement();
 
-      int threadPoolSize = getChromasthetiationThreadPoolSize();
       ThreadFactory threadFactory =
         new GroupedThreadFactory("Chromasthetiation", true);
       ExecutorService executor = (threadPoolSize == 0) ?
@@ -391,7 +404,6 @@ public class Kaleidoscope extends ExtPApplet
       builder.setSchedulingStrategy(
         new ExecutorSchedulingStrategy(executor));
 
-      long httpCacheSize = DEFAULT_HTTP_CACHE_SIZE;
       CacheConfig cacheConfig = CacheConfig.custom()
         .setMaxCacheEntries(Integer.MAX_VALUE)
         .setMaxObjectSize(httpCacheSize / 2)
@@ -405,8 +417,7 @@ public class Kaleidoscope extends ExtPApplet
 
       try {
         builder.setHttpCacheStorage(new DiskLruHttpCacheStorage(
-          this.getClass().getCanonicalName(),
-          HTTP_CACHE_APP_VERSION, httpCacheSize));
+          cacheDir, HTTP_CACHE_APP_VERSION, httpCacheSize));
         // TODO: Add configuration property for HTTP cache size and base directory
       } catch (IOException ex) {
         if (debug >= 1)
