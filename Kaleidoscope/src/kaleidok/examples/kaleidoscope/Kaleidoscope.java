@@ -420,6 +420,8 @@ public class Kaleidoscope extends ExtPApplet
           cacheDir, HTTP_CACHE_APP_VERSION, httpCacheSize));
         // TODO: Add configuration property for HTTP cache size and base directory
       } catch (IOException ex) {
+        System.err.format("Warning: Couldn't set up an HTTP cache in \"%s\": %s%n",
+          cacheDir, ex.getLocalizedMessage());
         if (debug >= 1)
           throw new AssertionError(ex);
         // else: use default cache storage
