@@ -357,6 +357,10 @@ public class Kaleidoscope extends ExtPApplet
       String data = parseStringOrFile(getParameter("com.flickr.api.key"), '@');
       if (data != null) {
         String[] keys = data.split(":|\r?\n", 2);
+        if (keys.length != 2) {
+          throw new IllegalArgumentException(
+            "Malformed Flickr API key: " + data);
+        }
         chromasthetiator.setFlickrApi(new Flickr(keys[0], keys[1]));
       }
 
