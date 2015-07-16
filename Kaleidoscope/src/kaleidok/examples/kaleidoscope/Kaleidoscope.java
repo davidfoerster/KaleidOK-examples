@@ -24,6 +24,7 @@ import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
+import kaleidok.util.Strings;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
@@ -485,18 +486,33 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private String sampledFrameRate = "";
+  private final char[] sampledFrameRate = new char[19];
+  { sampledFrameRate[0] = '0'; }
+  private int sampledFrameRateLength = 1;
+
+  private final char[] frameDrawTime = new char[13];
 
   private void drawFrameRate( long start )
   {
-    if (frameCount % 15 == 0)
-      sampledFrameRate = String.valueOf((int) frameRate);
-
     final int offset = 4, size = 8;
     textSize(size);
     fill(0, 255, 0);
-    text(sampledFrameRate, offset, size + offset);
-    text((int)(System.nanoTime() - start) / 1000000, offset, 2*size + offset);
+
+    if ((frameCount & 15) == 0) {
+      sampledFrameRateLength =
+        Math.max(1, Math.min(sampledFrameRate.length,
+          (int) Math.ceil(Math.log10(frameRate))));
+      Strings.toDigits((long) frameRate, 10,
+        sampledFrameRate, 0, sampledFrameRateLength);
+    }
+    text(sampledFrameRate, 0, sampledFrameRateLength, offset, size + offset);
+
+    long drawTime = (System.nanoTime() - start) / 1000000;
+    int drawTimeLength =
+      Math.max(1, Math.min(frameDrawTime.length,
+        (int) Math.ceil(Math.log10(drawTime))));
+    text(Strings.toDigits(drawTime, 10, frameDrawTime, 0, drawTimeLength),
+      0, drawTimeLength, offset, 2 * size + offset);
   }
 
 
