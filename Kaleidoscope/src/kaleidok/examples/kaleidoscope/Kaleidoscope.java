@@ -22,9 +22,9 @@ import kaleidok.http.cache.DiskLruHttpCacheStorage;
 import kaleidok.http.cache.ExecutorSchedulingStrategy;
 import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.ExtPApplet;
+import kaleidok.processing.FrameRateDisplay;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
-import kaleidok.util.Strings;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
@@ -112,6 +112,9 @@ public class Kaleidoscope extends ExtPApplet
     getLayers();
     getSTT();
     audioDispatcherThread.start();
+
+    if (verbose >= 1)
+      new FrameRateDisplay(this);
   }
 
   private static final int MIN_IMAGES = 5;
@@ -458,16 +461,11 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void draw()
   {
-    final long start = System.nanoTime();
-
     drawBackgroundTexture();
     for (CircularLayer l : layers) {
       if (l != null)
         l.run();
     }
-
-    if (verbose >= 1)
-      drawFrameRate(start);
   }
 
 
@@ -483,36 +481,6 @@ public class Kaleidoscope extends ExtPApplet
     } else {
       background(0);
     }
-  }
-
-
-  private final char[] sampledFrameRate = new char[19];
-  { sampledFrameRate[0] = '0'; }
-  private int sampledFrameRateLength = 1;
-
-  private final char[] frameDrawTime = new char[13];
-
-  private void drawFrameRate( long start )
-  {
-    final int offset = 4, size = 8;
-    textSize(size);
-    fill(0, 255, 0);
-
-    if ((frameCount & 15) == 0) {
-      sampledFrameRateLength =
-        Math.max(1, Math.min(sampledFrameRate.length,
-          (int) Math.ceil(Math.log10(frameRate))));
-      Strings.toDigits((long) frameRate, 10,
-        sampledFrameRate, 0, sampledFrameRateLength);
-    }
-    text(sampledFrameRate, 0, sampledFrameRateLength, offset, size + offset);
-
-    long drawTime = (System.nanoTime() - start) / 1000000;
-    int drawTimeLength =
-      Math.max(1, Math.min(frameDrawTime.length,
-        (int) Math.ceil(Math.log10(drawTime))));
-    text(Strings.toDigits(drawTime, 10, frameDrawTime, 0, drawTimeLength),
-      0, drawTimeLength, offset, 2 * size + offset);
   }
 
 
