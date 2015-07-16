@@ -42,14 +42,14 @@ public final class Strings
    * @param dst  A char array to hold the hexadecimal digits
    * @return  A char array with the hexadecimal representation of {@code n}
    */
-  public static char[] toHex( long n, char[] dst )
+  public static char[] toHexDigits( long n, char[] dst )
   {
     if (dst == null)
       dst = new char[Long.SIZE / 4];
-    return toHex(n, dst, 0, dst.length);
+    return toHexDigits(n, dst, 0, dst.length);
   }
 
-  public static char[] toHex( long n, char[] dst, int offset, int len )
+  public static char[] toHexDigits( long n, char[] dst, int offset, int len )
   {
     int i;
     for (i = offset + len - 1; i >= offset && n != 0; i--, n >>>= 4)

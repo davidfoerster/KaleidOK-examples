@@ -200,7 +200,7 @@ public class ChromatikQuery
 
           sb.append(QUERY_OPT_COLOR).append(QUERY_OPT_NAMEDELIM)
             .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
-            .append(Strings.toHex(c.value, hexStrBuf))
+            .append(Strings.toHexDigits(c.value, hexStrBuf))
             .append(QUERY_OPT_VALUEDELIM).append(weight)
             .append("{s=200000}").append(' ')
             .append(QUERY_OPT_COLORGROUP).append(QUERY_OPT_NAMEDELIM)

@@ -111,7 +111,7 @@ public class ChromatikColor
   public String toString()
   {
     char[] a = new char[groupName.length() + 9];
-    Strings.toHex(value, a, 0, 6);
+    Strings.toHexDigits(value, a, 0, 6);
     a[6] = ' ';
     a[7] = '(';
     groupName.getChars(0, groupName.length(), a, 8);
