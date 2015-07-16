@@ -2,6 +2,10 @@ package kaleidok.util;
 
 import java.util.*;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.ceil;
+import static java.lang.Math.log;
+
 
 public final class Strings
 {
@@ -55,6 +59,44 @@ public final class Strings
     for (i = offset + len - 1; i >= offset && n != 0; i--, n >>>= 4)
       dst[i] = Character.forDigit((int) n & 0xf, 16);
     java.util.Arrays.fill(dst, offset, i + 1, '0');
+    return dst;
+  }
+
+
+  public static char[] toDigits( long n, int base, char[] dst )
+  {
+    if (dst == null) {
+      int len = (int) ceil(log(abs((double) n)) / log(base));
+      if (n < 0)
+        len++;
+      dst = new char[len];
+    }
+    return toDigits(n, base, dst, 0, dst.length);
+  }
+
+  public static char[] toDigits( long n, int base, char[] dst, int offset, int len )
+  {
+    assert base > 1 && base <= 36 && len > 0;
+
+    boolean negative = n < 0;
+    if (negative) {
+      if (n == Long.MIN_VALUE) {
+        dst[offset + (--len)] = Character.forDigit((int) -(n % base), base);
+        n /= base;
+      }
+      n = -n;
+    }
+
+    int i;
+    for (i = offset + len - 1; i >= offset && n != 0; i--, n /= base)
+      dst[i] = Character.forDigit((int)(n % base), base);
+
+    if (i >= offset) {
+      if (negative)
+        dst[offset++] = '-';
+      java.util.Arrays.fill(dst, offset, i + 1, '0');
+    }
+
     return dst;
   }
 }
