@@ -8,6 +8,7 @@ import javaFlacEncoder.FLACStreamOutputStream;
 import javaFlacEncoder.StreamConfiguration;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 
 public class AudioTranscriptionProcessor implements AudioProcessor
@@ -128,10 +129,12 @@ public class AudioTranscriptionProcessor implements AudioProcessor
           (double) availableSamples / streamConfiguration.getSampleRate());
       }
 
-      long now = STT.debug ? System.nanoTime() : 0;
+      long encodingStartTime = STT.debug ? System.nanoTime() : 0;
       encoder.t_encodeSamples(availableSamples, true, availableSamples);
-      if (STT.debug)
-        assertShorter(now, 10 * 1000L*1000L, "Encoding remaining samples took too long");
+      if (STT.debug) {
+        logExcessDuration(encodingStartTime, 10, TimeUnit.SECONDS,
+          "Encoding the remaining samples took too long");
+      }
 
       stt.service.execute(this);
     }
@@ -151,14 +154,13 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   }
 
 
-  private static boolean assertShorter( long startTime, long maxDuration, String message )
+  private static void logExcessDuration( long startTimeNanos, long maxDuration,
+    TimeUnit maxDurationUnit, String message )
   {
-    long duration = System.nanoTime() - startTime;
-    if (duration < maxDuration)
-      return true;
-
-    System.err.format("%s: %.4g seconds%n", message, duration * 1e-9);
-    return false;
+    long duration = System.nanoTime() - startTimeNanos;
+    if (duration >= maxDurationUnit.toNanos(maxDuration)) {
+      System.err.format("%s: %.4g seconds%n", message, duration * 1e-9);
+    }
   }
 
 
