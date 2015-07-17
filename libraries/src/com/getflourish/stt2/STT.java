@@ -1,7 +1,7 @@
 package com.getflourish.stt2;
 
 import com.getflourish.stt2.mock.MockTranscriptionService;
-import com.getflourish.stt2.util.Timer;
+import kaleidok.util.Timer;
 import org.apache.http.concurrent.FutureCallback;
 
 import java.net.URL;

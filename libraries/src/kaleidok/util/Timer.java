@@ -1,4 +1,4 @@
-package com.getflourish.stt2.util;
+package kaleidok.util;
 
 
 public class Timer

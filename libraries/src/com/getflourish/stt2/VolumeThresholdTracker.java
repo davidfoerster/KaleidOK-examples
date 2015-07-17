@@ -2,7 +2,7 @@ package com.getflourish.stt2;
 
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
-import com.getflourish.stt2.util.Timer;
+import kaleidok.util.Timer;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
