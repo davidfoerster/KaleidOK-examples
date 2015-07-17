@@ -1,23 +1,28 @@
 package kaleidok.util;
 
 
+import java.util.concurrent.TimeUnit;
+
+
 public class Timer
 {
-  long savedTime, totalTime;
+  private long savedTime, totalTime;
+
 
   public Timer()
   {
-    this(-1);
+    this(-1, TimeUnit.NANOSECONDS);
   }
 
-  public Timer( int totalTime )
+  public Timer( int totalTime, TimeUnit unit )
   {
-    reset(totalTime);
+    reset(totalTime, unit);
   }
 
-  public void reset( int totalTime )
+
+  public void reset( int totalTime, TimeUnit unit )
   {
-    this.totalTime = totalTime * 1000000L;
+    this.totalTime = unit.toNanos(totalTime);
     reset();
   }
 
@@ -26,20 +31,30 @@ public class Timer
     savedTime = -1;
   }
 
+
   public void start()
   {
     savedTime = System.nanoTime();
   }
+
+
+  public long getTotalTime()
+  {
+    return totalTime;
+  }
+
 
   public long getRuntime()
   {
     return isStarted() ? System.nanoTime() - savedTime : -1;
   }
 
+
   public boolean isStarted()
   {
     return savedTime >= 0;
   }
+
 
   public boolean isFinished()
   {

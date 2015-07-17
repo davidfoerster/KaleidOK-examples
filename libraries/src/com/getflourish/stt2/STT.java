@@ -5,6 +5,7 @@ import kaleidok.util.Timer;
 import org.apache.http.concurrent.FutureCallback;
 
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 
 public class STT
@@ -42,7 +43,7 @@ public class STT
 
     //setAutoRecording(false);
 
-    recordingTimer = new Timer(interval);
+    recordingTimer = new Timer(interval, TimeUnit.MILLISECONDS);
     recordingTimer.start();
   }
 

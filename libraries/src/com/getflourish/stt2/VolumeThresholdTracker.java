@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 
 public class VolumeThresholdTracker implements AudioProcessor
@@ -45,7 +46,7 @@ public class VolumeThresholdTracker implements AudioProcessor
   private void startNewAnalysisWindow()
   {
     pastVolumes.clear();
-    timer.reset(2000);
+    timer.reset(2, TimeUnit.SECONDS);
     timer.start();
   }
 
@@ -76,7 +77,7 @@ public class VolumeThresholdTracker implements AudioProcessor
   @Override
   public void processingFinished()
   {
-    timer.reset(0);
+    timer.reset();
     pastVolumes.clear();
   }
 
