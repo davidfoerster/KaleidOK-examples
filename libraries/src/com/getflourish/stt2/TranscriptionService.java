@@ -133,9 +133,9 @@ public class TranscriptionService
   }
 
 
-  boolean assertNotInQueue( Transcription task )
+  boolean isInQueue( Transcription task )
   {
-    return !(executor instanceof ThreadPoolExecutor) ||
-      !((ThreadPoolExecutor) executor).getQueue().contains(task);
+    return executor instanceof ThreadPoolExecutor &&
+      ((ThreadPoolExecutor) executor).getQueue().contains(task);
   }
 }

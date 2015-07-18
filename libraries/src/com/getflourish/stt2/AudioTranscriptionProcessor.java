@@ -120,7 +120,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
     public void finishEncoding() throws IOException
     {
-      assert stt.service.assertNotInQueue(this);
+      assert !stt.service.isInQueue(this);
 
       int availableSamples = encoder.samplesAvailableToEncode();
       if (STT.debug) {
