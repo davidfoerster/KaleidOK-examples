@@ -177,6 +177,9 @@ public class ChromasthetiationService
     @Override
     public void completed( ChromatikResponse response )
     {
+      if (verbose >= 1) {
+        System.out.println("Chromatik found " + response.hits + " results.");
+      }
       for (ChromatikResponse.Result imgInfo: response.results) {
         final FlickrPhoto flickrPhoto = new FlickrPhoto(imgInfo);
         if (hasTickets(1)) {
