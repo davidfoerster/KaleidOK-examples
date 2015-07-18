@@ -196,8 +196,13 @@ public class Kaleidoscope extends ExtPApplet
       STT.debug = verbose >= 1;
       stt = new STT(new SttResponseHandler(),
         parseStringOrFile(getParameter("com.google.developer.api.key"), '@'));
-      stt.setLanguage((String) getParameter(
-        STT.class.getCanonicalName() + ".language", "en"));
+
+      String paramBase = stt.getClass().getCanonicalName() + '.';
+      stt.setLanguage((String) getParameter(paramBase + "language", "en"));
+      stt.setMaxTranscriptionInterval(
+        DefaultValueParser.parseInt(this, paramBase + "interval", 8),
+        TimeUnit.MILLISECONDS);
+
       getAudioDispatcher().addAudioProcessor(stt.getAudioProcessor());
     }
     return stt;
