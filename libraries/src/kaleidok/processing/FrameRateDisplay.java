@@ -14,7 +14,9 @@ public class FrameRateDisplay
 {
   private final PApplet p;
 
-  public int offsetX = 4, textSize = 8, textColor = 0xff00ff00;
+  public int offsetX = 4, offsetY = 4;
+
+  public int textSize = 8, textColor = 0xff00ff00;
 
 
   private int frameRateSampleFrequencyMask = 0xf;
@@ -71,13 +73,13 @@ public class FrameRateDisplay
       Strings.toDigits((long) p.frameRate, 10,
         sampledFrameRate, 0, sampledFrameRateLength);
     }
-    p.text(sampledFrameRate, 0, sampledFrameRateLength, offsetX, textSize + offsetX);
+    p.text(sampledFrameRate, 0, sampledFrameRateLength, offsetX, textSize + offsetY);
 
     long drawTime =
       timeUnit.convert(System.nanoTime() - drawStartTime, TimeUnit.NANOSECONDS);
     int drawTimeLength =
       clamp((int) ceil(log10(drawTime)), 1, frameDrawTime.length);
     p.text(Strings.toDigits(drawTime, 10, frameDrawTime, 0, drawTimeLength),
-      0, drawTimeLength, offsetX, 2 * textSize + offsetX);
+      0, drawTimeLength, offsetX, 2 * textSize + offsetY);
   }
 }
