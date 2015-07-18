@@ -5,6 +5,10 @@ import processing.core.PApplet;
 
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.log10;
+import static kaleidok.util.Math.clamp;
+
 
 public class FrameRateDisplay
 {
@@ -63,8 +67,7 @@ public class FrameRateDisplay
 
     if ((p.frameCount & frameRateSampleFrequencyMask) == 0) {
       sampledFrameRateLength =
-        Math.max(1, Math.min(sampledFrameRate.length,
-          (int) Math.ceil(Math.log10(p.frameRate))));
+        clamp((int) ceil(log10(p.frameRate)), 1, sampledFrameRate.length);
       Strings.toDigits((long) p.frameRate, 10,
         sampledFrameRate, 0, sampledFrameRateLength);
     }
@@ -73,8 +76,7 @@ public class FrameRateDisplay
     long drawTime =
       timeUnit.convert(System.nanoTime() - drawStartTime, TimeUnit.NANOSECONDS);
     int drawTimeLength =
-      Math.max(1, Math.min(frameDrawTime.length,
-        (int) Math.ceil(Math.log10(drawTime))));
+      clamp((int) ceil(log10(drawTime)), 1, frameDrawTime.length);
     p.text(Strings.toDigits(drawTime, 10, frameDrawTime, 0, drawTimeLength),
       0, drawTimeLength, offsetX, 2 * textSize + offsetX);
   }

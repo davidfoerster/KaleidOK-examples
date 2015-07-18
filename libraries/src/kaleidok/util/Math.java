@@ -102,4 +102,17 @@ public final class Math
   {
     return (divident - 1) / divisor + 1;
   }
+
+
+  public static long clamp( long x, long min, long max )
+  {
+    assert min <= max;
+    return java.lang.Math.min(java.lang.Math.max(x, min), max);
+  }
+
+  public static int clamp( int x, int min, int max )
+  {
+    assert min <= max;
+    return java.lang.Math.min(java.lang.Math.max(x, min), max);
+  }
 }
