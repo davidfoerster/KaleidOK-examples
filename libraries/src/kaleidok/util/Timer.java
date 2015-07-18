@@ -14,13 +14,13 @@ public class Timer
     this(-1, TimeUnit.NANOSECONDS);
   }
 
-  public Timer( int totalTime, TimeUnit unit )
+  public Timer( long totalTime, TimeUnit unit )
   {
     reset(totalTime, unit);
   }
 
 
-  public void reset( int totalTime, TimeUnit unit )
+  public void reset( long totalTime, TimeUnit unit )
   {
     this.totalTime = unit.toNanos(totalTime);
     reset();

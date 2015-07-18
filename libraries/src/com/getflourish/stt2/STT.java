@@ -16,7 +16,7 @@ public class STT
   public static final int SUCCESS = 4;
   public static final int ERROR = 5;
 
-  private boolean isActive = false, isRecording = false;
+  private boolean isActive = false;
 
   private boolean shouldAutoRecord = false;
   private int  status = -1, lastStatus = -1;
@@ -25,8 +25,7 @@ public class STT
   protected final TranscriptionService service;
   private final AudioTranscriptionProcessor processor;
 
-  private int interval = 500;
-  private final Timer recordingTimer;
+  private final Timer recordingTimer = new Timer();
 
   //private final VolumeThresholdTracker volumeThresholdTracker = new VolumeThresholdTracker(); // TODO: integration
 
@@ -42,15 +41,14 @@ public class STT
     processor = new AudioTranscriptionProcessor(this);
 
     //setAutoRecording(false);
-
-    recordingTimer = new Timer(interval, TimeUnit.MILLISECONDS);
-    recordingTimer.start();
   }
+
 
   public AudioTranscriptionProcessor getAudioProcessor()
   {
     return processor;
   }
+
 
   public URL getApiBase()
   {
@@ -62,6 +60,7 @@ public class STT
     service.setApiBase(apiBase);
   }
 
+
   public String getAccessKey()
   {
     return service.getAccessKey();
@@ -71,6 +70,7 @@ public class STT
   {
     service.setAccessKey(accessKey);
   }
+
 
   public String getLanguage()
   {
@@ -82,11 +82,13 @@ public class STT
     service.setLanguage(language);
   }
 
+
   public void shutdown()
   {
     // TODO
     service.shutdownNow();
   }
+
 
   public synchronized void begin( boolean doThrow )
   {
@@ -99,6 +101,7 @@ public class STT
       shouldAutoRecord = false;
     }
   }
+
 
   /*
   public void setAutoRecording( boolean enable )
@@ -159,6 +162,7 @@ public class STT
   }
   */
 
+
   public synchronized void end( boolean doThrow )
   {
     if (!isActive) {
@@ -171,9 +175,11 @@ public class STT
     }
   }
 
+
   public String getStatusText() {
     return statusText;
   }
+
 
   /*
   private final DateFormat timeFormat =  new SimpleDateFormat("HH:mm:ss");
@@ -201,6 +207,7 @@ public class STT
   }
   */
 
+
   private synchronized void onBegin()
   {
     statusText = "Recording";
@@ -212,34 +219,57 @@ public class STT
       System.out.println(statusText);
   }
 
+
   /*
   private void onSpeech()
   {
     statusText = "Recording";
     status = RECORDING;
     recordingTimer.start();
-    isRecording = true;
   }
   */
 
+
   public synchronized void onSpeechFinish()
   {
-    statusText = "Transcribing";
-    status = TRANSCRIBING;
+    //statusText = "Transcribing";
+    //status = TRANSCRIBING;
     processor.shouldRecord = false;
-    isRecording = false;
 
     if (debug) {
-      System.out.format("%s %.3f seconds of audio data...\n",
+      System.out.format("%s roughly %.3f seconds of audio data...%n",
         statusText, recordingTimer.getRuntime() * 1e-9);
     }
 
+    recordingTimer.reset();
     //dispatchTranscriptionEvent("", 0, null, TRANSCRIBING);
   }
+
 
   private void startListening()
   {
     // TODO: stop and then restart "recorder"
     recordingTimer.start();
+  }
+
+
+  public long getMaxTranscriptionInterval()
+  {
+    return recordingTimer.getTotalTime();
+  }
+
+  public void setMaxTranscriptionInterval( long interval, TimeUnit unit )
+  {
+    if (isRecording()) {
+      throw new IllegalStateException(
+        "Cannot change the transcription interval while a transcription is running");
+    }
+    recordingTimer.reset(interval, unit);
+  }
+
+
+  public boolean isRecording()
+  {
+    return recordingTimer.isStarted();
   }
 }
