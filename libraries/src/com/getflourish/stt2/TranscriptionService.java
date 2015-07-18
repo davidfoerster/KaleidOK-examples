@@ -16,11 +16,14 @@ import static kaleidok.http.URLEncoding.appendEncoded;
 
 public class TranscriptionService
 {
-  private URL apiBase, serviceUrl = null;
+  private URL apiBase;
 
-  private String accessKey, language;
+  private String accessKey;
+
+  private String language = "en";
 
   public FutureCallback<SttResponse> resultHandler;
+
 
   protected final ExecutorService executor =
     new ThreadPoolExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
@@ -48,7 +51,8 @@ public class TranscriptionService
   public TranscriptionService( URL apiBase, String accessKey, FutureCallback<SttResponse> resultHandler )
   {
     this(resultHandler);
-    setServiceUrl(apiBase, accessKey, "en");
+    this.apiBase = apiBase;
+    this.accessKey = accessKey;
   }
 
   protected TranscriptionService( FutureCallback<SttResponse> resultHandler )
@@ -64,8 +68,10 @@ public class TranscriptionService
 
   public void setApiBase( URL apiBase )
   {
-    setServiceUrl(apiBase, accessKey, language);
+    this.apiBase = apiBase;
+    serviceUrl = null;
   }
+
 
   public String getAccessKey()
   {
@@ -74,8 +80,10 @@ public class TranscriptionService
 
   public void setAccessKey( String accessKey )
   {
-    setServiceUrl(apiBase, accessKey, language);
+    this.accessKey = accessKey;
+    serviceUrl = null;
   }
+
 
   public String getLanguage()
   {
@@ -84,35 +92,35 @@ public class TranscriptionService
 
   public void setLanguage( String language )
   {
-    setServiceUrl(apiBase, accessKey, language);
+    this.language = language;
+    serviceUrl = null;
   }
+
 
   protected URL getServiceUrl()
   {
+    if (serviceUrl == null) {
+      StringBuilder urlSpec = new StringBuilder(
+        URL_SPEC_PREFIX.length() + language.length() +
+          URL_SPEC_KEY_BIT.length() + accessKey.length());
+      appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
+      appendEncoded(accessKey, urlSpec.append(URL_SPEC_KEY_BIT));
+
+      try {
+        serviceUrl = new URL(apiBase, urlSpec.toString());
+      } catch (MalformedURLException ex) {
+        throw new AssertionError(ex);
+      }
+    }
     return serviceUrl;
   }
 
-  protected void setServiceUrl( URL apiBase, String accessKey, String language )
-  {
-    StringBuilder urlSpec = new StringBuilder(
-      URL_SPEC_PREFIX.length() + language.length() +
-      URL_SPEC_KEY_BIT.length() + accessKey.length());
-    appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
-    appendEncoded(accessKey, urlSpec.append(URL_SPEC_KEY_BIT));
-
-    try {
-      this.serviceUrl = new URL(apiBase, urlSpec.toString());
-      this.apiBase = apiBase;
-      this.accessKey = accessKey;
-      this.language = language;
-    } catch (MalformedURLException ex) {
-      throw new AssertionError(ex);
-    }
-  }
+  private URL serviceUrl = null;
 
   private static final String
     URL_SPEC_PREFIX = "recognize?output=json&lang=",
     URL_SPEC_KEY_BIT = "&key=";
+
 
   public void execute( Transcription task )
   {
