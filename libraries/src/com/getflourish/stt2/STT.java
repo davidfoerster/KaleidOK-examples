@@ -10,17 +10,21 @@ import java.util.concurrent.TimeUnit;
 
 public class STT
 {
-  public static final int LISTENING = 1;
-  public static final int RECORDING = 2;
-  public static final int TRANSCRIBING = 3;
-  public static final int SUCCESS = 4;
-  public static final int ERROR = 5;
+  public enum State
+  {
+    IDLE,
+    LISTENING,
+    RECORDING,
+    TRANSCRIBING,
+    SUCCESS,
+    ERROR,
+    SHUTDOWN
+  }
 
   private boolean isActive = false;
 
   private boolean shouldAutoRecord = false;
-  private int  status = -1, lastStatus = -1;
-  private String statusText = "", lastStatusText = "";
+  private State status = State.IDLE, lastStatus = State.IDLE;
 
   protected final TranscriptionService service;
   private final AudioTranscriptionProcessor processor;
@@ -86,6 +90,7 @@ public class STT
   public void shutdown()
   {
     // TODO
+    status = State.SHUTDOWN;
     service.shutdownNow();
   }
 
@@ -176,8 +181,8 @@ public class STT
   }
 
 
-  public String getStatusText() {
-    return statusText;
+  public State getStatus() {
+    return status;
   }
 
 
@@ -210,13 +215,12 @@ public class STT
 
   private synchronized void onBegin()
   {
-    statusText = "Recording";
-    status = RECORDING;
+    status = State.RECORDING;
     processor.shouldRecord = true;
     startListening();
 
     if (debug)
-      System.out.println(statusText);
+      System.out.println(status);
   }
 
 
@@ -232,13 +236,12 @@ public class STT
 
   public synchronized void onSpeechFinish()
   {
-    //statusText = "Transcribing";
-    //status = TRANSCRIBING;
+    status = State.IDLE;
     processor.shouldRecord = false;
 
     if (debug) {
       System.out.format("%s roughly %.3f seconds of audio data...%n",
-        statusText, recordingTimer.getRuntime() * 1e-9);
+        status, recordingTimer.getRuntime() * 1e-9);
     }
 
     recordingTimer.reset();
