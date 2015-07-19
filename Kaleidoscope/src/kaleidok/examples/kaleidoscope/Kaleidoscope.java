@@ -4,6 +4,7 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioPlayer;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import com.getflourish.stt2.RecorderIcon;
 import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.STT;
 import kaleidok.audio.ContinuousAudioInputStream;
@@ -110,7 +111,11 @@ public class Kaleidoscope extends ExtPApplet
     getChromasthetiator();
     getChromasthetiationService();
     getLayers();
-    getSTT();
+    STT stt = getSTT();
+
+    RecorderIcon ri = new RecorderIcon(this, stt);
+    ri.x = width - ri.x;
+
     audioDispatcherThread.start();
 
     if (verbose >= 1)
