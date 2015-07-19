@@ -4,7 +4,11 @@ import com.getflourish.stt2.mock.MockTranscriptionService;
 import kaleidok.util.Timer;
 import org.apache.http.concurrent.FutureCallback;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 
@@ -32,6 +36,10 @@ public class STT
   private final Timer recordingTimer = new Timer();
 
   //private final VolumeThresholdTracker volumeThresholdTracker = new VolumeThresholdTracker(); // TODO: integration
+
+  private final Collection<ChangeListener> changeListeners = new ArrayList<>();
+
+  private final ChangeEvent changeEvent = new ChangeEvent(this);
 
 
   public static boolean debug;
@@ -87,11 +95,30 @@ public class STT
   }
 
 
+  public void addChangeListener( ChangeListener listener )
+  {
+    changeListeners.add(listener);
+  }
+
+  public boolean removeChangeListener( ChangeListener listener )
+  {
+    return changeListeners.remove(listener);
+  }
+
+
+  private void signalChange()
+  {
+    for (ChangeListener listener: changeListeners)
+      listener.stateChanged(changeEvent);
+  }
+
+
   public void shutdown()
   {
     // TODO
     status = State.SHUTDOWN;
     service.shutdownNow();
+    signalChange();
   }
 
 
@@ -221,6 +248,8 @@ public class STT
 
     if (debug)
       System.out.println(status);
+
+    signalChange();
   }
 
 
@@ -246,6 +275,8 @@ public class STT
 
     recordingTimer.reset();
     //dispatchTranscriptionEvent("", 0, null, TRANSCRIBING);
+
+    signalChange();
   }
 
 
