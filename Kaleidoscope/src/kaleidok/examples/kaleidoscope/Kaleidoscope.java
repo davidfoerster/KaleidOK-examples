@@ -104,7 +104,14 @@ public class Kaleidoscope extends ExtPApplet
     }
     size(width, height, OPENGL); // keep size, but use the OpenGL renderer
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
-    smooth(4);
+
+    int smoothingLevel = DefaultValueParser.parseInt(this,
+      g.getClass().getCanonicalName() + ".smooth", 4);
+    if (smoothingLevel > 0) {
+      smooth(smoothingLevel);
+    } else {
+      noSmooth();
+    }
 
     getImages();
     getChromasthetiator();
