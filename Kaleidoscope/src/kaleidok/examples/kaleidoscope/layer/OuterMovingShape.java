@@ -48,10 +48,16 @@ public class OuterMovingShape extends CircularLayer
     parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
   }
 
+
+  private PitchDetectionHandler pitchDetectionHandler = null;
+
   public PitchDetectionHandler getPitchDetectionHandler()
   {
-    return new MyPitchDetectionHandler();
+    if (pitchDetectionHandler == null)
+      pitchDetectionHandler = new MyPitchDetectionHandler();
+    return pitchDetectionHandler;
   }
+
 
   private class MyPitchDetectionHandler implements PitchDetectionHandler
   {

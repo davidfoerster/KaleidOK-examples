@@ -32,10 +32,10 @@ public abstract class CircularLayer implements Runnable
 
   private void initAngles()
   {
-    float step = (float) (Math.PI * 2 / segmentCount); // generate the step size based on the number of segments
+    double step = Math.PI * 2 / segmentCount; // generate the step size based on the number of segments
     // pre-calculate x and y based on angle and store values in two arrays
     for (int i = 0; i < segmentCount; i++) {
-      float theta = step * i; // angle for this segment
+      double theta = step * i; // angle for this segment
       xL[i] = (float) Math.sin(theta);
       yL[i] = (float) Math.cos(theta);
     }
