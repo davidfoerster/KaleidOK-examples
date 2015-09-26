@@ -104,6 +104,9 @@ public class Kaleidoscope extends ExtPApplet
       height = 1000;
     }
     size(width, height, OPENGL); // keep size, but use the OpenGL renderer
+    previousWidth = width;
+    previousHeight = height;
+
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
 
     int smoothingLevel = DefaultValueParser.parseInt(this,
@@ -489,6 +492,8 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  private int previousWidth = -1, previousHeight = -1;
+
   @Override
   public void draw()
   {
@@ -497,6 +502,15 @@ public class Kaleidoscope extends ExtPApplet
       if (l != null)
         l.run();
     }
+
+    previousWidth = width;
+    previousHeight = height;
+  }
+
+
+  public boolean wasResized()
+  {
+    return width != previousWidth || height != previousHeight;
   }
 
 
