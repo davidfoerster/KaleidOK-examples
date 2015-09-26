@@ -19,6 +19,7 @@ public class SpectrogramLayer extends CircularLayer
     int innerRadius, int outerRadius, MinimFFTProcessor spectrum )
 	{
 		super(parent, img, segmentCount, innerRadius, outerRadius);
+		scaleFactor = 5e-3f;
     avgSpectrum = spectrum;
 
     double nyquistFreq = 22050 / 2;
@@ -51,7 +52,7 @@ public class SpectrogramLayer extends CircularLayer
 	  {
 	    int imi = i % segmentCount; // make sure the end equals the start
 
-	    float dynamicOuter = (float) pow(avgSpectrum.get(imi), 1.125f) * 5e-3f;
+	    float dynamicOuter = (float) pow(avgSpectrum.get(imi), 1.125f) * scaleFactor;
 	    //System.out.println(dynamicOuter);
 
 	    drawCircleVertex(imi, innerRadius); // draw the vertex using the custom drawVertex() method
