@@ -350,8 +350,26 @@ public class Kaleidoscope extends ExtPApplet
         centreLayer =
           new CentreMovingShape(this, null, 16, 150, getVolumeLevelProcessor())
       };
+      updateLayerSizes();
     }
     return layers;
+  }
+
+  private void updateLayerSizes()
+  {
+    float r = Math.min(width, height) / 1000f;
+
+    centreLayer.outerRadius = r * 150;
+    centreLayer.scaleFactor = r;
+
+    foobarLayer.innerRadius = r * 125;
+    foobarLayer.outerRadius = r * 275;
+
+    outerMovingShape.outerRadius = r * 300;
+
+    spectrogramLayer.innerRadius = r * 125;
+    spectrogramLayer.outerRadius = r * 290;
+    spectrogramLayer.scaleFactor = r * 5e-3f;
   }
 
   private OuterMovingShape getOuterMovingShape()
@@ -498,6 +516,9 @@ public class Kaleidoscope extends ExtPApplet
   public void draw()
   {
     drawBackgroundTexture();
+
+    if (wasResized())
+      updateLayerSizes();
     for (CircularLayer l : layers) {
       if (l != null)
         l.run();
