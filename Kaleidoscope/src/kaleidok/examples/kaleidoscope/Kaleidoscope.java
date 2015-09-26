@@ -205,7 +205,7 @@ public class Kaleidoscope extends ExtPApplet
       String paramBase = stt.getClass().getCanonicalName() + '.';
       stt.setLanguage((String) getParameter(paramBase + "language", "en"));
       stt.setMaxTranscriptionInterval(
-        DefaultValueParser.parseInt(this, paramBase + "interval", 8),
+        DefaultValueParser.parseInt(this, paramBase + "interval", 8000),
         TimeUnit.MILLISECONDS);
 
       getAudioDispatcher().addAudioProcessor(stt.getAudioProcessor());
