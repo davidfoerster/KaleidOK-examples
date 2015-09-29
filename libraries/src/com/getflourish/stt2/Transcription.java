@@ -3,6 +3,7 @@ package com.getflourish.stt2;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import kaleidok.http.HttpConnection;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.http.responsehandler.JsonResponseHandler;
@@ -101,11 +102,12 @@ public class Transcription implements Runnable
   protected SttResponse parse( Reader source ) throws IOException
   {
     try (JsonReader jsonReader = new JsonReader(source)) {
+      jsonReader.setLenient(true);
       SttResponse response;
       do {
         response =
           JsonResponseHandler.getDefaultGson().fromJson(jsonReader, SttResponse.class);
-      } while (response != null && response.isEmpty());
+      } while ((response == null || response.isEmpty()) && jsonReader.peek() != JsonToken.END_DOCUMENT);
       return response;
     } catch (JsonSyntaxException ex) {
       throw new IOException(
