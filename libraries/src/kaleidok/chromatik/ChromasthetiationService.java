@@ -16,6 +16,7 @@ import synesketch.emotion.EmotionalState;
 
 import java.awt.Image;
 import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -148,7 +149,11 @@ public class ChromasthetiationService
       chromatikQuery.keywords = getQueryKeywords(emoState);
       getQueryOptions(emoState, chromatikQuery.opts);
 
-      jsonAsync.execute(Request.Get(chromatikQuery.getUri()),
+      URI chromatikUri = chromatikQuery.getUri();
+      if (verbose >= 3)
+        System.out.println(chromatikUri);
+
+      jsonAsync.execute(Request.Get(chromatikUri),
         ChromatikResponse.class, this);
     }
 
