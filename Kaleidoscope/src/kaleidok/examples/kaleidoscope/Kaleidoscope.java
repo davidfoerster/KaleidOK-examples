@@ -118,10 +118,8 @@ public class Kaleidoscope extends ExtPApplet
     getChromasthetiator();
     getChromasthetiationService();
     getLayers();
-    STT stt = getSTT();
-
-    RecorderIcon ri = new RecorderIcon(this, stt);
-    ri.x = width - ri.x;
+    getSTT();
+    initRecorderIcon();
 
     audioDispatcherThread.start();
 
@@ -392,6 +390,22 @@ public class Kaleidoscope extends ExtPApplet
       chromasthetiator.chromatikQuery.nhits = 10;
     }
     return chromasthetiator;
+  }
+
+
+  private boolean initRecorderIcon()
+  {
+    String strEnabled =
+      getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
+    boolean bEnabled = !"forceoff".equals(strEnabled) &&
+      (!STT.debug || DefaultValueParser.parseBoolean(strEnabled, true));
+
+    if (bEnabled) {
+      RecorderIcon ri = new RecorderIcon(this, stt);
+      ri.x = width - ri.x;
+    }
+
+    return bEnabled;
   }
 
 
