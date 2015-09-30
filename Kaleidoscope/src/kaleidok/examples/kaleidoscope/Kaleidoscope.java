@@ -4,6 +4,7 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioPlayer;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import com.getflourish.stt2.RecorderIcon;
 import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.STT;
 import kaleidok.audio.ContinuousAudioInputStream;
@@ -117,7 +118,11 @@ public class Kaleidoscope extends ExtPApplet
     getChromasthetiator();
     getChromasthetiationService();
     getLayers();
-    getSTT();
+    STT stt = getSTT();
+
+    RecorderIcon ri = new RecorderIcon(this, stt);
+    ri.x = width - ri.x;
+
     audioDispatcherThread.start();
 
     if (verbose >= 1)
@@ -203,8 +208,13 @@ public class Kaleidoscope extends ExtPApplet
       STT.debug = verbose >= 1;
       stt = new STT(new SttResponseHandler(),
         parseStringOrFile(getParameter("com.google.developer.api.key"), '@'));
-      stt.setLanguage((String) getParameter(
-        STT.class.getCanonicalName() + ".language", "en"));
+
+      String paramBase = stt.getClass().getCanonicalName() + '.';
+      stt.setLanguage((String) getParameter(paramBase + "language", "en"));
+      stt.setMaxTranscriptionInterval(
+        DefaultValueParser.parseInt(this, paramBase + "interval", 8000),
+        TimeUnit.MILLISECONDS);
+
       getAudioDispatcher().addAudioProcessor(stt.getAudioProcessor());
     }
     return stt;

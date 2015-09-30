@@ -89,6 +89,11 @@ are optional and have sensible defaults.
    Uses the specified file (if any) as audio input in a continuous loop instead of
    a microphone line; the sample rate is always that of the audio file.
 
+ * `com.getflourish.stt2.stt.interval` –
+   Sets the maxium duration of a speech record in milliseconds to send to the 
+   speech-to-text service. Google's web service is supposed to handle 10–15 
+   seconds, but a safer value seems to be around 8 seconds.
+
  * `kaleidok.examples.kaleidoscope.images.intial` –
    A space-separated list of URLs to use as initial images. Relative URLs are
    rooted in the `images` sub-directory of the applet path (inside `resources`

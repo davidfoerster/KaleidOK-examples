@@ -4,31 +4,42 @@ import com.getflourish.stt2.mock.MockTranscriptionService;
 import kaleidok.util.Timer;
 import org.apache.http.concurrent.FutureCallback;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 
 public class STT
 {
-  public static final int LISTENING = 1;
-  public static final int RECORDING = 2;
-  public static final int TRANSCRIBING = 3;
-  public static final int SUCCESS = 4;
-  public static final int ERROR = 5;
+  public enum State
+  {
+    IDLE,
+    LISTENING,
+    RECORDING,
+    TRANSCRIBING,
+    SUCCESS,
+    ERROR,
+    SHUTDOWN
+  }
 
-  private boolean isActive = false, isRecording = false;
+  private boolean isActive = false;
 
   private boolean shouldAutoRecord = false;
-  private int  status = -1, lastStatus = -1;
-  private String statusText = "", lastStatusText = "";
+  private State status = State.IDLE, lastStatus = State.IDLE;
 
   protected final TranscriptionService service;
   private final AudioTranscriptionProcessor processor;
 
-  private int interval = 500;
-  private final Timer recordingTimer;
+  private final Timer recordingTimer = new Timer();
 
   //private final VolumeThresholdTracker volumeThresholdTracker = new VolumeThresholdTracker(); // TODO: integration
+
+  private final Collection<ChangeListener> changeListeners = new ArrayList<>();
+
+  private final ChangeEvent changeEvent = new ChangeEvent(this);
 
 
   public static boolean debug;
@@ -42,15 +53,14 @@ public class STT
     processor = new AudioTranscriptionProcessor(this);
 
     //setAutoRecording(false);
-
-    recordingTimer = new Timer(interval, TimeUnit.MILLISECONDS);
-    recordingTimer.start();
   }
+
 
   public AudioTranscriptionProcessor getAudioProcessor()
   {
     return processor;
   }
+
 
   public URL getApiBase()
   {
@@ -62,6 +72,7 @@ public class STT
     service.setApiBase(apiBase);
   }
 
+
   public String getAccessKey()
   {
     return service.getAccessKey();
@@ -71,6 +82,7 @@ public class STT
   {
     service.setAccessKey(accessKey);
   }
+
 
   public String getLanguage()
   {
@@ -82,11 +94,33 @@ public class STT
     service.setLanguage(language);
   }
 
+
+  public void addChangeListener( ChangeListener listener )
+  {
+    changeListeners.add(listener);
+  }
+
+  public boolean removeChangeListener( ChangeListener listener )
+  {
+    return changeListeners.remove(listener);
+  }
+
+
+  private void signalChange()
+  {
+    for (ChangeListener listener: changeListeners)
+      listener.stateChanged(changeEvent);
+  }
+
+
   public void shutdown()
   {
     // TODO
+    status = State.SHUTDOWN;
     service.shutdownNow();
+    signalChange();
   }
+
 
   public synchronized void begin( boolean doThrow )
   {
@@ -99,6 +133,7 @@ public class STT
       shouldAutoRecord = false;
     }
   }
+
 
   /*
   public void setAutoRecording( boolean enable )
@@ -159,6 +194,7 @@ public class STT
   }
   */
 
+
   public synchronized void end( boolean doThrow )
   {
     if (!isActive) {
@@ -171,9 +207,11 @@ public class STT
     }
   }
 
-  public String getStatusText() {
-    return statusText;
+
+  public State getStatus() {
+    return status;
   }
+
 
   /*
   private final DateFormat timeFormat =  new SimpleDateFormat("HH:mm:ss");
@@ -201,16 +239,19 @@ public class STT
   }
   */
 
+
   private synchronized void onBegin()
   {
-    statusText = "Recording";
-    status = RECORDING;
+    status = State.RECORDING;
     processor.shouldRecord = true;
     startListening();
 
     if (debug)
-      System.out.println(statusText);
+      System.out.println(status);
+
+    signalChange();
   }
+
 
   /*
   private void onSpeech()
@@ -218,28 +259,51 @@ public class STT
     statusText = "Recording";
     status = RECORDING;
     recordingTimer.start();
-    isRecording = true;
   }
   */
 
+
   public synchronized void onSpeechFinish()
   {
-    statusText = "Transcribing";
-    status = TRANSCRIBING;
+    status = State.IDLE;
     processor.shouldRecord = false;
-    isRecording = false;
 
     if (debug) {
-      System.out.format("%s %.3f seconds of audio data...\n",
-        statusText, recordingTimer.getRuntime() * 1e-9);
+      System.out.format("%s roughly %.3f seconds of audio data...%n",
+        status, recordingTimer.getRuntime() * 1e-9);
     }
 
+    recordingTimer.reset();
     //dispatchTranscriptionEvent("", 0, null, TRANSCRIBING);
+
+    signalChange();
   }
+
 
   private void startListening()
   {
     // TODO: stop and then restart "recorder"
     recordingTimer.start();
+  }
+
+
+  public long getMaxTranscriptionInterval()
+  {
+    return recordingTimer.getTotalTime();
+  }
+
+  public void setMaxTranscriptionInterval( long interval, TimeUnit unit )
+  {
+    if (isRecording()) {
+      throw new IllegalStateException(
+        "Cannot change the transcription interval while a transcription is running");
+    }
+    recordingTimer.reset(interval, unit);
+  }
+
+
+  public boolean isRecording()
+  {
+    return recordingTimer.isStarted();
   }
 }

@@ -23,6 +23,8 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
   private int[] audioConversionBuffer = null;
 
+  private double transcriptionEndTimestamp = Double.POSITIVE_INFINITY;
+
   public volatile boolean shouldRecord = false;
 
 
@@ -44,17 +46,26 @@ public class AudioTranscriptionProcessor implements AudioProcessor
         encoder.t_encodeSamples(
           encoder.fullBlockSamplesAvailableToEncode(),
           false, Integer.MAX_VALUE);
+
+        if (audioEvent.getEndTimeStamp() < transcriptionEndTimestamp)
+          return true;
+
+        if (STT.debug) {
+          System.out.format(
+            "Speech recording interrupted after excess of the max. interval of %.3f s.%n",
+            stt.getMaxTranscriptionInterval() * 1e-9);
+        }
       } catch (IOException ex) {
         ex.printStackTrace();
         if (task != null) {
           task.dispose();
           task = null;
         }
-        stt.end(false);
       }
-    } else {
-      finishEncoding();
+      stt.end(false);
     }
+
+    finishEncoding();
     return true;
   }
 
@@ -79,12 +90,19 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
     if (task == null) {
       task = new FlacTranscription(ev.getSampleRate());
+
+      long maxTranscriptionInterval = stt.getMaxTranscriptionInterval();
+      transcriptionEndTimestamp =
+        (maxTranscriptionInterval > 0) ?
+          ev.getTimeStamp() + maxTranscriptionInterval * 1e-9 :
+          Double.POSITIVE_INFINITY;
     }
   }
 
 
   private void finishEncoding()
   {
+    transcriptionEndTimestamp = Double.POSITIVE_INFINITY;
     if (task != null) {
       try {
         task.finishEncoding();
