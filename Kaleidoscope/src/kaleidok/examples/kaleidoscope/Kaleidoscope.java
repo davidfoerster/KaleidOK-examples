@@ -491,9 +491,8 @@ public class Kaleidoscope extends ExtPApplet
     PImage bgImage;
     if (wireframe < 1 && (bgImage = this.bgImage.getNoThrow()) != null) {
       // background image
-      image(bgImage, 0, 0, width,
-        (float) width / height * bgImage.height); // resize-display image correctly to cover the whole screen
-      fill(255, 125 + sin(frameCount * 0.01f) * 5); // white fill with dynamic transparency
+      image(bgImage, ImageResizeMode.PAN, 0, 0, width, height); // resize-display image correctly to cover the whole screen
+      fill(255, 125 + (float) Math.sin(frameCount * 0.01) * 5); // white fill with dynamic transparency
       rect(0, 0, width, height); // rect covering the whole canvas
     } else {
       background(0);

@@ -3,6 +3,7 @@ package kaleidok.processing;
 import kaleidok.util.DebugManager;
 import kaleidok.util.DefaultValueParser;
 import processing.core.PApplet;
+import processing.core.PImage;
 
 import javax.swing.JApplet;
 import java.awt.Image;
@@ -118,5 +119,58 @@ public class ExtPApplet extends PApplet
   public PImageFuture getImageFuture( URL url, int width, int height )
   {
     return new PImageFuture(this, getImage(url), width, height);
+  }
+
+
+  public enum ImageResizeMode
+  {
+    STRETCH,
+    PAN
+  }
+
+  public void image( PImage img, ImageResizeMode resizeMode,
+    float dstLeft, float dstTop, float dstWidth, float dstHeight )
+  {
+    int srcLeft = 0, srcTop = 0, srcWidth = img.width, srcHeight = img.height;
+
+    if (dstWidth <= 0 || dstHeight <= 0) {
+      throw new IllegalArgumentException("Image destination has zero area");
+    }
+    if (srcWidth <= 0 || srcHeight <= 0) {
+      throw new IllegalArgumentException("Image source has zero area");
+    }
+    if (g.imageMode != CORNER) {
+      throw new UnsupportedOperationException(
+        "Image modes besides CORNER are currently unimplemented");
+    }
+
+    switch (resizeMode) {
+    case STRETCH:
+      break;
+
+    case PAN:
+      double dstRatio = (double) dstWidth / dstHeight,
+        srcRatio = (double) srcWidth / srcHeight;
+      if (srcRatio > dstRatio) {
+        srcWidth = (int)(srcHeight * dstRatio + 0.5);
+        assert srcWidth <= img.width;
+        srcLeft = (img.width - srcWidth) / 2;
+      } else if (srcRatio < dstRatio) {
+        srcHeight = (int)(srcWidth / dstRatio + 0.5);
+        assert srcHeight <= img.height;
+        srcTop = (img.height - srcHeight) / 2;
+      }
+      break;
+
+    default:
+      if (resizeMode == null) {
+        throw new NullPointerException("mode");
+      } else {
+        // If this section is ever reached, somebody forgot to implement a case of this switch block.
+        throw new AssertionError();
+      }
+    }
+
+    image(img, dstLeft, dstTop, dstWidth, dstHeight, srcLeft, srcTop, srcWidth, srcHeight);
   }
 }
