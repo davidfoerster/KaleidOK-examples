@@ -87,7 +87,7 @@ public class ChromatikQuery
 
     if (colors != null && colors.length != 0)
     {
-      Float weight = Math.min(1.f / colors.length, MAX_COLOR_WEIGHT);
+      Double weight = Math.min(1.0 / colors.length, MAX_COLOR_WEIGHT);
       for (int c: colors)
         opts.put(new ChromatikColor(c), weight);
     }

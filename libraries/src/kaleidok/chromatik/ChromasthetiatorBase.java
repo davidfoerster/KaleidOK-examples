@@ -124,7 +124,7 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
     Emotion emo = synState.getStrongestEmotion();
 
     // Derive color weight in search query from emotional weighting
-    Float weight = max((float) sqrt(emo.getWeight()) * 0.5f, 0.1f) / maxColors;
+    Double weight = max(sqrt(emo.getWeight()) * 0.5, 0.1) / maxColors;
 
     if (opts == null)
       opts = new HashMap<>();
