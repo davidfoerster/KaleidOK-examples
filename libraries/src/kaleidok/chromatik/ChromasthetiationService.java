@@ -145,6 +145,8 @@ public class ChromasthetiationService
         }
         return;
       }
+      if (verbose >= 3)
+        System.out.println(emoState);
 
       chromatikQuery.keywords = getQueryKeywords(emoState);
       getQueryOptions(emoState, chromatikQuery.opts);
