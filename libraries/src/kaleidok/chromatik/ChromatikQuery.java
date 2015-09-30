@@ -87,7 +87,7 @@ public class ChromatikQuery
 
     if (colors != null && colors.length != 0)
     {
-      Float weight = Math.min(1.f / colors.length, MAX_COLOR_WEIGHT);
+      Double weight = Math.min(1.0 / colors.length, MAX_COLOR_WEIGHT);
       for (int c: colors)
         opts.put(new ChromatikColor(c), weight);
     }
@@ -178,58 +178,100 @@ public class ChromatikQuery
     String searchQuery = keywords;
     if (!opts.isEmpty())
     {
-      StringBuilder sb = new StringBuilder();
-      if (!searchQuery.isEmpty())
-        sb.append(searchQuery).append(' ');
+      StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
+      sb.append(searchQuery);
+      buildColorSubquery(sb);
 
-      sb.append('(').append("OPT");
-      int totalWeight = 0;
-      char[] hexStrBuf = new char[6];
       for (Map.Entry<Object, Object> o: opts.entrySet())
       {
-        sb.append(' ');
-        if (o.getKey() instanceof ChromatikColor)
-        {
-          ChromatikColor c = (ChromatikColor) o.getKey();
-          int weight = (int)(((Number) o.getValue()).floatValue() * 100);
-          if (weight <= 0 || weight > 100) {
-            throw new IllegalArgumentException(
-              "Color weight lies outside of (0, 100]: " + weight);
-          }
-          totalWeight += weight;
-
-          sb.append(QUERY_OPT_COLOR).append(QUERY_OPT_NAMEDELIM)
-            .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
-            .append(Strings.toHexDigits(c.value, hexStrBuf))
-            .append(QUERY_OPT_VALUEDELIM).append(weight)
-            .append("{s=200000}").append(' ')
-            .append(QUERY_OPT_COLORGROUP).append(QUERY_OPT_NAMEDELIM)
-            .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
-            .append(weight);
-        }
-        else
+        if (!(o.getKey() instanceof ChromatikColor))
         {
           CharSequence key = toCharSequence(o.getKey()),
             value = toCharSequence(o.getValue());
           assert (key != null && key.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0) &&
             (value == null || value.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0);
 
-          sb.append(key);
+          sb.append(' ').append(key);
           if (value != null)
             sb.append(QUERY_OPT_NAMEDELIM).append(value);
         }
       }
-      sb.append(')');
-      searchQuery = sb.toString();
 
-      if (totalWeight > 100)
-        throw new IllegalArgumentException("Total color weight exceeds 100: " + totalWeight);
+      searchQuery = sb.toString();
     }
 
     if (!searchQuery.isEmpty())
       ub.addParameter(QUERY_QUERY, searchQuery);
 
     return ub;
+  }
+
+
+  private StringBuilder buildColorSubquery( StringBuilder sb )
+  {
+    Map<ChromatikColor, Number> colors = new HashMap<>(8);
+    Map<String, Number> colorGroups = new HashMap<>(8);
+    double totalWeight = 0;
+
+    for (Map.Entry<Object, Object> o: opts.entrySet())
+    {
+      if (o.getKey() instanceof ChromatikColor)
+      {
+        ChromatikColor c = (ChromatikColor) o.getKey();
+        Number weight = (Number) o.getValue();
+        double fWeight = weight.doubleValue();
+
+        if (fWeight <= 0 || fWeight > 1) {
+          throw new IllegalArgumentException(
+            "Color weight lies outside of (0, 1]: " + fWeight);
+        }
+
+        colors.put(c, weight);
+        Number groupWeight = colorGroups.get(c.groupName);
+        groupWeight = (groupWeight != null) ?
+          groupWeight.doubleValue() + fWeight :
+          weight;
+        colorGroups.put(c.groupName, groupWeight);
+
+        totalWeight += fWeight;
+      }
+    }
+
+    if (totalWeight > 1) {
+      throw new IllegalArgumentException(
+        "Total color weight exceeds 1: " + totalWeight);
+    }
+
+    if (!colors.isEmpty())
+    {
+      if (sb.length() != 0)
+        sb.append(' ');
+      sb.append('(');
+
+      char[] hexStrBuf = new char[6];
+      for (Map.Entry<ChromatikColor, Number> o: colors.entrySet())
+      {
+        ChromatikColor c = o.getKey();
+        double weight = o.getValue().doubleValue() * 100;
+        sb.append("OPT").append(' ')
+          .append(QUERY_OPT_COLOR).append(QUERY_OPT_NAMEDELIM)
+          .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
+          .append(Strings.toHexDigits(c.value, hexStrBuf))
+          .append(QUERY_OPT_VALUEDELIM).append((int) weight)
+          .append("{s=200000}").append(' ');
+      }
+
+      for (Map.Entry<String, Number> o: colorGroups.entrySet())
+      {
+        double weight = o.getValue().doubleValue() * 100;
+        sb.append(QUERY_OPT_COLORGROUP).append(QUERY_OPT_NAMEDELIM)
+          .append(o.getKey()).append(QUERY_OPT_VALUEDELIM)
+          .append((int) weight).append(' ');
+      }
+
+      sb.setCharAt(sb.length() - 1, ')');
+    }
+    return sb;
   }
 
 
@@ -291,5 +333,5 @@ public class ChromatikQuery
 
   public static final float MAX_COLOR_WEIGHT = 0.25f;
 
-  public static int INITIAL_BUFFER_CAPACITY = 128;
+  public static int INITIAL_BUFFER_CAPACITY = 1 << 8;
 }

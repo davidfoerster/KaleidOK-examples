@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 
 public class ChromatikQueryTest
 {
+
   private Map<String, String> getParams( ChromatikQuery q )
   {
     String qs = q.getUri().getRawQuery();
@@ -34,20 +35,31 @@ public class ChromatikQueryTest
     return m;
   }
 
+
   private List<String> getOpts( Map<String, String> m )
   {
     String q = m.get("q");
     if (q == null)
       return null;
 
-    String splitter = "(OPT ";
-    int split = q.indexOf(splitter);
+    int split = q.indexOf('(');
     List<String> opts;
     if (split >= 0) {
       assertEquals(')', q.charAt(q.length() - 1));
       String[] a = q
-        .substring(split + splitter.length(), q.length() - 1)
+        .substring(split + 1, q.length() - 1)
         .split(" +");
+      int i = 0, j = 0;
+      while (j < a.length) {
+        if (a[j].equals("OPT")) {
+          j++;
+          assertTrue(j < a.length);
+          assertTrue(a[j].startsWith("color:"));
+        }
+        a[i++] = a[j++];
+      }
+      a = Arrays.copyOf(a, i);
+
       opts = new ArrayList<>(a.length + 1);
       if (split > 0) {
         assertEquals(' ', q.charAt(split - 1));
@@ -64,6 +76,7 @@ public class ChromatikQueryTest
     return opts;
   }
 
+
   @Test
   public void testGetQueryString1() throws Exception
   {
@@ -76,6 +89,7 @@ public class ChromatikQueryTest
 
     assertEquals(2, p.size());
   }
+
 
   @Test
   public void testGetQueryString2() throws Exception
@@ -90,6 +104,7 @@ public class ChromatikQueryTest
     assertEquals(3, p.size());
   }
 
+
   @Test
   public void testGetQueryString3() throws Exception
   {
@@ -101,6 +116,7 @@ public class ChromatikQueryTest
 
     assertEquals(3, p.size());
   }
+
 
   @Test
   public void testGetQueryString4() throws Exception
@@ -115,13 +131,15 @@ public class ChromatikQueryTest
     assertEquals(3, p.size());
   }
 
+
   @Test
   public void testGetQueryString5() throws Exception
   {
-    ChromatikQuery q = new ChromatikQuery(10, null, null);
-    q.opts.put(new ChromatikColor(0xe51919), 0.07f);
-    q.opts.put(new ChromatikColor(0xebeb52), 0.23f);
-    q.opts.put(new ChromatikColor(0x1313ac), 0.42f);
+    ChromatikQuery q = new ChromatikQuery(10, null, null) {{
+        opts.put(new ChromatikColor(0xe51919), 0.07);
+        opts.put(new ChromatikColor(0xebeb52), 0.23);
+        opts.put(new ChromatikColor(0x1313ac), 0.42);
+      }};
     Map<String, String> p = getParams(q);
 
     assertEquals("0", p.get("start"));
@@ -139,4 +157,28 @@ public class ChromatikQueryTest
 
     assertEquals(3, p.size());
   }
+
+
+  @Test
+  public void testGetQueryString6() throws Exception
+  {
+    ChromatikQuery q = new ChromatikQuery(10, null, null) {{
+        opts.put(new ChromatikColor(0xe51919), 0.07);
+        opts.put(new ChromatikColor(0xac1313), 0.23);
+      }};
+    Map<String, String> p = getParams(q);
+
+    assertEquals("0", p.get("start"));
+    assertEquals("10", p.get("nhits"));
+
+    List<String> opts = getOpts(p);
+    assertNotNull(opts);
+    assertNull(opts.get(0));
+    assertEquals("color:Red/ac1313/23{s=200000}", opts.get(1));
+    assertEquals("color:Red/e51919/7{s=200000}", opts.get(2));
+    assertEquals("colorgroup:Red/30", opts.get(3));
+
+    assertEquals(3, p.size());
+  }
+
 }

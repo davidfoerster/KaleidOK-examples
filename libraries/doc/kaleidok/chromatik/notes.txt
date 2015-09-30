@@ -4,7 +4,8 @@ Query:
 	[nhits=N] - number of hits
 	q= - query string
 		[KEYWORD...]
-		[(OPT color:[color group name]/[RGB in hex from preset]/[weight in percent]{s=200000})]
+		[(OPT color:[color group name]/[RGB in hex from preset]/[weight in percent]{s=200000}...
+			colorgroup:[color group name]/[cumulated weight in percent]...)]
 		[saturation:(Colorful|Grayscale)]
 		[darkness:(Bright|Dark)]
 		[rights:license_(1-6)]
