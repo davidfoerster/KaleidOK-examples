@@ -104,6 +104,9 @@ public class Kaleidoscope extends ExtPApplet
       height = 1000;
     }
     size(width, height, OPENGL); // keep size, but use the OpenGL renderer
+    previousWidth = width;
+    previousHeight = height;
+
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
 
     int smoothingLevel = DefaultValueParser.parseInt(this,
@@ -347,8 +350,26 @@ public class Kaleidoscope extends ExtPApplet
         centreLayer =
           new CentreMovingShape(this, null, 16, 150, getVolumeLevelProcessor())
       };
+      updateLayerSizes();
     }
     return layers;
+  }
+
+  private void updateLayerSizes()
+  {
+    float r = Math.min(width, height) / 1000f;
+
+    centreLayer.outerRadius = r * 150;
+    centreLayer.scaleFactor = r;
+
+    foobarLayer.innerRadius = r * 125;
+    foobarLayer.outerRadius = r * 275;
+
+    outerMovingShape.outerRadius = r * 300;
+
+    spectrogramLayer.innerRadius = r * 125;
+    spectrogramLayer.outerRadius = r * 290;
+    spectrogramLayer.scaleFactor = r * 5e-3f;
   }
 
   private OuterMovingShape getOuterMovingShape()
@@ -489,14 +510,28 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  private int previousWidth = -1, previousHeight = -1;
+
   @Override
   public void draw()
   {
     drawBackgroundTexture();
+
+    if (wasResized())
+      updateLayerSizes();
     for (CircularLayer l : layers) {
       if (l != null)
         l.run();
     }
+
+    previousWidth = width;
+    previousHeight = height;
+  }
+
+
+  public boolean wasResized()
+  {
+    return width != previousWidth || height != previousHeight;
   }
 
 
