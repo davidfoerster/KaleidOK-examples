@@ -14,6 +14,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -112,11 +113,10 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
     Properties properties = new Properties();
     if (args != null && args.length > 0 && args[0].equals("--params")) {
       String paramsFile = args[1];
-      if (paramsFile.equals("-")) {
-        properties.load(System.in);
-      } else {
-        properties.load(new FileReader(paramsFile));
-      }
+      properties.load(
+        paramsFile.equals("-") ?
+          new InputStreamReader(System.in) :
+          new FileReader(paramsFile));
 
       args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
     } else {
