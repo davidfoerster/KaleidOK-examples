@@ -104,12 +104,15 @@ public class FullscreenRootPane extends JRootPane
       frame.removeNotify();
       frame.setUndecorated(fullscreen);
       frame.setResizable(!fullscreen);
+      //frame.setAlwaysOnTop(fullscreen);
       frame.addNotify();
+      /*
       if (fullscreen) {
         frame.addFocusListener(FullscreenFocusListener.INSTANCE);
       } else {
         frame.removeFocusListener(FullscreenFocusListener.INSTANCE);
       }
+      */
     }
 
     dev.setFullScreenWindow(fullscreen ? w : null);
