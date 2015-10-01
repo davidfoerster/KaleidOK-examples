@@ -107,6 +107,9 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
     boolean fullscreen )
   {
     getTextFieldPanel().setVisible(!fullscreen);
+    if (fullscreen) {
+      getSketch().requestFocusInWindow();
+    }
   }
 
 
