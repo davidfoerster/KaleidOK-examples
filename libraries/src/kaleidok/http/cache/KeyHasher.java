@@ -12,7 +12,8 @@ class KeyHasher
     MAX_SYMBOL_COUNT = 64,
     BITS_PER_SYMBOL = 5,
     SYMBOL_COUNT = 1 << BITS_PER_SYMBOL,
-    MAX_BYTE_COUNT = MAX_SYMBOL_COUNT * BITS_PER_SYMBOL / Byte.SIZE;
+    MAX_BYTE_COUNT = MAX_SYMBOL_COUNT * BITS_PER_SYMBOL / Byte.SIZE,
+    BYTES_PER_CHAR = Character.SIZE / Byte.SIZE;
 
 
   private final MessageDigest digester;
@@ -45,16 +46,18 @@ class KeyHasher
     final MessageDigest digester = this.digester;
     final byte[] buf = this.buf;
     final int len = s.length(),
-      chunklen = buf.length / (Character.SIZE / Byte.SIZE);
+      chunklen = buf.length / BYTES_PER_CHAR;
 
-    for (int chunkOffset = 0; chunkOffset < len; chunkOffset += chunklen) {
-      final int chunkEnd = Math.min(chunkOffset + chunklen, len);
-      for (int i = chunkOffset; i < chunkEnd; i++) {
-        final char c = s.charAt(i);
-        buf[i * 2] = (byte) c;
-        buf[i * 2 + 1] = (byte) (c >>> Byte.SIZE);
+    int j = 0;
+    while (j < len) {
+      final int l = Math.min(chunklen, len - j) * BYTES_PER_CHAR;
+      int i = 0;
+      while (i < l) {
+        final char c = s.charAt(j++);
+        buf[i++] = (byte) c;
+        buf[i++] = (byte)(c >>> Byte.SIZE);
       }
-      digester.update(buf, 0, chunkEnd - chunkOffset);
+      digester.update(buf, 0, l);
     }
 
     try {
