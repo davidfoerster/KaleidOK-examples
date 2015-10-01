@@ -150,7 +150,12 @@ public class ChromasthetiationService
 
       chromatikQuery.keywords = getQueryKeywords(emoState);
       getQueryOptions(emoState, chromatikQuery.opts);
+      runChromatikQuery();
+    }
 
+
+    private void runChromatikQuery()
+    {
       URI chromatikUri = chromatikQuery.getUri();
       if (verbose >= 3)
         System.out.println(chromatikUri);
@@ -187,6 +192,13 @@ public class ChromasthetiationService
       if (verbose >= 1) {
         System.out.println("Chromatik found " + response.hits + " results.");
       }
+
+      if (response.results.length == 0 && !chromatikQuery.keywords.isEmpty()) {
+        removeLastKeyword();
+        runChromatikQuery();
+        return;
+      }
+
       for (ChromatikResponse.Result imgInfo: response.results) {
         final FlickrPhoto flickrPhoto = new FlickrPhoto(imgInfo);
         if (hasTickets(1)) {
@@ -232,6 +244,7 @@ public class ChromasthetiationService
       }
     }
 
+
     @Override
     public void failed( Exception ex )
     {
@@ -241,6 +254,7 @@ public class ChromasthetiationService
         imageCallback.failed(ex);
     }
 
+
     @Override
     public void cancelled()
     {
@@ -248,6 +262,18 @@ public class ChromasthetiationService
         futureImageCallback.cancelled();
       if (imageCallback != null)
         imageCallback.cancelled();
+    }
+
+
+    private void removeLastKeyword()
+    {
+      /*
+       * Due to sorting, the last keyword has simultaneously the weakest
+       * emotional weight.
+       */
+      String keywords = chromatikQuery.keywords;
+      int p = keywords.lastIndexOf(' ');
+      chromatikQuery.keywords = (p > 0) ? keywords.substring(0, p) : "";
     }
   }
 }
