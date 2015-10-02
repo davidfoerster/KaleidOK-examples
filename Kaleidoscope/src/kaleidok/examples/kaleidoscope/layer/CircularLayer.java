@@ -19,7 +19,9 @@ public abstract class CircularLayer implements Runnable
 
   private final float[] xL, yL;
 
-  public CircularLayer(PApplet parent, PImageFuture img, int segmentCount, int innerRadius, int outerRadius)
+
+  public CircularLayer(PApplet parent, PImageFuture img, int segmentCount,
+    float innerRadius, float outerRadius)
   {
     this.parent = parent;
     this.currentImage = img;
@@ -32,6 +34,7 @@ public abstract class CircularLayer implements Runnable
     initAngles();
   }
 
+
   private void initAngles()
   {
     double step = Math.PI * 2 / segmentCount; // generate the step size based on the number of segments
@@ -43,27 +46,13 @@ public abstract class CircularLayer implements Runnable
     }
   }
 
+
   // custom method that draws a vertex with correct position and texture coordinates
   // based on index and a diameter input parameters
-  protected void drawCircleVertex(int index, float diam)
+  protected void drawCircleVertex( int index, float radius )
   {
-    float x = xL[index] * diam; // pre-calculated x direction times diameter
-    float y = yL[index] * diam; // pre-calculated y direction times diameter
-
-    PImage img = currentImage.getNoThrow();
-    if (img == null) {
-      parent.vertex(x, y);
-    } else {
-      // calculate texture coordinates based on the xy position
-      float tx = x / img.width + 0.5f;
-      float ty = y / img.height + 0.5f;
-      // draw vertex with the calculated position and texture coordinates
-      parent.vertex(x, y, tx, ty);
-    }
-  }
-
-  protected void drawCircleSegment(int index)
-  {
-    drawCircleVertex(index, outerRadius);
+    float x = xL[index] * radius, y = yL[index] * radius;
+    // draw vertex with the calculated position and texture coordinates
+    parent.vertex(x, y, (x + 1) / 2, (y + 1) / 2);
   }
 }

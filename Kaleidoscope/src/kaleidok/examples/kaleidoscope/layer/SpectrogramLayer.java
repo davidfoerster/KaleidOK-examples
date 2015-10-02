@@ -15,10 +15,13 @@ public class SpectrogramLayer extends CircularLayer
 {
 	private final MinimFFTProcessor avgSpectrum;
 
+  public double exponent = 1.125;
+
+
 	public SpectrogramLayer( PApplet parent, PImageFuture img, int segmentCount,
     int innerRadius, int outerRadius, MinimFFTProcessor spectrum )
 	{
-		super(parent, img, segmentCount, innerRadius, outerRadius);
+		super(parent, img, segmentCount * 2, innerRadius, outerRadius);
 		scaleFactor = 5e-3f;
     avgSpectrum = spectrum;
 
@@ -26,6 +29,15 @@ public class SpectrogramLayer extends CircularLayer
     int minFreq = 86;
     avgSpectrum.logAverages(minFreq, (int) ceil(segmentCount / log2(nyquistFreq / minFreq)));
 	}
+
+
+  public float expectedMaximumSpectrum = 60;
+
+  public float scaleSpectralLine( double x )
+  {
+    return (float) pow(x, exponent) * scaleFactor;
+  }
+
 
   @Override
 	public void run()
@@ -37,26 +49,37 @@ public class SpectrogramLayer extends CircularLayer
 
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
 		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
-    parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
+    final float
+      outerScale = 1 + scaleSpectralLine(expectedMaximumSpectrum),
+      totalScale = outerRadius * outerScale,
+      innerRadiusScaled = innerRadius / totalScale;
+    parent.scale(totalScale);
+
 		PImage img;
 		if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
       parent.noStroke();
+      parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
       parent.texture(img); // set the texture to use
     } else {
       parent.noFill();
       parent.stroke(255, 0, 0);
-      parent.strokeWeight(0.5f);
+      parent.strokeWeight(0.5f / totalScale);
+
+      parent.ellipseMode(PApplet.RADIUS);
+      parent.ellipse(0, 0, 1, 1);
+
+      parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     }
 
-	  for (int i = 0; i <= segmentCount; i++)
+	  for (int i = 0; i <= segmentCount; i += 2)
 	  {
 	    int imi = i % segmentCount; // make sure the end equals the start
 
-	    float dynamicOuter = (float) pow(avgSpectrum.get(imi), 1.125f) * scaleFactor;
+	    float dynamicOuter = 1 + scaleSpectralLine(avgSpectrum.get(imi / 2));
 	    //System.out.println(dynamicOuter);
 
-	    drawCircleVertex(imi, innerRadius); // draw the vertex using the custom drawVertex() method
-	    drawCircleVertex(imi, outerRadius * (dynamicOuter + 1)); // draw the vertex using the custom drawVertex() method
+	    drawCircleVertex(imi, innerRadiusScaled); // draw the vertex using the custom drawVertex() method
+	    drawCircleVertex(imi + 1, dynamicOuter / outerScale); // draw the vertex using the custom drawVertex() method
 	  }
 
 		parent.endShape(); // finalize the Shape

@@ -14,15 +14,19 @@ public class OuterMovingShape extends CircularLayer
 {
   private double angle = 0, step = 0;
 
-  public OuterMovingShape( PApplet parent, PImageFuture img, int segmentCount, int radius )
+
+  public OuterMovingShape( PApplet parent, PImageFuture img,
+    int segmentCount, float radius )
   {
     super(parent, img, segmentCount, 0, radius);
   }
+
 
   public void run()
   {
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
+    parent.scale(outerRadius);
 
     if (step != 0) {
       angle = (angle + step) % (Math.PI * 2);
@@ -37,12 +41,12 @@ public class OuterMovingShape extends CircularLayer
     } else {
       parent.noFill();
       parent.stroke(128);
-      parent.strokeWeight(0.5f);
+      parent.strokeWeight(0.5f / outerRadius);
     }
 
     parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
     for (int i = 0; i <= segmentCount; i++) {
-      drawCircleSegment(i % segmentCount); // make sure the end equals the start & draw the vertex using the custom drawVertex() method
+      drawCircleVertex(i % segmentCount, 1);
     }
     parent.endShape(); // finalize the Shape
     parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
