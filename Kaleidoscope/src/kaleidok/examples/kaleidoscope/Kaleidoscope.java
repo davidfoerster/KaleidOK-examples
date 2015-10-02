@@ -340,16 +340,22 @@ public class Kaleidoscope extends ExtPApplet
     {
       getAudioDispatcher();
 
+      spectrogramLayer =
+        new SpectrogramLayer(this, images.get(0), 1 << 8, -1, -1,
+          getFftProcessor());
+      OuterMovingShape outerMovingShape =
+        getOuterMovingShape();
+      foobarLayer =
+        new FoobarLayer(this, images.get(3), 1 << 4, -1, -1);
+      centreLayer =
+        new CentreMovingShape(this, null, 1 << 5, -1, getVolumeLevelProcessor());
+
       layers = new CircularLayer[]{
-        spectrogramLayer =
-          new SpectrogramLayer(this, images.get(0), 256, 125, 290,
-            getFftProcessor()),
-        getOuterMovingShape(),
-        foobarLayer =
-          new FoobarLayer(this, images.get(3), 16, 125, 275),
-        centreLayer =
-          new CentreMovingShape(this, null, 16, 150, getVolumeLevelProcessor())
-      };
+          spectrogramLayer,
+          outerMovingShape,
+          foobarLayer,
+          centreLayer,
+        };
       updateLayerSizes();
     }
     return layers;
@@ -376,7 +382,7 @@ public class Kaleidoscope extends ExtPApplet
   {
     if (outerMovingShape == null) {
       OuterMovingShape outerMovingShape =
-        new OuterMovingShape(this, getImages().get(4), 16, 300);
+        new OuterMovingShape(this, getImages().get(4), 1 << 5, -1);
       AudioDispatcher audioDispatcher = getAudioDispatcher();
       audioDispatcher.addAudioProcessor(new PitchProcessor(
         PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
