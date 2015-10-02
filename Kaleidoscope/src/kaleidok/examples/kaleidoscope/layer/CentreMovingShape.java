@@ -14,7 +14,9 @@ public class CentreMovingShape extends CircularLayer
 
   private VolumeLevelProcessor volumeLevelProcessor;
 
-  public CentreMovingShape( Kaleidoscope parent, PImageFuture img, int segmentCount, int radius,
+
+  public CentreMovingShape( Kaleidoscope parent, PImageFuture img,
+    int segmentCount, float radius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
     super(parent, img, segmentCount, 0, radius);
@@ -25,14 +27,16 @@ public class CentreMovingShape extends CircularLayer
       currentImage = parent.images.get(imageIndex);
   }
 
+
   public void run()
   {
     double level = volumeLevelProcessor.getLevel();
     //System.out.println("Volume level: " + level);
-    float radius = outerRadius * (float) Math.pow(level, 0.5) * scaleFactor;
+    float radius = (float) Math.pow(level, 0.5) * scaleFactor;
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
+    parent.scale(outerRadius);
     parent.rotate(parent.frameCount * -0.002f); // rotate around this center --anticlockwise
 
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
@@ -43,16 +47,17 @@ public class CentreMovingShape extends CircularLayer
     } else {
       parent.noFill();
       parent.stroke(128);
-      parent.strokeWeight(0.5f);
+      parent.strokeWeight(0.5f / outerRadius);
     }
 
     parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
     for (int i = 0; i <= segmentCount; i++) {
-      drawCircleVertex(i % segmentCount, radius); // make sure the end equals the start & draw the vertex using the custom drawVertex() method
+      drawCircleVertex(i % segmentCount, radius);
     }
     parent.endShape(); // finalize the Shape
     parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
   }
+
 
   public void nextImage()
   {

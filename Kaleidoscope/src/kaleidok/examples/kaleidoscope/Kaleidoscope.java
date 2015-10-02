@@ -368,12 +368,12 @@ public class Kaleidoscope extends ExtPApplet
     centreLayer.outerRadius = r * 150;
     centreLayer.scaleFactor = r;
 
-    foobarLayer.innerRadius = r * 125;
-    foobarLayer.outerRadius = r * 275;
+    foobarLayer.innerRadius = r * 0.500f * 125;
+    foobarLayer.outerRadius = r * 1.333f * 275;
 
-    outerMovingShape.outerRadius = r * 300;
+    outerMovingShape.outerRadius = r * 150;
 
-    spectrogramLayer.innerRadius = r * 125;
+    spectrogramLayer.innerRadius = r * 250;
     spectrogramLayer.outerRadius = r * 290;
     spectrogramLayer.scaleFactor = r * 5e-3f;
   }
