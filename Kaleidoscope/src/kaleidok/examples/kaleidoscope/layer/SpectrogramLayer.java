@@ -15,7 +15,9 @@ public class SpectrogramLayer extends CircularLayer
 {
 	private final MinimFFTProcessor avgSpectrum;
 
-  public double exponent = 1.125;
+  private double exponent = 1.125;
+
+  private float expectedMaximumSpectrum = 60;
 
 
 	public SpectrogramLayer( PApplet parent, PImageFuture img, int segmentCount,
@@ -31,7 +33,64 @@ public class SpectrogramLayer extends CircularLayer
 	}
 
 
-  public float expectedMaximumSpectrum = 60;
+  @Override
+  public void setInnerRadius( float innerRadius )
+  {
+    super.setInnerRadius(innerRadius);
+    updateCachedValues();
+  }
+
+
+  @Override
+  public void setOuterRadius( float outerRadius )
+  {
+    super.setOuterRadius(outerRadius);
+    updateCachedValues();
+  }
+
+
+  @Override
+  public void setScaleFactor( float scaleFactor )
+  {
+    super.setScaleFactor(scaleFactor);
+    updateCachedValues();
+  }
+
+
+  public float getExpectedMaximumSpectrum()
+  {
+    return expectedMaximumSpectrum;
+  }
+
+  public void setExpectedMaximumSpectrum( float expectedMaximumSpectrum )
+  {
+    this.expectedMaximumSpectrum = expectedMaximumSpectrum;
+    updateCachedValues();
+  }
+
+
+  public double getExponent()
+  {
+    return exponent;
+  }
+
+  public void setExponent( double exponent )
+  {
+    this.exponent = exponent;
+    updateCachedValues();
+  }
+
+
+  private float outerScaleInv, totalScale, innerRadiusScaled;
+
+  private void updateCachedValues()
+  {
+    float outerScale = 1 + scaleSpectralLine(expectedMaximumSpectrum);
+    outerScaleInv = 1 / outerScale;
+    totalScale = getOuterRadius() * outerScale;
+    innerRadiusScaled = getInnerRadius() / totalScale;
+  }
+
 
   public float scaleSpectralLine( double x )
   {
@@ -47,12 +106,12 @@ public class SpectrogramLayer extends CircularLayer
 
     assert getSegmentCount() <= avgSpectrum.size();
 
+    final PApplet parent = this.parent;
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
 		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
     final float
-      outerScale = 1 + scaleSpectralLine(expectedMaximumSpectrum),
-      totalScale = getOuterRadius() * outerScale,
-      innerRadiusScaled = getInnerRadius() / totalScale;
+      outerScaleInv = this.outerScaleInv,
+      innerRadiusScaled = this.innerRadiusScaled;
     parent.scale(totalScale);
 
 		PImage img;
@@ -80,7 +139,7 @@ public class SpectrogramLayer extends CircularLayer
 	    //System.out.println(dynamicOuter);
 
 	    drawCircleVertex(imi, innerRadiusScaled); // draw the vertex using the custom drawVertex() method
-	    drawCircleVertex(imi + 1, dynamicOuter / outerScale); // draw the vertex using the custom drawVertex() method
+	    drawCircleVertex(imi + 1, dynamicOuter * outerScaleInv); // draw the vertex using the custom drawVertex() method
 	  }
 
 		parent.endShape(); // finalize the Shape

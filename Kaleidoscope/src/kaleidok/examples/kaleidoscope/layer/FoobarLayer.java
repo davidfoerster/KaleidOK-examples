@@ -9,6 +9,9 @@ import static kaleidok.util.DebugManager.wireframe;
 
 public class FoobarLayer extends CircularLayer
 {
+  private float radiusRatio;
+
+
 	public FoobarLayer(PApplet parent, PImageFuture img, int segmentCount,
     float innerRadius, float outerRadius)
 	{
@@ -16,10 +19,33 @@ public class FoobarLayer extends CircularLayer
 	}
 
 
-	public void run()
+  @Override
+  public void setInnerRadius( float innerRadius )
+  {
+    super.setInnerRadius(innerRadius);
+    updateRadiusRatio();
+  }
+
+
+  @Override
+  public void setOuterRadius( float outerRadius )
+  {
+    super.setOuterRadius(outerRadius);
+    updateRadiusRatio();
+  }
+
+
+  private void updateRadiusRatio()
+  {
+    radiusRatio = getInnerRadius() / getOuterRadius();
+  }
+
+
+  public void run()
 	{
+    final PApplet parent = this.parent;
 	  final float
-      innerRatio = getInnerRadius() / getOuterRadius(),
+      radiusRatio = this.radiusRatio,
       fc1 = parent.frameCount * 0.01f,
 	    fc2 = parent.frameCount * 0.02f;
 
@@ -45,7 +71,7 @@ public class FoobarLayer extends CircularLayer
 	    float dynamicInner = (parent.noise(fc1 + im) * 2) + 1;
 	    float dynamicOuter = (parent.noise(fc2 + im) + 2) / 3;
 
-	    drawCircleVertex(im, dynamicInner * innerRatio);
+	    drawCircleVertex(im, dynamicInner * radiusRatio);
 	    drawCircleVertex(im, dynamicOuter);
 	  }
 

@@ -29,9 +29,10 @@ public class CentreMovingShape extends CircularLayer
 
   public void run()
   {
-    double level = volumeLevelProcessor.getLevel();
+    final PApplet parent = this.parent;
+    final double level = volumeLevelProcessor.getLevel();
     //System.out.println("Volume level: " + level);
-    float radius = (float) Math.pow(level, 0.5) * getScaleFactor();
+    final float radius = (float) Math.pow(level, 0.5) * getScaleFactor();
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
