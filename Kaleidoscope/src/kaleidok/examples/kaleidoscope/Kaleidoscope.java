@@ -365,17 +365,17 @@ public class Kaleidoscope extends ExtPApplet
   {
     float r = Math.min(width, height) / 1000f;
 
-    centreLayer.outerRadius = r * 150;
-    centreLayer.scaleFactor = r;
+    centreLayer.setOuterRadius(r * 150);
+    centreLayer.setScaleFactor(r);
 
-    foobarLayer.innerRadius = r * 0.500f * 125;
-    foobarLayer.outerRadius = r * 1.333f * 275;
+    foobarLayer.setInnerRadius(r * 0.500f * 125);
+    foobarLayer.setOuterRadius(r * 1.333f * 275);
 
-    outerMovingShape.outerRadius = r * 150;
+    outerMovingShape.setOuterRadius(r * 150);
 
-    spectrogramLayer.innerRadius = r * 250;
-    spectrogramLayer.outerRadius = r * 290;
-    spectrogramLayer.scaleFactor = r * 5e-3f;
+    spectrogramLayer.setInnerRadius(r * 250);
+    spectrogramLayer.setOuterRadius(r * 290);
+    spectrogramLayer.setScaleFactor(r * 5e-3f);
   }
 
   private OuterMovingShape getOuterMovingShape()
@@ -579,7 +579,7 @@ public class Kaleidoscope extends ExtPApplet
       CircularLayer[] layers = getLayers();
       int idx = imageListIndex.getAndIncrement() % (layers.length + 1) - 1;
       if (idx >= 0) {
-        layers[idx].currentImage = fImage;
+        layers[idx].setNextImage(fImage);
       } else {
         bgImage = fImage;
       }

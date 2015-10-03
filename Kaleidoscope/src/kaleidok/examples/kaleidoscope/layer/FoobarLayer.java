@@ -19,24 +19,25 @@ public class FoobarLayer extends CircularLayer
 	public void run()
 	{
 	  final float
-      innerRatio = innerRadius / outerRadius,
+      innerRatio = getInnerRadius() / getOuterRadius(),
       fc1 = parent.frameCount * 0.01f,
 	    fc2 = parent.frameCount * 0.02f;
 
 		parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
 		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
-		parent.scale(outerRadius);
+		parent.scale(getOuterRadius());
 
 		parent.stroke(255); // set stroke to white
-    parent.strokeWeight(1 / outerRadius);
+    parent.strokeWeight(1 / getOuterRadius());
 		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
 		PImage img;
-		if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
+		if (wireframe < 1 && (img = getCurrentImage()) != null) {
 			parent.texture(img); // set the texture to use
 		} else {
 			parent.noFill();
 		}
 
+		final int segmentCount = getSegmentCount();
 	  for (int i = 0; i <= segmentCount; i++) {
 	    int im = i % segmentCount; // make sure the end equals the start
 

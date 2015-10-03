@@ -22,7 +22,7 @@ public class SpectrogramLayer extends CircularLayer
     int innerRadius, int outerRadius, MinimFFTProcessor spectrum )
 	{
 		super(parent, img, segmentCount * 2, innerRadius, outerRadius);
-		scaleFactor = 5e-3f;
+		setScaleFactor(5e-3f);
     avgSpectrum = spectrum;
 
     double nyquistFreq = 22050 / 2;
@@ -35,7 +35,7 @@ public class SpectrogramLayer extends CircularLayer
 
   public float scaleSpectralLine( double x )
   {
-    return (float) pow(x, exponent) * scaleFactor;
+    return (float) pow(x, exponent) * getScaleFactor();
   }
 
 
@@ -45,18 +45,18 @@ public class SpectrogramLayer extends CircularLayer
     if (!avgSpectrum.isReady())
       return;
 
-    assert segmentCount <= avgSpectrum.size();
+    assert getSegmentCount() <= avgSpectrum.size();
 
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
 		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
     final float
       outerScale = 1 + scaleSpectralLine(expectedMaximumSpectrum),
-      totalScale = outerRadius * outerScale,
-      innerRadiusScaled = innerRadius / totalScale;
+      totalScale = getOuterRadius() * outerScale,
+      innerRadiusScaled = getInnerRadius() / totalScale;
     parent.scale(totalScale);
 
 		PImage img;
-		if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
+		if (wireframe < 1 && (img = getCurrentImage()) != null) {
       parent.noStroke();
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
       parent.texture(img); // set the texture to use
@@ -71,6 +71,7 @@ public class SpectrogramLayer extends CircularLayer
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     }
 
+    final int segmentCount = getSegmentCount();
 	  for (int i = 0; i <= segmentCount; i += 2)
 	  {
 	    int imi = i % segmentCount; // make sure the end equals the start

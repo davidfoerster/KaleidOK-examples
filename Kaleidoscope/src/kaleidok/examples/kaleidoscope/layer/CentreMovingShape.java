@@ -19,12 +19,11 @@ public class CentreMovingShape extends CircularLayer
     int segmentCount, float radius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
-    super(parent, img, segmentCount, 0, radius);
+    super(parent, null, segmentCount, 0, radius);
     this.volumeLevelProcessor = volumeLevelProcessor;
 
     imageIndex = (int) parent.random(parent.images.size());
-    if (img == null)
-      currentImage = parent.images.get(imageIndex);
+    setNextImage((img != null) ? img : parent.images.get(imageIndex));
   }
 
 
@@ -32,24 +31,25 @@ public class CentreMovingShape extends CircularLayer
   {
     double level = volumeLevelProcessor.getLevel();
     //System.out.println("Volume level: " + level);
-    float radius = (float) Math.pow(level, 0.5) * scaleFactor;
+    float radius = (float) Math.pow(level, 0.5) * getScaleFactor();
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
-    parent.scale(outerRadius);
+    parent.scale(getOuterRadius());
     parent.rotate(parent.frameCount * -0.002f); // rotate around this center --anticlockwise
 
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
     PImage img;
-    if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
+    if (wireframe < 1 && (img = getCurrentImage()) != null) {
       parent.texture(img); // set the texture to use
       parent.noStroke(); // turn off stroke
     } else {
       parent.noFill();
       parent.stroke(128);
-      parent.strokeWeight(0.5f / outerRadius);
+      parent.strokeWeight(0.5f / getOuterRadius());
     }
 
+    final int segmentCount = getSegmentCount();
     parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
     for (int i = 0; i <= segmentCount; i++) {
       drawCircleVertex(i % segmentCount, radius);
@@ -59,11 +59,11 @@ public class CentreMovingShape extends CircularLayer
   }
 
 
-  public void nextImage()
+  public void cycleImage()
   {
     Kaleidoscope parent = (Kaleidoscope) this.parent;
     imageIndex = (imageIndex + 1) % parent.images.size();
-    currentImage = parent.images.get(imageIndex);
+    setNextImage(parent.images.get(imageIndex));
   }
 
 }
