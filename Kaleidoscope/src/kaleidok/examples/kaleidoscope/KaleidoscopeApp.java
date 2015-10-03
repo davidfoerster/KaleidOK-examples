@@ -91,7 +91,8 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
         @Override
         public void actionPerformed( ActionEvent ev )
         {
-          getSketch().chromasthetiate(messageField.getText());
+          getSketch().getChromasthetiationService()
+            .submit(messageField.getText());
         }
       });
     }

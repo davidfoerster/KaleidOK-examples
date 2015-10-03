@@ -10,40 +10,20 @@ import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
-import kaleidok.chromatik.ChromasthetiationService;
-import kaleidok.chromatik.ChromasthetiatorBase;
-import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
-import kaleidok.concurrent.GroupedThreadFactory;
-import kaleidok.flickr.Flickr;
-import kaleidok.flickr.FlickrException;
-import kaleidok.http.cache.DiskLruHttpCacheStorage;
-import kaleidok.http.cache.ExecutorSchedulingStrategy;
-import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
-import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
-import org.apache.http.client.fluent.Executor;
-import org.apache.http.impl.client.cache.CacheConfig;
-import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
-import processing.core.PImage;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JApplet;
-import java.awt.Image;
 import java.io.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
-import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.verbose;
 import static kaleidok.util.Math.isPowerOfTwo;
 
@@ -62,8 +42,7 @@ public class Kaleidoscope extends ExtPApplet
   private VolumeLevelProcessor volumeLevelProcessor;
   private MinimFFTProcessor fftProcessor;
 
-  private DocumentChromasthetiator chromasthetiator;
-  private ChromasthetiationService chromasthetiationService;
+  private KaleidoscopeChromasthetiationService chromasthetiationService;
 
   private STT stt;
 
@@ -101,7 +80,6 @@ public class Kaleidoscope extends ExtPApplet
     }
 
     getLayers();
-    getChromasthetiator();
     getChromasthetiationService();
     getSTT();
     initRecorderIcon();
@@ -244,39 +222,13 @@ public class Kaleidoscope extends ExtPApplet
           @Override
           public void run()
           {
-            layers.waitForImages();
+            getLayers().waitForImages();
             dispatcher.run();
           }
         },
         "Audio dispatching");
       audioDispatcherThread.setDaemon(true);
     }
-  }
-
-
-  private DocumentChromasthetiator getChromasthetiator()
-  {
-    if (chromasthetiator == null) {
-      ChromasthetiatorBase.verbose = verbose;
-      chromasthetiator = new DocumentChromasthetiator(this);
-
-      String data = parseStringOrFile(getParameter("com.flickr.api.key"), '@');
-      if (data != null) {
-        String[] keys = data.split(":|\r?\n", 2);
-        if (keys.length != 2) {
-          throw new IllegalArgumentException(
-            "Malformed Flickr API key: " + data);
-        }
-        chromasthetiator.setFlickrApi(new Flickr(keys[0], keys[1]));
-      }
-
-      chromasthetiator.maxKeywords = DefaultValueParser.parseInt(this,
-        chromasthetiator.getClass().getPackage().getName() + ".maxKeywords",
-        chromasthetiator.maxKeywords);
-
-      chromasthetiator.chromatikQuery.nhits = 10;
-    }
-    return chromasthetiator;
   }
 
 
@@ -296,75 +248,11 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  public static final long DEFAULT_HTTP_CACHE_SIZE = 50L << 20;
-
-  private static final int HTTP_CACHE_APP_VERSION = 1;
-
-  private ChromasthetiationService getChromasthetiationService()
+  public KaleidoscopeChromasthetiationService getChromasthetiationService()
   {
     if (chromasthetiationService == null)
-    {
-      int threadPoolSize = getChromasthetiationThreadPoolSize();
-
-      String cacheParamBase = this.getClass().getCanonicalName() + ".cache.";
-      long httpCacheSize = DefaultValueParser.parseLong(this,
-        cacheParamBase + "size", DEFAULT_HTTP_CACHE_SIZE);
-      File cacheDir = new File((String) getParameter(
-        cacheParamBase + "path", this.getClass().getCanonicalName()));
-      if (!cacheDir.isAbsolute()) {
-        cacheDir = new File(
-          PlatformPaths.INSTANCE.getCacheDir().toString(),
-          cacheDir.getPath());
-      }
-
-      CachingHttpClientBuilder builder = CachingHttpClientBuilder.create();
-      builder
-        .disableConnectionState()
-        .disableCookieManagement();
-
-      ThreadFactory threadFactory =
-        new GroupedThreadFactory("Chromasthetiation", true);
-      ExecutorService executor = (threadPoolSize == 0) ?
-        Executors.newCachedThreadPool(threadFactory) :
-        Executors.newFixedThreadPool(threadPoolSize, threadFactory);
-      builder.setSchedulingStrategy(
-        new ExecutorSchedulingStrategy(executor));
-
-      CacheConfig cacheConfig = CacheConfig.custom()
-        .setMaxCacheEntries(Integer.MAX_VALUE)
-        .setMaxObjectSize(httpCacheSize / 2)
-        .setSharedCache(false)
-        .setAllow303Caching(true)
-        .setHeuristicCachingEnabled(true)
-        .setHeuristicCoefficient(0.5f)
-        .setHeuristicDefaultLifetime(TimeUnit.DAYS.toSeconds(28))
-        .setAsynchronousWorkersCore(0)
-        .build();
-
-      try {
-        builder.setHttpCacheStorage(new DiskLruHttpCacheStorage(
-          cacheDir, HTTP_CACHE_APP_VERSION, httpCacheSize));
-      } catch (IOException ex) {
-        System.err.format("Warning: Couldn't set up an HTTP cache in \"%s\": %s%n",
-          cacheDir, ex.getLocalizedMessage());
-        if (debug >= 1)
-          throw new AssertionError(ex);
-        // else: use default cache storage
-      }
-
-      builder.setCacheConfig(cacheConfig);
-      chromasthetiationService = new ChromasthetiationService(
-        executor, Executor.newInstance(builder.build()));
-    }
+      chromasthetiationService = KaleidoscopeChromasthetiationService.newInstance(this);
     return chromasthetiationService;
-  }
-
-
-  private int getChromasthetiationThreadPoolSize()
-  {
-    return DefaultValueParser.parseInt(this,
-      ChromasthetiationService.class.getCanonicalName() + ".threads",
-      ChromasthetiationService.DEFAULT_THREAD_POOL_SIZE);
   }
 
 
@@ -390,54 +278,6 @@ public class Kaleidoscope extends ExtPApplet
   public boolean wasResized()
   {
     return width != previousWidth || height != previousHeight;
-  }
-
-
-  public void chromasthetiate( String text )
-  {
-    getChromasthetiationService().submit(text, getChromasthetiator(),
-      null, chromasthetiationCallback, getLayers().size() + 1);
-  }
-
-
-  private final ChromasthetiationCallback chromasthetiationCallback =
-    new ChromasthetiationCallback();
-
-  private class ChromasthetiationCallback
-    extends AbstractFutureCallback<Image>
-  {
-    private final AtomicInteger imageListIndex = new AtomicInteger(0);
-
-    @Override
-    public void completed( Image image )
-    {
-      assert image.getWidth(null) > 0 && image.getHeight(null) > 0;
-      PImageFuture fImage = new PImageFuture(new PImage(image));
-
-      LayerManager layers = getLayers();
-      int idx = imageListIndex.getAndIncrement() % (layers.size() + 1) - 1;
-      if (idx >= 0) {
-        layers.get(idx).setNextImage(fImage);
-      } else {
-        layers.bgImage = fImage;
-      }
-    }
-
-    @Override
-    public void failed( Exception ex )
-    {
-      if (ex == null) {
-        System.out.println("Aborted!");
-      } else if (ex instanceof FlickrException) {
-        switch (((FlickrException) ex).getErrorCode()) {
-        case 1: // Photo not found
-        case 2: // Permission denied
-          System.err.println(ex.getLocalizedMessage());
-          return;
-        }
-      }
-      super.failed(ex);
-    }
   }
 
 
@@ -469,7 +309,7 @@ public class Kaleidoscope extends ExtPApplet
         println("STT returned: " + result.alternative[0].transcript);
 
       if (!isIgnoreTranscriptionResult())
-        chromasthetiate(result.alternative[0].transcript);
+        getChromasthetiationService().submit(result.alternative[0].transcript);
     }
 
     private boolean isIgnoreTranscriptionResult()
@@ -489,7 +329,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private String parseStringOrFile( String s, char filePrefix )
+  String parseStringOrFile( String s, char filePrefix )
   {
     if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {
       s = new String((s.length() == 2 && s.charAt(1) == '-') ?
