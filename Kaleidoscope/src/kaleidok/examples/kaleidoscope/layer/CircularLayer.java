@@ -4,6 +4,8 @@ import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 
 public abstract class CircularLayer implements Runnable
 {
@@ -13,7 +15,8 @@ public abstract class CircularLayer implements Runnable
 
   private float scaleFactor = 1;
 
-  private PImageFuture nextImage;
+  private final AtomicReference<PImageFuture> nextImage =
+    new AtomicReference<>();
 
   private PImage currentImage = null;
 
@@ -89,19 +92,20 @@ public abstract class CircularLayer implements Runnable
 
   public PImageFuture getNextImage()
   {
-    return nextImage;
+    return nextImage.get();
   }
 
   public void setNextImage( PImageFuture img )
   {
-    this.nextImage = img;
+    nextImage.set(img);
   }
 
 
   public PImage getCurrentImage()
   {
-    PImageFuture nextFuture = getNextImage();
-    if (nextFuture != null) {
+    PImageFuture nextFuture = nextImage.getAndSet(null);
+    if (nextFuture != null)
+    {
       PImage next = nextFuture.getNoThrow();
       if (next != null && next.width > 0 && next.height > 0)
         setCurrentImage(next);
@@ -111,7 +115,8 @@ public abstract class CircularLayer implements Runnable
 
   public void setCurrentImage( PImage img )
   {
-    if (img != currentImage) {
+    if (img != null && img != currentImage)
+    {
       assert img.width > 0 && img.height > 0;
       float
         imgWidth = img.width, imgHeight = img.height,
@@ -123,8 +128,8 @@ public abstract class CircularLayer implements Runnable
         txFactor = imgHeight / imgWidth; // = 1 / imgAspect;
         tyFactor = 1;
       }
-      currentImage = img;
     }
+    currentImage = img;
   }
 
   private float txFactor = 1, tyFactor = 1;
