@@ -39,19 +39,20 @@ public class LayerManager extends ArrayList<CircularLayer>
   LayerManager( Kaleidoscope parent )
   {
     this.parent = parent;
-    AudioDispatcher audioDispatcher = parent.getAudioDispatcher();
     List<PImageFuture> images = getImages();
+    AudioProcessingManager apm = parent.getAudioProcessingManager();
 
     spectrogramLayer =
       new SpectrogramLayer(parent, images.get(0), 1 << 8, -1, -1,
-        parent.getFftProcessor(), audioDispatcher.getFormat().getSampleRate());
+        apm.getFftProcessor(),
+        apm.getAudioDispatcher().getFormat().getSampleRate());
     OuterMovingShape outerMovingShape =
       getOuterMovingShape();
     foobarLayer =
       new FoobarLayer(parent, images.get(3), 1 << 4, -1, -1);
     centreLayer =
       new CentreMovingShape(parent, images, 1 << 5, -1,
-        parent.getVolumeLevelProcessor());
+        apm.getVolumeLevelProcessor());
 
     add(spectrogramLayer);
     add(outerMovingShape);
@@ -66,11 +67,12 @@ public class LayerManager extends ArrayList<CircularLayer>
     if (outerMovingShape == null) {
       OuterMovingShape outerMovingShape =
         new OuterMovingShape(parent, getImages().get(4), 1 << 5, -1);
-      AudioDispatcher audioDispatcher = parent.getAudioDispatcher();
+      AudioProcessingManager apm = parent.getAudioProcessingManager();
+      AudioDispatcher audioDispatcher = apm.getAudioDispatcher();
       audioDispatcher.addAudioProcessor(new PitchProcessor(
         PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
         audioDispatcher.getFormat().getSampleRate(),
-        parent.getAudioBufferSize(),
+        apm.getAudioBufferSize(),
         outerMovingShape.getPitchDetectionHandler()));
       this.outerMovingShape = outerMovingShape;
     }

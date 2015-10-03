@@ -30,7 +30,8 @@ public class SttManager
     stt.setMaxTranscriptionInterval(
       DefaultValueParser.parseInt(parent, paramBase + "interval", 8000),
       TimeUnit.MILLISECONDS);
-    parent.getAudioDispatcher().addAudioProcessor(stt.getAudioProcessor());
+    parent.getAudioProcessingManager().getAudioDispatcher()
+      .addAudioProcessor(stt.getAudioProcessor());
 
     initRecorderIcon();
   }
