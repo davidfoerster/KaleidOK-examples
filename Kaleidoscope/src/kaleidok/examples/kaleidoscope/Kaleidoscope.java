@@ -3,14 +3,10 @@ package kaleidok.examples.kaleidoscope;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioPlayer;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
-import com.getflourish.stt2.RecorderIcon;
-import com.getflourish.stt2.SttResponse;
-import com.getflourish.stt2.STT;
 import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
-import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.util.DefaultValueParser;
@@ -20,7 +16,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JApplet;
 import java.io.*;
-import java.util.concurrent.TimeUnit;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
@@ -44,7 +39,7 @@ public class Kaleidoscope extends ExtPApplet
 
   private KaleidoscopeChromasthetiationService chromasthetiationService;
 
-  private STT stt;
+  private SttManager stt;
 
 
   public Kaleidoscope( JApplet parent )
@@ -82,7 +77,6 @@ public class Kaleidoscope extends ExtPApplet
     getLayers();
     getChromasthetiationService();
     getSTT();
-    initRecorderIcon();
 
     audioDispatcherThread.start();
 
@@ -99,21 +93,10 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private STT getSTT()
+  private SttManager getSTT()
   {
-    if (stt == null) {
-      STT.debug = verbose >= 1;
-      stt = new STT(new SttResponseHandler(),
-        parseStringOrFile(getParameter("com.google.developer.api.key"), '@'));
-
-      String paramBase = stt.getClass().getCanonicalName() + '.';
-      stt.setLanguage((String) getParameter(paramBase + "language", "en"));
-      stt.setMaxTranscriptionInterval(
-        DefaultValueParser.parseInt(this, paramBase + "interval", 8000),
-        TimeUnit.MILLISECONDS);
-
-      getAudioDispatcher().addAudioProcessor(stt.getAudioProcessor());
-    }
+    if (stt == null)
+      stt = new SttManager(this);
     return stt;
   }
 
@@ -232,22 +215,6 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private boolean initRecorderIcon()
-  {
-    String strEnabled =
-      getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
-    boolean bEnabled = !"forceoff".equals(strEnabled) &&
-      (!STT.debug || DefaultValueParser.parseBoolean(strEnabled, true));
-
-    if (bEnabled) {
-      RecorderIcon ri = new RecorderIcon(this, stt);
-      ri.x = width - ri.x;
-    }
-
-    return bEnabled;
-  }
-
-
   public KaleidoscopeChromasthetiationService getChromasthetiationService()
   {
     if (chromasthetiationService == null)
@@ -292,39 +259,6 @@ public class Kaleidoscope extends ExtPApplet
     case 'o':
       stt.end(false);
       break;
-    }
-  }
-
-
-  private class SttResponseHandler extends AbstractFutureCallback<SttResponse>
-  {
-    private Boolean isIgnoreTranscriptionResult = null;
-
-    @Override
-    public void completed( SttResponse response )
-    {
-      SttResponse.Result result = response.result[0];
-
-      if (verbose >= 1)
-        println("STT returned: " + result.alternative[0].transcript);
-
-      if (!isIgnoreTranscriptionResult())
-        getChromasthetiationService().submit(result.alternative[0].transcript);
-    }
-
-    private boolean isIgnoreTranscriptionResult()
-    {
-      if (isIgnoreTranscriptionResult == null) {
-        isIgnoreTranscriptionResult =
-          DefaultValueParser.parseBoolean(Kaleidoscope.this,
-            this.getClass().getPackage().getName() + ".ignoreTranscription",
-            false);
-        if (isIgnoreTranscriptionResult) {
-          System.out.println(
-            "Notice: Speech transcription results are configured to be ignored.");
-        }
-      }
-      return isIgnoreTranscriptionResult;
     }
   }
 
