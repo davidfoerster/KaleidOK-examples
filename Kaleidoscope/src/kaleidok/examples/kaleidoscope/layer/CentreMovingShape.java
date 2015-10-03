@@ -2,28 +2,39 @@ package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.Kaleidoscope;
+import kaleidok.examples.kaleidoscope.LayerManager;
 import kaleidok.processing.PImageFuture;
+import kaleidok.util.CyclingList;
 import processing.core.PApplet;
 import processing.core.PImage;
+
+import java.util.List;
 
 import static kaleidok.util.DebugManager.wireframe;
 
 public class CentreMovingShape extends CircularLayer
 {
-  private int imageIndex;
+  private final CyclingList<PImageFuture> images;
 
   private VolumeLevelProcessor volumeLevelProcessor;
 
 
-  public CentreMovingShape( Kaleidoscope parent, PImageFuture img,
+  public CentreMovingShape( Kaleidoscope parent, List<PImageFuture> images,
     int segmentCount, float radius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
-    super(parent, null, segmentCount, 0, radius);
-    this.volumeLevelProcessor = volumeLevelProcessor;
+    this(parent, new CyclingList<>(images, (int) parent.random(images.size())),
+      segmentCount, radius, volumeLevelProcessor);
+  }
 
-    imageIndex = (int) parent.random(parent.images.size());
-    setNextImage((img != null) ? img : parent.images.get(imageIndex));
+
+  private CentreMovingShape( Kaleidoscope parent,
+    CyclingList<PImageFuture> images, int segmentCount, float radius,
+    VolumeLevelProcessor volumeLevelProcessor )
+  {
+    super(parent, images.getNext(), segmentCount, 0, radius);
+    this.images = images;
+    this.volumeLevelProcessor = volumeLevelProcessor;
   }
 
 
@@ -62,9 +73,7 @@ public class CentreMovingShape extends CircularLayer
 
   public void cycleImage()
   {
-    Kaleidoscope parent = (Kaleidoscope) this.parent;
-    imageIndex = (imageIndex + 1) % parent.images.size();
-    setNextImage(parent.images.get(imageIndex));
+    setNextImage(images.getNext());
   }
 
 }

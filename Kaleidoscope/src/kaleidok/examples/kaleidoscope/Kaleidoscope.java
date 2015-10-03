@@ -3,7 +3,6 @@ package kaleidok.examples.kaleidoscope;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.jvm.AudioPlayer;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
-import be.tarsos.dsp.pitch.PitchProcessor;
 import com.getflourish.stt2.RecorderIcon;
 import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.STT;
@@ -16,7 +15,6 @@ import kaleidok.chromatik.ChromasthetiatorBase;
 import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.concurrent.GroupedThreadFactory;
-import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.http.cache.DiskLruHttpCacheStorage;
@@ -37,9 +35,6 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JApplet;
 import java.awt.Image;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -49,25 +44,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 import static kaleidok.util.DebugManager.debug;
-import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.DebugManager.verbose;
 import static kaleidok.util.Math.isPowerOfTwo;
 
 
 public class Kaleidoscope extends ExtPApplet
 {
-  private CircularLayer[] layers;
-
-  public List<PImageFuture> images; // list to hold input images
-
-  public volatile PImageFuture bgImage;
-
-  private int bgImageIndex; // variable to keep track of the current image
-
-  public SpectrogramLayer spectrogramLayer;
-  public OuterMovingShape outerMovingShape;
-  public FoobarLayer foobarLayer;
-  public CentreMovingShape centreLayer;
+  private LayerManager layers;
 
   public static final int DEFAULT_AUDIO_SAMPLERATE = 32000;
   public static final int DEFAULT_AUDIO_BUFFERSIZE = 1 << 11;
@@ -117,10 +100,9 @@ public class Kaleidoscope extends ExtPApplet
       noSmooth();
     }
 
-    getImages();
+    getLayers();
     getChromasthetiator();
     getChromasthetiationService();
-    getLayers();
     getSTT();
     initRecorderIcon();
 
@@ -130,78 +112,14 @@ public class Kaleidoscope extends ExtPApplet
       new FrameRateDisplay(this);
   }
 
-  private static final int MIN_IMAGES = 5;
-  private List<PImageFuture> getImages()
+
+  public LayerManager getLayers()
   {
-    if (images == null)
-    {
-      String imagesParam = getParameter(
-        this.getClass().getPackage().getName() + ".images.initial");
-      if (imagesParam == null) {
-        this.images = new ArrayList<>(MIN_IMAGES);
-      } else {
-        String[] images = imagesParam.split("\\s+");
-        this.images = new ArrayList<>(Math.max(images.length, MIN_IMAGES));
-        for (String strImage: images) {
-          if (!strImage.isEmpty()) {
-            char c = strImage.charAt(0);
-            if (c != '/' && c != File.separatorChar &&
-              strImage.indexOf(':') < 0)
-            {
-              strImage = "/images/" + strImage;
-            }
-            PImageFuture image = getImageFuture(strImage);
-            if (image != null) {
-              this.images.add(image);
-            } else if (debug >= 1) {
-              throw new AssertionError(new FileNotFoundException(strImage));
-            } else {
-              System.err.println("Couldn't load image: " + strImage);
-            }
-          }
-        }
-      }
-
-      switch (images.size()) {
-      case 0:
-        images.add(PImageFuture.EMPTY);
-        // fall through
-
-      case 1:
-        bgImageIndex = 0;
-        break;
-
-      default:
-        bgImageIndex = (int) random(images.size()); // randomly choose the bgImageIndex
-        break;
-      }
-      bgImage = images.get(bgImageIndex);
-      int imageCount = images.size();
-      for (int i = images.size(); i < MIN_IMAGES; i++)
-        images.add(images.get(i % imageCount));
-    }
-    return images;
+    if (layers == null)
+      layers = new LayerManager(this);
+    return layers;
   }
 
-  private void waitForImages()
-  {
-    for (PImageFuture futureImg: getImages()) {
-      try {
-        PImage img;
-        while (true) {
-          try {
-            img = futureImg.get();
-            break;
-          } catch (InterruptedException ex) {
-            // go on...
-          }
-        }
-        assert img != null && img.width > 0 && img.height > 0;
-      } catch (ExecutionException ex) {
-        throw new RuntimeException(ex.getCause());
-      }
-    }
-  }
 
   private STT getSTT()
   {
@@ -221,7 +139,8 @@ public class Kaleidoscope extends ExtPApplet
     return stt;
   }
 
-  private AudioDispatcher getAudioDispatcher()
+
+  AudioDispatcher getAudioDispatcher()
   {
     if (audioDispatcher == null) {
       String paramBase = this.getClass().getPackage().getName() + ".audio.";
@@ -301,7 +220,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private VolumeLevelProcessor getVolumeLevelProcessor()
+  VolumeLevelProcessor getVolumeLevelProcessor()
   {
     if (volumeLevelProcessor == null)
       volumeLevelProcessor = new VolumeLevelProcessor();
@@ -309,7 +228,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private MinimFFTProcessor getFftProcessor()
+  MinimFFTProcessor getFftProcessor()
   {
     if (fftProcessor == null)
       fftProcessor = new MinimFFTProcessor(getAudioBufferSize());
@@ -325,72 +244,13 @@ public class Kaleidoscope extends ExtPApplet
           @Override
           public void run()
           {
-            waitForImages();
+            layers.waitForImages();
             dispatcher.run();
           }
         },
         "Audio dispatching");
       audioDispatcherThread.setDaemon(true);
     }
-  }
-
-  private CircularLayer[] getLayers()
-  {
-    if (layers == null)
-    {
-      AudioDispatcher audioDispatcher = getAudioDispatcher();
-
-      spectrogramLayer =
-        new SpectrogramLayer(this, images.get(0), 1 << 8, -1, -1,
-          getFftProcessor(), audioDispatcher.getFormat().getSampleRate());
-      OuterMovingShape outerMovingShape =
-        getOuterMovingShape();
-      foobarLayer =
-        new FoobarLayer(this, images.get(3), 1 << 4, -1, -1);
-      centreLayer =
-        new CentreMovingShape(this, null, 1 << 5, -1, getVolumeLevelProcessor());
-
-      layers = new CircularLayer[]{
-          spectrogramLayer,
-          outerMovingShape,
-          foobarLayer,
-          centreLayer,
-        };
-      updateLayerSizes();
-    }
-    return layers;
-  }
-
-  private void updateLayerSizes()
-  {
-    float r = Math.min(width, height) / 1000f;
-
-    centreLayer.setOuterRadius(r * 150);
-    centreLayer.setScaleFactor(r);
-
-    foobarLayer.setInnerRadius(r * 0.500f * 125);
-    foobarLayer.setOuterRadius(r * 1.333f * 275);
-
-    outerMovingShape.setOuterRadius(r * 150);
-
-    spectrogramLayer.setInnerRadius(r * 250);
-    spectrogramLayer.setOuterRadius(r * 290);
-    spectrogramLayer.setScaleFactor(r * 5e-3f);
-  }
-
-  private OuterMovingShape getOuterMovingShape()
-  {
-    if (outerMovingShape == null) {
-      OuterMovingShape outerMovingShape =
-        new OuterMovingShape(this, getImages().get(4), 1 << 5, -1);
-      AudioDispatcher audioDispatcher = getAudioDispatcher();
-      audioDispatcher.addAudioProcessor(new PitchProcessor(
-        PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
-        audioDispatcher.getFormat().getSampleRate(), audioBufferSize,
-        outerMovingShape.getPitchDetectionHandler()));
-      this.outerMovingShape = outerMovingShape;
-    }
-    return outerMovingShape;
   }
 
 
@@ -521,15 +381,7 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void draw()
   {
-    drawBackgroundTexture();
-
-    if (wasResized())
-      updateLayerSizes();
-    for (CircularLayer l : layers) {
-      if (l != null)
-        l.run();
-    }
-
+    getLayers().draw();
     previousWidth = width;
     previousHeight = height;
   }
@@ -541,24 +393,10 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private void drawBackgroundTexture()
-  {
-    PImage bgImage;
-    if (wireframe < 1 && (bgImage = this.bgImage.getNoThrow()) != null) {
-      // background image
-      image(bgImage, ImageResizeMode.PAN, 0, 0, width, height); // resize-display image correctly to cover the whole screen
-      fill(255, 125 + (float) Math.sin(frameCount * 0.01) * 5); // white fill with dynamic transparency
-      rect(0, 0, width, height); // rect covering the whole canvas
-    } else {
-      background(0);
-    }
-  }
-
-
   public void chromasthetiate( String text )
   {
     getChromasthetiationService().submit(text, getChromasthetiator(),
-      null, chromasthetiationCallback, getLayers().length + 1);
+      null, chromasthetiationCallback, getLayers().size() + 1);
   }
 
 
@@ -576,12 +414,12 @@ public class Kaleidoscope extends ExtPApplet
       assert image.getWidth(null) > 0 && image.getHeight(null) > 0;
       PImageFuture fImage = new PImageFuture(new PImage(image));
 
-      CircularLayer[] layers = getLayers();
-      int idx = imageListIndex.getAndIncrement() % (layers.length + 1) - 1;
+      LayerManager layers = getLayers();
+      int idx = imageListIndex.getAndIncrement() % (layers.size() + 1) - 1;
       if (idx >= 0) {
-        layers[idx].setNextImage(fImage);
+        layers.get(idx).setNextImage(fImage);
       } else {
-        bgImage = fImage;
+        layers.bgImage = fImage;
       }
     }
 
