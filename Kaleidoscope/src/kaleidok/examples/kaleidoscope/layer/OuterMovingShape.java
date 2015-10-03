@@ -24,9 +24,10 @@ public class OuterMovingShape extends CircularLayer
 
   public void run()
   {
+    final PApplet parent = this.parent;
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.translate(parent.width / 2f, parent.height / 2f); // translate to the left-center
-    parent.scale(outerRadius);
+    parent.scale(getOuterRadius());
 
     if (step != 0) {
       angle = (angle + step) % (Math.PI * 2);
@@ -35,15 +36,16 @@ public class OuterMovingShape extends CircularLayer
 
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
     PImage img;
-    if (wireframe < 1 && (img = currentImage.getNoThrow()) != null) {
+    if (wireframe < 1 && (img = getCurrentImage()) != null) {
       parent.texture(img); // set the texture to use
       parent.noStroke(); // turn off stroke
     } else {
       parent.noFill();
       parent.stroke(128);
-      parent.strokeWeight(0.5f / outerRadius);
+      parent.strokeWeight(0.5f / getOuterRadius());
     }
 
+    final int segmentCount = getSegmentCount();
     parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
     for (int i = 0; i <= segmentCount; i++) {
       drawCircleVertex(i % segmentCount, 1);
