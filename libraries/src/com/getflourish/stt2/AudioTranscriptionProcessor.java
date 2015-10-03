@@ -192,8 +192,9 @@ public class AudioTranscriptionProcessor implements AudioProcessor
         new int[len];
     final int offset = ev.getOverlap() / 2;
     for (int i = 0; i < len; i++) {
-      assert Math.abs(audioFloat[i + offset]) <= 1;
-      audioInt[i] = (int) (audioFloat[i + offset] * Short.MAX_VALUE);
+      final float sample = audioFloat[i + offset];
+      assert sample >= -1 && sample <= 1 : sample;
+      audioInt[i] = (int) (sample * Short.MAX_VALUE);
     }
     return audioInt;
   }

@@ -20,6 +20,7 @@ import java.io.InputStream;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
+import static kaleidok.util.DebugManager.verbose;
 import static kaleidok.util.Math.isPowerOfTwo;
 
 
@@ -101,6 +102,9 @@ public class AudioProcessingManager
           audioDispatcher =
             new AudioDispatcher(new ContinuousAudioInputStream(ais),
               bufferSize, bufferOverlap);
+
+          if (verbose >= 2)
+            System.out.println(audioDispatcher.getFormat().toString());
 
           boolean play =
             DefaultValueParser.parseBoolean(parent, paramBase + "input.play", false);
