@@ -51,8 +51,22 @@ public abstract class CircularLayer implements Runnable
   // based on index and a diameter input parameters
   protected void drawCircleVertex( int index, float radius )
   {
-    float x = xL[index] * radius, y = yL[index] * radius;
+    float
+      x = xL[index] * radius, tx = x,
+      y = yL[index] * radius, ty = y;
+
+    PImage img = currentImage.getNoThrow();
+    if (img != null) {
+      assert img.width > 0 && img.height > 0;
+      float imgAspect = (float) img.width / img.height;
+      if (imgAspect <= 1) {
+        ty *= imgAspect;
+      } else {
+        tx /= imgAspect;
+      }
+    }
+
     // draw vertex with the calculated position and texture coordinates
-    parent.vertex(x, y, (x + 1) / 2, (y + 1) / 2);
+    parent.vertex(x, y, (tx + 1) / 2, (ty + 1) / 2);
   }
 }
