@@ -6,6 +6,8 @@ import kaleidok.util.DefaultValueParser;
 
 import javax.swing.JApplet;
 
+import java.awt.Point;
+
 import static kaleidok.util.DebugManager.verbose;
 
 
@@ -28,19 +30,17 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void setup()
   {
-    int width = this.width, height = this.height;
-    if (width == 100 && height == 100) {
+    Point size = new Point(width, height);
+    if (size.x == 100 && size.y == 100) {
       /*
        * Default dimensions mean, the surrounding layout manager didn't resize
        * this sketch yet; use more sensible default dimensions instead (and set
        * them thereafter).
        */
-      width = 1000;
-      height = 1000;
+      size.setLocation(1000, 1000);
     }
-    size(width, height, OPENGL); // keep size, but use the OpenGL renderer
-    previousWidth = width;
-    previousHeight = height;
+    this.size(size.x, size.y, OPENGL); // keep size, but use the OpenGL renderer
+    previousSize = size;
 
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
 
@@ -102,20 +102,21 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private int previousWidth = -1, previousHeight = -1;
+  private Point previousSize = null;
 
   @Override
   public void draw()
   {
-    getLayers().draw();
-    previousWidth = width;
-    previousHeight = height;
+    layers.draw();
+    previousSize.setLocation(width, height);
   }
 
 
   public boolean wasResized()
   {
-    return width != previousWidth || height != previousHeight;
+    final Point previousSize = this.previousSize;
+    return previousSize != null &&
+      (width != previousSize.x || height != previousSize.y);
   }
 
 
