@@ -19,17 +19,20 @@ public class SpectrogramLayer extends CircularLayer
 
   private float expectedMaximumSpectrum = 60;
 
+  private static final int MIN_FREQUENCY = 86;
+
 
 	public SpectrogramLayer( PApplet parent, PImageFuture img, int segmentCount,
-    int innerRadius, int outerRadius, MinimFFTProcessor spectrum )
+    int innerRadius, int outerRadius, MinimFFTProcessor spectrum,
+    float sampleRate )
 	{
 		super(parent, img, segmentCount * 2, innerRadius, outerRadius);
 		setScaleFactor(5e-3f);
     avgSpectrum = spectrum;
 
-    double nyquistFreq = 22050 / 2;
-    int minFreq = 86;
-    avgSpectrum.logAverages(minFreq, (int) ceil(segmentCount / log2(nyquistFreq / minFreq)));
+    float nyquistFreq = sampleRate / 2;
+    avgSpectrum.logAverages(MIN_FREQUENCY,
+      (int) ceil(segmentCount / log2(nyquistFreq / MIN_FREQUENCY)));
 	}
 
 

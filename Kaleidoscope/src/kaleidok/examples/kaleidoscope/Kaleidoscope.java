@@ -338,11 +338,11 @@ public class Kaleidoscope extends ExtPApplet
   {
     if (layers == null)
     {
-      getAudioDispatcher();
+      AudioDispatcher audioDispatcher = getAudioDispatcher();
 
       spectrogramLayer =
         new SpectrogramLayer(this, images.get(0), 1 << 8, -1, -1,
-          getFftProcessor());
+          getFftProcessor(), audioDispatcher.getFormat().getSampleRate());
       OuterMovingShape outerMovingShape =
         getOuterMovingShape();
       foobarLayer =
