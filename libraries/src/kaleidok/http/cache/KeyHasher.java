@@ -46,11 +46,11 @@ class KeyHasher
     final MessageDigest digester = this.digester;
     final byte[] buf = this.buf;
     final int len = s.length(),
-      chunklen = buf.length / BYTES_PER_CHAR;
+      chunkLen = buf.length / BYTES_PER_CHAR;
 
     int j = 0;
     while (j < len) {
-      final int l = Math.min(chunklen, len - j) * BYTES_PER_CHAR;
+      final int l = Math.min(chunkLen, len - j) * BYTES_PER_CHAR;
       int i = 0;
       while (i < l) {
         final char c = s.charAt(j++);
@@ -77,10 +77,10 @@ class KeyHasher
     long bits = 0;
     int bitCount = 0, bufIdx = 0, keyIdx = 0;
     while (bufIdx < digestLen) {
-      for (; bufIdx < digestLen && bitCount <= (Long.SIZE - Byte.SIZE);
+      for (; (bufIdx < digestLen) && (bitCount <= Long.SIZE - Byte.SIZE);
         bitCount += Byte.SIZE, bufIdx++)
       {
-        bits |= (long) (buf[bufIdx] & 0xff) << bitCount;
+        bits |= (long)(buf[bufIdx] & 0xff) << bitCount;
       }
       for (; bitCount >= BITS_PER_SYMBOL;
         bitCount -= BITS_PER_SYMBOL, bits >>>= BITS_PER_SYMBOL, keyIdx++)
