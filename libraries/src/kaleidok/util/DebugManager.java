@@ -1,6 +1,9 @@
 package kaleidok.util;
 
+import sun.awt.AppContext;
+
 import java.applet.Applet;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -102,6 +105,36 @@ public final class DebugManager
       }
     }
   }
+
+
+  public static void printThreads( PrintStream out, ThreadGroup tg, boolean recurse )
+  {
+    if (out == null)
+      out = System.out;
+    if (tg == null)
+      tg = AppContext.getAppContext().getThreadGroup();
+
+    Thread[] threads = new Thread[1 << 4];
+    int count;
+    while ((count = tg.enumerate(threads, recurse)) >= threads.length)
+      threads = new Thread[java.lang.Math.max(threads.length << 1, count + 1)];
+
+    out.format(
+      "Thread group \"%s\" (%d): %d children, daemon=%s, maxPriority=%d:%n",
+      tg.getName(), System.identityHashCode(tg), count, tg.isDaemon(),
+      tg.getMaxPriority());
+    for (int i = 0; i < count; i++) {
+      final Thread t = threads[i];
+      out.format(
+        "Thread \"%s\" (%d): state=%s, daemon=%s, priority=%d, group=\"%s\" (%d)%n",
+        t.getName(), t.getId(), t.getState().name(), t.isDaemon(),
+        t.getPriority(), t.getThreadGroup().getName(),
+        System.identityHashCode(t.getThreadGroup()));
+    }
+    if (count > 0)
+      out.println();
+  }
+
 
   private interface PropertyGetter
   {

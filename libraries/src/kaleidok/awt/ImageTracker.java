@@ -1,5 +1,9 @@
 package kaleidok.awt;
 
+import kaleidok.util.DebugManager;
+import kaleidok.util.Threads;
+import sun.awt.AppContext;
+
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.ImageObserver;
@@ -77,6 +81,9 @@ public class ImageTracker implements ImageObserver
         if ((infoFlags & infoMask) == 0 &&
           !toolkit.prepareImage(image, -1, -1, this))
         {
+          adjustImageFetcherPriority();
+          //DebugManager.printThreads(null, null, false);
+
           do {
             try {
               wait();
@@ -85,6 +92,46 @@ public class ImageTracker implements ImageObserver
               // go on...
             }
           } while ((infoFlags & infoMask) == 0);
+        }
+      }
+    }
+  }
+
+
+  public static int IMAGE_FETCHER_PRIORITY = Thread.MIN_PRIORITY + 1;
+
+  static void adjustImageFetcherPriority()
+  {
+    adjustImageFetcherPriority(IMAGE_FETCHER_PRIORITY);
+  }
+
+
+  private static final Object IMAGE_FETCHER_ADJUSTMENT_LOCK = new Object();
+
+  private static void adjustImageFetcherPriority( int newPriority )
+  {
+    final ThreadGroup tg = AppContext.getAppContext().getThreadGroup();
+
+    if (newPriority > tg.getMaxPriority()) {
+      System.err.format(
+        "Warning: The requested thread priority %d exceeds the maximum priority %d of the pertaining thread group \"%s\".%n",
+        newPriority, tg.getMaxPriority(), tg.getName());
+      return;
+    }
+
+    synchronized (IMAGE_FETCHER_ADJUSTMENT_LOCK)
+    {
+      for (final Thread t: Threads.getThreads(tg, false)) {
+        if (t.getName().startsWith("Image Fetcher ")) {
+          final int oldPriority = t.getPriority();
+          if (newPriority != oldPriority) {
+            t.setPriority(newPriority);
+            if (DebugManager.verbose >= 5) {
+              System.out.format(
+                "Changed priority of thread \"%s\" (%d) from %d to %d.%n",
+                t.getName(), t.getId(), oldPriority, newPriority);
+            }
+          }
         }
       }
     }

@@ -148,6 +148,7 @@ public class AudioProcessingManager
       },
         "Audio dispatching");
       audioDispatcherThread.setDaemon(true);
+      audioDispatcherThread.setPriority(Thread.NORM_PRIORITY + 1);
     }
   }
 

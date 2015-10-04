@@ -24,6 +24,10 @@ class ReadyImageFutureImpl extends ReadyImageFuture implements ImageObserver
   protected boolean prepareImpl( Component comp, int width, int height )
   {
     boolean done = comp.prepareImage(image, width, height, this);
+    if (!done) {
+      ImageTracker.adjustImageFetcherPriority();
+      //DebugManager.printThreads(null, null, false);
+    }
     statusFlags = done ? SUCCESS | WIDTH | HEIGHT | PROPERTIES : 0;
     notifyFutureCallback(image, statusFlags);
     return done;
