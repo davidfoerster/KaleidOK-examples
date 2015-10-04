@@ -1,5 +1,6 @@
 package com.getflourish.stt2.mock;
 
+import com.getflourish.stt2.STT;
 import com.getflourish.stt2.SttResponse;
 import com.getflourish.stt2.TranscriptionService;
 import com.sun.net.httpserver.HttpServer;
@@ -25,20 +26,28 @@ public class MockTranscriptionService extends TranscriptionService
 
   private static HttpServer server = null;
 
-  protected static void initServer() throws IOException
+  private static MockSpeechToTextHandler sttHandler;
+
+
+  protected static void initServer( STT stt ) throws IOException
   {
     if (server == null) {
+      sttHandler =  new MockSpeechToTextHandler(stt);
       server = HttpServer.create(new InetSocketAddress(MOCK_API_BASE.getPort()), 0);
-      server.createContext(MOCK_API_BASE.getPath(), new MockSpeechToTextHandler());
+      server.createContext(MOCK_API_BASE.getPath(), sttHandler);
       server.start();
+    } else {
+      assert stt == sttHandler.stt;
     }
   }
 
-  public MockTranscriptionService( String accessKey, FutureCallback<SttResponse> resultHandler )
+
+  public MockTranscriptionService( String accessKey,
+    FutureCallback<SttResponse> resultHandler, STT stt )
   {
     super(MOCK_API_BASE, accessKey, resultHandler);
     try {
-      initServer();
+      initServer(stt);
     } catch (IOException ex) {
       throw new Error(ex);
     }

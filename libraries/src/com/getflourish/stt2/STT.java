@@ -47,7 +47,7 @@ public class STT
   public STT( FutureCallback<SttResponse> resultHandler, String accessKey )
   {
     service = accessKey.startsWith("!MOCK") ?
-      new MockTranscriptionService(accessKey, resultHandler) :
+      new MockTranscriptionService(accessKey, resultHandler, this) :
       new TranscriptionService(accessKey, resultHandler);
     processor = new AudioTranscriptionProcessor(this);
   }

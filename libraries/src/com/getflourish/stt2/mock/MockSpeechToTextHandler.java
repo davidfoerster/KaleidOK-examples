@@ -1,5 +1,6 @@
 package com.getflourish.stt2.mock;
 
+import com.getflourish.stt2.STT;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import kaleidok.http.util.Parsers;
@@ -9,18 +10,29 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.regex.*;
 
 import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
 
 
 public class MockSpeechToTextHandler implements HttpHandler
 {
+  final STT stt;
+
+
+  public MockSpeechToTextHandler( STT stt )
+  {
+    this.stt = stt;
+  }
+
+
   @Override
   public void handle( HttpExchange t ) throws IOException
   {
