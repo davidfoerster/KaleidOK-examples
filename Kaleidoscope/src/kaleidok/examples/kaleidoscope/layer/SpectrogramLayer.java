@@ -26,7 +26,7 @@ public class SpectrogramLayer extends CircularLayer
     int innerRadius, int outerRadius, MinimFFTProcessor spectrum,
     float sampleRate )
 	{
-		super(parent, img, segmentCount * 2, innerRadius, outerRadius);
+		super(parent, img, segmentCount, innerRadius, outerRadius);
 		setScaleFactor(5e-3f);
     avgSpectrum = spectrum;
 
@@ -34,6 +34,19 @@ public class SpectrogramLayer extends CircularLayer
     avgSpectrum.logAverages(MIN_FREQUENCY,
       (int) ceil(segmentCount / log2(nyquistFreq / MIN_FREQUENCY)));
 	}
+
+
+  @Override
+  public int getSegmentCount()
+  {
+    return super.getSegmentCount() / 2;
+  }
+
+  @Override
+  public void setSegmentCount( int segmentCount )
+  {
+    super.setSegmentCount(segmentCount * 2);
+  }
 
 
   @Override
