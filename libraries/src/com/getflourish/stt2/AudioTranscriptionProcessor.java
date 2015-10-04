@@ -8,8 +8,6 @@ import javaFlacEncoder.FLACStreamOutputStream;
 import javaFlacEncoder.StreamConfiguration;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 
@@ -26,6 +24,8 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   private int[] audioConversionBuffer = null;
 
   private double transcriptionEndTimestamp = Double.POSITIVE_INFINITY;
+
+  private int intervalSequenceCount = 0;
 
   public volatile boolean shouldRecord = false;
 
