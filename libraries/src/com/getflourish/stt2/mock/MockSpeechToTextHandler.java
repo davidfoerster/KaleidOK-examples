@@ -38,7 +38,7 @@ public class MockSpeechToTextHandler implements HttpHandler
         t.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
         break;
       }
-    } catch (NullPointerException | IllegalArgumentException ex) {
+    } catch (NullPointerException | AssertionError ex) {
       ex.printStackTrace();
       handleException(t, ex, HttpURLConnection.HTTP_BAD_REQUEST);
     } catch (Throwable ex) {
@@ -115,7 +115,7 @@ public class MockSpeechToTextHandler implements HttpHandler
   protected static void assertTrue( boolean b )
   {
     if (!b)
-      throw new IllegalArgumentException();
+      throw new AssertionError();
   }
 
 
