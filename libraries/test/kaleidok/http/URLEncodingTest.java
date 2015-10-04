@@ -327,7 +327,9 @@ public class URLEncodingTest
 
   private static int getRandomCodePoint( int minChar, int maxChar )
   {
-    assert isValidCodePoint(minChar) && isValidCodePoint(maxChar);
+    assert isValidCodePoint(minChar) && isValidCodePoint(maxChar) :
+      String.format("Contains invalid code points: %d, %d", minChar, maxChar);
+
     while (true) {
       int c = getRandom(minChar, maxChar);
       if (!isValidCodePoint(c) || isISOControl(c))
@@ -343,7 +345,10 @@ public class URLEncodingTest
 
   private static int getRandom( int min, int max )
   {
-    assert (min <= max) && ((long) max - (long) min < Integer.MAX_VALUE);
+    assert min <= max : min + " > " + max;
+    assert (long) max - (long) min + 1 < Integer.MAX_VALUE :
+      String.format("(%d - %d + 1) overflows", max, min);
+
     return (int)(rand.nextDouble() * (max - min + 1)) + min;
   }
 }

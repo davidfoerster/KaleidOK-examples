@@ -117,7 +117,8 @@ public abstract class CircularLayer implements Runnable
   {
     if (img != null && img != currentImage)
     {
-      assert img.width > 0 && img.height > 0;
+      assert img.width > 0 && img.height > 0 :
+        img + " has width or height ≤0";
       float
         imgWidth = img.width, imgHeight = img.height,
         imgAspect = imgWidth / imgHeight;

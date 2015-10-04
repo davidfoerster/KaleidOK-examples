@@ -4,6 +4,7 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
+import java.util.Arrays;
 import java.util.BitSet;
 
 import static java.lang.System.arraycopy;
@@ -225,7 +226,9 @@ public final class URLEncoding
 
   private static int toHexDigit( int c )
   {
-    assert c >>> 4 == 0;
+    assert c >>> 4 == 0 :
+      String.format("%1$#10x (%1$d) is outside of [0, 16)", c);
+
     return c + ((c < 10) ? '0' : ('A' - 10));
   }
 
@@ -239,7 +242,9 @@ public final class URLEncoding
     int needEncodingCount, CharsetEncoder enc )
   {
     // Assumption: up to 1/4 of input characters need to be encoded
-    assert inputLength >= needEncodingCount;
+    assert inputLength >= needEncodingCount :
+      inputLength + " < " + needEncodingCount;
+
     inputLength -= needEncodingCount;
     return 1 + (int)(
       inputLength * 0.75f * (1f + enc.averageBytesPerChar()) +
@@ -354,7 +359,7 @@ public final class URLEncoding
           }
 
           if (bytes.position() == 0) {
-            assert bytes.hasRemaining();
+            assert bytes.hasRemaining() : "empty byte buffer";
             break;
           }
 
@@ -365,12 +370,19 @@ public final class URLEncoding
             cr = dec.flush(chars);
           if (!cr.isUnderflow())
           {
-            if (cr.isOverflow())
+            if (cr.isOverflow()) {
               throw new AssertionError(new BufferOverflowException());
-            if (cr.isMalformed())
+            } else if (cr.isMalformed()) {
               throw new IllegalArgumentException(new MalformedInputException(cr.length()));
-            assert cr.isUnmappable();
-            throw new IllegalArgumentException(new UnmappableCharacterException(cr.length()));
+            } else {
+              assert cr.isUnmappable() :
+                cr + " is expected to have an \"unmappable\" condition";
+              byte[] unmappable = new byte[cr.length()];
+              bytes.get(unmappable);
+              throw new IllegalArgumentException(
+                Arrays.toString(unmappable) + " are unmappable from " + charset.name(),
+                new UnmappableCharacterException(cr.length()));
+            }
           }
 
           assert chars.arrayOffset() == 0;
@@ -413,7 +425,8 @@ public final class URLEncoding
 
   private static int countEscapeSequences( CharSequence s, int begin, final int end )
   {
-    assert begin >= 0 && end <= s.length();
+    assert begin >= 0 && end <= s.length() :
+      String.format("0 ≤ %d ≤ %d ≤ %d doesn't hold", begin, end, s.length());
     int escapedCount = 0;
     while (begin < end) {
       if (s.charAt(begin++) == ESCAPE_PREFIX) {

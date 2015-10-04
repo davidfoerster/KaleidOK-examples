@@ -134,7 +134,8 @@ public class MimeTypeMap extends HashMap<String, Float>
    */
   public String allows( String mime, boolean wildcards )
   {
-    assert mime == null || MIME_TYPE_PATTERN.matcher(mime).matches();
+    assert mime == null || MIME_TYPE_PATTERN.matcher(mime).matches() :
+      getMismatchError(mime);
 
     Float q = get(mime);
     if (q != null)
@@ -144,7 +145,8 @@ public class MimeTypeMap extends HashMap<String, Float>
 
     if (mime != null) {
       int p = mime.indexOf('/') + 1;
-      assert p > 0 && p < mime.length();
+      assert p > 0 && p < mime.length() :
+        "'/' doesn't occur before the last character of \"" + mime + '\"';
       if (mime.charAt(p) != '*') {
         mime = mime.substring(0, p) + '*';
         q = get(mime);
@@ -174,7 +176,8 @@ public class MimeTypeMap extends HashMap<String, Float>
 
     StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, Float> e: entrySet()) {
-      assert MIME_TYPE_PATTERN.matcher(e.getKey()).matches();
+      assert MIME_TYPE_PATTERN.matcher(e.getKey()).matches() :
+        getMismatchError(e.getKey());
 
       if (sb.length() != 0)
         sb.append(',');
@@ -182,9 +185,10 @@ public class MimeTypeMap extends HashMap<String, Float>
 
       Float q = e.getValue();
       if (q != null && q < 1) {
-        assert q >= 0 && q <= 1;
+        assert q >= 0 && q <= 1 : q + " lies outside of [0, 1]";
         String qs = qFormat.format(q.doubleValue());
-        assert qs.length() <= 1 || "0.,".indexOf(qs.charAt(qs.length() - 1)) < 0;
+        assert qs.length() <= 1 || "0.,".indexOf(qs.charAt(qs.length() - 1)) < 0 :
+          '\"' + qs + "\" is longer than 1 and ends in any of '0', ',', or '.'";
         sb.append(";q=").append(qs);
       }
     }
@@ -237,5 +241,12 @@ public class MimeTypeMap extends HashMap<String, Float>
     qFormat.setMaximumIntegerDigits(1);
     qFormat.setMinimumFractionDigits(0);
     qFormat.setMaximumFractionDigits(3);
+  }
+
+
+  private static String getMismatchError( String mime )
+  {
+    return String.format("\"%s\" isn't a MIME type matching \"%s\"",
+      mime, MIME_TYPE_PATTERN.pattern());
   }
 }

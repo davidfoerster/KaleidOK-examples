@@ -155,7 +155,8 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
     @Override
     public void completed( Image image )
     {
-      assert image.getWidth(null) > 0 && image.getHeight(null) > 0;
+      assert image.getWidth(null) > 0 && image.getHeight(null) > 0 :
+        image + " has width or height ≤0";
       PImageFuture fImage = new PImageFuture(new PImage(image));
 
       LayerManager layers = parent.getLayers();

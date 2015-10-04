@@ -22,7 +22,8 @@ public final class Math
 
   private static float sumOfSquares_noBoundsCheck( float[] a, int offset, int len )
   {
-    assert len != 0 && checkBounds(offset, len, a.length);
+    assert len != 0 && checkBounds(offset, len, a.length) :
+      getBoundsExceededMessage(offset, len, a.length);
 
     if (len == 1) {
       float x = a[offset];
@@ -48,7 +49,8 @@ public final class Math
 
   private static float sum_noBoundsCheck( FloatList a, int offset, int len )
   {
-    assert len != 0 && checkBounds(offset, len, a.size());
+    assert len != 0 && checkBounds(offset, len, a.size()) :
+      getBoundsExceededMessage(offset, len, a.size());
 
     if (len == 1)
       return a.get(offset);
@@ -73,6 +75,13 @@ public final class Math
   private static void throwArrayIndexOutOfBoundsException( long index )
   {
     throw new ArrayIndexOutOfBoundsException(Long.toString(index));
+  }
+
+  private static String getBoundsExceededMessage( int offset, int len, int bufSize )
+  {
+    return String.format(
+      "%2$ is 0, %1$d, %2$d or %3$d are negative, or %1$d + %2$d ≥ %3$d",
+      offset, len, bufSize);
   }
 
 
@@ -106,13 +115,13 @@ public final class Math
 
   public static long clamp( long x, long min, long max )
   {
-    assert min <= max;
+    assert min <= max : min + " > " + max;
     return java.lang.Math.min(java.lang.Math.max(x, min), max);
   }
 
   public static int clamp( int x, int min, int max )
   {
-    assert min <= max;
+    assert min <= max : min + " > " + max;
     return java.lang.Math.min(java.lang.Math.max(x, min), max);
   }
 }

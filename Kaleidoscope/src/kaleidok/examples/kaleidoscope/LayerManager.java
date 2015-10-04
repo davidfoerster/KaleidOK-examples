@@ -187,7 +187,8 @@ public class LayerManager extends ArrayList<CircularLayer>
             // go on...
           }
         }
-        assert img != null && img.width > 0 && img.height > 0;
+        assert img != null && img.width > 0 && img.height > 0 :
+          String.valueOf(img) + " has width or height ≤0";
       } catch (ExecutionException ex) {
         throw new RuntimeException(ex.getCause());
       }

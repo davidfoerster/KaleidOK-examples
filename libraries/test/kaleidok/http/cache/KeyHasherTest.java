@@ -34,7 +34,7 @@ public class KeyHasherTest
   private final Map<String, String> km =
     new HashMap<String, String>(EXTERNAL_KEYS.length * 2) {{
       for (String k: EXTERNAL_KEYS) {
-        assert !containsKey(k);
+        assert !containsKey(k) : '\"' + k + "\" was already inserted earlier";
         put(k, kh.toInternalKey(k));
       }
     }};

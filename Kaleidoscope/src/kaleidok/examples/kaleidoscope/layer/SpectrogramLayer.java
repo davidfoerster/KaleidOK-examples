@@ -107,7 +107,9 @@ public class SpectrogramLayer extends CircularLayer
     if (!avgSpectrum.isReady())
       return;
 
-    assert getSegmentCount() <= avgSpectrum.size();
+    final int segmentCount = super.getSegmentCount();
+    assert segmentCount <= avgSpectrum.size() :
+      segmentCount + " > " + avgSpectrum.size();
 
     final PApplet parent = this.parent;
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
@@ -133,7 +135,6 @@ public class SpectrogramLayer extends CircularLayer
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     }
 
-    final int segmentCount = getSegmentCount();
 	  for (int i = 0; i <= segmentCount; i += 2)
 	  {
 	    int imi = i % segmentCount; // make sure the end equals the start

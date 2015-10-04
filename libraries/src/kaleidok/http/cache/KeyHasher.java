@@ -92,7 +92,7 @@ class KeyHasher
     if (bitCount > 0)
       key[keyIdx++] = Character.forDigit((int) bits, SYMBOL_COUNT);
 
-    assert keyIdx == key.length;
+    assert keyIdx == key.length : keyIdx + " ≠ " + key.length;
     return new String(key);
   }
 }

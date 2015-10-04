@@ -63,6 +63,8 @@ public final class Strings
   }
 
 
+  public static final int DIGITS_BASE_MAX = 36;
+
   public static char[] toDigits( long n, int base, char[] dst )
   {
     if (dst == null) {
@@ -76,7 +78,9 @@ public final class Strings
 
   public static char[] toDigits( long n, int base, char[] dst, int offset, int len )
   {
-    assert base > 1 && base <= 36 && len > 0;
+    assert base > 1 && base <= DIGITS_BASE_MAX && len > 0 :
+      String.format("%d is not in [1, %d] or %d ≤ 0",
+        base, DIGITS_BASE_MAX, len);
 
     boolean negative = n < 0;
     if (negative) {

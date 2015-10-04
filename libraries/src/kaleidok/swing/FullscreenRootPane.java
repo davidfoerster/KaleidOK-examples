@@ -23,7 +23,8 @@ public class FullscreenRootPane extends JRootPane
     if (topLevelWindow == null) {
       topLevelWindow = getTopLevelWindow(this);
     } else {
-      assert topLevelWindow == getTopLevelWindow(this);
+      assert topLevelWindow == getTopLevelWindow(this) :
+        topLevelWindow + " ≠ " + getTopLevelWindow(this);
     }
     return topLevelWindow;
   }

@@ -153,11 +153,11 @@ public class ExtPApplet extends PApplet
         srcRatio = (double) srcWidth / srcHeight;
       if (srcRatio > dstRatio) {
         srcWidth = (int)(srcHeight * dstRatio + 0.5);
-        assert srcWidth <= img.width;
+        assert srcWidth <= img.width : srcWidth + " > " + img.width;
         srcLeft = (img.width - srcWidth) / 2;
       } else if (srcRatio < dstRatio) {
         srcHeight = (int)(srcWidth / dstRatio + 0.5);
-        assert srcHeight <= img.height;
+        assert srcHeight <= img.height : srcHeight + " > " + img.height;
         srcTop = (img.height - srcHeight) / 2;
       }
       break;

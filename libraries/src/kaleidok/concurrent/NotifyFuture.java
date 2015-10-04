@@ -23,12 +23,20 @@ public abstract class NotifyFuture<V> implements Future<V>
   protected void waitFor( long timeout, TimeUnit unit )
     throws InterruptedException, TimeoutException
   {
-    if (timeout == 0) {
+    if (timeout == 0)
+    {
       waitFor();
-    } else if (timeout < 0) {
+    }
+    else if (timeout < 0)
+    {
       throw new IllegalArgumentException("Negative timeout: " + timeout);
-    } else if (!isDone()) {
-      assert unit.convert(Long.MAX_VALUE, NANOSECONDS) >= timeout;
+    }
+    else if (!isDone())
+    {
+      assert unit.convert(Long.MAX_VALUE, NANOSECONDS) >= timeout :
+        String.format("%d %s overflows when converting to %s",
+          timeout, unit.name(), NANOSECONDS.name());
+
       timeout = unit.toNanos(timeout);
       // unit = NANOSECONDS;
       long now = System.nanoTime();

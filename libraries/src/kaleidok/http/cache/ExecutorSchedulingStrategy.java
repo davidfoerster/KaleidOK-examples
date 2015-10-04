@@ -18,7 +18,6 @@ public class ExecutorSchedulingStrategy implements SchedulingStrategy {
 
     @Override
     public void schedule( AsynchronousValidationRequest revalidationRequest ) {
-        assert revalidationRequest != null;
         executor.execute(revalidationRequest);
     }
 

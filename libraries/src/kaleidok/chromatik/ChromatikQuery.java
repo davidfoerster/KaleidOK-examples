@@ -188,8 +188,10 @@ public class ChromatikQuery
         {
           CharSequence key = toCharSequence(o.getKey()),
             value = toCharSequence(o.getValue());
-          assert (key != null && key.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0) &&
-            (value == null || value.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0);
+          assert key != null && key.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0 :
+            getContainsIllegalCharError(key, QUERY_OPT_NAMEDELIM);
+          assert value == null || value.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0 :
+            getContainsIllegalCharError(value, QUERY_OPT_NAMEDELIM);
 
           sb.append(' ').append(key);
           if (value != null)
@@ -204,6 +206,12 @@ public class ChromatikQuery
       ub.addParameter(QUERY_QUERY, searchQuery);
 
     return ub;
+  }
+
+
+  private static String getContainsIllegalCharError( CharSequence s, Character c )
+  {
+    return String.format("\"%s\" contains '%c'", s, c);
   }
 
 

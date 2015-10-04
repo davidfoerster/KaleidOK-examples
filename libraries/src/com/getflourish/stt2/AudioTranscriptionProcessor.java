@@ -8,6 +8,8 @@ import javaFlacEncoder.FLACStreamOutputStream;
 import javaFlacEncoder.StreamConfiguration;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 
@@ -138,7 +140,8 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
     public void finishEncoding() throws IOException
     {
-      assert !stt.service.isInQueue(this);
+      assert !stt.service.isInQueue(this) :
+        this + " is not in the queue of " + stt.service;
 
       int availableSamples = encoder.samplesAvailableToEncode();
       if (STT.debug) {
@@ -193,9 +196,28 @@ public class AudioTranscriptionProcessor implements AudioProcessor
     final int offset = ev.getOverlap() / 2;
     for (int i = 0; i < len; i++) {
       final float sample = audioFloat[i + offset];
-      assert sample >= -1 && sample <= 1 : sample;
+      assert sample >= -1 && sample <= 1 :
+        getSampleValueErrorMessage(audioFloat, i + offset);
       audioInt[i] = (int) (sample * Short.MAX_VALUE);
     }
     return audioInt;
+  }
+
+
+  private static String getSampleValueErrorMessage( float[] samples, int idx )
+  {
+    float outOfRangeSample = samples[idx],
+      min = samples[0], max = samples[0];
+    for (int i = 1; i < samples.length; i++) {
+      final float sample = samples[i];
+      if (min > sample)
+        min = sample;
+      if (max < sample)
+        max = sample;
+    }
+
+    return String.format(
+      "Encountered sample value %g at index %d; min=%g, max=%g",
+      outOfRangeSample, idx, min, max);
   }
 }

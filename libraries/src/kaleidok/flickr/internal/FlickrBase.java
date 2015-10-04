@@ -101,10 +101,12 @@ public class FlickrBase
     if (apiKey == null) {
       apiKey = this.apiKey;
       //apiSecret = this.apiSecret; // currently unused
-    } else {
-      assert apiSecret != null;
+    } else if (apiSecret != null) {
       this.apiKey = apiKey;
       this.apiSecret = apiSecret;
+    } else {
+      throw new NullPointerException(
+        "apiSecret mustn't be null when apiKey is set");
     }
     if (apiKey != null)
       ub.setParameter(QUERY_API_KEY, apiKey);
