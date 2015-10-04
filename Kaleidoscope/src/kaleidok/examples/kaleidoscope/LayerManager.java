@@ -115,7 +115,7 @@ public class LayerManager extends ArrayList<CircularLayer>
               strImage.indexOf(':') < 0) {
               strImage = "/images/" + strImage;
             }
-            PImageFuture image = getImageFuture(strImage);
+            PImageFuture image = parent.getImageFuture(strImage);
             if (image != null) {
               this.images.add(image);
             } else if (debug >= 1) {
@@ -148,31 +148,6 @@ public class LayerManager extends ArrayList<CircularLayer>
     }
     return this.images;
   }
-
-
-  public PImageFuture getImageFuture( String path )
-  {
-    URL url = this.getClass().getResource(path);
-    if (url == null) {
-      try {
-        url = new URL(parent.getDocumentBase(), path);
-      } catch (MalformedURLException ex) {
-        throw new IllegalArgumentException(ex);
-      }
-      if (url.getProtocol().equals("file")) {
-        File file;
-        try {
-          file = new File(url.toURI());
-        } catch (URISyntaxException ex) {
-          throw new AssertionError(ex);
-        }
-        if (!file.isFile() || !file.canRead())
-          url = null;
-      }
-    }
-    return (url != null) ? parent.getImageFuture(url) : null;
-  }
-
 
   public void waitForImages()
   {
