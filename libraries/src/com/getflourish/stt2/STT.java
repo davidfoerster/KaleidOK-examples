@@ -27,8 +27,7 @@ public class STT
 
   private boolean isActive = false;
 
-  private boolean shouldAutoRecord = false;
-  private State status = State.IDLE, lastStatus = State.IDLE;
+  private State status = State.IDLE;
 
   protected final TranscriptionService service;
   private final AudioTranscriptionProcessor processor;
@@ -51,8 +50,6 @@ public class STT
       new MockTranscriptionService(accessKey, resultHandler) :
       new TranscriptionService(accessKey, resultHandler);
     processor = new AudioTranscriptionProcessor(this);
-
-    //setAutoRecording(false);
   }
 
 
@@ -130,69 +127,8 @@ public class STT
     } else {
       onBegin();
       isActive = true;
-      shouldAutoRecord = false;
     }
   }
-
-
-  /*
-  public void setAutoRecording( boolean enable )
-  {
-    shouldAutoRecord = enable;
-    setAutoThreshold(enable);
-    statusText = enable ?
-      "STT info: Automatic mode enabled. Anything louder than threshold will be recorded." :
-      "STT info: Manual mode enabled. Use begin() / end() to manage recording.";
-  }
-
-  public void setAutoRecording( double threshold )
-  {
-    shouldAutoRecord = true;
-    volumeThresholdTracker.setManualThreshold(threshold);
-    statusText = "STT info: Automatic mode enabled. Anything louder than " + threshold + " will be recorded.";
-  }
-
-  public void setAutoThreshold( boolean enabled )
-  {
-    volumeThresholdTracker.setAutoThreshold(enabled);
-  }
-
-  private void draw()
-  {
-    if (shouldAutoRecord)
-      handleAutoRecording();
-
-    if (status != lastStatus)
-    {
-      dispatchTranscriptionEvent(thread.getUtterance(),
-        thread.getConfidence(), thread.getLanguage(),
-        status);
-      lastStatus = status;
-    }
-
-    if (thread.isResultAvailable())
-    {
-      // Why dispatch the same event twice?
-      dispatchTranscriptionEvent(thread.getUtterance(),
-        thread.getConfidence(), thread.getLanguage(),
-        thread.getStatus());
-
-      statusText = "Listening";
-      status = LISTENING;
-      // Why dispatch the same event a third time?
-      dispatchTranscriptionEvent(thread.getUtterance(),
-        thread.getConfidence(), thread.getLanguage(), status);
-      lastStatus = status;
-      thread.interrupt();
-    }
-
-    if (debug && !statusText.equals(lastStatusText))
-    {
-      System.out.println(getTime() + ' ' + statusText);
-      lastStatusText = statusText;
-    }
-  }
-  */
 
 
   public synchronized void end( boolean doThrow )
@@ -203,7 +139,6 @@ public class STT
     } else {
       onSpeechFinish();
       isActive = false;
-      shouldAutoRecord = false;
     }
   }
 
@@ -211,33 +146,6 @@ public class STT
   public State getStatus() {
     return status;
   }
-
-
-  /*
-  private final DateFormat timeFormat =  new SimpleDateFormat("HH:mm:ss");
-
-  private String getTime()
-  {
-    return timeFormat.format(new Date());
-  }
-  */
-
-  /*
-  private void handleAutoRecording( AudioEvent audioEvent )
-  {
-    volumeThresholdTracker.process(audioEvent);
-
-    if (audioEvent.getRMS() >= volumeThresholdTracker.getThreshold()) { // TODO: use common volume level calculator
-      onSpeech();
-    } else if (recordingTimer.isFinished()) {
-      if (recorder.isRecording() && isRecording) {
-        onSpeechFinish();
-      } else {
-        startListening();
-      }
-    }
-  }
-  */
 
 
   private synchronized void onBegin()
@@ -253,16 +161,6 @@ public class STT
   }
 
 
-  /*
-  private void onSpeech()
-  {
-    statusText = "Recording";
-    status = RECORDING;
-    recordingTimer.start();
-  }
-  */
-
-
   public synchronized void onSpeechFinish()
   {
     status = State.IDLE;
@@ -274,8 +172,6 @@ public class STT
     }
 
     recordingTimer.reset();
-    //dispatchTranscriptionEvent("", 0, null, TRANSCRIBING);
-
     signalChange();
   }
 
