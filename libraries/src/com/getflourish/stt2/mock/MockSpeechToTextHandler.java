@@ -84,13 +84,23 @@ public class MockSpeechToTextHandler implements HttpHandler
     assertTrue(sampleRate > 0 && !Float.isInfinite(sampleRate));
 
     long inLen;
+    Path tmpFile;
     try (InputStream in = t.getRequestBody()) {
+      tmpFile = createTempFile(this, ".flac");
       inLen =
-        Files.copy(in, createTempFile(this, ".flac"),
+        Files.copy(in, tmpFile,
           StandardCopyOption.REPLACE_EXISTING);
+      in.close();
     }
-    System.out.println("Server received " + inLen + " bytes on request to " + t.getRequestURI());
+    System.out.format("Server received %d bytes on request to %s", inLen, t.getRequestURI());
     assertTrue(inLen > 86);
+
+    double duration = testFlacFile(tmpFile.toString(), sampleRate);
+    if (!Double.isNaN(duration)) {
+      assertTrue(duration <= stt.getMaxTranscriptionInterval() * 1e-9);
+    } else {
+      System.out.println("Server couldn't determine duration of the submitted audio record");
+    }
 
     setContentType(t, "application/json");
     t.sendResponseHeaders(HttpURLConnection.HTTP_OK, transcriptionResult.length);
@@ -102,6 +112,88 @@ public class MockSpeechToTextHandler implements HttpHandler
   }
 
 
+  private static final Pattern
+    SAMPLERATE_PATTERN = Pattern.compile("^(\\d+(?:\\.\\d*)?) (k)?Hz$"),
+    SAMPLECOUNT_PATTERN = Pattern.compile("^(\\d+) samples$");
+
+  private static double testFlacFile( String path, float expectedSampleRate )
+    throws IOException
+  {
+    if (path.isEmpty())
+      throw new NoSuchFileException(path);
+    if (path.charAt(0) == '-')
+      path = "./" + path;
+
+    ProcessBuilder prb = new ProcessBuilder("file", path);
+    prb.redirectError(ProcessBuilder.Redirect.INHERIT);
+    prb.environment().put("LC_MESSAGES", "C");
+    Process pr;
+    String fileOutput;
+    try {
+      pr = prb.start();
+      pr.getOutputStream().close();
+
+      try (BufferedReader r =
+        new BufferedReader(new InputStreamReader(pr.getInputStream())))
+      {
+        fileOutput = r.readLine();
+        if (fileOutput != null)
+          assertTrue(r.read() == -1);
+      }
+    } catch (IOException ex) {
+      throw new Error(
+        "Your system configuration doesn't permit the validation of submitted audio data", ex);
+    }
+    while (true) {
+      try {
+        assertTrue(pr.waitFor() == 0);
+        break;
+      } catch (InterruptedException ex) {
+        // keep waiting
+      }
+    }
+
+    assertTrue(fileOutput != null);
+    assertTrue(fileOutput.startsWith(path));
+    assertTrue(fileOutput.length() > path.length() + 2);
+    assertTrue(fileOutput.charAt(path.length()) == ':');
+    String[] fileSpec = fileOutput.substring(path.length() + 2).split(", ");
+    assertTrue(fileSpec[0].startsWith("FLAC"));
+
+    float sampleRate = Float.NaN;
+    long sampleCount = -1;
+    for (int i = 1; i < fileSpec.length; i++) {
+      String s = fileSpec[i];
+      Matcher m;
+      if ((m = SAMPLERATE_PATTERN.matcher(s)).matches())
+      {
+        try {
+          sampleRate = Float.parseFloat(m.group(1));
+        } catch (NumberFormatException ex) {
+          throw new IllegalArgumentException(s, ex);
+        }
+        if (m.groupCount() >= 2)
+        switch (m.group(2).charAt(0)) {
+        case 'k':
+          sampleRate *= 1000;
+          break;
+        }
+        assertTrue(sampleRate == expectedSampleRate);
+      }
+      else if ((m = SAMPLECOUNT_PATTERN.matcher(s)).matches())
+      {
+        try {
+          sampleCount = Long.parseLong(m.group(1));
+        } catch (NumberFormatException ex) {
+          throw new IllegalArgumentException(s, ex);
+        }
+      }
+    }
+
+    return (sampleCount >= 0) ? (double) sampleCount / sampleRate : Double.NaN;
+  }
+
+
   private static Path tempDir = null;
 
   private static final Format tempFileFormat =
@@ -110,8 +202,8 @@ public class MockSpeechToTextHandler implements HttpHandler
   protected static Path createTempFile( Object namespace, String extension )
     throws IOException
   {
-    Class<?> clazz = (namespace instanceof Class) ? (Class<?>) namespace : namespace.getClass();
     if (tempDir == null) {
+      Class<?> clazz = (namespace instanceof Class) ? (Class<?>) namespace : namespace.getClass();
       tempDir = PlatformPaths.INSTANCE.getTempDir().resolve(clazz.getCanonicalName());
       try {
         Files.createDirectory(tempDir);
