@@ -126,7 +126,6 @@ public class SpectrogramLayer extends CircularLayer
 
     final PApplet parent = this.parent;
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-		parent.translate(parent.width / 2f, parent.height / 2f); // translate to the right-center
     final float
       outerScaleInv = this.outerScaleInv,
       innerRadiusScaled = this.innerRadiusScaled;

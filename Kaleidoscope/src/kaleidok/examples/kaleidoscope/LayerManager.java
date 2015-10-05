@@ -171,16 +171,22 @@ public class LayerManager extends ArrayList<CircularLayer>
   }
 
 
+  @SuppressWarnings("ForLoopReplaceableByForEach")
   public void draw()
   {
+    final Kaleidoscope parent = this.parent;
+
     if (parent.wasResized())
       updateLayerSizes();
 
     drawBackgroundTexture();
 
-    for (CircularLayer l : this) {
-      l.run();
+    parent.pushMatrix();
+    parent.translate(parent.width / 2, parent.height / 2);  // translate to the left-center
+    for (int i = 0, len = size(); i < len; i++) {
+      get(i).run();
     }
+    parent.popMatrix();
   }
 
 
