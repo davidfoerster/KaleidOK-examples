@@ -60,6 +60,8 @@ public class PlatformPaths
     FileAttribute<?>... attrs )
     throws IOException
   {
+    if (attrs == null)
+      attrs = NO_ATTRIBUTES;
     return Files.createTempDirectory(getTempDir(), prefix, attrs);
   }
 
@@ -67,6 +69,8 @@ public class PlatformPaths
     FileAttribute<?>... attrs )
     throws IOException
   {
+    if (attrs == null)
+      attrs = NO_ATTRIBUTES;
     return Files.createTempFile(getTempDir(), prefix, suffix, attrs);
   }
 
@@ -91,6 +95,8 @@ public class PlatformPaths
   {
     if (name.isEmpty())
       throw new IllegalArgumentException("Empty cache directory name");
+    if (attrs == null)
+      attrs = NO_ATTRIBUTES;
     return Files.createDirectories(
       getCacheDir().resolve(name), attrs);
   }
