@@ -8,6 +8,13 @@ class OsxPaths extends UnixPaths
   @Override
   protected Path getCacheDirImpl()
   {
-    return getHomeDir().resolve("Library/Caches");
+    return getDataDir().resolve("Caches");
+  }
+
+
+  @Override
+  protected Path getDataDirImpl()
+  {
+    return getHomeDir().resolve("Library");
   }
 }
