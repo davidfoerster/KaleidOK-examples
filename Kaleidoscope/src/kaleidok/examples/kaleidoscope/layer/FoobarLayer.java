@@ -9,6 +9,12 @@ import static kaleidok.util.DebugManager.wireframe;
 import static processing.core.PApplet.map;
 
 
+/**
+ * Draws a ring with varying per-segment radii, which follow a Perlin noise
+ * function.
+ *
+ * @see PApplet#noise(float)
+ */
 public class FoobarLayer extends CircularLayer
 {
   private float radiusRatio;
@@ -18,9 +24,16 @@ public class FoobarLayer extends CircularLayer
     float innerRadius, float outerRadius)
 	{
 		super(parent, img, segmentCount, innerRadius, outerRadius);
+    setScaleFactor(0.5f);
 	}
 
 
+  /**
+   * Sets the distance of the innermost vertices from the centre (after the
+   * application of the noise function).
+   *
+   * @param innerRadius  A radius
+   */
   @Override
   public void setInnerRadius( float innerRadius )
   {
@@ -29,11 +42,35 @@ public class FoobarLayer extends CircularLayer
   }
 
 
+  /**
+   * Sets the distance of the outermost vertices from the centre (after the
+   * application of the noise function).
+   *
+   * @param outerRadius  A radius
+   */
   @Override
   public void setOuterRadius( float outerRadius )
   {
     super.setOuterRadius(outerRadius);
     updateRadiusRatio();
+  }
+
+
+  /**
+   * Sets, how far into the ring both the outer and inner vertices will
+   * oscillate.
+   * <p>
+   * 0 mean no oscillation; 1 means until the other inner or outer
+   * border of the ring respectively. Values outside of that range are possible
+   * and result in vertices outside of the ring as defined by the outer and
+   * inner radii.
+   *
+   * @param scaleFactor  An oscillation strength factor (normally between 0 and 1)
+   */
+  @Override
+  public void setScaleFactor( float scaleFactor )
+  {
+    super.setScaleFactor(scaleFactor);
   }
 
 
@@ -43,6 +80,7 @@ public class FoobarLayer extends CircularLayer
   }
 
 
+  // TODO: cache variables; document source code
   public void run()
 	{
     final PApplet parent = this.parent;
@@ -61,7 +99,7 @@ public class FoobarLayer extends CircularLayer
 
       float
         innerScaled = map(getScaleFactor(), 0, 1, getInnerRadius(), getOuterRadius()),
-        outerScaled = map(getScaleFactor(), 1, 0, getOuterRadius(), getInnerRadius()),
+        outerScaled = map(getScaleFactor(), 1, 0, getInnerRadius(), getOuterRadius()),
         scaleDiff = outerScaled - innerScaled;
       // make sure, that the inner circles don't lie on top of each other
       if (Math.abs(scaleDiff) < 2f) {
@@ -95,25 +133,12 @@ public class FoobarLayer extends CircularLayer
 	    int im = i % segmentCount; // make sure the end equals the start
 
 	    // each vertex has a noise-based dynamic movement
-	    float dynamicInner = (parent.noise(fc1 + im) * 2) + 1;
-	    float dynamicOuter = (parent.noise(fc2 + im) + 2) / 3;
+	    float dynamicInner = parent.noise(fc1 + im);
+	    float dynamicOuter = parent.noise(fc2 + im);
 
-	    drawCircleVertex(im, dynamicInner * radiusRatio);
-	    drawCircleVertex(im, dynamicOuter);
+	    drawCircleVertex(im, map(dynamicInner, 0, 1, radiusRatio, radiusRatio + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * getScaleFactor()));
+	    drawCircleVertex(im, map(dynamicOuter, 0, 1, radiusRatio + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * (1 - getScaleFactor()), 1));
 	  }
-
-    /*
-    for (int i = 0; i <= segmentCount; i += 2) {
-      int im = i % segmentCount; // make sure the end equals the start
-
-      // each vertex has a noise-based dynamic movement
-      float dynamicInner = (parent.noise(fc1 + im) * 2) + 1;
-      float dynamicOuter = (parent.noise(fc2 + (im + 1)) + 2) / 3;
-
-      drawCircleVertex(im, dynamicInner * innerRatio);
-      drawCircleVertex(im + 1, dynamicOuter);
-    }
-   */
 
 		parent.endShape(); // finalize the Shape
 		parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings

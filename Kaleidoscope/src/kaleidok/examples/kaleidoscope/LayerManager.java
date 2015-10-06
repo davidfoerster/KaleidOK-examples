@@ -50,6 +50,7 @@ public class LayerManager extends ArrayList<CircularLayer>
       getOuterMovingShape();
     foobarLayer =
       new FoobarLayer(parent, images.get(3), 1 << 4, -1, -1);
+    foobarLayer.setScaleFactor(0.4f);
     centreLayer =
       new CentreMovingShape(parent, images, 1 << 5, -1,
         apm.getVolumeLevelProcessor());
