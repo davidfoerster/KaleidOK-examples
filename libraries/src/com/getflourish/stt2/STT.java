@@ -25,6 +25,8 @@ public class STT
     SHUTDOWN
   }
 
+  public int intervalSequenceCountMax = 1;
+
   private boolean isActive = false;
 
   private State status = State.IDLE;

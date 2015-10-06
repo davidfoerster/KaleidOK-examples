@@ -90,9 +90,17 @@ are optional and have sensible defaults.
    a microphone line; the sample rate is always that of the audio file.
 
  * `com.getflourish.stt2.stt.interval` –
-   Sets the maxium duration of a speech record in milliseconds to send to the 
+   Sets the maximum duration of a speech record in milliseconds to send to the 
    speech-to-text service. Google's web service is supposed to handle 10–15 
    seconds, but a safer value seems to be around 8 seconds.
+ 
+ * `com.getflourish.stt2.stt.interval.count` –
+   Allows some kind of continuous speech transcription beyond the limitations
+   from above setting, by resuming recording immediately after an interval
+   elapsed. With this setting you can configure, how many times recording is to
+   be resumed automatically unless interrupted by user interaction.
+   Defaults to 1, meaning no automatic resumption. 0 means unlimited
+   resumption.
 
  * `kaleidok.examples.kaleidoscope.images.intial` –
    A space-separated list of URLs to use as initial images. Relative URLs are

@@ -8,8 +8,6 @@ import javaFlacEncoder.FLACStreamOutputStream;
 import javaFlacEncoder.StreamConfiguration;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 
@@ -27,6 +25,8 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
   private double transcriptionEndTimestamp = Double.POSITIVE_INFINITY;
 
+  private int intervalSequenceCount = 0;
+
   public volatile boolean shouldRecord = false;
 
 
@@ -39,7 +39,8 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   @Override
   public boolean process( AudioEvent audioEvent )
   {
-    if (shouldRecord) {
+    if (shouldRecord)
+    {
       int[] audioInt = convertTo16Bit(audioEvent, audioConversionBuffer);
       audioConversionBuffer = audioInt;
       try {
@@ -51,24 +52,41 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
         if (audioEvent.getEndTimeStamp() < transcriptionEndTimestamp)
           return true;
-
-        if (STT.debug) {
-          System.out.format(
-            "Speech recording interrupted after excess of the max. interval of %.3f s.%n",
-            stt.getMaxTranscriptionInterval() * 1e-9);
-        }
-      } catch (IOException ex) {
+      }
+      catch (IOException ex)
+      {
         ex.printStackTrace();
         if (task != null) {
           task.dispose();
           task = null;
         }
       }
-      stt.end(false);
+
+      if (task != null && STT.debug) {
+        System.out.format(
+          "Speech recording interrupted at %d of up to %s intervals after excess of the max. interval of %.3f s. %n",
+          intervalSequenceCount,
+          (stt.intervalSequenceCountMax > 0) ? stt.intervalSequenceCountMax : "∞",
+          stt.getMaxTranscriptionInterval() * 1e-9);
+      }
+
+      if (task != null && intervalSequenceCount < getIntervalSequenceCountMax()) {
+        intervalSequenceCount++;
+      } else {
+        stt.end(false);
+        intervalSequenceCount = 0;
+      }
     }
 
     finishEncoding();
     return true;
+  }
+
+
+  private int getIntervalSequenceCountMax()
+  {
+    int n = stt.intervalSequenceCountMax;
+    return (n > 0) ? n : Integer.MAX_VALUE;
   }
 
 
@@ -99,6 +117,9 @@ public class AudioTranscriptionProcessor implements AudioProcessor
           ev.getTimeStamp() + maxTranscriptionInterval * 1e-9 :
           Double.POSITIVE_INFINITY;
     }
+
+    if (intervalSequenceCount == 0)
+      intervalSequenceCount = 1;
   }
 
 
