@@ -9,9 +9,6 @@ import processing.core.PImage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -87,15 +84,15 @@ public class LayerManager extends ArrayList<CircularLayer>
   {
     float r = Math.min(parent.width, parent.height) / 1000f;
 
-    centreLayer.setOuterRadius(r * 150);
+    centreLayer.setOuterRadius(r * 75);
 
-    foobarLayer.setInnerRadius(r * 0.500f * 125);
-    foobarLayer.setOuterRadius(r * 1.333f * 275);
+    outerMovingShape.setOuterRadius(r * 175);
 
-    outerMovingShape.setOuterRadius(r * 150);
+    foobarLayer.setInnerRadius(r * 100);
+    foobarLayer.setOuterRadius(r * 350);
 
-    spectrogramLayer.setInnerRadius(r * 250);
-    spectrogramLayer.setOuterRadius(r * 290);
+    spectrogramLayer.setInnerRadius(r * 290);
+    spectrogramLayer.setOuterRadius(r * 480);
   }
 
 
