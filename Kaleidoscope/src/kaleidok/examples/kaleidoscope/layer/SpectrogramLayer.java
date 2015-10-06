@@ -93,6 +93,29 @@ public class SpectrogramLayer extends CircularLayer
   }
 
 
+  @Override
+  public void setOuterRadius( float outerRadius )
+  {
+    super.setOuterRadius(outerRadius);
+    updateIntermediates();
+  }
+
+  @Override
+  public void setInnerRadius( float innerRadius )
+  {
+    super.setInnerRadius(innerRadius);
+    updateIntermediates();
+  }
+
+
+  private float scaledInnerRadius;
+
+  private void updateIntermediates()
+  {
+    scaledInnerRadius = getInnerRadius() / getOuterRadius();
+  }
+
+
   /**
    * Draws the current spectrogram around a ring. The spectral lines are scaled
    * according to a power function:
@@ -126,7 +149,8 @@ public class SpectrogramLayer extends CircularLayer
       return;
 
     final MinimFFTProcessor avgSpectrum = this.avgSpectrum;
-    final float scaledInnerRadius = getInnerRadius() / getOuterRadius(),
+    final float scaledInnerRadius = this.scaledInnerRadius,
+      outerScale = 1 - scaledInnerRadius,
       scaleFactor = getScaleFactor();
     final double exponent = getExponent();
     final int segmentCount = super.getSegmentCount();
@@ -157,7 +181,7 @@ public class SpectrogramLayer extends CircularLayer
 	    float dynamicOuter = (float) pow(x * scaleFactor, exponent);
 
 	    drawCircleVertex(imi, scaledInnerRadius);
-	    drawCircleVertex(imi + 1, map(dynamicOuter, 0, 1, scaledInnerRadius, 1));
+	    drawCircleVertex(imi + 1, dynamicOuter * outerScale + scaledInnerRadius);
 	  }
 
 		parent.endShape(); // finalize the Shape

@@ -17,9 +17,6 @@ import static processing.core.PApplet.map;
  */
 public class FoobarLayer extends CircularLayer
 {
-  private float radiusRatio;
-
-
 	public FoobarLayer(PApplet parent, PImageFuture img, int segmentCount,
     float innerRadius, float outerRadius)
 	{
@@ -38,7 +35,7 @@ public class FoobarLayer extends CircularLayer
   public void setInnerRadius( float innerRadius )
   {
     super.setInnerRadius(innerRadius);
-    updateRadiusRatio();
+    updateIntermediates();
   }
 
 
@@ -52,7 +49,7 @@ public class FoobarLayer extends CircularLayer
   public void setOuterRadius( float outerRadius )
   {
     super.setOuterRadius(outerRadius);
-    updateRadiusRatio();
+    updateIntermediates();
   }
 
 
@@ -71,21 +68,28 @@ public class FoobarLayer extends CircularLayer
   public void setScaleFactor( float scaleFactor )
   {
     super.setScaleFactor(scaleFactor);
+    updateIntermediates();
   }
 
 
-  private void updateRadiusRatio()
+  private float innerOffset, outerOffset, innerScale;
+
+  private void updateIntermediates()
   {
-    radiusRatio = getInnerRadius() / getOuterRadius();
+    innerOffset = getInnerRadius() / getOuterRadius();
+    outerOffset = innerOffset + (1 - innerOffset) * (1 - getScaleFactor());
+    innerScale = (1 - innerOffset) * getScaleFactor();
   }
 
 
-  // TODO: cache variables; document source code
   public void run()
 	{
     final PApplet parent = this.parent;
 	  final float
-      radiusRatio = this.radiusRatio,
+      innerOffset = this.innerOffset,
+      outerOffset = this.outerOffset,
+      innerScale = this.innerScale,
+      outerScale = 1 - outerOffset,
       fc1 = parent.frameCount * 0.01f,
 	    fc2 = parent.frameCount * 0.02f;
 
@@ -136,8 +140,10 @@ public class FoobarLayer extends CircularLayer
 	    float dynamicInner = parent.noise(fc1 + im);
 	    float dynamicOuter = parent.noise(fc2 + im);
 
-	    drawCircleVertex(im, map(dynamicInner, 0, 1, radiusRatio, radiusRatio + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * getScaleFactor()));
-	    drawCircleVertex(im, map(dynamicOuter, 0, 1, radiusRatio + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * (1 - getScaleFactor()), 1));
+      drawCircleVertex(im, dynamicInner * innerScale + innerOffset);
+      drawCircleVertex(im, dynamicOuter * outerScale + outerOffset);
+	    //drawCircleVertex(im, map(dynamicInner, 0, 1, innerOffset, innerOffset + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * getScaleFactor()));
+	    //drawCircleVertex(im, map(dynamicOuter, 0, 1, innerOffset + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * (1 - getScaleFactor()), 1));
 	  }
 
 		parent.endShape(); // finalize the Shape
