@@ -7,6 +7,7 @@ import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 
 
@@ -25,6 +26,12 @@ public class OuterMovingShape extends CircularLayer
   public void run()
   {
     final PApplet parent = this.parent;
+
+    if (debug >= 1 && wireframe >= 1) {
+      parent.stroke(192, 0, 0);
+      drawDebugCircle(getOuterRadius());
+    }
+
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.scale(getOuterRadius());
 

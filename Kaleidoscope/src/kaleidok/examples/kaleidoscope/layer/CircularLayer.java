@@ -147,4 +147,14 @@ public abstract class CircularLayer implements Runnable
     // draw vertex with the calculated position and texture coordinates
     parent.vertex(x, y, (tx + 1) / 2, (ty + 1) / 2);
   }
+
+
+  protected void drawDebugCircle( float radius )
+  {
+    PApplet parent = this.parent;
+    assert parent.g.ellipseMode == PApplet.RADIUS;
+    parent.noFill();
+    parent.strokeWeight(1);
+    parent.ellipse(0, 0, radius, radius);
+  }
 }

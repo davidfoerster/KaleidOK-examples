@@ -10,6 +10,7 @@ import processing.core.PImage;
 
 import java.util.List;
 
+import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 
 public class CentreMovingShape extends CircularLayer
@@ -44,6 +45,11 @@ public class CentreMovingShape extends CircularLayer
     final double level = volumeLevelProcessor.getLevel();
     //System.out.println("Volume level: " + level);
     final float radius = (float) Math.pow(level, 0.5) * getScaleFactor();
+
+    if (debug >= 1 && wireframe >= 1) {
+      parent.stroke(128, 0, 128);
+      drawDebugCircle(getOuterRadius());
+    }
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.scale(getOuterRadius());
