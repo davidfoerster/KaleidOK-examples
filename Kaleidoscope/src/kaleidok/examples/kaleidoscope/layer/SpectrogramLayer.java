@@ -141,7 +141,7 @@ public class SpectrogramLayer extends CircularLayer
       parent.stroke(255, 0, 0);
       parent.strokeWeight(0.5f / totalScale);
 
-      parent.ellipseMode(PApplet.RADIUS);
+      //parent.ellipseMode(PApplet.RADIUS);
       parent.ellipse(0, 0, 1, 1);
 
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call

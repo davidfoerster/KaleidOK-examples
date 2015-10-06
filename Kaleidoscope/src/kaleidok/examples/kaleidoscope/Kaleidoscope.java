@@ -43,6 +43,7 @@ public class Kaleidoscope extends ExtPApplet
     previousSize = size;
 
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
+    ellipseMode(RADIUS);
 
     int smoothingLevel = DefaultValueParser.parseInt(this,
       g.getClass().getCanonicalName() + ".smooth", 4);

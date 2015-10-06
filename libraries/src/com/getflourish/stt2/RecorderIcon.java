@@ -38,9 +38,9 @@ public class RecorderIcon
       p.stroke(strokeColor);
       p.strokeWeight(strokeWeight);
 
-      p.ellipseMode(PApplet.RADIUS);
+      //p.ellipseMode(PApplet.RADIUS);
       p.ellipse(x, y, radius, radius);
-      p.ellipseMode(PApplet.CENTER);
+      //p.ellipseMode(PApplet.CENTER);
     }
   }
 }
