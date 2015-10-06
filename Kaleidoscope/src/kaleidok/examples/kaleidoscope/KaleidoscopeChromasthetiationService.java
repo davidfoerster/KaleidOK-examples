@@ -99,11 +99,13 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
       builder.setHttpCacheStorage(new DiskLruHttpCacheStorage(
         cacheDir, HTTP_CACHE_APP_VERSION, httpCacheSize));
     } catch (IOException ex) {
-      System.err.format("Warning: Couldn't set up an HTTP cache in \"%s\": %s%n",
-        cacheDir, ex.getLocalizedMessage());
+      String msg = "Couldn't set up an HTTP cache";
       if (debug >= 1)
-        throw new AssertionError(ex);
+        throw new AssertionError(msg, ex);
+
       // else: use default cache storage
+      System.err.format("Warning: %s in \"%s\": %s%n",
+        msg, cacheDir, ex.getLocalizedMessage());
     }
 
     builder.setCacheConfig(cacheConfig);
