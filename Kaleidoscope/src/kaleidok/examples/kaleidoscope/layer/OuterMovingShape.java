@@ -3,6 +3,7 @@ package kaleidok.examples.kaleidoscope.layer;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
+import be.tarsos.dsp.pitch.PitchProcessor;
 import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -11,6 +12,17 @@ import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 
 
+/**
+ * Draws a shape that is rotated with a speed depending on the logarithm of the
+ * pitch frequency of an audio signal. The rough relation between the two is:
+ * <pre>
+ * v = (a * log(pitchFrequency) + b) / frameRate
+ * </pre>
+ * Where <code>a</code> and <code>b</code> are some suitable (currently
+ * hard-coded) values and <code>v</code> is the angular velocity.
+ *
+ * @see be.tarsos.dsp.pitch.PitchProcessor
+ */
 public class OuterMovingShape extends CircularLayer
 {
   private double angle = 0, step = 0;
@@ -36,6 +48,11 @@ public class OuterMovingShape extends CircularLayer
     parent.scale(getOuterRadius());
 
     if (step != 0) {
+      /*
+       * Set the angle of the total rotation, with "step" as the rotation since
+       * the last drawn frame. For numerical stability we wrap around the angle
+       * after a full rotation (2π).
+       */
       angle = (angle + step) % (Math.PI * 2);
     }
     parent.rotate((float) angle); // rotate around this center
@@ -63,6 +80,10 @@ public class OuterMovingShape extends CircularLayer
 
   private PitchDetectionHandler pitchDetectionHandler = null;
 
+  /**
+   * @return The pitch detection handler of this shape
+   * @see be.tarsos.dsp.pitch.PitchProcessor#PitchProcessor(PitchProcessor.PitchEstimationAlgorithm, float, int, PitchDetectionHandler)
+   */
   public PitchDetectionHandler getPitchDetectionHandler()
   {
     if (pitchDetectionHandler == null)
