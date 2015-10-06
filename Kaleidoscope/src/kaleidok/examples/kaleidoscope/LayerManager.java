@@ -46,6 +46,7 @@ public class LayerManager extends ArrayList<CircularLayer>
       new SpectrogramLayer(parent, images.get(0), 1 << 8, -1, -1,
         apm.getFftProcessor(),
         apm.getAudioDispatcher().getFormat().getSampleRate());
+    spectrogramLayer.setScaleFactor(1 / 60f);
     OuterMovingShape outerMovingShape =
       getOuterMovingShape();
     foobarLayer =
@@ -95,7 +96,6 @@ public class LayerManager extends ArrayList<CircularLayer>
 
     spectrogramLayer.setInnerRadius(r * 250);
     spectrogramLayer.setOuterRadius(r * 290);
-    spectrogramLayer.setScaleFactor(r * 5e-3f);
   }
 
 

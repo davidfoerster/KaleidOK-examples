@@ -7,17 +7,23 @@ import processing.core.PImage;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.pow;
+import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.Math.log2;
+import static processing.core.PApplet.map;
 
 
+/**
+ * Draws a ring whose outer edge forms a spectrogram of an audio (or other
+ * one-dimensional) signal.
+ *
+ * @see MinimFFTProcessor
+ */
 public class SpectrogramLayer extends CircularLayer
 {
 	private final MinimFFTProcessor avgSpectrum;
 
   private double exponent = 1.125;
-
-  private float expectedMaximumSpectrum = 60;
 
   private static final int MIN_FREQUENCY = 86;
 
@@ -27,7 +33,6 @@ public class SpectrogramLayer extends CircularLayer
     float sampleRate )
 	{
 		super(parent, img, segmentCount, innerRadius, outerRadius);
-		setScaleFactor(5e-3f);
     avgSpectrum = spectrum;
 
     float nyquistFreq = sampleRate / 2;
@@ -45,91 +50,91 @@ public class SpectrogramLayer extends CircularLayer
   @Override
   public void setSegmentCount( int segmentCount )
   {
+    /*
+     * Double the segment count to give the spectrogram area a nicely falling
+     * off outer curve instead of straight normal lines.
+     */
     super.setSegmentCount(segmentCount * 2);
   }
 
 
-  @Override
-  public void setInnerRadius( float innerRadius )
-  {
-    super.setInnerRadius(innerRadius);
-    updateCachedValues();
-  }
-
-
-  @Override
-  public void setOuterRadius( float outerRadius )
-  {
-    super.setOuterRadius(outerRadius);
-    updateCachedValues();
-  }
-
-
+  /**
+   * Set the scale factor for spectral intensities. You should set this to the
+   * inverse of the largest expected spectral intensity.
+   *
+   * @param scaleFactor  A scale factor
+   * @see #run()
+   */
   @Override
   public void setScaleFactor( float scaleFactor )
   {
     super.setScaleFactor(scaleFactor);
-    updateCachedValues();
   }
 
 
-  public float getExpectedMaximumSpectrum()
-  {
-    return expectedMaximumSpectrum;
-  }
-
-  public void setExpectedMaximumSpectrum( float expectedMaximumSpectrum )
-  {
-    this.expectedMaximumSpectrum = expectedMaximumSpectrum;
-    updateCachedValues();
-  }
-
-
+  /**
+   * @return  The current exponent for dynamic range adjustments
+   * @see #setExponent(double)
+   */
   public double getExponent()
   {
     return exponent;
   }
 
+  /**
+   * Sets the exponent to adjust the dynamic range of the spectral intensities.
+   *
+   * @param exponent  An exponent
+   * @see #run()
+   */
   public void setExponent( double exponent )
   {
     this.exponent = exponent;
-    updateCachedValues();
   }
 
 
-  private float outerScaleInv, totalScale, innerRadiusScaled;
-
-  private void updateCachedValues()
-  {
-    float outerScale = 1 + scaleSpectralLine(expectedMaximumSpectrum);
-    outerScaleInv = 1 / outerScale;
-    totalScale = getOuterRadius() * outerScale;
-    innerRadiusScaled = getInnerRadius() / totalScale;
-  }
-
-
-  public float scaleSpectralLine( double x )
-  {
-    return (float) pow(x, exponent) * getScaleFactor();
-  }
-
-
+  /**
+   * Draws the current spectrogram around a ring. The spectral lines are scaled
+   * according to a power function:
+   * <pre>
+   * l = (a * x) ^ exponent
+   * </pre>
+   * where <code>a</code> is the result of
+   * <code>{@link #getScaleFactor()}</code>.
+   * <p>
+   * <code>l</code> is more or less assumed to lie between 0 and 1, which
+   * holds true for <code>x</code> between 0 and <code>a</code> and a
+   * non-negative <code>exponent</code>.
+   *
+   * @see #getExponent()
+   * @see #getScaleFactor()
+   */
   @Override
 	public void run()
 	{
+    final PApplet parent = this.parent;
+
+    if (debug >= 1 && wireframe >= 1)
+    {
+      parent.stroke(0, 192, 0);
+      drawDebugCircle(getInnerRadius());
+      parent.stroke(128, 255, 128);
+      drawDebugCircle(getOuterRadius());
+    }
+
     if (!avgSpectrum.isReady())
       return;
 
+    final MinimFFTProcessor avgSpectrum = this.avgSpectrum;
+    final float scaledInnerRadius = getInnerRadius() / getOuterRadius(),
+      scaleFactor = getScaleFactor();
+    final double exponent = getExponent();
     final int segmentCount = super.getSegmentCount();
     assert segmentCount <= avgSpectrum.size() :
       segmentCount + " > " + avgSpectrum.size();
 
-    final PApplet parent = this.parent;
 	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-    final float
-      outerScaleInv = this.outerScaleInv,
-      innerRadiusScaled = this.innerRadiusScaled;
-    parent.scale(totalScale);
+    parent.scale(getOuterRadius());
 
 		PImage img;
 		if (wireframe < 1 && (img = getCurrentImage()) != null) {
@@ -138,12 +143,8 @@ public class SpectrogramLayer extends CircularLayer
       parent.texture(img); // set the texture to use
     } else {
       parent.noFill();
-      parent.stroke(255, 0, 0);
-      parent.strokeWeight(0.5f / totalScale);
-
-      //parent.ellipseMode(PApplet.RADIUS);
-      parent.ellipse(0, 0, 1, 1);
-
+      parent.stroke(0, 255, 0);
+      parent.strokeWeight(0.5f / getOuterRadius());
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     }
 
@@ -151,11 +152,12 @@ public class SpectrogramLayer extends CircularLayer
 	  {
 	    int imi = i % segmentCount; // make sure the end equals the start
 
-	    float dynamicOuter = 1 + scaleSpectralLine(avgSpectrum.get(imi / 2));
-	    //System.out.println(dynamicOuter);
+      float x = avgSpectrum.get(imi / 2);
+      // scale the intensity value and adjust its dynamic range:
+	    float dynamicOuter = (float) pow(x * scaleFactor, exponent);
 
-	    drawCircleVertex(imi, innerRadiusScaled); // draw the vertex using the custom drawVertex() method
-	    drawCircleVertex(imi + 1, dynamicOuter * outerScaleInv); // draw the vertex using the custom drawVertex() method
+	    drawCircleVertex(imi, scaledInnerRadius);
+	    drawCircleVertex(imi + 1, map(dynamicOuter, 0, 1, scaledInnerRadius, 1));
 	  }
 
 		parent.endShape(); // finalize the Shape
