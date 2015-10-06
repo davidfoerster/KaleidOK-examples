@@ -53,6 +53,7 @@ public class LayerManager extends ArrayList<CircularLayer>
     centreLayer =
       new CentreMovingShape(parent, images, 1 << 5, -1,
         apm.getVolumeLevelProcessor());
+    centreLayer.setScaleFactor(8.0f);
 
     add(spectrogramLayer);
     add(outerMovingShape);
@@ -85,7 +86,6 @@ public class LayerManager extends ArrayList<CircularLayer>
     float r = Math.min(parent.width, parent.height) / 1000f;
 
     centreLayer.setOuterRadius(r * 150);
-    centreLayer.setScaleFactor(r);
 
     foobarLayer.setInnerRadius(r * 0.500f * 125);
     foobarLayer.setOuterRadius(r * 1.333f * 275);

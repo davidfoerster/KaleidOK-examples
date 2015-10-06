@@ -10,14 +10,24 @@ import processing.core.PImage;
 
 import java.util.List;
 
+import static java.lang.Math.pow;
 import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 
+
+/**
+ * Draws a whose radius depends on a volume level. The disc and its texture
+ * are rotated at a constant speed.
+ *
+ * @see VolumeLevelProcessor
+ */
 public class CentreMovingShape extends CircularLayer
 {
   private final CyclingList<PImageFuture> images;
 
   private VolumeLevelProcessor volumeLevelProcessor;
+
+  private double exponent = 0.5;
 
 
   public CentreMovingShape( Kaleidoscope parent, List<PImageFuture> images,
@@ -39,13 +49,73 @@ public class CentreMovingShape extends CircularLayer
   }
 
 
+  /**
+   * Sets the exponent for the dynamic range adjustment of the volume level
+   * before deriving the radius:
+   * <pre>
+   * radius = level ^ exp
+   * </pre>
+   * where <code>level</code> is assumed to lie between 0 and 1, so that
+   * the same can be true for <code>radius</code>.
+   *
+   * @param exp  An exponent
+   */
+  @Override
+  public void setScaleFactor( float exp )
+  {
+    super.setScaleFactor(exp);
+  }
+
+
+  /**
+   * @return  The current exponent for dynamic range adjustments
+   * @see #setExponent(double)
+   */
+  public double getExponent()
+  {
+    return exponent;
+  }
+
+  /**
+   * Sets the exponent to adjust the dynamic range of the spectral intensities.
+   *
+   * @param exponent  An exponent
+   * @see #run()
+   */
+  public void setExponent( double exponent )
+  {
+    this.exponent = exponent;
+  }
+
+
+  /**
+   * Draws the rotated circle with a volume-dependent radius. The volume level
+   * is scaled according to a power function:
+   * <pre>
+   * l = (a * x) ^ exponent
+   * </pre>
+   * where <code>a</code> is the result of
+   * <code>{@link #getScaleFactor()}</code>.
+   * <p>
+   * <code>l</code> is more or less assumed to lie between 0 and 1, which
+   * holds true for <code>x</code> between 0 and <code>a</code> and a
+   * non-negative <code>exponent</code>.
+   *
+   * @see #getExponent()
+   * @see #getScaleFactor()
+   */
+  @Override
   public void run()
   {
-    final PApplet parent = this.parent;
     final double level = volumeLevelProcessor.getLevel();
     //System.out.println("Volume level: " + level);
-    final float radius = (float) Math.pow(level, 0.5) * getScaleFactor();
+    if (!(level > 0))
+      return;
 
+    // Adjust the dynamic range of the volume level:
+    final float radius = (float) pow(level * getScaleFactor(), getExponent());
+
+    final PApplet parent = this.parent;
     if (debug >= 1 && wireframe >= 1) {
       parent.stroke(128, 0, 128);
       drawDebugCircle(getOuterRadius());
