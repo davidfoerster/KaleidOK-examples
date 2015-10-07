@@ -124,4 +124,10 @@ public final class Math
     assert min <= max : min + " > " + max;
     return java.lang.Math.min(java.lang.Math.max(x, min), max);
   }
+
+  public static float clamp( float x, float min, float max )
+  {
+    assert min <= max : min + " > " + max;
+    return java.lang.Math.min(java.lang.Math.max(x, min), max);
+  }
 }

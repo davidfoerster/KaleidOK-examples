@@ -10,6 +10,9 @@ import javaFlacEncoder.StreamConfiguration;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static kaleidok.util.DebugManager.debug;
+import static kaleidok.util.Math.clamp;
+
 
 public class AudioTranscriptionProcessor implements AudioProcessor
 {
@@ -206,7 +209,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   }
 
 
-  private static int[] convertTo16Bit( AudioEvent ev, int[] conversionBuffer )
+  private int[] convertTo16Bit( AudioEvent ev, int[] conversionBuffer )
   {
     final float[] audioFloat = ev.getFloatBuffer();
     final int len = audioFloat.length - ev.getOverlap();
@@ -215,30 +218,52 @@ public class AudioTranscriptionProcessor implements AudioProcessor
         conversionBuffer :
         new int[len];
     final int offset = ev.getOverlap() / 2;
+
     for (int i = 0; i < len; i++) {
-      final float sample = audioFloat[i + offset];
-      assert sample >= -1 && sample <= 1 :
-        getSampleValueErrorMessage(audioFloat, i + offset);
-      audioInt[i] = (int) (sample * Short.MAX_VALUE);
+      float sample = audioFloat[i + offset];
+      if (sample < -1 || sample > +1) {
+        sample = clamp(sample, -1, +1);
+        if (debug >= 1)
+          printSampleValueErrorMessage(ev, i);
+      }
+      audioInt[i] = (int)(sample * Short.MAX_VALUE);
     }
+
     return audioInt;
   }
 
 
-  private static String getSampleValueErrorMessage( float[] samples, int idx )
+  private long lastSampleOffset = -1;
+  private float sampleMin = Float.NaN, sampleMax = Float.NaN;
+
+  private void printSampleValueErrorMessage( AudioEvent ev, int idx )
   {
-    float outOfRangeSample = samples[idx],
-      min = samples[0], max = samples[0];
-    for (int i = 1; i < samples.length; i++) {
-      final float sample = samples[i];
-      if (min > sample)
-        min = sample;
-      if (max < sample)
-        max = sample;
+    final float[] samples = ev.getFloatBuffer();
+    final int overlap = ev.getOverlap() / 2;
+    long sampleOffset = ev.getSamplesProcessed();
+
+    if (sampleOffset != lastSampleOffset)
+    {
+      assert sampleOffset > lastSampleOffset;
+      float min = samples[overlap], max = min;
+      final int end = samples.length - overlap;
+      for (int i = overlap + 1; i < end; i++)
+      {
+        final float sample = samples[i];
+        if (min > sample)
+          min = sample;
+        if (max < sample)
+          max = sample;
+      }
+      sampleMin = min;
+      sampleMax = max;
+      lastSampleOffset = sampleOffset;
     }
 
-    return String.format(
-      "Encountered sample value %g at index %d; min=%g, max=%g",
-      outOfRangeSample, idx, min, max);
+    long sampleCount = sampleOffset + idx;
+    System.err.format(
+      "Encountered unexpected sample value %g at %d (%.3f s); min=%g, max=%g%n",
+      samples[idx + overlap], sampleCount,
+      sampleCount / (double) ev.getSampleRate(), sampleMin, sampleMax);
   }
 }
