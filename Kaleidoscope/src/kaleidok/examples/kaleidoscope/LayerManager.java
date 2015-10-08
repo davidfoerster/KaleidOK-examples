@@ -9,9 +9,6 @@ import processing.core.PImage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -30,35 +27,32 @@ public class LayerManager extends ArrayList<CircularLayer>
 
   public PImageFuture bgImage;
 
-  public final SpectrogramLayer spectrogramLayer;
+  public SpectrogramLayer spectrogramLayer;
   private OuterMovingShape outerMovingShape;
-  public final FoobarLayer foobarLayer;
-  public final CentreMovingShape centreLayer;
+  public FoobarLayer foobarLayer;
+  public CentreMovingShape centreLayer;
 
 
   LayerManager( Kaleidoscope parent )
   {
     this.parent = parent;
-    List<PImageFuture> images = getImages();
-    AudioProcessingManager apm = parent.getAudioProcessingManager();
-
-    spectrogramLayer =
-      new SpectrogramLayer(parent, images.get(0), 1 << 8, -1, -1,
-        apm.getFftProcessor(),
-        apm.getAudioDispatcher().getFormat().getSampleRate());
-    OuterMovingShape outerMovingShape =
-      getOuterMovingShape();
-    foobarLayer =
-      new FoobarLayer(parent, images.get(3), 1 << 4, -1, -1);
-    centreLayer =
-      new CentreMovingShape(parent, images, 1 << 5, -1,
-        apm.getVolumeLevelProcessor());
-
-    add(spectrogramLayer);
-    add(outerMovingShape);
-    add(foobarLayer);
-    add(centreLayer);
+    add(getSpectrogramLayer());
+    add(getOuterMovingShape());
+    add(getFoobarLayer());
+    add(getCentreLayer());
     updateLayerSizes();
+  }
+
+
+  private SpectrogramLayer getSpectrogramLayer()
+  {
+    if (spectrogramLayer == null) {
+      AudioProcessingManager apm = parent.getAudioProcessingManager();
+      spectrogramLayer = new SpectrogramLayer(parent,
+        getImages().get(0), 1 << 8, -1, -1, apm.getFftProcessor(),
+        apm.getAudioDispatcher().getFormat().getSampleRate());
+    }
+    return spectrogramLayer;
   }
 
 
@@ -77,6 +71,27 @@ public class LayerManager extends ArrayList<CircularLayer>
       this.outerMovingShape = outerMovingShape;
     }
     return outerMovingShape;
+  }
+
+
+  private FoobarLayer getFoobarLayer()
+  {
+    if (foobarLayer == null) {
+      foobarLayer = new FoobarLayer(parent,
+        getImages().get(3), 1 << 4, -1, -1);
+    }
+    return foobarLayer;
+  }
+
+
+  private CentreMovingShape getCentreLayer()
+  {
+    if (centreLayer == null) {
+      centreLayer = new CentreMovingShape(parent,
+        getImages(), 1 << 5, -1,
+        parent.getAudioProcessingManager().getVolumeLevelProcessor());
+    }
+    return centreLayer;
   }
 
 
@@ -149,6 +164,7 @@ public class LayerManager extends ArrayList<CircularLayer>
     return this.images;
   }
 
+
   public void waitForImages()
   {
     for (PImageFuture futureImg: getImages()) {
@@ -178,7 +194,7 @@ public class LayerManager extends ArrayList<CircularLayer>
 
     drawBackgroundTexture();
 
-    for (CircularLayer l : this) {
+    for (Runnable l : this) {
       l.run();
     }
   }
