@@ -3,22 +3,20 @@ package kaleidok.examples.kaleidoscope.layer;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
-import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
 import static kaleidok.util.DebugManager.wireframe;
 
 
-public class OuterMovingShape extends CircularLayer
+public class OuterMovingShape extends CircularImageLayer
 {
   private double angle = 0, step = 0;
 
 
-  public OuterMovingShape( PApplet parent, PImageFuture img,
-    int segmentCount, float radius )
+  public OuterMovingShape( PApplet parent, int segmentCount, float radius )
   {
-    super(parent, img, segmentCount, 0, radius);
+    super(parent, segmentCount, 0, radius);
   }
 
 
@@ -76,9 +74,9 @@ public class OuterMovingShape extends CircularLayer
       {
         long now = System.nanoTime();
 
-        if (lastPitchDetectionTime >= 0) {
+        //if (lastPitchDetectionTime >= 0) {
           //System.out.format("Pitch lasted for %d ms.\n", (int)(now - lastPitchDetectionTime) / 1000000);
-        }
+        //}
 
         if (pitchDetectionResult.isPitched())
         {

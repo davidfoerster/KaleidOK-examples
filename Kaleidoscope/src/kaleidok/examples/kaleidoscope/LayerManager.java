@@ -17,7 +17,8 @@ import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 
 
-public class LayerManager extends ArrayList<CircularLayer>
+public class LayerManager extends ArrayList<ImageLayer>
+  implements Runnable
 {
   private static final int MIN_IMAGES = 5;
 
@@ -49,8 +50,9 @@ public class LayerManager extends ArrayList<CircularLayer>
     if (spectrogramLayer == null) {
       AudioProcessingManager apm = parent.getAudioProcessingManager();
       spectrogramLayer = new SpectrogramLayer(parent,
-        getImages().get(0), 1 << 8, -1, -1, apm.getFftProcessor(),
+        1 << 8, -1, -1, apm.getFftProcessor(),
         apm.getAudioDispatcher().getFormat().getSampleRate());
+      spectrogramLayer.setNextImage(getImages().get(0));
     }
     return spectrogramLayer;
   }
@@ -59,8 +61,9 @@ public class LayerManager extends ArrayList<CircularLayer>
   private OuterMovingShape getOuterMovingShape()
   {
     if (outerMovingShape == null) {
-      OuterMovingShape outerMovingShape =
-        new OuterMovingShape(parent, getImages().get(4), 1 << 5, -1);
+      outerMovingShape = new OuterMovingShape(parent, 1 << 5, -1);
+      outerMovingShape.setNextImage(getImages().get(4));
+
       AudioProcessingManager apm = parent.getAudioProcessingManager();
       AudioDispatcher audioDispatcher = apm.getAudioDispatcher();
       audioDispatcher.addAudioProcessor(new PitchProcessor(
@@ -68,7 +71,6 @@ public class LayerManager extends ArrayList<CircularLayer>
         audioDispatcher.getFormat().getSampleRate(),
         apm.getAudioBufferSize(),
         outerMovingShape.getPitchDetectionHandler()));
-      this.outerMovingShape = outerMovingShape;
     }
     return outerMovingShape;
   }
@@ -77,8 +79,8 @@ public class LayerManager extends ArrayList<CircularLayer>
   private FoobarLayer getFoobarLayer()
   {
     if (foobarLayer == null) {
-      foobarLayer = new FoobarLayer(parent,
-        getImages().get(3), 1 << 4, -1, -1);
+      foobarLayer = new FoobarLayer(parent, 1 << 4, -1, -1);
+      foobarLayer.setNextImage(getImages().get(3));
     }
     return foobarLayer;
   }
@@ -187,7 +189,11 @@ public class LayerManager extends ArrayList<CircularLayer>
   }
 
 
-  public void draw()
+  /**
+   * Draws the managed layers.
+   */
+  @Override
+  public void run()
   {
     if (parent.wasResized())
       updateLayerSizes();

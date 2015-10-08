@@ -2,7 +2,6 @@ package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.examples.kaleidoscope.Kaleidoscope;
-import kaleidok.examples.kaleidoscope.LayerManager;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.CyclingList;
 import processing.core.PApplet;
@@ -12,7 +11,7 @@ import java.util.List;
 
 import static kaleidok.util.DebugManager.wireframe;
 
-public class CentreMovingShape extends CircularLayer
+public class CentreMovingShape extends CircularImageLayer
 {
   private final CyclingList<PImageFuture> images;
 
@@ -32,7 +31,8 @@ public class CentreMovingShape extends CircularLayer
     CyclingList<PImageFuture> images, int segmentCount, float radius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
-    super(parent, images.getNext(), segmentCount, 0, radius);
+    super(parent, segmentCount, 0, radius);
+    setNextImage(images.getNext());
     this.images = images;
     this.volumeLevelProcessor = volumeLevelProcessor;
   }

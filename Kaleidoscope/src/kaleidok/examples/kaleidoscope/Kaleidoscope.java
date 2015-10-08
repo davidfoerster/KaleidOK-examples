@@ -121,7 +121,7 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void draw()
   {
-    layers.draw();
+    layers.run();
     previousSize.setLocation(width, height);
   }
 
