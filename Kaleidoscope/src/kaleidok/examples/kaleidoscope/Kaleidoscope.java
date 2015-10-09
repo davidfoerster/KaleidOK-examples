@@ -156,7 +156,7 @@ public class Kaleidoscope extends ExtPApplet
 
   /**
    * If the supplied string <code>s</code> begins with <code>filePrefix</code>,
-   * its remainder is interpreted as a pathh to a file, whose content shall be
+   * its remainder is interpreted as a path to a file, whose content shall be
    * returned. The special path <code>"-"</code> is interpreted as the standard
    * input stream of this process. The default encoding of this runtime
    * environment is used to decode the bytes of that stream into a string and
@@ -165,9 +165,9 @@ public class Kaleidoscope extends ExtPApplet
    * <p>
    * In all other cases the string itself is returned.
    *
-   * @param s
-   * @param filePrefix
-   * @return
+   * @param s  A string
+   * @param filePrefix  A character to start a file path
+   * @return  The same or another string
    */
   String parseStringOrFile( String s, char filePrefix )
   {
