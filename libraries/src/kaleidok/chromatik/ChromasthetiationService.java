@@ -145,8 +145,11 @@ public class ChromasthetiationService
         }
         return;
       }
-      if (verbose >= 3)
-        System.out.println(emoState);
+      if (verbose >= 3) {
+        System.out.format(
+          "[%tc] Synesthetiation result:%n%s%n%n",
+          System.currentTimeMillis(), emoState);
+      }
 
       chromatikQuery.keywords = getQueryKeywords(emoState);
       getQueryOptions(emoState, chromatikQuery.opts);

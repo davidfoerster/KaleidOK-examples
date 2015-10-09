@@ -64,16 +64,19 @@ public class SttManager
     @Override
     public void completed( SttResponse response )
     {
-      SttResponse.Result result = response.result[0];
+      SttResponse.Result.Alternative topAlternative =
+        response.result[0].alternative[0];
 
       if (verbose >= 1) {
-        System.out.println(
-          "STT returned: " + result.alternative[0].transcript);
+        System.out.format(
+          "[%tc] STT returned (confidence=%.1f%%): %s%n",
+          System.currentTimeMillis(),
+          topAlternative.confidence * 100, topAlternative.transcript);
       }
 
       if (!isIgnoreTranscriptionResult()) {
         parent.getChromasthetiationService()
-          .submit(result.alternative[0].transcript);
+          .submit(topAlternative.transcript);
       }
     }
 
