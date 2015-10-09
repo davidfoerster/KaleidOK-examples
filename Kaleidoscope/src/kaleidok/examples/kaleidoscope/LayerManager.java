@@ -26,17 +26,18 @@ public class LayerManager extends ArrayList<ImageLayer>
 
   public List<PImageFuture> images; // list to hold input images
 
-  public PImageFuture bgImage;
-
-  public SpectrogramLayer spectrogramLayer;
+  private SpectrogramLayer spectrogramLayer;
   private OuterMovingShape outerMovingShape;
-  public FoobarLayer foobarLayer;
-  public CentreMovingShape centreLayer;
+  private FoobarLayer foobarLayer;
+  private CentreMovingShape centreLayer;
+  private BackgroundLayer backgroundLayer;
 
 
   LayerManager( Kaleidoscope parent )
   {
+    super(8);
     this.parent = parent;
+    add(getBackgroundLayer());
     add(getSpectrogramLayer());
     add(getOuterMovingShape());
     add(getFoobarLayer());
@@ -97,6 +98,20 @@ public class LayerManager extends ArrayList<ImageLayer>
   }
 
 
+  BackgroundLayer getBackgroundLayer()
+  {
+    if (backgroundLayer == null) {
+      final List<PImageFuture> images = getImages();
+      backgroundLayer = new BackgroundLayer(parent);
+      if (!images.isEmpty()) {
+        backgroundLayer.setNextImage(
+          images.get((int) parent.random(images.size())));
+      }
+    }
+    return backgroundLayer;
+  }
+
+
   private void updateLayerSizes()
   {
     float r = Math.min(parent.width, parent.height) / 1000f;
@@ -144,21 +159,8 @@ public class LayerManager extends ArrayList<ImageLayer>
         }
       }
 
-      int bgImageIndex;
-      switch (images.size()) {
-      case 0:
+      if (images.isEmpty())
         images.add(PImageFuture.EMPTY);
-        // fall through
-
-      case 1:
-        bgImageIndex = 0;
-        break;
-
-      default:
-        bgImageIndex = (int) parent.random(images.size()); // randomly choose the bgImageIndex
-        break;
-      }
-      bgImage = images.get(bgImageIndex);
       int imageCount = images.size();
       for (int i = images.size(); i < MIN_IMAGES; i++)
         images.add(images.get(i % imageCount));
@@ -198,26 +200,8 @@ public class LayerManager extends ArrayList<ImageLayer>
     if (parent.wasResized())
       updateLayerSizes();
 
-    drawBackgroundTexture();
-
     for (Runnable l : this) {
       l.run();
-    }
-  }
-
-
-  private void drawBackgroundTexture()
-  {
-    Kaleidoscope parent = this.parent;
-    PImage bgImage;
-    if (wireframe < 1 && (bgImage = this.bgImage.getNoThrow()) != null) {
-      // background image
-      parent.image(bgImage, ExtPApplet.ImageResizeMode.PAN, 0, 0,
-        parent.width, parent.height); // resize-display image correctly to cover the whole screen
-      parent.fill(255, 125 + (float) Math.sin(parent.frameCount * 0.01) * 5); // white fill with dynamic transparency
-      parent.rect(0, 0, parent.width, parent.height); // rect covering the whole canvas
-    } else {
-      parent.background(0);
     }
   }
 }

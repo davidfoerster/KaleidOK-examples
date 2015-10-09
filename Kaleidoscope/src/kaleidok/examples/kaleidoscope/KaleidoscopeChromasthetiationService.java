@@ -5,6 +5,7 @@ import kaleidok.chromatik.ChromasthetiatorBase;
 import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.concurrent.GroupedThreadFactory;
+import kaleidok.examples.kaleidoscope.layer.ImageLayer;
 import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.http.cache.DiskLruHttpCacheStorage;
@@ -163,11 +164,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
 
       LayerManager layers = parent.getLayers();
       int idx = imageListIndex.getAndIncrement() % (layers.size() + 1) - 1;
-      if (idx >= 0) {
-        layers.get(idx).setNextImage(fImage);
-      } else {
-        layers.bgImage = fImage;
-      }
+      layers.get(idx).setNextImage(fImage);
     }
 
 
