@@ -216,7 +216,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
         new int[len];
     final int offset = ev.getOverlap() / 2;
     for (int i = 0; i < len; i++) {
-      final float sample = audioFloat[i + offset];
+      final float sample = audioFloat[i + offset] * 0.5f;
       assert sample >= -1 && sample <= 1 :
         getSampleValueErrorMessage(audioFloat, i + offset);
       audioInt[i] = (int) (sample * Short.MAX_VALUE);
@@ -231,10 +231,11 @@ public class AudioTranscriptionProcessor implements AudioProcessor
       min = samples[0], max = samples[0];
     for (int i = 1; i < samples.length; i++) {
       final float sample = samples[i];
-      if (min > sample)
+      if (min > sample) {
         min = sample;
-      if (max < sample)
+      } else if (max < sample) {
         max = sample;
+      }
     }
 
     return String.format(
