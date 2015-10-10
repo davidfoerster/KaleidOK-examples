@@ -147,15 +147,13 @@ public class Transcription implements Runnable
 
   protected void logResponse( SttResponse response )
   {
-    if (response != null) {
+    if (response != null && !response.isEmpty()) {
       SttResponse.Result result = response.result[0];
       assert response.result.length == 1;
       SttResponse.Result.Alternative alternative = result.alternative[0];
       System.out.println(
         "Recognized: " + alternative.transcript +
           " (confidence: " + alternative.confidence + ')');
-    } else {
-      System.out.println("Speech could not be interpreted! Try to shorten the recording.");
     }
   }
 

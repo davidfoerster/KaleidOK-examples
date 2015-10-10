@@ -101,6 +101,7 @@ public class MockSpeechToTextHandler implements HttpHandler
       System.out.println("Server couldn't determine duration of the submitted audio record");
     }
 
+    byte[] transcriptionResult = normalTranscriptionResult;
     setContentType(t, "application/json");
     t.sendResponseHeaders(HttpURLConnection.HTTP_OK, transcriptionResult.length);
     try (OutputStream out = t.getResponseBody()) {
@@ -246,18 +247,21 @@ public class MockSpeechToTextHandler implements HttpHandler
   public static final String CONTENT_TYPE = "Content-Type";
 
 
-  private static final byte[] transcriptionResult = (
-    "{\"result\":[]}\n" +
-      "{\"result\":[{" +
-      "\"alternative\":[" +
-      "{\"transcript\":\"I like hot dogs\",\"confidence\":0.95803052}," +
-      "{\"transcript\":\"I like hotdogs\"}," +
-      "{\"transcript\":\"I like hot stocks\"}," +
-      "{\"transcript\":\"I'll like hotdogs\"}," +
-      "{\"transcript\":\"I like a hot stocks\"}" +
-      "]," +
-      "\"final\":true" +
-      "}]," +
-      "\"result_index\":0}\n"
-  ).getBytes(DEFAULT_CHARSET);
+  private static final byte[]
+    normalTranscriptionResult = (
+        "{\"result\":[]}\n" +
+        "{\"result\":[{" +
+        "\"alternative\":[" +
+        "{\"transcript\":\"I like hot dogs\",\"confidence\":0.95803052}," +
+        "{\"transcript\":\"I like hotdogs\"}," +
+        "{\"transcript\":\"I like hot stocks\"}," +
+        "{\"transcript\":\"I'll like hotdogs\"}," +
+        "{\"transcript\":\"I like a hot stocks\"}" +
+        "]," +
+        "\"final\":true" +
+        "}]," +
+        "\"result_index\":0}\n"
+      ).getBytes(DEFAULT_CHARSET),
+    emptyTranscriptionResult =
+      "{\"result\":[]}".getBytes(DEFAULT_CHARSET);
 }
