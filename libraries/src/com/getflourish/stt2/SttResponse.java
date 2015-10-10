@@ -10,6 +10,13 @@ public class SttResponse
     return result == null || result.length == 0;
   }
 
+
+  public Result.Alternative getTopAlternative()
+  {
+    return isEmpty() ? null : result[0].alternative[0];
+  }
+
+
   public class Result
   {
     public Alternative[] alternative;

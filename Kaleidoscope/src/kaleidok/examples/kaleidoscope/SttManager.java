@@ -65,18 +65,27 @@ public class SttManager
     public void completed( SttResponse response )
     {
       SttResponse.Result.Alternative topAlternative =
-        response.result[0].alternative[0];
+        response.getTopAlternative();
 
-      if (verbose >= 1) {
-        System.out.format(
-          "[%tc] STT returned (confidence=%.1f%%): %s%n",
-          System.currentTimeMillis(),
-          topAlternative.confidence * 100, topAlternative.transcript);
+      if (topAlternative != null)
+      {
+        if (verbose >= 1) {
+          System.out.format(
+            "[%tc] STT returned (confidence=%.1f%%): %s%n",
+            System.currentTimeMillis(),
+            topAlternative.confidence * 100, topAlternative.transcript);
+        }
+
+        if (!isIgnoreTranscriptionResult()) {
+          parent.getChromasthetiationService()
+            .submit(topAlternative.transcript);
+        }
       }
-
-      if (!isIgnoreTranscriptionResult()) {
-        parent.getChromasthetiationService()
-          .submit(topAlternative.transcript);
+      else if (verbose >= 1)
+      {
+        System.out.format(
+          "[%tc] STT returned no result.%n",
+          System.currentTimeMillis());
       }
     }
 
