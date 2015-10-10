@@ -118,7 +118,7 @@ public class PlatformPaths
       throw new IllegalArgumentException("Empty data directory name");
     if (attrs == null)
       attrs = NO_ATTRIBUTES;
-    return Files.createDirectory(
+    return Files.createDirectories(
       getDataDir().resolve(name), attrs);
   }
 
