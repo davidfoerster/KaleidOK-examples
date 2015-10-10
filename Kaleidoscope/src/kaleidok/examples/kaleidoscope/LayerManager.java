@@ -114,7 +114,8 @@ public class LayerManager extends ArrayList<ImageLayer>
   {
     float r = Math.min(parent.width, parent.height) / 1000f;
 
-    centreLayer.setOuterRadius(r * 75);
+    centreLayer.setInnerRadius(r * 50);
+    centreLayer.setOuterRadius(r * 150);
 
     outerMovingShape.setOuterRadius(r * 175);
 
