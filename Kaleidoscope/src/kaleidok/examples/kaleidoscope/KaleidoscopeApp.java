@@ -1,13 +1,11 @@
 package kaleidok.examples.kaleidoscope;
 
-import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.AppletLauncher;
 import kaleidok.processing.FudgedAppletViewerFactory;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchAppletWrapper;
 import kaleidok.swing.FullscreenEventListener;
 import kaleidok.util.DefaultValueParser;
-import org.apache.commons.io.output.TeeOutputStream;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -17,15 +15,8 @@ import java.awt.event.ActionEvent;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
-
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.WRITE;
 
 
 public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
@@ -133,19 +124,6 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
       properties.load(appletClass.getResourceAsStream(
         appletClass.getSimpleName() + ".properties"));
     }
-
-    // TODO: Hack to append to log file
-    Path logfilePath =
-      PlatformPaths.INSTANCE.getDataDir(appletClass.getPackage().getName())
-        .resolve("logfile.log");
-    System.out.println(
-      "Appending all subsequent program output to: " + logfilePath);
-    System.out.flush();
-    System.setOut(new PrintStream(new TeeOutputStream(
-      System.out, Files.newOutputStream(logfilePath, WRITE, CREATE, APPEND))));
-    System.out.format("Starting new instance of %s at %tc.%n",
-      appletClass.getCanonicalName(), System.currentTimeMillis());
-
     new AppletLauncher(new FudgedAppletViewerFactory())
       .launch(appletClass, properties, args);
   }
