@@ -48,5 +48,6 @@
     <orderEntry type="library" name="com.jakewharton:disklrucache:2.0.2" level="project" />
     <orderEntry type="library" name="org.apache.httpcomponents:httpclient-cache:4.5" level="project" />
     <orderEntry type="library" name="org.apache.commons:commons-collections4:4.0" level="project" />
+    <orderEntry type="library" name="commons-io:commons-io:2.4" level="project" />
   </component>
 </module>

@@ -7,14 +7,20 @@ import com.google.gson.stream.JsonToken;
 import kaleidok.http.HttpConnection;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.http.responsehandler.JsonResponseHandler;
+import kaleidok.io.platform.PlatformPaths;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.http.concurrent.FutureCallback;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 
 
 public class Transcription implements Runnable
@@ -46,9 +52,30 @@ public class Transcription implements Runnable
   public OutputStream getOutputStream() throws IOException
   {
     if (outputStream == null) {
-      outputStream = connection.getOutputStream();
+      outputStream = new TeeOutputStream(
+        connection.getOutputStream(), openLogOutputStream());
     }
     return outputStream;
+  }
+
+
+  private static final Format logFileFormat =
+    new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS.'flac'");
+
+  private static final OpenOption[] logOpenoptions =
+    new OpenOption[]{
+      StandardOpenOption.CREATE_NEW
+    };
+
+  private OutputStream openLogOutputStream() throws IOException
+  {
+    Path path = PlatformPaths.INSTANCE.getDataDir(
+      this.getClass().getPackage().getName(), (FileAttribute[]) null)
+      .resolve(logFileFormat.format(System.currentTimeMillis()));
+    if (STT.debug)
+      System.out.println("Recorded speech written to " + path);
+    return new BufferedOutputStream(
+      Files.newOutputStream(path, logOpenoptions));
   }
 
 

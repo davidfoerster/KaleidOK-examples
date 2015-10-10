@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 import java.util.regex.*;
 
@@ -211,7 +210,8 @@ public class MockSpeechToTextHandler implements HttpHandler
         // go on...
       }
     }
-    return Files.createTempFile(tempDir, tempFileFormat.format(new Date()),
+    return Files.createTempFile(tempDir,
+      tempFileFormat.format(System.currentTimeMillis()),
       extension,  PlatformPaths.NO_ATTRIBUTES);
   }
 
