@@ -1,7 +1,6 @@
 package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.audio.processor.MinimFFTProcessor;
-import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -10,7 +9,6 @@ import static java.lang.Math.pow;
 import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.Math.log2;
-import static processing.core.PApplet.map;
 
 
 /**
@@ -19,7 +17,7 @@ import static processing.core.PApplet.map;
  *
  * @see MinimFFTProcessor
  */
-public class SpectrogramLayer extends CircularLayer
+public class SpectrogramLayer extends CircularImageLayer
 {
 	private final MinimFFTProcessor avgSpectrum;
 
@@ -28,11 +26,11 @@ public class SpectrogramLayer extends CircularLayer
   private static final int MIN_FREQUENCY = 86;
 
 
-	public SpectrogramLayer( PApplet parent, PImageFuture img, int segmentCount,
+	public SpectrogramLayer( PApplet parent, int segmentCount,
     int innerRadius, int outerRadius, MinimFFTProcessor spectrum,
     float sampleRate )
 	{
-		super(parent, img, segmentCount, innerRadius, outerRadius);
+		super(parent, segmentCount, innerRadius, outerRadius);
     avgSpectrum = spectrum;
 
     float nyquistFreq = sampleRate / 2;

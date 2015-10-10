@@ -13,12 +13,26 @@ import static kaleidok.util.DebugManager.verbose;
 
 public class Kaleidoscope extends ExtPApplet
 {
+  /**
+   * Manages the kaleidoscopic layers of shapes of this sketch.
+   */
   private LayerManager layers;
 
+  /**
+   * Manages the source of an audio signal and its processing and possibly
+   * playback.
+   */
   private AudioProcessingManager audioProcessingManager;
 
+  /**
+   *
+   */
   private KaleidoscopeChromasthetiationService chromasthetiationService;
 
+  /**
+   * Manages the transcription of an audio signal with the "Speech-to-Text"
+   * module.
+   */
   private SttManager stt;
 
 
@@ -109,11 +123,16 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void draw()
   {
-    layers.draw();
+    layers.run();
     previousSize.setLocation(width, height);
   }
 
 
+  /**
+   * Tells, whether the size of this sketch changed since the last frame.
+   *
+   * @return <code>true</code>, if changed; <code>false</code> otherwise
+   */
   public boolean wasResized()
   {
     final Point previousSize = this.previousSize;
@@ -137,6 +156,21 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  /**
+   * If the supplied string <code>s</code> begins with <code>filePrefix</code>,
+   * its remainder is interpreted as a path to a file, whose content shall be
+   * returned. The special path <code>"-"</code> is interpreted as the standard
+   * input stream of this process. The default encoding of this runtime
+   * environment is used to decode the bytes of that stream into a string and
+   * all terminating platform-specific line separators are removed from its
+   * end.
+   * <p>
+   * In all other cases the string itself is returned.
+   *
+   * @param s  A string
+   * @param filePrefix  A character to start a file path
+   * @return  The same or another string
+   */
   String parseStringOrFile( String s, char filePrefix )
   {
     if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {

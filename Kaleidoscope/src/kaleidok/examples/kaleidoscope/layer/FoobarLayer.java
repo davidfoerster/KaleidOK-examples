@@ -1,6 +1,5 @@
 package kaleidok.examples.kaleidoscope.layer;
 
-import kaleidok.processing.PImageFuture;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -15,12 +14,12 @@ import static processing.core.PApplet.map;
  *
  * @see PApplet#noise(float)
  */
-public class FoobarLayer extends CircularLayer
+public class FoobarLayer extends CircularImageLayer
 {
-	public FoobarLayer(PApplet parent, PImageFuture img, int segmentCount,
+	public FoobarLayer(PApplet parent, int segmentCount,
     float innerRadius, float outerRadius)
 	{
-		super(parent, img, segmentCount, innerRadius, outerRadius);
+		super(parent, segmentCount, innerRadius, outerRadius);
     setScaleFactor(0.5f);
 	}
 

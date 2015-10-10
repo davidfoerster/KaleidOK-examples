@@ -56,10 +56,23 @@ public class PlatformPaths
   }
 
 
+  protected FileAttribute<?>[] getTempDirectoryDefaultAttributes()
+  {
+    return NO_ATTRIBUTES;
+  }
+
+  protected FileAttribute<?>[] getTempFileDefaultAttributes()
+  {
+    return NO_ATTRIBUTES;
+  }
+
+
   public Path createTempDirectory( String prefix,
     FileAttribute<?>... attrs )
     throws IOException
   {
+    if (attrs == null || attrs.length == 0)
+      attrs = getTempDirectoryDefaultAttributes();
     return Files.createTempDirectory(getTempDir(), prefix, attrs);
   }
 
@@ -67,6 +80,8 @@ public class PlatformPaths
     FileAttribute<?>... attrs )
     throws IOException
   {
+    if (attrs == null || attrs.length == 0)
+      attrs = getTempFileDefaultAttributes();
     return Files.createTempFile(getTempDir(), prefix, suffix, attrs);
   }
 

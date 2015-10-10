@@ -3,7 +3,6 @@ package kaleidok.examples.kaleidoscope;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import kaleidok.examples.kaleidoscope.layer.*;
-import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
 import processing.core.PImage;
 
@@ -14,10 +13,10 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static kaleidok.util.DebugManager.debug;
-import static kaleidok.util.DebugManager.wireframe;
 
 
-public class LayerManager extends ArrayList<CircularLayer>
+public class LayerManager extends ArrayList<ImageLayer>
+  implements Runnable
 {
   private static final int MIN_IMAGES = 5;
 
@@ -25,48 +24,45 @@ public class LayerManager extends ArrayList<CircularLayer>
 
   public List<PImageFuture> images; // list to hold input images
 
-  public PImageFuture bgImage;
-
-  public final SpectrogramLayer spectrogramLayer;
+  private SpectrogramLayer spectrogramLayer;
   private OuterMovingShape outerMovingShape;
-  public final FoobarLayer foobarLayer;
-  public final CentreMovingShape centreLayer;
+  private FoobarLayer foobarLayer;
+  private CentreMovingShape centreLayer;
+  private BackgroundLayer backgroundLayer;
 
 
   LayerManager( Kaleidoscope parent )
   {
+    super(8);
     this.parent = parent;
-    List<PImageFuture> images = getImages();
-    AudioProcessingManager apm = parent.getAudioProcessingManager();
-
-    spectrogramLayer =
-      new SpectrogramLayer(parent, images.get(0), 1 << 8, -1, -1,
-        apm.getFftProcessor(),
-        apm.getAudioDispatcher().getFormat().getSampleRate());
-    spectrogramLayer.setScaleFactor(1 / 60f);
-    OuterMovingShape outerMovingShape =
-      getOuterMovingShape();
-    foobarLayer =
-      new FoobarLayer(parent, images.get(3), 1 << 4, -1, -1);
-    foobarLayer.setScaleFactor(0.4f);
-    centreLayer =
-      new CentreMovingShape(parent, images, 1 << 5, -1,
-        apm.getVolumeLevelProcessor());
-    centreLayer.setScaleFactor(8.0f);
-
-    add(spectrogramLayer);
-    add(outerMovingShape);
-    add(foobarLayer);
-    add(centreLayer);
+    getBackgroundLayer();
+    add(getSpectrogramLayer());
+    add(getOuterMovingShape());
+    add(getFoobarLayer());
+    add(getCentreLayer());
     updateLayerSizes();
+  }
+
+
+  private SpectrogramLayer getSpectrogramLayer()
+  {
+    if (spectrogramLayer == null) {
+      AudioProcessingManager apm = parent.getAudioProcessingManager();
+      spectrogramLayer = new SpectrogramLayer(parent,
+        1 << 8, -1, -1, apm.getFftProcessor(),
+        apm.getAudioDispatcher().getFormat().getSampleRate());
+      spectrogramLayer.setNextImage(getImages().get(0));
+    }
+    return spectrogramLayer;
   }
 
 
   private OuterMovingShape getOuterMovingShape()
   {
     if (outerMovingShape == null) {
-      OuterMovingShape outerMovingShape =
-        new OuterMovingShape(parent, getImages().get(4), 1 << 5, -1);
+      outerMovingShape = new OuterMovingShape(parent, 1 << 5, -1);
+      outerMovingShape.setNextImage(getImages().get(4));
+
       AudioProcessingManager apm = parent.getAudioProcessingManager();
       AudioDispatcher audioDispatcher = apm.getAudioDispatcher();
       audioDispatcher.addAudioProcessor(new PitchProcessor(
@@ -74,9 +70,43 @@ public class LayerManager extends ArrayList<CircularLayer>
         audioDispatcher.getFormat().getSampleRate(),
         apm.getAudioBufferSize(),
         outerMovingShape.getPitchDetectionHandler()));
-      this.outerMovingShape = outerMovingShape;
     }
     return outerMovingShape;
+  }
+
+
+  private FoobarLayer getFoobarLayer()
+  {
+    if (foobarLayer == null) {
+      foobarLayer = new FoobarLayer(parent, 1 << 4, -1, -1);
+      foobarLayer.setNextImage(getImages().get(3));
+    }
+    return foobarLayer;
+  }
+
+
+  private CentreMovingShape getCentreLayer()
+  {
+    if (centreLayer == null) {
+      centreLayer = new CentreMovingShape(parent,
+        getImages(), 1 << 5, -1,
+        parent.getAudioProcessingManager().getVolumeLevelProcessor());
+    }
+    return centreLayer;
+  }
+
+
+  BackgroundLayer getBackgroundLayer()
+  {
+    if (backgroundLayer == null) {
+      final List<PImageFuture> images = getImages();
+      backgroundLayer = new BackgroundLayer(parent);
+      if (!images.isEmpty()) {
+        backgroundLayer.setNextImage(
+          images.get((int) parent.random(images.size())));
+      }
+    }
+    return backgroundLayer;
   }
 
 
@@ -125,27 +155,15 @@ public class LayerManager extends ArrayList<CircularLayer>
         }
       }
 
-      int bgImageIndex;
-      switch (images.size()) {
-      case 0:
+      if (images.isEmpty())
         images.add(PImageFuture.EMPTY);
-        // fall through
-
-      case 1:
-        bgImageIndex = 0;
-        break;
-
-      default:
-        bgImageIndex = (int) parent.random(images.size()); // randomly choose the bgImageIndex
-        break;
-      }
-      bgImage = images.get(bgImageIndex);
       int imageCount = images.size();
       for (int i = images.size(); i < MIN_IMAGES; i++)
         images.add(images.get(i % imageCount));
     }
     return this.images;
   }
+
 
   public void waitForImages()
   {
@@ -169,37 +187,24 @@ public class LayerManager extends ArrayList<CircularLayer>
   }
 
 
-  @SuppressWarnings("ForLoopReplaceableByForEach")
-  public void draw()
+  /**
+   * Draws the managed layers.
+   */
+  @Override
+  public void run()
   {
     final Kaleidoscope parent = this.parent;
 
     if (parent.wasResized())
       updateLayerSizes();
 
-    drawBackgroundTexture();
+    backgroundLayer.run();
 
     parent.pushMatrix();
-    parent.translate(parent.width / 2, parent.height / 2);  // translate to the left-center
-    for (int i = 0, len = size(); i < len; i++) {
-      get(i).run();
+    parent.translate(parent.width * 0.5f, parent.height * 0.5f);
+    for (Runnable l : this) {
+      l.run();
     }
     parent.popMatrix();
-  }
-
-
-  private void drawBackgroundTexture()
-  {
-    Kaleidoscope parent = this.parent;
-    PImage bgImage;
-    if (wireframe < 1 && (bgImage = this.bgImage.getNoThrow()) != null) {
-      // background image
-      parent.image(bgImage, ExtPApplet.ImageResizeMode.PAN, 0, 0,
-        parent.width, parent.height); // resize-display image correctly to cover the whole screen
-      parent.fill(255, 125 + (float) Math.sin(parent.frameCount * 0.01) * 5); // white fill with dynamic transparency
-      parent.rect(0, 0, parent.width, parent.height); // rect covering the whole canvas
-    } else {
-      parent.background(0);
-    }
   }
 }

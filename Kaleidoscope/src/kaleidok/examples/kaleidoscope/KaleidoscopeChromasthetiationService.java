@@ -163,11 +163,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
 
       LayerManager layers = parent.getLayers();
       int idx = imageListIndex.getAndIncrement() % (layers.size() + 1) - 1;
-      if (idx >= 0) {
-        layers.get(idx).setNextImage(fImage);
-      } else {
-        layers.bgImage = fImage;
-      }
+      layers.get(idx).setNextImage(fImage);
     }
 
 
