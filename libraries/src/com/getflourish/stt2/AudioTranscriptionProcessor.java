@@ -166,7 +166,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
       int availableSamples = encoder.samplesAvailableToEncode();
       if (STT.debug) {
-        System.out.format(
+        System.err.format(
           "%.4g seconds left to encode after recording finished.%n",
           (double) availableSamples / streamConfiguration.getSampleRate());
       }
