@@ -103,6 +103,10 @@ public class AppletLauncher
         case "--param":
           String param = args[++i];
           int p = param.indexOf('=');
+          if (p <= 0) {
+            throw new IllegalArgumentException(
+              "Invalid parameter specification: " + param);
+          }
           attributes.put(param.substring(0, p), param.substring(p + 1));
           break;
 
