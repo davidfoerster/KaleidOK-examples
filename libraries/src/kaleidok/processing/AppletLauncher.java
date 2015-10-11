@@ -107,7 +107,7 @@ public class AppletLauncher
           break;
 
         default:
-          throw new IllegalArgumentException("Illegal parameter:" + arg);
+          throw new IllegalArgumentException("Illegal parameter: " + arg);
         }
       }
     }
