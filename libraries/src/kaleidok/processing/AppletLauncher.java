@@ -50,7 +50,10 @@ public class AppletLauncher
   private AppletViewer launch0( Class<? extends Applet> appletClass,
     Hashtable<String, String> attributes, int x, int y )
   {
-    loadLocalLoggerProperties(appletClass);
+    String systemLoggerConfigPath =
+      System.getProperty(Logger.class.getPackage().getName() + ".config.file");
+    if (systemLoggerConfigPath == null || systemLoggerConfigPath.isEmpty())
+      loadLocalLoggerProperties(appletClass);
 
     URL documentURL = appletClass.getResource(".");
     if (documentURL == null) {
