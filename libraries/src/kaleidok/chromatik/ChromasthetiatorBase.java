@@ -26,9 +26,6 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
     Logger.getLogger(ChromasthetiationService.class.getPackage().getName());
 
   // Configuration:
-
-  public static int verbose = 0; // TODO: Can this be substituted by the logger entirely?
-
   /**
    * Maximum amount of colors to use in the query to Chromatik
    */

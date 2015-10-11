@@ -1,7 +1,6 @@
 package kaleidok.examples.kaleidoscope;
 
 import kaleidok.chromatik.ChromasthetiationService;
-import kaleidok.chromatik.ChromasthetiatorBase;
 import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.concurrent.GroupedThreadFactory;
@@ -28,7 +27,6 @@ import java.util.logging.Level;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.DebugManager.debug;
-import static kaleidok.util.DebugManager.verbose;
 
 
 public class KaleidoscopeChromasthetiationService extends ChromasthetiationService
@@ -51,7 +49,6 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
     org.apache.http.client.fluent.Executor httpExecutor )
   {
     super(executor, httpExecutor);
-    ChromasthetiatorBase.verbose = verbose;
     this.parent = parent;
   }
 

@@ -47,8 +47,6 @@ public class STT
 
   static final Logger logger = Logger.getLogger(STT.class.getPackage().getName());
 
-  public static boolean debug; // TODO: Can this be substituted completely by the logger?
-
 
   public STT( FutureCallback<SttResponse> resultHandler, String accessKey )
   {
@@ -154,13 +152,15 @@ public class STT
   }
 
 
+  static final Level statusLoggingLevel = Level.INFO;
+
   private synchronized void onBegin()
   {
     status = State.RECORDING;
     processor.shouldRecord = true;
     startListening();
 
-    logger.info(status.name());
+    logger.log(statusLoggingLevel, status.name());
 
     signalChange();
   }
@@ -205,5 +205,11 @@ public class STT
   public boolean isRecording()
   {
     return recordingTimer.isStarted();
+  }
+
+
+  public static boolean isLoggingStatus()
+  {
+    return logger.isLoggable(statusLoggingLevel);
   }
 }

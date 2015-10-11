@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
-import static kaleidok.util.DebugManager.verbose;
 
 
 public class SttManager
@@ -24,7 +23,6 @@ public class SttManager
   {
     this.parent = parent;
 
-    STT.debug = verbose >= 1;
     stt = new STT(new SttResponseHandler(),
       parent.parseStringOrFile(parent.getParameter("com.google.developer.api.key"), '@'));
     String paramBase = stt.getClass().getCanonicalName() + '.';
@@ -47,7 +45,8 @@ public class SttManager
     String strEnabled =
       parent.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
     boolean bEnabled = !"forceoff".equals(strEnabled) &&
-      (!STT.debug || DefaultValueParser.parseBoolean(strEnabled, true));
+      (!STT.isLoggingStatus() ||
+         DefaultValueParser.parseBoolean(strEnabled, true));
 
     if (bEnabled) {
       RecorderIcon ri = new RecorderIcon(parent, stt);
@@ -71,7 +70,7 @@ public class SttManager
 
       if (topAlternative != null) {
         logger.log(Level.INFO,
-          "Transcribed with confidence {0,percent}: {1}",
+          "Transcribed with confidence {0,number,percent}: {1}",
           new Object[]{topAlternative.confidence, topAlternative.transcript});
 
         if (!isIgnoreTranscriptionResult()) {
