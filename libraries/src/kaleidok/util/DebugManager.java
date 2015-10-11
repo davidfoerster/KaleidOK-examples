@@ -1,14 +1,13 @@
 package kaleidok.util;
 
-import sun.awt.AppContext;
-
 import java.applet.Applet;
-import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public final class DebugManager
@@ -33,6 +32,9 @@ public final class DebugManager
   }
 
 
+  private static final Logger logger =
+    Logger.getLogger(DebugManager.class.getCanonicalName());
+
   private static Object source = null;
 
   private static void checkAlreadyInitialized( Object source )
@@ -44,9 +46,8 @@ public final class DebugManager
             " was already initialized earlier from the different source " +
             DebugManager.source);
       } else if (verbose >= 1) {
-        System.err.println(
-          "Warning: Re-initializing " + DebugManager.class.getCanonicalName() +
-            " from the same object \"" + source + "\" as earlier.");
+        logger.log(Level.WARNING,
+          "Re-initializing from the same object \"{0}\" as earlier", source);
       }
     }
   }
@@ -107,6 +108,7 @@ public final class DebugManager
   }
 
 
+  /*
   public static void printThreads( PrintStream out, ThreadGroup tg, boolean recurse )
   {
     if (out == null)
@@ -134,6 +136,7 @@ public final class DebugManager
     if (count > 0)
       out.println();
   }
+  */
 
 
   private interface PropertyGetter

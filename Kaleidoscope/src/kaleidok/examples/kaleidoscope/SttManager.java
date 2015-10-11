@@ -7,7 +7,9 @@ import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.util.DefaultValueParser;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
+import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.DebugManager.verbose;
 
 
@@ -67,25 +69,17 @@ public class SttManager
       SttResponse.Result.Alternative topAlternative =
         response.getTopAlternative();
 
-      if (topAlternative != null)
-      {
-        if (verbose >= 1) {
-          System.out.format(
-            "[%tc] STT returned (confidence=%.1f%%): %s%n",
-            System.currentTimeMillis(),
-            topAlternative.confidence * 100, topAlternative.transcript);
-        }
+      if (topAlternative != null) {
+        logger.log(Level.INFO,
+          "Transcribed with confidence {0,percent}: {1}",
+          new Object[]{topAlternative.confidence, topAlternative.transcript});
 
         if (!isIgnoreTranscriptionResult()) {
           parent.getChromasthetiationService()
             .submit(topAlternative.transcript);
         }
-      }
-      else if (verbose >= 1)
-      {
-        System.out.format(
-          "[%tc] STT returned no result.%n",
-          System.currentTimeMillis());
+      } else {
+        logger.info("Transcription returned no result");
       }
     }
 
@@ -98,8 +92,8 @@ public class SttManager
             parent.getClass().getPackage().getName() + ".ignoreTranscription",
             false);
         if (isIgnoreTranscriptionResult) {
-          System.out.println(
-            "Notice: Speech transcription results are configured to be ignored.");
+          logger.config(
+            "Speech transcription results are configured to be ignored");
         }
       }
       return isIgnoreTranscriptionResult;

@@ -21,6 +21,9 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+
+import static com.getflourish.stt2.STT.logger;
 
 
 public class Transcription implements Runnable
@@ -72,8 +75,7 @@ public class Transcription implements Runnable
     Path path = PlatformPaths.INSTANCE.getDataDir(
       this.getClass().getPackage().getName(), (FileAttribute[]) null)
       .resolve(logFileFormat.format(System.currentTimeMillis()));
-    if (STT.debug)
-      System.out.println("Recorded speech written to " + path);
+    logger.log(Level.FINE, "Recorded speech written to \"{0}\"", path);
     return new BufferedOutputStream(
       Files.newOutputStream(path, logOpenoptions));
   }
@@ -109,19 +111,17 @@ public class Transcription implements Runnable
   {
     try {
       SttResponse response;
-      if (!STT.debug) {
+      if (!logger.isLoggable(Level.FINEST)) {
         response = parse(connection.getReader());
       } else {
         String strResponse = connection.getBody();
-        System.out.println(strResponse);
+        logger.log(Level.FINEST, strResponse);
         response = parse(new StringReader(strResponse));
         logResponse(response);
       }
       return response;
     } catch (IOException ex) {
-      if (STT.debug)
-        System.err.println("I/O ERROR: Network connection failure");
-      throw ex;
+      throw new IOException("Network connection failure", ex);
     }
   }
 
@@ -147,13 +147,13 @@ public class Transcription implements Runnable
 
   protected void logResponse( SttResponse response )
   {
-    if (response != null && !response.isEmpty()) {
-      SttResponse.Result result = response.result[0];
-      assert response.result.length == 1;
-      SttResponse.Result.Alternative alternative = result.alternative[0];
-      System.out.println(
-        "Recognized: " + alternative.transcript +
-          " (confidence: " + alternative.confidence + ')');
+    if (response != null) {
+      SttResponse.Result.Alternative alternative = response.getTopAlternative();
+      if (alternative != null) {
+        logger.log(Level.FINE,
+          "Recognized: {0} (confidence: {1,number,percent})",
+          new Object[]{alternative.transcript, alternative.confidence});
+      }
     }
   }
 

@@ -10,6 +10,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class STT
@@ -43,7 +45,9 @@ public class STT
   private final ChangeEvent changeEvent = new ChangeEvent(this);
 
 
-  public static boolean debug;
+  static final Logger logger = Logger.getLogger(STT.class.getPackage().getName());
+
+  public static boolean debug; // TODO: Can this be substituted completely by the logger?
 
 
   public STT( FutureCallback<SttResponse> resultHandler, String accessKey )
@@ -156,8 +160,7 @@ public class STT
     processor.shouldRecord = true;
     startListening();
 
-    if (debug)
-      System.out.println(status);
+    logger.info(status.name());
 
     signalChange();
   }
@@ -168,10 +171,9 @@ public class STT
     status = State.IDLE;
     processor.shouldRecord = false;
 
-    if (debug) {
-      System.out.format("%s roughly %.3f seconds of audio data...%n",
-        status, recordingTimer.getRuntime() * 1e-9);
-    }
+    logger.log(Level.FINER,
+      "{0} roughly {1,number,0.000} seconds of audio data",
+      new Object[]{status, recordingTimer.getRuntime() * 1e-9});
 
     recordingTimer.reset();
     signalChange();

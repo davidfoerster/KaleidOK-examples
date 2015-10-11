@@ -5,7 +5,6 @@ import kaleidok.chromatik.ChromasthetiatorBase;
 import kaleidok.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.concurrent.GroupedThreadFactory;
-import kaleidok.examples.kaleidoscope.layer.ImageLayer;
 import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.http.cache.DiskLruHttpCacheStorage;
@@ -25,7 +24,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 
+import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.DebugManager.verbose;
 
@@ -105,8 +106,8 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
         throw new AssertionError(msg, ex);
 
       // else: use default cache storage
-      System.err.format("Warning: %s in \"%s\": %s%n",
-        msg, cacheDir, ex.getLocalizedMessage());
+      logger.log(Level.WARNING, "{0} in \"{1}\": {2}",
+        new Object[]{msg, cacheDir, ex.getLocalizedMessage()});
     }
 
     builder.setCacheConfig(cacheConfig);
@@ -172,12 +173,12 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
     public void failed( Exception ex )
     {
       if (ex == null) {
-        System.out.println("Aborted!");
+        logger.fine("Chromasthetiation aborted");
       } else if (ex instanceof FlickrException) {
         switch (((FlickrException) ex).getErrorCode()) {
         case 1: // Photo not found
         case 2: // Permission denied
-          System.err.println(ex.getLocalizedMessage());
+          logger.fine("Flickr: " + ex.getLocalizedMessage());
           return;
         }
       }

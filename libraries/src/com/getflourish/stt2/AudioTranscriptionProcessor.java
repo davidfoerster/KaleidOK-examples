@@ -9,6 +9,9 @@ import javaFlacEncoder.StreamConfiguration;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+
+import static com.getflourish.stt2.STT.logger;
 
 
 public class AudioTranscriptionProcessor implements AudioProcessor
@@ -62,12 +65,15 @@ public class AudioTranscriptionProcessor implements AudioProcessor
         }
       }
 
-      if (task != null && STT.debug) {
-        System.out.format(
-          "Speech recording interrupted at %d of up to %s intervals after excess of the max. interval of %.3f s. %n",
-          intervalSequenceCount,
-          (stt.intervalSequenceCountMax > 0) ? stt.intervalSequenceCountMax : "∞",
-          stt.getMaxTranscriptionInterval() * 1e-9);
+      if (task != null) {
+        logger.log(Level.FINER,
+          "Speech recording interrupted at {0} of up to {1} intervals after " +
+            "excess of the max. interval of {2,number,0.###} s",
+          new Object[]{
+            intervalSequenceCount,
+            (stt.intervalSequenceCountMax > 0) ? stt.intervalSequenceCountMax : "∞",
+            stt.getMaxTranscriptionInterval() * 1e-9
+          });
       }
 
       if (task != null && intervalSequenceCount < getIntervalSequenceCountMax()) {
@@ -165,18 +171,14 @@ public class AudioTranscriptionProcessor implements AudioProcessor
         this + " is not in the queue of " + stt.service;
 
       int availableSamples = encoder.samplesAvailableToEncode();
-      if (STT.debug) {
-        System.err.format(
-          "%.4g seconds left to encode after recording finished.%n",
-          (double) availableSamples / streamConfiguration.getSampleRate());
-      }
+      logger.log(Level.FINEST,
+        "{0,number} seconds left to encode after recording finished",
+        (double) availableSamples / streamConfiguration.getSampleRate());
 
-      long encodingStartTime = STT.debug ? System.nanoTime() : 0;
+      long encodingStartTime = System.nanoTime();
       encoder.t_encodeSamples(availableSamples, true, availableSamples);
-      if (STT.debug) {
-        logExcessDuration(encodingStartTime, 10, TimeUnit.SECONDS,
-          "Encoding the remaining samples took too long");
-      }
+      logExcessDuration(encodingStartTime, stt.getMaxTranscriptionInterval(),
+        TimeUnit.NANOSECONDS, "Encoding the remaining samples took too long");
 
       stt.service.execute(this);
     }
@@ -201,7 +203,8 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   {
     long duration = System.nanoTime() - startTimeNanos;
     if (duration >= maxDurationUnit.toNanos(maxDuration)) {
-      System.err.format("%s: %.4g seconds%n", message, duration * 1e-9);
+     logger.log(Level.FINER, "{0}: {1,number,0.0000E0} seconds",
+       new Object[]{message, duration * 1e-9});
     }
   }
 
