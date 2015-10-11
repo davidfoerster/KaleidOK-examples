@@ -7,12 +7,16 @@ import java.applet.Applet;
 import java.awt.Rectangle;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 
 public class AppletLauncher
@@ -130,8 +134,19 @@ public class AppletLauncher
 
       args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
     } else {
-      properties.load(appletClass.getResourceAsStream(
-        appletClass.getSimpleName() + ".properties"));
+      String propertiesPath = appletClass.getSimpleName() + ".properties";
+      InputStream is = appletClass.getResourceAsStream(propertiesPath);
+      if (is != null) {
+        try {
+          properties.load(is);
+        } finally {
+          is.close();
+        }
+      } else {
+        Logger.getLogger(appletClass.getCanonicalName()).log(Level.INFO,
+          "No properties file found for applet class {0}; using default values",
+          appletClass.getCanonicalName());
+      }
     }
     return launch(appletClass, properties, args);
   }
