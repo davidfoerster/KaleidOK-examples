@@ -50,6 +50,8 @@ public class AppletLauncher
   private AppletViewer launch0( Class<? extends Applet> appletClass,
     Hashtable<String, String> attributes, int x, int y )
   {
+    loadLocalLoggerProperties(appletClass);
+
     URL documentURL = appletClass.getResource(".");
     if (documentURL == null) {
       documentURL = appletClass.getProtectionDomain().getCodeSource().getLocation();
@@ -149,5 +151,20 @@ public class AppletLauncher
       }
     }
     return launch(appletClass, properties, args);
+  }
+
+
+  public void loadLocalLoggerProperties( Class<?> appletClass )
+  {
+    try (InputStream is =
+      appletClass.getResourceAsStream("/logging.properties"))
+    {
+      LogManager.getLogManager().readConfiguration(is);
+    } catch (IOException ex) {
+      Logger.getAnonymousLogger().log(Level.SEVERE,
+        "Could not load default logging.properties file for " +
+          appletClass.getCanonicalName(),
+        ex);
+    }
   }
 }
