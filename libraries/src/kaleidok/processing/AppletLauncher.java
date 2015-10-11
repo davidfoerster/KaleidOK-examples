@@ -5,9 +5,14 @@ import sun.applet.AppletViewerFactory;
 
 import java.applet.Applet;
 import java.awt.Rectangle;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Properties;
 
 
 public class AppletLauncher
@@ -109,5 +114,25 @@ public class AppletLauncher
 
     buildAttributes(attributes, appletClass, null);
     return launch0(appletClass, attributes, 0, 0);
+  }
+
+
+  public AppletViewer launch( Class<? extends Applet> appletClass,
+    String... args ) throws IOException
+  {
+    Properties properties = new Properties();
+    if (args != null && args.length > 0 && args[0].equals("--params")) {
+      String paramsFile = args[1];
+      properties.load(
+        (paramsFile.length() == 1 && paramsFile.charAt(0) == '-') ?
+          new InputStreamReader(System.in) :
+          new FileReader(paramsFile));
+
+      args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
+    } else {
+      properties.load(appletClass.getResourceAsStream(
+        appletClass.getSimpleName() + ".properties"));
+    }
+    return launch(appletClass, properties, args);
   }
 }

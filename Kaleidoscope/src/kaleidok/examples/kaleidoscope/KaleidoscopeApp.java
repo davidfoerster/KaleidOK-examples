@@ -110,21 +110,7 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
 
   public static void main( String... args ) throws IOException
   {
-    Class<? extends JApplet> appletClass = KaleidoscopeApp.class;
-    Properties properties = new Properties();
-    if (args != null && args.length > 0 && args[0].equals("--params")) {
-      String paramsFile = args[1];
-      properties.load(
-        paramsFile.equals("-") ?
-          new InputStreamReader(System.in) :
-          new FileReader(paramsFile));
-
-      args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
-    } else {
-      properties.load(appletClass.getResourceAsStream(
-        appletClass.getSimpleName() + ".properties"));
-    }
     new AppletLauncher(new FudgedAppletViewerFactory())
-      .launch(appletClass, properties, args);
+      .launch(KaleidoscopeApp.class, args);
   }
 }
