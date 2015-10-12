@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class FullscreenRootPane extends JRootPane
@@ -16,6 +18,9 @@ public class FullscreenRootPane extends JRootPane
 
   private Collection<FullscreenEventListener> fullscreenListeners =
     new ArrayList<>();
+
+  private static final Logger logger =
+    Logger.getLogger(FullscreenRootPane.class.getCanonicalName());
 
 
   public Window getTopLevelWindow()
@@ -79,9 +84,8 @@ public class FullscreenRootPane extends JRootPane
         return;
       }
 
-      System.err.println(
-        "Warning: No screen with index " + i +
-        " available; using default screen instead.");
+      logger.log(Level.WARNING,
+        "No screen with index {0} available; using default screen instead", i);
     }
 
     // use default screen

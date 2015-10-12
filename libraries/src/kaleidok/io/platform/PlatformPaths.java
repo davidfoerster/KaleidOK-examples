@@ -106,7 +106,35 @@ public class PlatformPaths
   {
     if (name.isEmpty())
       throw new IllegalArgumentException("Empty cache directory name");
+    if (attrs == null)
+      attrs = NO_ATTRIBUTES;
     return Files.createDirectories(
       getCacheDir().resolve(name), attrs);
+  }
+
+
+  private Path dataDir;
+
+  public Path getDataDir()
+  {
+    if (dataDir == null)
+      dataDir = getDataDirImpl();
+    return dataDir;
+  }
+
+  public Path getDataDir( String name, FileAttribute<?>... attrs )
+    throws IOException
+  {
+    if (name.isEmpty())
+      throw new IllegalArgumentException("Empty data directory name");
+    if (attrs == null)
+      attrs = NO_ATTRIBUTES;
+    return Files.createDirectories(
+      getDataDir().resolve(name), attrs);
+  }
+
+  protected Path getDataDirImpl()
+  {
+    throw new UnsupportedOperationException();
   }
 }

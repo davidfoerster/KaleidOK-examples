@@ -7,12 +7,16 @@ import kaleidok.util.DefaultValueParser;
 import javax.swing.JApplet;
 
 import java.awt.Point;
+import java.util.logging.Logger;
 
 import static kaleidok.util.DebugManager.verbose;
 
 
 public class Kaleidoscope extends ExtPApplet
 {
+  static final Logger logger =
+    Logger.getLogger(Kaleidoscope.class.getPackage().getName());
+
   /**
    * Manages the kaleidoscopic layers of shapes of this sketch.
    */

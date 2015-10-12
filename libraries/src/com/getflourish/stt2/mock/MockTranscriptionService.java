@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class MockTranscriptionService extends TranscriptionService
@@ -51,8 +53,11 @@ public class MockTranscriptionService extends TranscriptionService
     } catch (IOException ex) {
       throw new Error(ex);
     }
-    System.out.println("Notice: You set your Google API access key to \"" +
-      accessKey + "\"; speech transcription is performed by " +
-      this.getClass().getCanonicalName() + '.');
+
+    String className = this.getClass().getCanonicalName();
+    Logger.getLogger(className).log(Level.CONFIG,
+      "You set your Google API access key to \"{0}\"; " +
+        "speech transcription is performed by {1}",
+      new Object[]{accessKey, className});
   }
 }

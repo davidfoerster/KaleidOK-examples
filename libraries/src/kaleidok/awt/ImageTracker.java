@@ -1,16 +1,20 @@
 package kaleidok.awt;
 
-import kaleidok.util.DebugManager;
 import kaleidok.util.Threads;
 import sun.awt.AppContext;
 
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.ImageObserver;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class ImageTracker implements ImageObserver
 {
+  private static final Logger logger =
+    Logger.getLogger(ImageTracker.class.getCanonicalName());
+
   public static final int
     SUCCESS = ALLBITS | FRAMEBITS,
     DONE = SUCCESS | ERROR | ABORT;
@@ -113,9 +117,10 @@ public class ImageTracker implements ImageObserver
     final ThreadGroup tg = AppContext.getAppContext().getThreadGroup();
 
     if (newPriority > tg.getMaxPriority()) {
-      System.err.format(
-        "Warning: The requested thread priority %d exceeds the maximum priority %d of the pertaining thread group \"%s\".%n",
-        newPriority, tg.getMaxPriority(), tg.getName());
+      logger.log(Level.WARNING,
+        "The requested thread priority {0} exceeds the maximum priority {1} " +
+          "of the pertaining thread group \"{2}\"",
+        new Object[]{newPriority, tg.getMaxPriority(), tg.getName()});
       return;
     }
 
@@ -126,10 +131,10 @@ public class ImageTracker implements ImageObserver
           final int oldPriority = t.getPriority();
           if (newPriority != oldPriority) {
             t.setPriority(newPriority);
-            if (DebugManager.verbose >= 5) {
-              System.out.format(
-                "Changed priority of thread \"%s\" (%d) from %d to %d.%n",
-                t.getName(), t.getId(), oldPriority, newPriority);
+            if (logger.isLoggable(Level.FINEST)) {
+              logger.log(Level.FINEST,
+                "Changed priority of thread \"{0}\" ({1}) from {2} to {3}",
+                new Object[]{t.getName(), t.getId(), oldPriority, newPriority});
             }
           }
         }

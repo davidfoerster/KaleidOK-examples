@@ -15,8 +15,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.*;
 
 import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
@@ -24,6 +25,9 @@ import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
 
 public class MockSpeechToTextHandler implements HttpHandler
 {
+  private static final Logger logger =
+    Logger.getLogger(MockSpeechToTextHandler.class.getCanonicalName());
+
   final STT stt;
 
 
@@ -92,16 +96,19 @@ public class MockSpeechToTextHandler implements HttpHandler
           StandardCopyOption.REPLACE_EXISTING);
       in.close();
     }
-    System.out.format("Server received %d bytes on request to %s", inLen, t.getRequestURI());
+    logger.log(Level.FINEST,
+      "Received {0} bytes on request to {1}",
+      new Object[]{inLen, t.getRequestURI()});
     assertTrue(inLen > 86);
 
     double duration = testFlacFile(tmpFile.toString(), sampleRate);
     if (!Double.isNaN(duration)) {
       assertTrue(duration <= stt.getMaxTranscriptionInterval() * 1e-9);
     } else {
-      System.out.println("Server couldn't determine duration of the submitted audio record");
+      logger.finest("Couldn't determine duration of the submitted audio record");
     }
 
+    byte[] transcriptionResult = normalTranscriptionResult;
     setContentType(t, "application/json");
     t.sendResponseHeaders(HttpURLConnection.HTTP_OK, transcriptionResult.length);
     try (OutputStream out = t.getResponseBody()) {
@@ -211,7 +218,8 @@ public class MockSpeechToTextHandler implements HttpHandler
         // go on...
       }
     }
-    return Files.createTempFile(tempDir, tempFileFormat.format(new Date()),
+    return Files.createTempFile(tempDir,
+      tempFileFormat.format(System.currentTimeMillis()),
       extension,  PlatformPaths.NO_ATTRIBUTES);
   }
 
@@ -246,18 +254,21 @@ public class MockSpeechToTextHandler implements HttpHandler
   public static final String CONTENT_TYPE = "Content-Type";
 
 
-  private static final byte[] transcriptionResult = (
-    "{\"result\":[]}\n" +
-      "{\"result\":[{" +
-      "\"alternative\":[" +
-      "{\"transcript\":\"I like hot dogs\",\"confidence\":0.95803052}," +
-      "{\"transcript\":\"I like hotdogs\"}," +
-      "{\"transcript\":\"I like hot stocks\"}," +
-      "{\"transcript\":\"I'll like hotdogs\"}," +
-      "{\"transcript\":\"I like a hot stocks\"}" +
-      "]," +
-      "\"final\":true" +
-      "}]," +
-      "\"result_index\":0}\n"
-  ).getBytes(DEFAULT_CHARSET);
+  private static final byte[]
+    normalTranscriptionResult = (
+        "{\"result\":[]}\n" +
+        "{\"result\":[{" +
+        "\"alternative\":[" +
+        "{\"transcript\":\"I like hot dogs\",\"confidence\":0.95803052}," +
+        "{\"transcript\":\"I like hotdogs\"}," +
+        "{\"transcript\":\"I like hot stocks\"}," +
+        "{\"transcript\":\"I'll like hotdogs\"}," +
+        "{\"transcript\":\"I like a hot stocks\"}" +
+        "]," +
+        "\"final\":true" +
+        "}]," +
+        "\"result_index\":0}\n"
+      ).getBytes(DEFAULT_CHARSET),
+    emptyTranscriptionResult =
+      "{\"result\":[]}".getBytes(DEFAULT_CHARSET);
 }

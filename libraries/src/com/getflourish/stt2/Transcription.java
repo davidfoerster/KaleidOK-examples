@@ -7,14 +7,23 @@ import com.google.gson.stream.JsonToken;
 import kaleidok.http.HttpConnection;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.http.responsehandler.JsonResponseHandler;
+import kaleidok.io.platform.PlatformPaths;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.http.concurrent.FutureCallback;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+
+import static com.getflourish.stt2.STT.logger;
 
 
 public class Transcription implements Runnable
@@ -46,9 +55,29 @@ public class Transcription implements Runnable
   public OutputStream getOutputStream() throws IOException
   {
     if (outputStream == null) {
-      outputStream = connection.getOutputStream();
+      outputStream = new TeeOutputStream(
+        connection.getOutputStream(), openLogOutputStream());
     }
     return outputStream;
+  }
+
+
+  private static final Format logFileFormat =
+    new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS.'flac'");
+
+  private static final OpenOption[] logOpenoptions =
+    new OpenOption[]{
+      StandardOpenOption.CREATE_NEW
+    };
+
+  private OutputStream openLogOutputStream() throws IOException
+  {
+    Path path = PlatformPaths.INSTANCE.getDataDir(
+      this.getClass().getPackage().getName(), (FileAttribute[]) null)
+      .resolve(logFileFormat.format(System.currentTimeMillis()));
+    logger.log(Level.FINE, "Recorded speech written to \"{0}\"", path);
+    return new BufferedOutputStream(
+      Files.newOutputStream(path, logOpenoptions));
   }
 
 
@@ -82,19 +111,17 @@ public class Transcription implements Runnable
   {
     try {
       SttResponse response;
-      if (!STT.debug) {
+      if (!logger.isLoggable(Level.FINEST)) {
         response = parse(connection.getReader());
       } else {
         String strResponse = connection.getBody();
-        System.out.println(strResponse);
+        logger.log(Level.FINEST, strResponse);
         response = parse(new StringReader(strResponse));
         logResponse(response);
       }
       return response;
     } catch (IOException ex) {
-      if (STT.debug)
-        System.err.println("I/O ERROR: Network connection failure");
-      throw ex;
+      throw new IOException("Network connection failure", ex);
     }
   }
 
@@ -121,14 +148,12 @@ public class Transcription implements Runnable
   protected void logResponse( SttResponse response )
   {
     if (response != null) {
-      SttResponse.Result result = response.result[0];
-      assert response.result.length == 1;
-      SttResponse.Result.Alternative alternative = result.alternative[0];
-      System.out.println(
-        "Recognized: " + alternative.transcript +
-          " (confidence: " + alternative.confidence + ')');
-    } else {
-      System.out.println("Speech could not be interpreted! Try to shorten the recording.");
+      SttResponse.Result.Alternative alternative = response.getTopAlternative();
+      if (alternative != null) {
+        logger.log(Level.FINE,
+          "Recognized: {0} (confidence: {1,number,percent})",
+          new Object[]{alternative.transcript, alternative.confidence});
+      }
     }
   }
 

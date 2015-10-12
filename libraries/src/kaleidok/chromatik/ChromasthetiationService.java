@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 
 
 public class ChromasthetiationService
@@ -145,8 +146,7 @@ public class ChromasthetiationService
         }
         return;
       }
-      if (verbose >= 3)
-        System.out.println(emoState);
+      logger.log(Level.FINE, "Synesthetiation result:\n{0}", emoState);
 
       chromatikQuery.keywords = getQueryKeywords(emoState);
       getQueryOptions(emoState, chromatikQuery.opts);
@@ -157,8 +157,8 @@ public class ChromasthetiationService
     private void runChromatikQuery()
     {
       URI chromatikUri = chromatikQuery.getUri();
-      if (verbose >= 3)
-        System.out.println(chromatikUri);
+      logger.log(Level.FINER,
+        "Requesting search results from: {0}", chromatikUri);
 
       jsonAsync.execute(Request.Get(chromatikUri),
         ChromatikResponse.class, this);
@@ -189,9 +189,7 @@ public class ChromasthetiationService
     @Override
     public void completed( ChromatikResponse response )
     {
-      if (verbose >= 1) {
-        System.out.println("Chromatik found " + response.hits + " results.");
-      }
+      logger.log(Level.FINE, "Chromatik found {0} results", response.hits);
 
       if (response.results.length == 0 && !chromatikQuery.keywords.isEmpty()) {
         removeLastKeyword();
@@ -210,10 +208,9 @@ public class ChromasthetiationService
               {
                 flickrPhoto.setSizes(sizes);
                 int ticket = takeTickets(1);
-                if (verbose >= 3) {
-                  System.out.println("Received " + ticket +
-                    " download tickets for " + flickrPhoto.getMediumUrl());
-                }
+                logger.log(Level.FINEST,
+                  "Received {0} download tickets for {1}",
+                  new Object[]{ticket, flickrPhoto.getMediumUrl()});
                 if (ticket > 0) {
                   Future<Image> fImage = imageAsync.execute(
                     Request.Get(flickrPhoto.getLargestImageSize().source),
