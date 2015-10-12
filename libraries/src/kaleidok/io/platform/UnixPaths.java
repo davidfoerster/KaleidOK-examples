@@ -10,7 +10,7 @@ import java.util.Set;
 import static java.nio.file.attribute.PosixFilePermissions.asFileAttribute;
 
 
-class UnixPaths extends PlatformPaths
+class UnixPaths extends PlatformPathsBase
 {
   @Override
   protected Path getTempDirImpl()

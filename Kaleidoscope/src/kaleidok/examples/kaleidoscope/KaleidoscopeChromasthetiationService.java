@@ -65,9 +65,8 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
     File cacheDir = new File(parent.getParameter(
       cacheParamBase + "path", parent.getClass().getCanonicalName()));
     if (!cacheDir.isAbsolute()) {
-      cacheDir = new File(
-        PlatformPaths.INSTANCE.getCacheDir().toString(),
-        cacheDir.getPath());
+      cacheDir =
+        PlatformPaths.getCacheDir().resolve(cacheDir.getPath()).toFile();
     }
 
     CachingHttpClientBuilder builder = CachingHttpClientBuilder.create();

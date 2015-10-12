@@ -71,9 +71,9 @@ public class Transcription implements Runnable
 
   private OutputStream openLogOutputStream() throws IOException
   {
-    Path path = PlatformPaths.INSTANCE.getDataDir(
-      this.getClass().getPackage().getName())
-      .resolve(logFileFormat.format(System.currentTimeMillis()));
+    Path path =
+      PlatformPaths.getDataDir(this.getClass().getPackage().getName())
+        .resolve(logFileFormat.format(System.currentTimeMillis()));
     logger.log(Level.FINE, "Recorded speech written to \"{0}\"", path);
     return new BufferedOutputStream(
       Files.newOutputStream(path, logOpenoptions));

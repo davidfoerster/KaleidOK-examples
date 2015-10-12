@@ -211,7 +211,7 @@ public class MockSpeechToTextHandler implements HttpHandler
   {
     if (tempDir == null) {
       Class<?> clazz = (namespace instanceof Class) ? (Class<?>) namespace : namespace.getClass();
-      tempDir = PlatformPaths.INSTANCE.getTempDir().resolve(clazz.getCanonicalName());
+      tempDir = PlatformPaths.getTempDir().resolve(clazz.getCanonicalName());
       try {
         Files.createDirectory(tempDir);
       } catch (FileAlreadyExistsException ex) {
