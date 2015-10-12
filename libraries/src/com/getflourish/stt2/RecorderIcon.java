@@ -12,13 +12,11 @@ public class RecorderIcon
 
   public float radius = 20;
 
-  public float
-    x = 10 + radius,
-    y = 10 + radius;
+  public float x = -10 - radius, y = -x;
 
   public float strokeWeight = 1;
 
-  public int fillColor = 0xffff0000, strokeColor = 0xffffffff;
+  public int fillColor = 0xffff0000, strokeColor = 0xc0ffffff;
 
 
   public RecorderIcon( PApplet p, STT stt )
@@ -32,15 +30,24 @@ public class RecorderIcon
 
   public void draw()
   {
+    PApplet p = this.p;
     switch (stt.getStatus()) {
     case RECORDING:
+      int previousEllipseMode = p.g.ellipseMode;
+      p.ellipseMode(PApplet.RADIUS);
       p.fill(fillColor);
       p.stroke(strokeColor);
       p.strokeWeight(strokeWeight);
 
-      p.ellipseMode(PApplet.RADIUS);
+      float x = this.x, y = this.y, radius = this.radius;
+      if (x < 0)
+        x += p.width;
+      if (y < 0)
+        y += p.height;
       p.ellipse(x, y, radius, radius);
-      p.ellipseMode(PApplet.CENTER);
+
+      p.ellipseMode(previousEllipseMode);
+      break;
     }
   }
 }

@@ -50,7 +50,6 @@ public class SttManager
 
     if (bEnabled) {
       RecorderIcon ri = new RecorderIcon(parent, stt);
-      ri.x = parent.width - ri.x;
     }
 
     return bEnabled;
