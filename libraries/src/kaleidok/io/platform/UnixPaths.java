@@ -41,12 +41,8 @@ class UnixPaths extends PlatformPathsBase
 
 
   private static final FileAttribute<?>[]
-    DEFAULT_TEMPFILE_ATTRIBUTES = new FileAttribute[] {
-        asFileAttribute(permissionsFromMask(0600))
-      },
-    DEFAULT_TEMPDIR_ATTRIBUTES = new FileAttribute[] {
-        asFileAttribute(permissionsFromMask(0700))
-      };
+    DEFAULT_TEMPFILE_ATTRIBUTES = { asFileAttribute(permissionsFromMask(0600)) },
+    DEFAULT_TEMPDIR_ATTRIBUTES = { asFileAttribute(permissionsFromMask(0700)) };
 
   @Override
   protected FileAttribute<?>[] getTempDirectoryDefaultAttributes()
