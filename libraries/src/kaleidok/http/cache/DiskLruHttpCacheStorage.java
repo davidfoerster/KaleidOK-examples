@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.nio.file.attribute.FileAttribute;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -61,9 +60,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
     throws IOException
   {
     this(
-      PlatformPaths.INSTANCE
-        .getCacheDir(appName, (FileAttribute[]) null)
-        .toFile(),
+      PlatformPaths.INSTANCE.getCacheDir(appName).toFile(),
       appVersion, maxSize);
   }
 

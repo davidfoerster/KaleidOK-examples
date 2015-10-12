@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.FileAttribute;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.logging.Level;
@@ -73,7 +72,7 @@ public class Transcription implements Runnable
   private OutputStream openLogOutputStream() throws IOException
   {
     Path path = PlatformPaths.INSTANCE.getDataDir(
-      this.getClass().getPackage().getName(), (FileAttribute[]) null)
+      this.getClass().getPackage().getName())
       .resolve(logFileFormat.format(System.currentTimeMillis()));
     logger.log(Level.FINE, "Recorded speech written to \"{0}\"", path);
     return new BufferedOutputStream(

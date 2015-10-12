@@ -67,6 +67,11 @@ public class PlatformPaths
   }
 
 
+  public Path createTempDirectory( String prefix ) throws IOException
+  {
+    return createTempDirectory( prefix, (FileAttribute[]) null );
+  }
+
   public Path createTempDirectory( String prefix,
     FileAttribute<?>... attrs )
     throws IOException
@@ -74,6 +79,12 @@ public class PlatformPaths
     if (attrs == null || attrs.length == 0)
       attrs = getTempDirectoryDefaultAttributes();
     return Files.createTempDirectory(getTempDir(), prefix, attrs);
+  }
+
+
+  public Path createTempFile( String prefix, String suffix ) throws IOException
+  {
+    return createTempFile(prefix, suffix, (FileAttribute[]) null);
   }
 
   public Path createTempFile( String prefix, String suffix,
@@ -101,6 +112,11 @@ public class PlatformPaths
   }
 
 
+  public Path getCacheDir( String name ) throws IOException
+  {
+    return getCacheDir(name, (FileAttribute[]) null);
+  }
+
   public Path getCacheDir( String name, FileAttribute<?>... attrs )
     throws IOException
   {
@@ -122,6 +138,17 @@ public class PlatformPaths
     return dataDir;
   }
 
+  protected Path getDataDirImpl()
+  {
+    throw new UnsupportedOperationException();
+  }
+
+
+  public Path getDataDir( String name ) throws IOException
+  {
+    return getDataDir(name, (FileAttribute[]) null);
+  }
+
   public Path getDataDir( String name, FileAttribute<?>... attrs )
     throws IOException
   {
@@ -131,10 +158,5 @@ public class PlatformPaths
       attrs = NO_ATTRIBUTES;
     return Files.createDirectories(
       getDataDir().resolve(name), attrs);
-  }
-
-  protected Path getDataDirImpl()
-  {
-    throw new UnsupportedOperationException();
   }
 }
