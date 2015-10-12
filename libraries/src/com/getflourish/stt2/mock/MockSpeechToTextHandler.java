@@ -8,7 +8,6 @@ import kaleidok.io.platform.PlatformPaths;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -202,6 +201,7 @@ public class MockSpeechToTextHandler implements HttpHandler
 
 
   private static Path tempDir = null;
+  private static Class<?> tempDirNamespace = null;
 
   private static final Format tempFileFormat =
     new SimpleDateFormat("yyyyMMdd-HHmmss.SSS-");
@@ -210,13 +210,14 @@ public class MockSpeechToTextHandler implements HttpHandler
     throws IOException
   {
     if (tempDir == null) {
-      Class<?> clazz = (namespace instanceof Class) ? (Class<?>) namespace : namespace.getClass();
-      tempDir = PlatformPaths.getTempDir().resolve(clazz.getCanonicalName());
-      try {
-        Files.createDirectory(tempDir);
-      } catch (FileAlreadyExistsException ex) {
-        // go on...
-      }
+      tempDirNamespace =
+        (namespace instanceof Class) ?
+          (Class<?>) namespace :
+          namespace.getClass();
+      tempDir =
+        PlatformPaths.createTempDirectory(tempDirNamespace.getCanonicalName());
+    } else if (namespace != tempDirNamespace) {
+      throw new AssertionError();
     }
     return Files.createTempFile(tempDir,
       tempFileFormat.format(System.currentTimeMillis()),
