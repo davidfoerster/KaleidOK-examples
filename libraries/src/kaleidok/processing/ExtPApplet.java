@@ -36,7 +36,7 @@ public class ExtPApplet extends PApplet
     return parent.getParameter(name);
   }
 
-  public Object getParameter( String name, Object defaultValue )
+  public <T> T getParameter( String name, T defaultValue )
   {
     return DefaultValueParser.parse(getParameter(name), defaultValue);
   }

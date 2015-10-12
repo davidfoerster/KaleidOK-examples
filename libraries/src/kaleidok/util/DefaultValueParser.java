@@ -72,38 +72,44 @@ public final class DefaultValueParser
   }
 
 
-  private static final Class<?>[] valueOfParameterTypes =
-    new Class<?>[]{ String.class };
+  private static final Class<?>[] valueOfParameterTypes = { String.class };
 
   public static <T> T valueOf( String s, Class<T> targetClass )
     throws IllegalArgumentException
   {
     try {
       Method m = targetClass.getMethod("valueOf", valueOfParameterTypes);
-      if (targetClass.isAssignableFrom(m.getReturnType())) {
-        try {
-          //noinspection unchecked
-          return (T) m.invoke(null, s);
-        } catch (InvocationTargetException ex) {
-          throw new IllegalArgumentException(ex.getCause());
-        }
+      if (!targetClass.isAssignableFrom(m.getReturnType())) {
+        throw new ClassCastException(String.format(
+          "Cannot assign return type %3$s of %4$s#%1$s(%2$s) to %4$s",
+          m.getName(), valueOfParameterTypes[0].getSimpleName(),
+          m.getReturnType().getName(), targetClass.getCanonicalName()));
       }
-      throw new ClassCastException(
-        "Cannot assign return type " + m.getReturnType().getName() + " to " + targetClass.getName());
-    }
-    catch (NoSuchMethodException | IllegalAccessException | ClassCastException | NullPointerException ex) {
-      throw new Error(
-        targetClass.getName() + " cannot be created with #valueOf(String)", ex);
+      //noinspection unchecked
+      return (T) m.invoke(null, s);
+    } catch (NoSuchMethodException | IllegalAccessException | ClassCastException | IllegalArgumentException ex) {
+      throw new IllegalArgumentException("Cannot parse to " + targetClass.getName(), ex);
+    } catch (InvocationTargetException ex) {
+      throw new IllegalArgumentException(ex.getCause());
     }
   }
 
-  public static Object parse( String s, Object defaultValue )
+
+  public static <T> T parse( String s, T defaultValue )
   {
-    if (defaultValue instanceof String)
-      return (s != null) ? s : defaultValue;
+    //noinspection unchecked
+    return parse(s, defaultValue, (Class<T>) defaultValue.getClass());
+  }
+
+  public static <T> T parse( String s, T defaultValue, Class<T> clazz )
+  {
+    if (clazz == String.class || clazz == CharSequence.class) {
+      //noinspection unchecked
+      return (s != null) ? (T) s : defaultValue;
+    }
     if (s != null && !s.isEmpty()) {
       try {
-        Object value = valueOf(s, defaultValue.getClass());
+        T value = valueOf(s, clazz);
         if (value != null)
           return value;
       } catch (IllegalArgumentException ex) {

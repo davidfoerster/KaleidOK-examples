@@ -62,7 +62,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
     String cacheParamBase = parent.getClass().getCanonicalName() + ".cache.";
     long httpCacheSize = DefaultValueParser.parseLong(parent,
       cacheParamBase + "size", DEFAULT_HTTP_CACHE_SIZE);
-    File cacheDir = new File((String) parent.getParameter(
+    File cacheDir = new File(parent.getParameter(
       cacheParamBase + "path", parent.getClass().getCanonicalName()));
     if (!cacheDir.isAbsolute()) {
       cacheDir = new File(
