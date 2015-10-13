@@ -75,7 +75,7 @@ public class ChromasthetiationService
 
   private static ThreadFactory createThreadFactory()
   {
-    return new GroupedThreadFactory("Chromastetiation", true);
+    return new GroupedThreadFactory("Chromasthetiation", true);
   }
 
 
