@@ -174,7 +174,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
         switch (((FlickrException) ex).getErrorCode()) {
         case 1: // Photo not found
         case 2: // Permission denied
-          logger.fine("Flickr: " + ex.getLocalizedMessage());
+          logger.log(Level.FINE, "Flickr says: {0}", ex.getLocalizedMessage());
           return;
         }
       }

@@ -2,9 +2,8 @@ package kaleidok.chromatik;
 
 import kaleidok.chromatik.data.ChromatikResponse;
 import kaleidok.concurrent.GroupedThreadFactory;
-import kaleidok.concurrent.NestedFutureCallback;
+import kaleidok.util.BoundedCompletionQueue;
 import kaleidok.flickr.AsyncFlickr;
-import kaleidok.flickr.Size;
 import kaleidok.flickr.internal.FlickrBase;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.SizeMap;
@@ -17,11 +16,7 @@ import synesketch.emotion.EmotionalState;
 import java.awt.Image;
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 
 
@@ -109,7 +104,7 @@ public class ChromasthetiationService
 
     private final FutureCallback<Image> imageCallback;
 
-    private final AtomicInteger remainingCount;
+    private final BoundedCompletionQueue<FlickrPhoto> photoQueue;
 
 
     public RunnableChromasthetiator( ChromasthetiatorBase<?> queryParams,
@@ -125,7 +120,7 @@ public class ChromasthetiationService
       this.text = text;
       this.futureImageCallback = futureImageCallback;
       this.imageCallback = imageCallback;
-      remainingCount = (maxCount >= 0) ? new AtomicInteger(maxCount) : null;
+      photoQueue = new BoundedCompletionQueue<>(maxCount, chromatikQuery.nhits);
     }
 
 
@@ -165,27 +160,6 @@ public class ChromasthetiationService
     }
 
 
-    protected int takeTickets( int count )
-    {
-      AtomicInteger remainingCount = this.remainingCount;
-      if (remainingCount == null)
-        return count;
-      int current, taken;
-      do {
-        current = remainingCount.get();
-        if (current <= 0)
-          return 0;
-        taken =  Math.min(count, current);
-      } while (!remainingCount.compareAndSet(current, current - taken));
-      return taken;
-    }
-
-    protected boolean hasTickets( int count )
-    {
-      return remainingCount == null || remainingCount.get() >= count;
-    }
-
-
     @Override
     public void completed( ChromatikResponse response )
     {
@@ -197,47 +171,109 @@ public class ChromasthetiationService
         return;
       }
 
-      for (ChromatikResponse.Result imgInfo: response.results) {
-        final FlickrPhoto flickrPhoto = new FlickrPhoto(imgInfo);
-        if (hasTickets(1)) {
-          flickr.getPhotoSizes(flickrPhoto.id,
-            new NestedFutureCallback<SizeMap, ChromatikResponse>(this)
-            {
-              @Override
-              public void completed( SizeMap sizes )
-              {
-                flickrPhoto.setSizes(sizes);
-                int ticket = takeTickets(1);
-                logger.log(Level.FINEST,
-                  "Received {0} download tickets for {1}",
-                  new Object[]{ticket, flickrPhoto.getMediumUrl()});
-                if (ticket > 0) {
-                  Future<Image> fImage = imageAsync.execute(
-                    Request.Get(flickrPhoto.getLargestImageSize().source),
-                    imageCallback);
-                  if (futureImageCallback != null)
-                    futureImageCallback.completed(fImage);
-                } else {
-                  cancelled();
-                }
-              }
-
-              @Override
-              public void failed( Exception ex )
-              {
-                if (ex instanceof FlickrException) {
-                  ((FlickrException) ex).setPertainingObject(
-                    flickrPhoto.getMediumUrl());
-                } else if (ex instanceof IOException) {
-                  Size s = flickrPhoto.getLargestImageSize();
-                  String url = (s != null) ? s.source : flickrPhoto.getMediumUrl();
-                  ex = new IOException("Couldn't load " + url, ex);
-                }
-                super.failed(ex);
-              }
-            });
+      synchronized (photoQueue) {
+        for (ChromatikResponse.Result imgInfo : response.results) {
+          final FlickrPhoto flickrPhoto = new FlickrPhoto(imgInfo);
+          imgInfo.flickrPhoto = flickrPhoto;
+          photoQueue.add(flickrPhoto);
         }
-        imgInfo.flickrPhoto = flickrPhoto;
+
+        dispatchQueue();
+      }
+    }
+
+
+    private void dispatchQueue()
+    {
+      synchronized (photoQueue) {
+        FlickrPhoto flickrPhoto;
+        while ((flickrPhoto = photoQueue.poll()) != null) {
+          logger.log(Level.FINEST,
+            "Received a download ticket for {0}", flickrPhoto);
+          flickr.getPhotoSizes(
+            flickrPhoto.id, new PhotoSizesCallback(flickrPhoto));
+        }
+      }
+    }
+
+
+    private void releaseQueuePermit()
+    {
+      synchronized (photoQueue) {
+        photoQueue.release();
+        dispatchQueue();
+      }
+    }
+
+
+    private class PhotoSizesCallback implements FutureCallback<SizeMap>
+    {
+      private final FlickrPhoto flickrPhoto;
+
+
+      private PhotoSizesCallback( FlickrPhoto flickrPhoto )
+      {
+        this.flickrPhoto = flickrPhoto;
+      }
+
+
+      @Override
+      public void completed( SizeMap sizes )
+      {
+        flickrPhoto.setSizes(sizes);
+        Future<Image> fImage = imageAsync.execute(
+          Request.Get(flickrPhoto.getLargestImageSize().source),
+          new FutureCallback<Image>()
+          {
+            @Override
+            public void completed( Image image )
+            {
+              logger.log(Level.FINE, "Downloaded image {0}",
+                flickrPhoto.getLargestImageSize().source);
+              photoQueue.completeItem();
+              imageCallback.completed(image);
+            }
+
+            @Override
+            public void failed( Exception ex )
+            {
+              imageCallback.failed(ex);
+              releaseQueuePermit();
+            }
+
+            @Override
+            public void cancelled()
+            {
+              imageCallback.cancelled();
+              releaseQueuePermit();
+            }
+          });
+
+        if (futureImageCallback != null)
+          futureImageCallback.completed(fImage);
+      }
+
+
+      @Override
+      public void failed( Exception ex )
+      {
+        if (ex instanceof FlickrException) {
+          ((FlickrException) ex).setPertainingObject(
+            flickrPhoto.getMediumUrl());
+        } else if (ex instanceof IOException) {
+          ex = new IOException("Couldn't load sizes of " + flickrPhoto, ex);
+        }
+
+        RunnableChromasthetiator.this.failed(ex);
+        releaseQueuePermit();
+      }
+
+
+      @Override
+      public void cancelled()
+      {
+        RunnableChromasthetiator.this.cancelled();
+        releaseQueuePermit();
       }
     }
 
@@ -247,8 +283,6 @@ public class ChromasthetiationService
     {
       if (futureImageCallback != null)
         futureImageCallback.failed(ex);
-      if (imageCallback != null)
-        imageCallback.failed(ex);
     }
 
 
@@ -257,8 +291,6 @@ public class ChromasthetiationService
     {
       if (futureImageCallback != null)
         futureImageCallback.cancelled();
-      if (imageCallback != null)
-        imageCallback.cancelled();
     }
 
 

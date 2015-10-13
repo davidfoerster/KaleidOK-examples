@@ -45,6 +45,13 @@ public abstract class Photo
   }
 
 
+  @Override
+  public String toString()
+  {
+    return getMediumUrl();
+  }
+
+
   public SizeMap getSizes()
   {
     return sizes;
