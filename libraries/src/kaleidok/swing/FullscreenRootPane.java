@@ -108,9 +108,9 @@ public class FullscreenRootPane extends JRootPane
       frame.addNotify();
       /*
       if (fullscreen) {
-        frame.addFocusListener(FullscreenFocusListener.INSTANCE);
+        frame.addFocusListener(FullscreenFocusListener.getInstance());
       } else {
-        frame.removeFocusListener(FullscreenFocusListener.INSTANCE);
+        frame.removeFocusListener(FullscreenFocusListener.getInstance());
       }
       */
     }
@@ -143,8 +143,18 @@ public class FullscreenRootPane extends JRootPane
 
   private static class FullscreenFocusListener implements FocusListener
   {
-    public static final FullscreenFocusListener INSTANCE =
-      new FullscreenFocusListener();
+    private static FullscreenFocusListener INSTANCE = null;
+
+    public static FullscreenFocusListener getInstance()
+    {
+      if (INSTANCE == null) {
+        synchronized (FullscreenFocusListener.class) {
+          if (INSTANCE == null)
+            INSTANCE = new FullscreenFocusListener();
+        }
+      }
+      return INSTANCE;
+    }
 
     protected FullscreenFocusListener() { }
 
