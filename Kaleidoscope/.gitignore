@@ -1,2 +1,3 @@
 resources/images/
-src/kaleidok/examples/kaleidoscope/*.properties
+resources/logging.properties
+src/kaleidok/examples/kaleidoscope/KaleidoscopeApp.properties
