@@ -19,6 +19,8 @@ import java.net.URI;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
+import static kaleidok.util.LoggingUtils.logThrown;
+
 
 public class ChromasthetiationService
 {
@@ -237,6 +239,11 @@ public class ChromasthetiationService
             @Override
             public void failed( Exception ex )
             {
+              logThrown(logger,
+                (ex instanceof IOException) ? Level.SEVERE : Level.FINER,
+                "Couldn't download {0}",
+                ex, flickrPhoto.getLargestImageSize().source);
+
               imageCallback.failed(ex);
               releaseQueuePermit();
             }
@@ -281,6 +288,10 @@ public class ChromasthetiationService
     @Override
     public void failed( Exception ex )
     {
+      logger.log(
+        (ex instanceof IOException) ? Level.SEVERE : Level.FINER,
+        "Chromasthetiation error", ex);
+
       if (futureImageCallback != null)
         futureImageCallback.failed(ex);
     }

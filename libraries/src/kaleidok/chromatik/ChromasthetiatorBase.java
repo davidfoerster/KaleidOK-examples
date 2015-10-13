@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 import static kaleidok.util.Arrays.shuffle;
+import static kaleidok.util.LoggingUtils.logThrown;
 
 
 public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr>
@@ -183,17 +184,19 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
           switch (ex.getErrorCode()) {
           case 1: // Photo not found
           case 2: // Permission denied
-            logger.log(Level.FINER, "{0}: {1}",
-              new Object[]{flickrErrorMessage, ex.getLocalizedMessage()});
+            logger.log(Level.FINER, "{0} for {1}: {2}",
+              new Object[]{flickrErrorMessage, this, ex.getLocalizedMessage()});
             sizes = new SizeMap();
             break;
 
           default:
-            logger.log(Level.WARNING, flickrErrorMessage, ex);
+            logThrown(logger, Level.WARNING, "{0} for {1}", ex,
+              new Object[]{flickrErrorMessage, this});
             break;
           }
         } catch (IOException ex) {
-          logger.log(Level.WARNING, flickrErrorMessage, ex);
+          logThrown(logger, Level.WARNING, "{0} for {1}", ex,
+            new Object[]{flickrErrorMessage, this});
         }
       }
       return sizes;
