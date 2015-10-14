@@ -90,7 +90,6 @@ public abstract class CircularImageLayer extends ImageLayer
     PApplet parent = this.parent;
     assert parent.g.ellipseMode == PApplet.RADIUS;
     parent.noFill();
-    parent.strokeWeight(1);
     parent.ellipse(0, 0, radius, radius);
   }
 }

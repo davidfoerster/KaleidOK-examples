@@ -63,7 +63,7 @@ public class OuterMovingShape extends CircularImageLayer
     } else {
       parent.noFill();
       parent.stroke(128);
-      parent.strokeWeight(0.5f / getOuterRadius());
+      parent.strokeWeight(parent.g.strokeWeight * 0.5f / getOuterRadius());
     }
 
     final int segmentCount = getSegmentCount();

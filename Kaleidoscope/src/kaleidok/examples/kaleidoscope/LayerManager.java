@@ -42,7 +42,6 @@ public class LayerManager extends ArrayList<ImageLayer>
     add(getOuterMovingShape());
     add(getFoobarLayer());
     add(getCentreLayer());
-    updateLayerSizes();
   }
 
 
@@ -51,7 +50,8 @@ public class LayerManager extends ArrayList<ImageLayer>
     if (spectrogramLayer == null) {
       AudioProcessingManager apm = parent.getAudioProcessingManager();
       spectrogramLayer = new SpectrogramLayer(parent,
-        1 << 8, -1, -1, apm.getFftProcessor(),
+        1 << 8, 0.290f, 0.480f,
+        apm.getFftProcessor(),
         apm.getAudioDispatcher().getFormat().getSampleRate());
       spectrogramLayer.setNextImage(getImages().get(0));
     }
@@ -62,7 +62,7 @@ public class LayerManager extends ArrayList<ImageLayer>
   private OuterMovingShape getOuterMovingShape()
   {
     if (outerMovingShape == null) {
-      outerMovingShape = new OuterMovingShape(parent, 1 << 5, -1);
+      outerMovingShape = new OuterMovingShape(parent, 16, 0.175f);
       outerMovingShape.setNextImage(getImages().get(4));
 
       AudioProcessingManager apm = parent.getAudioProcessingManager();
@@ -80,7 +80,7 @@ public class LayerManager extends ArrayList<ImageLayer>
   private FoobarLayer getFoobarLayer()
   {
     if (foobarLayer == null) {
-      foobarLayer = new FoobarLayer(parent, 1 << 4, -1, -1);
+      foobarLayer = new FoobarLayer(parent, 16, 0.100f, 0.350f);
       foobarLayer.setNextImage(getImages().get(3));
     }
     return foobarLayer;
@@ -91,7 +91,7 @@ public class LayerManager extends ArrayList<ImageLayer>
   {
     if (centreLayer == null) {
       centreLayer = new CentreMovingShape(parent,
-        getImages(), 1 << 5, -1,
+        getImages(), 1 << 5, 0.050f, 0.150f,
         parent.getAudioProcessingManager().getVolumeLevelProcessor());
     }
     return centreLayer;
@@ -109,23 +109,6 @@ public class LayerManager extends ArrayList<ImageLayer>
       }
     }
     return backgroundLayer;
-  }
-
-
-  private void updateLayerSizes()
-  {
-    float r = Math.min(parent.width, parent.height) / 1000f;
-
-    centreLayer.setInnerRadius(r * 50);
-    centreLayer.setOuterRadius(r * 150);
-
-    outerMovingShape.setOuterRadius(r * 175);
-
-    foobarLayer.setInnerRadius(r * 100);
-    foobarLayer.setOuterRadius(r * 350);
-
-    spectrogramLayer.setInnerRadius(r * 290);
-    spectrogramLayer.setOuterRadius(r * 480);
   }
 
 
@@ -203,14 +186,16 @@ public class LayerManager extends ArrayList<ImageLayer>
   {
     final Kaleidoscope parent = this.parent;
 
-    if (parent.wasResized())
-      updateLayerSizes();
-
     backgroundLayer.run();
 
+    float
+      scale = Math.min(parent.width, parent.height),
+      strokeWeight = 1 / scale;
     parent.pushMatrix();
     parent.translate(parent.width * 0.5f, parent.height * 0.5f);
+    parent.scale(scale);
     for (Runnable l : this) {
+      parent.strokeWeight(strokeWeight);
       l.run();
     }
     parent.popMatrix();

@@ -122,7 +122,7 @@ public class FoobarLayer extends CircularImageLayer
 		parent.scale(getOuterRadius());
 
 		parent.stroke(255); // set stroke to white
-    parent.strokeWeight(1 / getOuterRadius());
+    parent.strokeWeight(parent.g.strokeWeight / getOuterRadius());
 		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
 		PImage img;
 		if (wireframe < 1 && (img = getCurrentImage()) != null) {

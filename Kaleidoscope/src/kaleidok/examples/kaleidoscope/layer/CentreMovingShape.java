@@ -30,19 +30,19 @@ public class CentreMovingShape extends CircularImageLayer
 
 
   public CentreMovingShape( Kaleidoscope parent, List<PImageFuture> images,
-    int segmentCount, float radius,
+    int segmentCount, float innerRadius, float outerRadius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
     this(parent, new CyclingList<>(images, (int) parent.random(images.size())),
-      segmentCount, radius, volumeLevelProcessor);
+      segmentCount, innerRadius, outerRadius, volumeLevelProcessor);
   }
 
 
   private CentreMovingShape( Kaleidoscope parent,
-    CyclingList<PImageFuture> images, int segmentCount, float radius,
-    VolumeLevelProcessor volumeLevelProcessor )
+    CyclingList<PImageFuture> images, int segmentCount, float innerRadius,
+    float outerRadius, VolumeLevelProcessor volumeLevelProcessor )
   {
-    super(parent, segmentCount, 0, radius);
+    super(parent, segmentCount, innerRadius, outerRadius);
     setNextImage(images.getNext());
     this.images = images;
     this.volumeLevelProcessor = volumeLevelProcessor;
@@ -135,7 +135,7 @@ public class CentreMovingShape extends CircularImageLayer
     } else {
       parent.noFill();
       parent.stroke(128);
-      parent.strokeWeight(0.5f / getOuterRadius());
+      parent.strokeWeight(parent.g.strokeWeight * 0.5f / getOuterRadius());
     }
 
     final int segmentCount = getSegmentCount();

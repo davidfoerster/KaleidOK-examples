@@ -27,7 +27,7 @@ public class SpectrogramLayer extends CircularImageLayer
 
 
 	public SpectrogramLayer( PApplet parent, int segmentCount,
-    int innerRadius, int outerRadius, MinimFFTProcessor spectrum,
+    float innerRadius, float outerRadius, MinimFFTProcessor spectrum,
     float sampleRate )
 	{
 		super(parent, segmentCount, innerRadius, outerRadius);
@@ -166,7 +166,7 @@ public class SpectrogramLayer extends CircularImageLayer
     } else {
       parent.noFill();
       parent.stroke(0, 255, 0);
-      parent.strokeWeight(0.5f / getOuterRadius());
+      parent.strokeWeight(parent.g.strokeWeight * 0.5f / getOuterRadius());
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     }
 
