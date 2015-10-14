@@ -9,7 +9,7 @@ import java.nio.file.attribute.FileAttribute;
 import static kaleidok.io.platform.PlatformPaths.NO_ATTRIBUTES;
 
 
-class PlatformPathsBase
+public class PlatformPathsBase
 {
   protected PlatformPathsBase() { }
 

@@ -3,7 +3,7 @@ package kaleidok.io.platform;
 import java.nio.file.Path;
 
 
-class OsxPaths extends UnixPaths
+public class OsxPaths extends UnixPaths
 {
   @Override
   protected Path getCacheDirImpl()

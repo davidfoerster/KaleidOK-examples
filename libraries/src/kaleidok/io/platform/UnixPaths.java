@@ -10,7 +10,7 @@ import java.util.Set;
 import static java.nio.file.attribute.PosixFilePermissions.asFileAttribute;
 
 
-class UnixPaths extends PlatformPathsBase
+public class UnixPaths extends PlatformPathsBase
 {
   @Override
   protected Path getTempDirImpl()
@@ -24,14 +24,15 @@ class UnixPaths extends PlatformPathsBase
   }
 
 
+  private static final PosixFilePermission[] posixFilePermissions = PosixFilePermission.values();
+
   public static Set<PosixFilePermission> permissionsFromMask( int mask )
   {
     final EnumSet<PosixFilePermission> dst =
       EnumSet.noneOf(PosixFilePermission.class);
     if ((mask & 0777) != 0) {
-      final PosixFilePermission[] src = PosixFilePermission.values();
-      for (PosixFilePermission p: src) {
-        final int pMask = 1 << (src.length - p.ordinal() - 1);
+      for (PosixFilePermission p: posixFilePermissions) {
+        final int pMask = 1 << (posixFilePermissions.length - p.ordinal() - 1);
         if ((mask & pMask) != 0)
           dst.add(p);
       }

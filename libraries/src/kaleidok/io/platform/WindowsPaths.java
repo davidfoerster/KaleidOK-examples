@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
-class WindowsPaths extends PlatformPathsBase
+public class WindowsPaths extends PlatformPathsBase
 {
   @Override
   protected Path getTempDirImpl()
