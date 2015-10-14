@@ -50,7 +50,7 @@ public class LayerManager extends ArrayList<ImageLayer>
     if (spectrogramLayer == null) {
       AudioProcessingManager apm = parent.getAudioProcessingManager();
       spectrogramLayer = new SpectrogramLayer(parent,
-        1 << 8, 0.290f, 0.480f,
+        1 << 8, 0.275f, 0.480f,
         apm.getFftProcessor(),
         apm.getAudioDispatcher().getFormat().getSampleRate());
       spectrogramLayer.setNextImage(getImages().get(0));
@@ -62,7 +62,7 @@ public class LayerManager extends ArrayList<ImageLayer>
   private OuterMovingShape getOuterMovingShape()
   {
     if (outerMovingShape == null) {
-      outerMovingShape = new OuterMovingShape(parent, 16, 0.175f);
+      outerMovingShape = new OuterMovingShape(parent, 16, 0.280f);
       outerMovingShape.setNextImage(getImages().get(4));
 
       AudioProcessingManager apm = parent.getAudioProcessingManager();
@@ -80,7 +80,7 @@ public class LayerManager extends ArrayList<ImageLayer>
   private FoobarLayer getFoobarLayer()
   {
     if (foobarLayer == null) {
-      foobarLayer = new FoobarLayer(parent, 16, 0.100f, 0.350f);
+      foobarLayer = new FoobarLayer(parent, 16, 0.100f, 0.300f);
       foobarLayer.setNextImage(getImages().get(3));
     }
     return foobarLayer;
