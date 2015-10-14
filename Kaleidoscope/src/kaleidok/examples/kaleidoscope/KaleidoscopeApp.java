@@ -52,8 +52,10 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
       getParameter(paramBase + "screen"), -1);
     boolean fullscreen = DefaultValueParser.parseBoolean(
       getParameter(paramBase + "fullscreen"), false);
-    if (screenIndex >= 0 || fullscreen)
+    if (screenIndex >= 0 || fullscreen) {
       getRootPane().moveToScreen(screenIndex, fullscreen);
+    }
+    handleFullscreenStateChange(null, null, fullscreen);
   }
 
   @Override
@@ -105,26 +107,15 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
     boolean fullscreen )
   {
     getTextFieldPanel().setVisible(!fullscreen);
+    if (fullscreen) {
+      getSketch().requestFocusInWindow();
+    }
   }
 
 
   public static void main( String... args ) throws IOException
   {
-    Class<? extends JApplet> appletClass = KaleidoscopeApp.class;
-    Properties properties = new Properties();
-    if (args != null && args.length > 0 && args[0].equals("--params")) {
-      String paramsFile = args[1];
-      properties.load(
-        paramsFile.equals("-") ?
-          new InputStreamReader(System.in) :
-          new FileReader(paramsFile));
-
-      args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
-    } else {
-      properties.load(appletClass.getResourceAsStream(
-        appletClass.getSimpleName() + ".properties"));
-    }
     new AppletLauncher(new FudgedAppletViewerFactory())
-      .launch(appletClass, properties, args);
+      .launch(KaleidoscopeApp.class, args);
   }
 }

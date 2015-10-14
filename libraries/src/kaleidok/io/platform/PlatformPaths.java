@@ -7,106 +7,93 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 
 
-public class PlatformPaths
+public final class PlatformPaths
 {
-  protected PlatformPaths() { }
+  private PlatformPaths() { }
 
 
   public static final FileAttribute<?>[] NO_ATTRIBUTES = new FileAttribute[0];
 
-  public static final PlatformPaths INSTANCE;
+  static final PlatformPathsBase platform;
   static {
     String os = System.getProperty("os.name").replace(" ", "");
-    INSTANCE =
+    platform =
       os.startsWith("Windows") ? new WindowsPaths() :
       os.startsWith("Linux") ? new LinuxPaths() :
       os.startsWith("MacOSX") ? new OsxPaths() :
       (os.startsWith("Solaris") || os.endsWith("BSD")) ? new UnixPaths() :
-        new PlatformPaths();
+        new PlatformPathsBase();
   }
 
 
-  private Path homeDir;
-
-  public Path getHomeDir()
+  public static Path getHomeDir()
   {
-    if (homeDir == null)
-      homeDir = getHomeDirImpl();
-    return homeDir;
+    return platform.getHomeDir();
   }
 
-  protected Path getHomeDirImpl()
+
+  public static Path getTempDir()
   {
-    return Paths.get(System.getProperty("user.home"));
+    return platform.getTempDir();
   }
 
 
-  private Path tempDir;
-
-  public Path getTempDir()
+  public static Path createTempDirectory( String prefix ) throws IOException
   {
-    if (tempDir == null)
-      tempDir = getTempDirImpl();
-    return tempDir;
+    return createTempDirectory( prefix, (FileAttribute[]) null );
   }
 
-  protected Path getTempDirImpl()
-  {
-    return Paths.get(System.getProperty("java.io.tmpdir"));
-  }
-
-
-  protected FileAttribute<?>[] getTempDirectoryDefaultAttributes()
-  {
-    return NO_ATTRIBUTES;
-  }
-
-  protected FileAttribute<?>[] getTempFileDefaultAttributes()
-  {
-    return NO_ATTRIBUTES;
-  }
-
-
-  public Path createTempDirectory( String prefix,
+  public static Path createTempDirectory( String prefix,
     FileAttribute<?>... attrs )
     throws IOException
   {
-    if (attrs == null || attrs.length == 0)
-      attrs = getTempDirectoryDefaultAttributes();
-    return Files.createTempDirectory(getTempDir(), prefix, attrs);
+    return platform.createTempDirectory(prefix, attrs);
   }
 
-  public Path createTempFile( String prefix, String suffix,
+
+  public static Path createTempFile( String prefix, String suffix ) throws IOException
+  {
+    return createTempFile(prefix, suffix, (FileAttribute[]) null);
+  }
+
+  public static Path createTempFile( String prefix, String suffix,
     FileAttribute<?>... attrs )
     throws IOException
   {
-    if (attrs == null || attrs.length == 0)
-      attrs = getTempFileDefaultAttributes();
-    return Files.createTempFile(getTempDir(), prefix, suffix, attrs);
+    return platform.createTempFile(prefix, suffix, attrs);
   }
 
 
-  private Path cacheDir;
-
-  public Path getCacheDir()
+  public static Path getCacheDir()
   {
-    if (cacheDir == null)
-      cacheDir = getCacheDirImpl();
-    return cacheDir;
+    return platform.getCacheDir();
   }
 
-  protected Path getCacheDirImpl()
+  public static Path getCacheDir( String name ) throws IOException
   {
-    throw new UnsupportedOperationException();
+    return getCacheDir(name, (FileAttribute[]) null);
   }
 
-
-  public Path getCacheDir( String name, FileAttribute<?>... attrs )
+  public static Path getCacheDir( String name, FileAttribute<?>... attrs )
     throws IOException
   {
-    if (name.isEmpty())
-      throw new IllegalArgumentException("Empty cache directory name");
-    return Files.createDirectories(
-      getCacheDir().resolve(name), attrs);
+    return platform.getCacheDir(name, attrs);
+  }
+
+
+  public static Path getDataDir()
+  {
+    return platform.getDataDir();
+  }
+
+  public static Path getDataDir( String name ) throws IOException
+  {
+    return getDataDir(name, (FileAttribute[]) null);
+  }
+
+  public static Path getDataDir( String name, FileAttribute<?>... attrs )
+    throws IOException
+  {
+    return platform.getDataDir(name, attrs);
   }
 }

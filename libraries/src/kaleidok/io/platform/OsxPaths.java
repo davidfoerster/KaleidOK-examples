@@ -3,11 +3,18 @@ package kaleidok.io.platform;
 import java.nio.file.Path;
 
 
-class OsxPaths extends UnixPaths
+public class OsxPaths extends UnixPaths
 {
   @Override
   protected Path getCacheDirImpl()
   {
-    return getHomeDir().resolve("Library/Caches");
+    return getDataDir().resolve("Caches");
+  }
+
+
+  @Override
+  protected Path getDataDirImpl()
+  {
+    return getHomeDir().resolve("Library");
   }
 }

@@ -60,9 +60,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
     throws IOException
   {
     this(
-      PlatformPaths.INSTANCE
-        .getCacheDir(appName, PlatformPaths.NO_ATTRIBUTES)
-        .toFile(),
+      PlatformPaths.getCacheDir(appName).toFile(),
       appVersion, maxSize);
   }
 

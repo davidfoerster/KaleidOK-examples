@@ -10,7 +10,7 @@ import java.util.Set;
 import static java.nio.file.attribute.PosixFilePermissions.asFileAttribute;
 
 
-class UnixPaths extends PlatformPaths
+public class UnixPaths extends PlatformPathsBase
 {
   @Override
   protected Path getTempDirImpl()
@@ -24,14 +24,15 @@ class UnixPaths extends PlatformPaths
   }
 
 
+  private static final PosixFilePermission[] posixFilePermissions = PosixFilePermission.values();
+
   public static Set<PosixFilePermission> permissionsFromMask( int mask )
   {
     final EnumSet<PosixFilePermission> dst =
       EnumSet.noneOf(PosixFilePermission.class);
     if ((mask & 0777) != 0) {
-      final PosixFilePermission[] src = PosixFilePermission.values();
-      for (PosixFilePermission p: src) {
-        final int pMask = 1 << (src.length - p.ordinal() - 1);
+      for (PosixFilePermission p: posixFilePermissions) {
+        final int pMask = 1 << (posixFilePermissions.length - p.ordinal() - 1);
         if ((mask & pMask) != 0)
           dst.add(p);
       }
@@ -41,12 +42,8 @@ class UnixPaths extends PlatformPaths
 
 
   private static final FileAttribute<?>[]
-    DEFAULT_TEMPFILE_ATTRIBUTES = new FileAttribute[] {
-        asFileAttribute(permissionsFromMask(0600))
-      },
-    DEFAULT_TEMPDIR_ATTRIBUTES = new FileAttribute[] {
-        asFileAttribute(permissionsFromMask(0700))
-      };
+    DEFAULT_TEMPFILE_ATTRIBUTES = { asFileAttribute(permissionsFromMask(0600)) },
+    DEFAULT_TEMPDIR_ATTRIBUTES = { asFileAttribute(permissionsFromMask(0700)) };
 
   @Override
   protected FileAttribute<?>[] getTempDirectoryDefaultAttributes()
@@ -64,9 +61,22 @@ class UnixPaths extends PlatformPaths
   @Override
   protected Path getCacheDirImpl()
   {
-    String dir = System.getenv("XDG_CACHE_HOME");
+    return pathGetXdgHome("CACHE", ".cache");
+  }
+
+
+  @Override
+  protected Path getDataDirImpl()
+  {
+    return pathGetXdgHome("DATA", ".local/share");
+  }
+
+
+  private Path pathGetXdgHome( String type, String defaultPath )
+  {
+    String dir = System.getenv("XDG_" + type + "_HOME");
     return (dir != null && !dir.isEmpty()) ?
       Paths.get(dir) :
-      getHomeDir().resolve(".cache");
+      getHomeDir().resolve(defaultPath);
   }
 }

@@ -4,22 +4,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
-class WindowsPaths extends PlatformPaths
+public class WindowsPaths extends PlatformPathsBase
 {
   @Override
   protected Path getTempDirImpl()
   {
-    String dir = System.getenv("TEMP");
-    return (dir != null && !dir.isEmpty()) ?
-      Paths.get(dir) :
-      super.getTempDirImpl();
+    return getEnvDir("TEMP", super.getTempDirImpl());
   }
 
 
   @Override
   protected Path getCacheDirImpl()
   {
-    String dir = System.getenv("LOCALAPPDATA");
-    return (dir != null && !dir.isEmpty()) ? Paths.get(dir) : getHomeDir();
+    return getEnvDir("LOCALAPPDATA", getHomeDir());
+  }
+
+
+  @Override
+  protected Path getDataDirImpl()
+  {
+    return getEnvDir("APPDATA", getHomeDir());
+  }
+
+
+  private Path getEnvDir( String envName, Path defaultPath )
+  {
+    String dir = System.getenv(envName);
+    return (dir != null && !dir.isEmpty()) ? Paths.get(dir) : defaultPath;
   }
 }

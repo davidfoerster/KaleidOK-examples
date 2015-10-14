@@ -12,18 +12,21 @@ import synesketch.emotion.*;
 import java.applet.Applet;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 import static kaleidok.util.Arrays.shuffle;
+import static kaleidok.util.LoggingUtils.logThrown;
 
 
 public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr>
 {
+  static final Logger logger =
+    Logger.getLogger(ChromasthetiationService.class.getPackage().getName());
+
   // Configuration:
-
-  public static int verbose = 0;
-
   /**
    * Maximum amount of colors to use in the query to Chromatik
    */
@@ -109,8 +112,7 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
     if (emo.getType() != Emotion.NEUTRAL) {
       keywords = Strings.join(findStrongestAffectWords(
         synState.getAffectWords(), maxKeywords), ' ');
-      if (verbose >= 1)
-        System.out.println("Selected keywords: " + keywords);
+      logger.log(Level.FINE, "Selected keywords: {0}", keywords);
     } else {
       keywords = "";
     }
@@ -130,17 +132,20 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
       opts = new HashMap<>();
 
     // Use (up to) maxColors random colors from palette for search query
-    if (verbose >= 1)
-      System.out.print("Colors:");
+    final Formatter fmt = logger.isLoggable(Level.FINE) ? new Formatter() : null;
+    if (fmt != null)
+      ((StringBuilder) fmt.out()).append("Colors:");
+
     for (int c: shuffle(palettes.getColors(emo), new Random(synState.getText().hashCode()))) {
       if (opts.size() >= maxColors)
         break;
       ChromatikColor cc = new ChromatikColor(c);
-      if (opts.put(cc, weight) == null && verbose >= 1)
-        System.out.format(" #%06x (%s),", cc.value, cc.groupName);
+      if (opts.put(cc, weight) == null && fmt != null)
+        fmt.format(" #%06x (%s),", cc.value, cc.groupName);
     }
-    if (verbose >= 1)
-      System.out.println();
+
+    if (fmt != null)
+      logger.log(Level.FINE, fmt.toString());
 
     return opts;
   }
@@ -148,8 +153,7 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
 
   private void addFlickrPhotos( ChromatikResponse response )
   {
-    if (verbose >= 1)
-      System.out.println("Hits: " + response.hits);
+    logger.log(Level.FINE, "Found {0} search results", response.hits);
 
     for (ChromatikResponse.Result imgInfo: response.results)
       imgInfo.flickrPhoto = new FlickrPhoto(imgInfo);
@@ -166,6 +170,9 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
     }
 
 
+    private static final String flickrErrorMessage =
+      "Couldn't retrieve Flickr image sizes";
+
     @Override
     public SizeMap getSizes()
     {
@@ -177,16 +184,19 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
           switch (ex.getErrorCode()) {
           case 1: // Photo not found
           case 2: // Permission denied
-            System.err.println(ex.getLocalizedMessage());
+            logger.log(Level.FINER, "{0} for {1}: {2}",
+              new Object[]{flickrErrorMessage, this, ex.getLocalizedMessage()});
             sizes = new SizeMap();
             break;
 
           default:
-            ex.printStackTrace();
+            logThrown(logger, Level.WARNING, "{0} for {1}", ex,
+              new Object[]{flickrErrorMessage, this});
             break;
           }
         } catch (IOException ex) {
-          ex.printStackTrace();
+          logThrown(logger, Level.WARNING, "{0} for {1}", ex,
+            new Object[]{flickrErrorMessage, this});
         }
       }
       return sizes;

@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class FullscreenRootPane extends JRootPane
@@ -16,6 +18,9 @@ public class FullscreenRootPane extends JRootPane
 
   private Collection<FullscreenEventListener> fullscreenListeners =
     new ArrayList<>();
+
+  private static final Logger logger =
+    Logger.getLogger(FullscreenRootPane.class.getCanonicalName());
 
 
   public Window getTopLevelWindow()
@@ -79,9 +84,8 @@ public class FullscreenRootPane extends JRootPane
         return;
       }
 
-      System.err.println(
-        "Warning: No screen with index " + i +
-        " available; using default screen instead.");
+      logger.log(Level.WARNING,
+        "No screen with index {0} available; using default screen instead", i);
     }
 
     // use default screen
@@ -100,12 +104,15 @@ public class FullscreenRootPane extends JRootPane
       frame.removeNotify();
       frame.setUndecorated(fullscreen);
       frame.setResizable(!fullscreen);
+      //frame.setAlwaysOnTop(fullscreen);
       frame.addNotify();
+      /*
       if (fullscreen) {
-        frame.addFocusListener(FullscreenFocusListener.INSTANCE);
+        frame.addFocusListener(FullscreenFocusListener.getInstance());
       } else {
-        frame.removeFocusListener(FullscreenFocusListener.INSTANCE);
+        frame.removeFocusListener(FullscreenFocusListener.getInstance());
       }
+      */
     }
 
     dev.setFullScreenWindow(fullscreen ? w : null);
@@ -136,8 +143,18 @@ public class FullscreenRootPane extends JRootPane
 
   private static class FullscreenFocusListener implements FocusListener
   {
-    public static final FullscreenFocusListener INSTANCE =
-      new FullscreenFocusListener();
+    private static FullscreenFocusListener INSTANCE = null;
+
+    public static FullscreenFocusListener getInstance()
+    {
+      if (INSTANCE == null) {
+        synchronized (FullscreenFocusListener.class) {
+          if (INSTANCE == null)
+            INSTANCE = new FullscreenFocusListener();
+        }
+      }
+      return INSTANCE;
+    }
 
     protected FullscreenFocusListener() { }
 

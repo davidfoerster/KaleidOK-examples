@@ -7,8 +7,9 @@ import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.util.DefaultValueParser;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
-import static kaleidok.util.DebugManager.verbose;
+import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 
 
 public class SttManager
@@ -22,7 +23,6 @@ public class SttManager
   {
     this.parent = parent;
 
-    STT.debug = verbose >= 1;
     stt = new STT(new SttResponseHandler(),
       parent.parseStringOrFile(parent.getParameter("com.google.developer.api.key"), '@'));
     String paramBase = stt.getClass().getCanonicalName() + '.';
@@ -45,11 +45,11 @@ public class SttManager
     String strEnabled =
       parent.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
     boolean bEnabled = !"forceoff".equals(strEnabled) &&
-      (!STT.debug || DefaultValueParser.parseBoolean(strEnabled, true));
+      (!STT.isLoggingStatus() ||
+         DefaultValueParser.parseBoolean(strEnabled, true));
 
     if (bEnabled) {
       RecorderIcon ri = new RecorderIcon(parent, stt);
-      ri.x = parent.width - ri.x;
     }
 
     return bEnabled;
@@ -64,16 +64,20 @@ public class SttManager
     @Override
     public void completed( SttResponse response )
     {
-      SttResponse.Result result = response.result[0];
+      SttResponse.Result.Alternative topAlternative =
+        response.getTopAlternative();
 
-      if (verbose >= 1) {
-        System.out.println(
-          "STT returned: " + result.alternative[0].transcript);
-      }
+      if (topAlternative != null) {
+        logger.log(Level.INFO,
+          "Transcribed with confidence {0,number,percent}: {1}",
+          new Object[]{topAlternative.confidence, topAlternative.transcript});
 
-      if (!isIgnoreTranscriptionResult()) {
-        parent.getChromasthetiationService()
-          .submit(result.alternative[0].transcript);
+        if (!isIgnoreTranscriptionResult()) {
+          parent.getChromasthetiationService()
+            .submit(topAlternative.transcript);
+        }
+      } else {
+        logger.info("Transcription returned no result");
       }
     }
 
@@ -86,8 +90,8 @@ public class SttManager
             parent.getClass().getPackage().getName() + ".ignoreTranscription",
             false);
         if (isIgnoreTranscriptionResult) {
-          System.out.println(
-            "Notice: Speech transcription results are configured to be ignored.");
+          logger.config(
+            "Speech transcription results are configured to be ignored");
         }
       }
       return isIgnoreTranscriptionResult;

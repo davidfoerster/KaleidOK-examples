@@ -1,6 +1,6 @@
 package kaleidok.io.platform;
 
 
-class LinuxPaths extends UnixPaths
+public class LinuxPaths extends UnixPaths
 {
 }

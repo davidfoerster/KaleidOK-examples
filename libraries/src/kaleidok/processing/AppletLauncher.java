@@ -5,9 +5,18 @@ import sun.applet.AppletViewerFactory;
 
 import java.applet.Applet;
 import java.awt.Rectangle;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 
 public class AppletLauncher
@@ -41,6 +50,11 @@ public class AppletLauncher
   private AppletViewer launch0( Class<? extends Applet> appletClass,
     Hashtable<String, String> attributes, int x, int y )
   {
+    String systemLoggerConfigPath =
+      System.getProperty(Logger.class.getPackage().getName() + ".config.file");
+    if (systemLoggerConfigPath == null || systemLoggerConfigPath.isEmpty())
+      loadLocalLoggerProperties(appletClass);
+
     URL documentURL = appletClass.getResource(".");
     if (documentURL == null) {
       documentURL = appletClass.getProtectionDomain().getCodeSource().getLocation();
@@ -92,6 +106,10 @@ public class AppletLauncher
         case "--param":
           String param = args[++i];
           int p = param.indexOf('=');
+          if (p <= 0) {
+            throw new IllegalArgumentException(
+              "Invalid parameter specification: " + param);
+          }
           attributes.put(param.substring(0, p), param.substring(p + 1));
           break;
 
@@ -102,12 +120,58 @@ public class AppletLauncher
           break;
 
         default:
-          throw new IllegalArgumentException("Illegal parameter:" + arg);
+          throw new IllegalArgumentException("Illegal parameter: " + arg);
         }
       }
     }
 
     buildAttributes(attributes, appletClass, null);
     return launch0(appletClass, attributes, 0, 0);
+  }
+
+
+  public AppletViewer launch( Class<? extends Applet> appletClass,
+    String... args ) throws IOException
+  {
+    Properties properties = new Properties();
+    if (args != null && args.length > 0 && args[0].equals("--params")) {
+      String paramsFile = args[1];
+      properties.load(
+        (paramsFile.length() == 1 && paramsFile.charAt(0) == '-') ?
+          new InputStreamReader(System.in) :
+          new FileReader(paramsFile));
+
+      args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
+    } else {
+      String propertiesPath = appletClass.getSimpleName() + ".properties";
+      InputStream is = appletClass.getResourceAsStream(propertiesPath);
+      if (is != null) {
+        try {
+          properties.load(is);
+        } finally {
+          is.close();
+        }
+      } else {
+        Logger.getLogger(appletClass.getCanonicalName()).log(Level.INFO,
+          "No properties file found for applet class {0}; using default values",
+          appletClass.getCanonicalName());
+      }
+    }
+    return launch(appletClass, properties, args);
+  }
+
+
+  public void loadLocalLoggerProperties( Class<?> appletClass )
+  {
+    try (InputStream is =
+      appletClass.getResourceAsStream("/logging.properties"))
+    {
+      LogManager.getLogManager().readConfiguration(is);
+    } catch (IOException ex) {
+      Logger.getAnonymousLogger().log(Level.SEVERE,
+        "Could not load default logging.properties file for " +
+          appletClass.getCanonicalName(),
+        ex);
+    }
   }
 }

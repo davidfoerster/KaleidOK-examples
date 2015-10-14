@@ -5,9 +5,8 @@ import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
 
 import java.util.concurrent.locks.LockSupport;
-
-import static kaleidok.util.DebugManager.debug;
-import static kaleidok.util.DebugManager.verbose;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -16,6 +15,9 @@ import static kaleidok.util.DebugManager.verbose;
  */
 public class DummyAudioPlayer implements AudioProcessor
 {
+  private static Logger logger =
+    Logger.getLogger(DummyAudioPlayer.class.getCanonicalName());
+
   private long startTime = -1, startSample = -1;
 
   /**
@@ -48,9 +50,9 @@ public class DummyAudioPlayer implements AudioProcessor
           startTime - System.nanoTime();
       if (delay >= 0) {
         LockSupport.parkNanos(delay);
-      } else if (debug <= 0 && verbose >= 1) {
-        System.out.format(
-          "Warning: Audio processing too slow by %.4g milliseconds.%n",
+      } else {
+        logger.log(Level.FINER,
+          "Audio processing too slow by {0,number,0.0000E0} milliseconds",
           delay * -1e-6);
       }
     } else {

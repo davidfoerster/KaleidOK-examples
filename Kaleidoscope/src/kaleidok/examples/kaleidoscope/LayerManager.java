@@ -11,7 +11,9 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 
+import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.DebugManager.debug;
 
 
@@ -147,10 +149,15 @@ public class LayerManager extends ArrayList<ImageLayer>
             PImageFuture image = parent.getImageFuture(strImage);
             if (image != null) {
               this.images.add(image);
-            } else if (debug >= 1) {
-              throw new AssertionError(new FileNotFoundException(strImage));
             } else {
-              System.err.println("Couldn't load image: " + strImage);
+              Error ex = new AssertionError(
+                "Couldn't load image", new FileNotFoundException(strImage));
+              if (debug >= 1) {
+                throw ex;
+              } else {
+                logger.log(Level.WARNING, "{0}: {1}",
+                  new Object[]{ex.getMessage(), ex.getCause().getMessage()});
+              }
             }
           }
         }
