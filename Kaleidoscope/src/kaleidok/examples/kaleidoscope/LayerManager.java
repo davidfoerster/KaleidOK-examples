@@ -4,17 +4,20 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.PImageFuture;
+import kaleidok.util.BeanUtils;
 import processing.core.PImage;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.DebugManager.debug;
+import static kaleidok.util.LoggingUtils.logThrown;
 
 
 public class LayerManager extends ArrayList<ImageLayer>
@@ -37,7 +40,6 @@ public class LayerManager extends ArrayList<ImageLayer>
   {
     super(8);
     this.parent = parent;
-
     getBackgroundLayer();
     add(getSpectrogramLayer());
     add(getOuterMovingShape());
@@ -212,5 +214,31 @@ public class LayerManager extends ArrayList<ImageLayer>
       l.run();
     }
     parent.popMatrix();
+  }
+
+
+  private static final URL layerPropertiesResource =
+    ImageLayer.class.getResource("layer.properties");
+
+  private Properties layerProperties = null;
+
+
+  private Properties getLayerProperties()
+  {
+    if (layerProperties == null) {
+      layerProperties = new Properties();
+      if (layerPropertiesResource != null) {
+        try (Reader r = new InputStreamReader(layerPropertiesResource.openStream())) {
+          layerProperties.load(r);
+        } catch (IOException ex) {
+          logThrown(logger, Level.SEVERE,
+            "Couldn't load properties from {0}",
+            ex, layerPropertiesResource);
+        }
+      } else {
+        logger.config("No layer properties file found");
+      }
+    }
+    return layerProperties;
   }
 }
