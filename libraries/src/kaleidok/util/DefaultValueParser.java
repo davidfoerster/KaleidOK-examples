@@ -87,13 +87,24 @@ public final class DefaultValueParser
   public static <T> T valueOf( String s, Class<T> targetClass )
     throws IllegalArgumentException
   {
+    Class<?> wrapperClass = getWrapperType(targetClass);
+    if (wrapperClass == Character.class) {
+      if (s.length() != 1) {
+        throw new IllegalArgumentException(
+          "Cannot cast string of length " + s.length() + " to " +
+            targetClass.getName());
+      }
+      //noinspection unchecked
+      return (T) Character.valueOf(s.charAt(0));
+    }
     try {
-      Method m = targetClass.getMethod("valueOf", valueOfParameterTypes);
-      if (!targetClass.isAssignableFrom(m.getReturnType())) {
+      Method m = wrapperClass.getMethod("valueOf", valueOfParameterTypes);
+      if (!wrapperClass.isAssignableFrom(m.getReturnType())) {
         throw new ClassCastException(String.format(
-          "Cannot assign return type %3$s of %4$s#%1$s(%2$s) to %4$s",
-          m.getName(), valueOfParameterTypes[0].getSimpleName(),
-          m.getReturnType().getName(), targetClass.getCanonicalName()));
+          "Cannot assign return type %s of %s#%s(%s) to %s",
+          m.getReturnType().getName(),
+          m.getDeclaringClass().getCanonicalName(), m.getName(),
+          valueOfParameterTypes[0].getCanonicalName(), wrapperClass.getName()));
       }
       //noinspection unchecked
       return (T) m.invoke(null, s);
