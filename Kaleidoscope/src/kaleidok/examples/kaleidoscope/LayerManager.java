@@ -37,11 +37,24 @@ public class LayerManager extends ArrayList<ImageLayer>
   {
     super(8);
     this.parent = parent;
+
     getBackgroundLayer();
     add(getSpectrogramLayer());
     add(getOuterMovingShape());
     add(getFoobarLayer());
     add(getCentreLayer());
+
+    Properties prop = getLayerProperties();
+    Package pack = ImageLayer.class.getPackage();
+    int count = 0;
+    for (ImageLayer l: this)
+      count += BeanUtils.applyBeanProperties(prop, pack, l);
+
+    if (count != prop.size()) {
+      logger.log(Level.FINEST,
+        "Only {0} of your {1} layer property settings were used",
+        new Object[]{count, prop.size()});
+    }
   }
 
 
