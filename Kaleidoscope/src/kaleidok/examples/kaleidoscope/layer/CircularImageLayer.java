@@ -10,7 +10,7 @@ public abstract class CircularImageLayer extends ImageLayer
 
   private float scaleFactor = 1;
 
-  private float[] xL = null, yL = null;
+  private float[] segmentCoords = null;
 
 
   public CircularImageLayer( PApplet parent, int segmentCount,
@@ -25,22 +25,21 @@ public abstract class CircularImageLayer extends ImageLayer
 
   public int getSegmentCount()
   {
-    return xL.length;
+    return segmentCoords.length / 2;
   }
 
   public void setSegmentCount( int segmentCount )
   {
-    if (xL == null || xL.length != segmentCount) {
-      xL = new float[segmentCount];
-      yL = new float[segmentCount];
-    }
+    if (segmentCoords == null || segmentCoords.length != segmentCount * 2)
+      segmentCoords = new float[segmentCount * 2];
 
+    final float[] segmentCoords = this.segmentCoords;
     double step = Math.PI * 2 / segmentCount; // generate the step size based on the number of segments
     // pre-calculate x and y based on angle and store values in two arrays
     for (int i = segmentCount - 1; i >= 0; i--) {
       double theta = step * i; // angle for this segment
-      xL[i] = (float) Math.sin(theta);
-      yL[i] = (float) Math.cos(theta);
+      segmentCoords[i * 2] = (float) Math.sin(theta);
+      segmentCoords[i * 2 + 1] = (float) Math.cos(theta);
     }
   }
 
@@ -81,7 +80,9 @@ public abstract class CircularImageLayer extends ImageLayer
 
   protected void drawCircleVertex( int index, float radius )
   {
-    drawVertex(xL[index] * radius, yL[index] * radius);
+    drawVertex(
+      segmentCoords[index * 2] * radius,
+      segmentCoords[index * 2 + 1] * radius);
   }
 
 
