@@ -49,9 +49,9 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   private void initWindowPosition()
   {
     int screenIndex = DefaultValueParser.parseInt(
-      getParameter(paramBase + "screen"), -1);
+      getParameter("screen"), -1);
     boolean fullscreen = DefaultValueParser.parseBoolean(
-      getParameter(paramBase + "fullscreen"), false);
+      getParameter("fullscreen"), false);
     if (screenIndex >= 0 || fullscreen) {
       getRootPane().moveToScreen(screenIndex, fullscreen);
     }

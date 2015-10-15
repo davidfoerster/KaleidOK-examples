@@ -77,7 +77,7 @@ are optional and have sensible defaults.
  * `kaleidok.examples.kaleidoscope.text` –
    Default text for the upper text input field (see point 3 under *Usage*)
 
- * `kaleidok.examples.kaleidoscope.[screen|fullscreen]` –
+ * `screen` and `fullscreen]` –
    Move the Kaleidoscope window to the screen with the given index (-1 means
    default) and/or put it in fullscreen mode.
 
