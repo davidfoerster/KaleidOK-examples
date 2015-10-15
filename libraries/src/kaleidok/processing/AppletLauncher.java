@@ -5,10 +5,7 @@ import sun.applet.AppletViewerFactory;
 
 import java.applet.Applet;
 import java.awt.Rectangle;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -144,12 +141,13 @@ public class AppletLauncher
       args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
     } else {
       String propertiesPath = appletClass.getSimpleName() + ".properties";
-      InputStream is = appletClass.getResourceAsStream(propertiesPath);
+      File propertiesFile = new File(propertiesPath);
+      InputStream is = propertiesFile.exists() ?
+        new FileInputStream(propertiesFile) :
+        appletClass.getResourceAsStream(propertiesPath);
       if (is != null) {
-        try {
-          properties.load(is);
-        } finally {
-          is.close();
+        try (Reader reader = new InputStreamReader(is)) {
+          properties.load(reader);
         }
       } else {
         Logger.getLogger(appletClass.getCanonicalName()).log(Level.INFO,
@@ -163,15 +161,34 @@ public class AppletLauncher
 
   public void loadLocalLoggerProperties( Class<?> appletClass )
   {
-    try (InputStream is =
-      appletClass.getResourceAsStream("/logging.properties"))
+    String loggingPath = "logging.properties";
+    File loggingFile = new File(loggingPath);
+    InputStream is = null;
+    try
     {
-      LogManager.getLogManager().readConfiguration(is);
-    } catch (IOException ex) {
+      is = loggingFile.exists() ?
+        new FileInputStream(loggingFile) :
+        appletClass.getResourceAsStream(File.separator + loggingPath);
+      if (is != null)
+        LogManager.getLogManager().readConfiguration(is);
+    }
+    catch (IOException ex)
+    {
       Logger.getAnonymousLogger().log(Level.SEVERE,
         "Could not load default logging.properties file for " +
           appletClass.getCanonicalName(),
         ex);
+    }
+    finally
+    {
+      if (is != null) {
+        try {
+          is.close();
+        } catch (IOException ex) {
+          Logger.getAnonymousLogger().log(Level.WARNING,
+            "Couldn't close logger configuration file", ex);
+        }
+      }
     }
   }
 }
