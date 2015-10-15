@@ -12,6 +12,7 @@ public final class DefaultValueParser
 
 
   public static int parseInt( String s, int defaultValue )
+    throws NumberFormatException
   {
     return (s != null && !s.isEmpty()) ?
       Integer.parseInt(s) :
@@ -19,12 +20,14 @@ public final class DefaultValueParser
   }
 
   public static int parseInt( Applet a, String name, int defaultValue )
+    throws NumberFormatException
   {
     return parseInt(a.getParameter(name), defaultValue);
   }
 
 
   public static long parseLong( String s, long defaultValue )
+    throws NumberFormatException
   {
     return (s != null && !s.isEmpty()) ?
       Long.parseLong(s) :
@@ -32,6 +35,7 @@ public final class DefaultValueParser
   }
 
   public static long parseLong( Applet a, String name, long defaultValue )
+    throws NumberFormatException
   {
     return parseLong(a.getParameter(name), defaultValue);
   }
@@ -42,6 +46,7 @@ public final class DefaultValueParser
     };
 
   public static boolean parseBoolean( String s )
+    throws IllegalArgumentException
   {
     if (s != null && !s.isEmpty()) {
       if (Character.isDigit(s.charAt(0))) {
@@ -60,6 +65,7 @@ public final class DefaultValueParser
   }
 
   public static boolean parseBoolean( String s, boolean defaultValue )
+    throws IllegalArgumentException
   {
     return (s != null && !s.isEmpty()) ?
       parseBoolean(s) :
@@ -67,6 +73,7 @@ public final class DefaultValueParser
   }
 
   public static boolean parseBoolean( Applet a, String name, boolean defaultValue )
+    throws IllegalArgumentException
   {
     return parseBoolean(a.getParameter(name), defaultValue);
   }
@@ -96,12 +103,14 @@ public final class DefaultValueParser
 
 
   public static <T> T parse( String s, T defaultValue )
+    throws IllegalArgumentException
   {
     //noinspection unchecked
     return parse(s, defaultValue, (Class<T>) defaultValue.getClass());
   }
 
   public static <T> T parse( String s, T defaultValue, Class<T> clazz )
+    throws IllegalArgumentException
   {
     if (clazz == String.class || clazz == CharSequence.class) {
       //noinspection unchecked
