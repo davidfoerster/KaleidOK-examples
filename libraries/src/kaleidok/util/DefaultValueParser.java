@@ -8,6 +8,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 
 public final class DefaultValueParser
 {
@@ -44,27 +47,29 @@ public final class DefaultValueParser
   }
 
 
-  private static final String[] BOOLEAN_WORDS = {
-      "true", "false", "yes", "no", "on", "off", "enabled", "disabled"
-    };
-
   public static boolean parseBoolean( String s )
     throws IllegalArgumentException
   {
+    Throwable cause = null;
+
     if (s != null && !s.isEmpty()) {
       if (Character.isDigit(s.charAt(0))) {
         try {
           return Integer.parseInt(s) != 0;
         } catch (NumberFormatException ex) {
-          throw new IllegalArgumentException("Not a boolean: " + s, ex);
+          cause = ex;
         }
-      }
-      for (int i = 0; i < BOOLEAN_WORDS.length; i++) {
-        if (BOOLEAN_WORDS[i].equalsIgnoreCase(s))
-          return i % 2 == 0;
+      } else {
+        Boolean result = BOOLEAN_WORDS.get(s.toLowerCase());
+        if (result != null)
+          return result;
       }
     }
-    throw new IllegalArgumentException("Not a boolean: " + s);
+
+    String msg = "Not a boolean: " + s;
+    throw (cause != null) ?
+      new IllegalArgumentException(msg, cause) :
+      new IllegalArgumentException(msg);
   }
 
   public static boolean parseBoolean( String s, boolean defaultValue )
@@ -163,5 +168,18 @@ public final class DefaultValueParser
           throw new AssertionError(ex);
         }
       }
+    }};
+
+
+  private static final Map<String, Boolean> BOOLEAN_WORDS =
+    new HashMap<String, Boolean>(16) {{
+      put("true", TRUE);
+      put("false", FALSE);
+      put("yes", TRUE);
+      put("no", FALSE);
+      put("on", TRUE);
+      put("off", FALSE);
+      put("enabled", TRUE);
+      put("disabled", FALSE);
     }};
 }
