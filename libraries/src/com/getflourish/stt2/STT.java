@@ -7,6 +7,7 @@ import org.apache.http.concurrent.FutureCallback;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.net.URL;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +44,8 @@ public class STT
   private final Collection<ChangeListener> changeListeners = new ArrayList<>();
 
   private final ChangeEvent changeEvent = new ChangeEvent(this);
+
+  public Format logfilePattern = null;
 
 
   static final Logger logger = Logger.getLogger(STT.class.getPackage().getName());

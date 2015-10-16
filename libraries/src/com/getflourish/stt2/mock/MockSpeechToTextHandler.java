@@ -5,15 +5,16 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import kaleidok.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.text.Format;
-import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -86,21 +87,23 @@ public class MockSpeechToTextHandler implements HttpHandler
     float sampleRate = Float.parseFloat(contentType.get("rate"));
     assertTrue(sampleRate > 0 && !Float.isInfinite(sampleRate));
 
-    long inLen;
-    Path tmpFile;
-    try (InputStream in = t.getRequestBody()) {
-      tmpFile = createTempFile(this, ".flac");
-      inLen =
-        Files.copy(in, tmpFile,
-          StandardCopyOption.REPLACE_EXISTING);
-      in.close();
+    byte[] flacBuffer;
+    try (InputStream is = t.getRequestBody()) {
+      flacBuffer = IOUtils.toByteArray(is);
     }
     logger.log(Level.FINEST,
       "Received {0} bytes on request to {1}",
-      new Object[]{inLen, t.getRequestURI()});
-    assertTrue(inLen > 86);
+      new Object[]{flacBuffer.length, t.getRequestURI()});
+    assertTrue(flacBuffer.length > 86);
 
-    double duration = testFlacFile(tmpFile.toString(), sampleRate);
+    Path tmpFilePath = createTempFile();
+    if (tmpFilePath != null) {
+      try (OutputStream os = Files.newOutputStream(tmpFilePath)) {
+        os.write(flacBuffer);
+      }
+    }
+
+    double duration = testFlacFile(flacBuffer, sampleRate);
     if (!Double.isNaN(duration)) {
       assertTrue(duration <= stt.getMaxTranscriptionInterval() * 1e-9);
     } else {
@@ -118,27 +121,29 @@ public class MockSpeechToTextHandler implements HttpHandler
   }
 
 
+  private static final ProcessBuilder pbFlacFileTest =
+    new ProcessBuilder("file", "-")
+      .redirectOutput(ProcessBuilder.Redirect.PIPE)
+      .redirectInput(ProcessBuilder.Redirect.PIPE)
+      .redirectError(ProcessBuilder.Redirect.INHERIT);
+  static {
+    pbFlacFileTest.environment().put("LC_MESSAGES", "C");
+  }
+
   private static final Pattern
     SAMPLERATE_PATTERN = Pattern.compile("^(\\d+(?:\\.\\d*)?) (k)?Hz$"),
     SAMPLECOUNT_PATTERN = Pattern.compile("^(\\d+) samples$");
 
-  private static double testFlacFile( String path, float expectedSampleRate )
+  private static double testFlacFile( byte flacData[], float expectedSampleRate )
     throws IOException
   {
-    if (path.isEmpty())
-      throw new NoSuchFileException(path);
-    if (path.charAt(0) == '-')
-      path = "./" + path;
-
-    ProcessBuilder prb = new ProcessBuilder("file", path);
-    prb.redirectError(ProcessBuilder.Redirect.INHERIT);
-    prb.environment().put("LC_MESSAGES", "C");
     Process pr;
     String fileOutput;
     try {
-      pr = prb.start();
-      pr.getOutputStream().close();
-
+      pr = pbFlacFileTest.start();
+      try (OutputStream os = pr.getOutputStream()) {
+        os.write(flacData);
+      }
       try (BufferedReader r =
         new BufferedReader(new InputStreamReader(pr.getInputStream())))
       {
@@ -160,10 +165,9 @@ public class MockSpeechToTextHandler implements HttpHandler
     }
 
     assertTrue(fileOutput != null);
-    assertTrue(fileOutput.startsWith(path));
-    assertTrue(fileOutput.length() > path.length() + 2);
-    assertTrue(fileOutput.charAt(path.length()) == ':');
-    String[] fileSpec = fileOutput.substring(path.length() + 2).split(", ");
+    int p = fileOutput.indexOf(':');
+    assertTrue(p >= 0);
+    String[] fileSpec = fileOutput.substring(p + 2).split(", ");
     assertTrue(fileSpec[0].startsWith("FLAC"));
 
     float sampleRate = Float.NaN;
@@ -201,27 +205,30 @@ public class MockSpeechToTextHandler implements HttpHandler
 
 
   private static Path tempDir = null;
-  private static Class<?> tempDirNamespace = null;
 
-  private static final Format tempFileFormat =
-    new SimpleDateFormat("yyyyMMdd-HHmmss.SSS-");
-
-  protected static Path createTempFile( Object namespace, String extension )
+  protected Path createTempFile()
     throws IOException
   {
+    Format logfilePattern = stt.logfilePattern;
+    if (logfilePattern == null)
+      return null;
+
     if (tempDir == null) {
-      tempDirNamespace =
-        (namespace instanceof Class) ?
-          (Class<?>) namespace :
-          namespace.getClass();
-      tempDir =
-        PlatformPaths.createTempDirectory(tempDirNamespace.getCanonicalName());
-    } else if (namespace != tempDirNamespace) {
-      throw new AssertionError();
+      tempDir = PlatformPaths.getTempDir().resolve(this.getClass().getCanonicalName());
+      try {
+        Files.createDirectory(tempDir);
+      } catch (FileAlreadyExistsException ex) {
+        if (!Files.isDirectory(tempDir))
+          throw ex;
+      }
     }
+
+    String fn = logfilePattern.format(new Date());
+    int p = FilenameUtils.indexOfExtension(fn);
     return Files.createTempFile(tempDir,
-      tempFileFormat.format(System.currentTimeMillis()),
-      extension,  PlatformPaths.NO_ATTRIBUTES);
+      (p >= 0) ? fn.substring(0, p) : fn,
+      (p >= 0) ? fn.substring(p) : ".flac",
+      PlatformPaths.NO_ATTRIBUTES);
   }
 
 

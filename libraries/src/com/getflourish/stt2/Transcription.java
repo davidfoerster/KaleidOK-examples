@@ -12,6 +12,7 @@ import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.http.concurrent.FutureCallback;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -20,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Level;
 
 import static com.getflourish.stt2.STT.logger;
@@ -54,29 +56,60 @@ public class Transcription implements Runnable
   public OutputStream getOutputStream() throws IOException
   {
     if (outputStream == null) {
-      outputStream = new TeeOutputStream(
-        connection.getOutputStream(), openLogOutputStream());
+      OutputStream
+        connOs = connection.getOutputStream(),
+        copyOs = openLogOutputStream();
+      outputStream =
+        (copyOs != null) ? new TeeOutputStream(connOs, copyOs) : connOs;
     }
     return outputStream;
   }
 
 
-  private static final Format logFileFormat =
-    new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS.'flac'");
+  public static final Constructor<? extends Format>
+    DEFAULT_LOGFILE_PATTERN_FORMAT;
 
-  private static final OpenOption[] logOpenoptions =
-    new OpenOption[]{
+  public static final String
+    DEFAULT_LOGFILE_PATTERN = "yyyy-MM-dd_HH:mm:ss.SSS.'flac'";
+
+  static {
+    try {
+      DEFAULT_LOGFILE_PATTERN_FORMAT =
+        SimpleDateFormat.class.getConstructor(String.class);
+    } catch (NoSuchMethodException ex) {
+      throw new AssertionError(ex);
+    }
+  }
+
+  public static Format buildLogfileFormat(
+    Constructor<? extends Format> formatConstructor, String formatString )
+    throws ReflectiveOperationException
+  {
+    if (formatConstructor == null)
+      formatConstructor = DEFAULT_LOGFILE_PATTERN_FORMAT;
+    return formatConstructor.newInstance(formatString);
+  }
+
+
+  public Format logfilePattern = null;
+
+
+  private static final OpenOption[] logfileOpenOptions = {
       StandardOpenOption.CREATE_NEW
     };
 
   private OutputStream openLogOutputStream() throws IOException
   {
+    Format logfilePattern = this.logfilePattern;
+    if (logfilePattern == null)
+      return null;
+
     Path path =
       PlatformPaths.getDataDir(this.getClass().getPackage().getName())
-        .resolve(logFileFormat.format(System.currentTimeMillis()));
+        .resolve(logfilePattern.format(new Date()));
     logger.log(Level.FINE, "Recorded speech written to \"{0}\"", path);
     return new BufferedOutputStream(
-      Files.newOutputStream(path, logOpenoptions));
+      Files.newOutputStream(path, logfileOpenOptions));
   }
 
 
