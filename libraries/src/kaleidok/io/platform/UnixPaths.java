@@ -1,10 +1,13 @@
 package kaleidok.io.platform;
 
+import kaleidok.util.Arrays;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import static java.nio.file.attribute.PosixFilePermissions.asFileAttribute;
@@ -24,7 +27,8 @@ public class UnixPaths extends PlatformPathsBase
   }
 
 
-  private static final PosixFilePermission[] posixFilePermissions = PosixFilePermission.values();
+  public static final List<PosixFilePermission> posixFilePermissions =
+    Arrays.asImmutableList(PosixFilePermission.values());
 
   public static Set<PosixFilePermission> permissionsFromMask( int mask )
   {
@@ -32,7 +36,7 @@ public class UnixPaths extends PlatformPathsBase
       EnumSet.noneOf(PosixFilePermission.class);
     if ((mask & 0777) != 0) {
       for (PosixFilePermission p: posixFilePermissions) {
-        final int pMask = 1 << (posixFilePermissions.length - p.ordinal() - 1);
+        final int pMask = 1 << (posixFilePermissions.size() - p.ordinal() - 1);
         if ((mask & pMask) != 0)
           dst.add(p);
       }
