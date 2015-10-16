@@ -1,6 +1,5 @@
 package kaleidok.processing;
 
-import kaleidok.util.DebugManager;
 import kaleidok.util.DefaultValueParser;
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -25,8 +24,6 @@ public class ExtPApplet extends PApplet
   public ExtPApplet( JApplet parent )
   {
     this.parent = parent;
-    if (parent != null)
-      DebugManager.fromApplet(parent);
   }
 
 

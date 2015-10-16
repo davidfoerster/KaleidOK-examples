@@ -5,6 +5,7 @@ import kaleidok.processing.FudgedAppletViewerFactory;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchAppletWrapper;
 import kaleidok.swing.FullscreenEventListener;
+import kaleidok.util.AssertionUtils;
 import kaleidok.util.DefaultValueParser;
 
 import javax.swing.*;
@@ -115,6 +116,7 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
 
   public static void main( String... args ) throws IOException
   {
+    AssertionUtils.enableAssertionsOnDebugging();
     new AppletLauncher(new FudgedAppletViewerFactory())
       .launch(KaleidoscopeApp.class, args);
   }
