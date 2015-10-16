@@ -28,7 +28,7 @@ public class SttManager
     stt = new STT(new SttResponseHandler(),
       parent.parseStringOrFile(parent.getParameter("com.google.developer.api.key"), '@'));
     String paramBase = stt.getClass().getCanonicalName() + '.';
-    stt.setLanguage((String) parent.getParameter(paramBase + "language", "en"));
+    stt.setLanguage(parent.getParameter(paramBase + "language", "en"));
     stt.setMaxTranscriptionInterval(
       DefaultValueParser.parseInt(parent, paramBase + "interval", 8000),
       TimeUnit.MILLISECONDS);

@@ -170,7 +170,7 @@ public class MockSpeechToTextHandler implements HttpHandler
     String[] fileSpec = fileOutput.substring(p + 2).split(", ");
     assertTrue(fileSpec[0].startsWith("FLAC"));
 
-    float sampleRate = Float.NaN;
+    double sampleRate = Double.NaN;
     long sampleCount = -1;
     for (int i = 1; i < fileSpec.length; i++) {
       String s = fileSpec[i];
@@ -178,7 +178,7 @@ public class MockSpeechToTextHandler implements HttpHandler
       if ((m = SAMPLERATE_PATTERN.matcher(s)).matches())
       {
         try {
-          sampleRate = Float.parseFloat(m.group(1));
+          sampleRate = Double.parseDouble(m.group(1));
         } catch (NumberFormatException ex) {
           throw new IllegalArgumentException(s, ex);
         }
@@ -200,7 +200,8 @@ public class MockSpeechToTextHandler implements HttpHandler
       }
     }
 
-    return (sampleCount >= 0) ? (double) sampleCount / sampleRate : Double.NaN;
+    assertTrue(sampleRate > 0 && !Double.isInfinite(sampleRate));
+    return (sampleCount >= 0) ? sampleCount / sampleRate : Double.NaN;
   }
 
 
