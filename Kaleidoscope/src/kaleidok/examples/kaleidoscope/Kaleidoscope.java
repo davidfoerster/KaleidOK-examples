@@ -9,8 +9,6 @@ import javax.swing.JApplet;
 import java.awt.Point;
 import java.util.logging.Logger;
 
-import static kaleidok.util.DebugManager.verbose;
-
 
 public class Kaleidoscope extends ExtPApplet
 {
@@ -77,8 +75,11 @@ public class Kaleidoscope extends ExtPApplet
     getSTT();
     getAudioProcessingManager().getAudioDispatcherThread().start();
 
-    if (verbose >= 1)
+    if (DefaultValueParser.parseBoolean(
+      getParameter("display-framerate"), false))
+    {
       new FrameRateDisplay(this);
+    }
   }
 
 
