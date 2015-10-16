@@ -3,9 +3,11 @@ package kaleidok.examples.kaleidoscope;
 import com.getflourish.stt2.RecorderIcon;
 import com.getflourish.stt2.STT;
 import com.getflourish.stt2.SttResponse;
+import com.getflourish.stt2.Transcription;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.util.DefaultValueParser;
 
+import java.text.Format;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -33,10 +35,25 @@ public class SttManager
     stt.intervalSequenceCountMax =
       DefaultValueParser.parseInt(parent, paramBase + "interval.count",
         stt.intervalSequenceCountMax);
+    stt.logfilePattern = getLogfilePattern();
     parent.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
 
     initRecorderIcon();
+  }
+
+
+  private Format getLogfilePattern()
+  {
+    String logFilePattern = parent.getParameter(
+      stt.getClass().getCanonicalName() + ".log.pattern");
+    try {
+      return (logFilePattern != null) ?
+        Transcription.buildLogfileFormat(null, logFilePattern) : null;
+    } catch (ReflectiveOperationException ex) {
+      throw new IllegalArgumentException(
+        "Cannot parse log file pattern: " + logFilePattern, ex);
+    }
   }
 
 
