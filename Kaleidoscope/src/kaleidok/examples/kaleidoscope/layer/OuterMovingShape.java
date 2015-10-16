@@ -7,9 +7,6 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-import static kaleidok.util.DebugManager.debug;
-import static kaleidok.util.DebugManager.wireframe;
-
 
 /**
  * Draws a shape that is rotated with a speed depending on the logarithm of the
@@ -37,7 +34,7 @@ public class OuterMovingShape extends CircularImageLayer
   {
     final PApplet parent = this.parent;
 
-    if (debug >= 1 && wireframe >= 1) {
+    if (wireframe >= 2) {
       parent.stroke(192, 0, 0);
       drawDebugCircle(getOuterRadius());
     }
@@ -57,7 +54,7 @@ public class OuterMovingShape extends CircularImageLayer
 
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
     PImage img;
-    if (wireframe < 1 && (img = getCurrentImage()) != null) {
+    if (wireframe <= 0 && (img = getCurrentImage()) != null) {
       parent.texture(img); // set the texture to use
       parent.noStroke(); // turn off stroke
     } else {

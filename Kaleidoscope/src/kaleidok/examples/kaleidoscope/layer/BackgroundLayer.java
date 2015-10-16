@@ -4,8 +4,6 @@ import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-import static kaleidok.util.DebugManager.wireframe;
-
 
 public class BackgroundLayer extends ImageLayer
 {
@@ -19,7 +17,7 @@ public class BackgroundLayer extends ImageLayer
   public void run()
   {
     PImage bgImage;
-    if (wireframe < 1 && (bgImage = getCurrentImage()) != null) {
+    if (wireframe <= 0 && (bgImage = getCurrentImage()) != null) {
       // background image
       final ExtPApplet parent = (ExtPApplet) this.parent;
       parent.image(bgImage, ExtPApplet.ImageResizeMode.PAN, 0, 0,

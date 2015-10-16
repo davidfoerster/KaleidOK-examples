@@ -6,8 +6,6 @@ import processing.core.PImage;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.pow;
-import static kaleidok.util.DebugManager.debug;
-import static kaleidok.util.DebugManager.wireframe;
 import static kaleidok.util.Math.log2;
 
 
@@ -135,7 +133,7 @@ public class SpectrogramLayer extends CircularImageLayer
 	{
     final PApplet parent = this.parent;
 
-    if (debug >= 1 && wireframe >= 1)
+    if (wireframe >= 2)
     {
       parent.stroke(0, 192, 0);
       drawDebugCircle(getInnerRadius());
@@ -159,7 +157,7 @@ public class SpectrogramLayer extends CircularImageLayer
     parent.scale(getOuterRadius());
 
 		PImage img;
-		if (wireframe < 1 && (img = getCurrentImage()) != null) {
+		if (wireframe <= 0 && (img = getCurrentImage()) != null) {
       parent.noStroke();
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
       parent.texture(img); // set the texture to use

@@ -12,8 +12,6 @@ public final class DebugManager
 {
   public static int verbose = 0;
 
-  public static int wireframe = 0;
-
   public static int debug = 0;
   static {
     String prefix = "-agentlib:jdwp";

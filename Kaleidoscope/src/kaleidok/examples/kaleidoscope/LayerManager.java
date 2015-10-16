@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
-import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 
@@ -40,7 +39,8 @@ public class LayerManager extends ArrayList<ImageLayer>
   {
     super(8);
     this.parent = parent;
-    getBackgroundLayer();
+
+    BackgroundLayer bg = getBackgroundLayer();
     add(getSpectrogramLayer());
     add(getOuterMovingShape());
     add(getFoobarLayer());
@@ -48,7 +48,7 @@ public class LayerManager extends ArrayList<ImageLayer>
 
     Properties prop = getLayerProperties();
     Package pack = ImageLayer.class.getPackage();
-    int count = 0;
+    int count = BeanUtils.applyBeanProperties(prop, pack, bg);
     for (ImageLayer l: this)
       count += BeanUtils.applyBeanProperties(prop, pack, l);
 
@@ -148,13 +148,12 @@ public class LayerManager extends ArrayList<ImageLayer>
             if (image != null) {
               this.images.add(image);
             } else {
-              Error ex = new AssertionError(
-                "Couldn't load image", new FileNotFoundException(strImage));
-              if (debug >= 1) {
-                throw ex;
+              String msg = "Couldn't load image";
+              Throwable ex = new FileNotFoundException(strImage);
+              if (LayerManager.class.desiredAssertionStatus()) {
+                throw new AssertionError(msg, ex);
               } else {
-                logger.log(Level.WARNING, "{0}: {1}",
-                  new Object[]{ex.getMessage(), ex.getCause().getMessage()});
+                logger.log(Level.WARNING, msg, ex);
               }
             }
           }

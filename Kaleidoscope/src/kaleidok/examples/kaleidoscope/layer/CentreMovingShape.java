@@ -10,8 +10,6 @@ import processing.core.PImage;
 import java.util.List;
 
 import static java.lang.Math.pow;
-import static kaleidok.util.DebugManager.debug;
-import static kaleidok.util.DebugManager.wireframe;
 
 
 /**
@@ -118,7 +116,7 @@ public class CentreMovingShape extends CircularImageLayer
       ((float) level * (getOuterRadius() - getInnerRadius()) + getInnerRadius()) / getOuterRadius();
 
     final PApplet parent = this.parent;
-    if (debug >= 1 && wireframe >= 1) {
+    if (wireframe >= 2) {
       parent.stroke(128, 0, 128);
       drawDebugCircle(getOuterRadius());
     }
@@ -129,7 +127,7 @@ public class CentreMovingShape extends CircularImageLayer
 
     parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
     PImage img;
-    if (wireframe < 1 && (img = getCurrentImage()) != null) {
+    if (wireframe <= 0 && (img = getCurrentImage()) != null) {
       parent.texture(img); // set the texture to use
       parent.noStroke(); // turn off stroke
     } else {

@@ -11,6 +11,8 @@ public abstract class ImageLayer implements Runnable
 {
   protected final PApplet parent;
 
+  public int wireframe = 0;
+
   private final AtomicReference<PImageFuture> nextImage =
     new AtomicReference<>();
 

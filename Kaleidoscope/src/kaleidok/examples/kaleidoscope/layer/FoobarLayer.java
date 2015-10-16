@@ -3,8 +3,6 @@ package kaleidok.examples.kaleidoscope.layer;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-import static kaleidok.util.DebugManager.debug;
-import static kaleidok.util.DebugManager.wireframe;
 import static processing.core.PApplet.map;
 
 
@@ -92,7 +90,7 @@ public class FoobarLayer extends CircularImageLayer
       fc1 = parent.frameCount * 0.01f,
 	    fc2 = parent.frameCount * 0.02f;
 
-    if (debug >= 1 && wireframe >= 1)
+    if (wireframe >= 2)
     {
       // draw the ring borders
       parent.stroke(0, 255, 255);
@@ -125,7 +123,7 @@ public class FoobarLayer extends CircularImageLayer
     parent.strokeWeight(parent.g.strokeWeight / getOuterRadius());
 		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
 		PImage img;
-		if (wireframe < 1 && (img = getCurrentImage()) != null) {
+		if (wireframe <= 0 && (img = getCurrentImage()) != null) {
 			parent.texture(img); // set the texture to use
 		} else {
 			parent.noFill();
