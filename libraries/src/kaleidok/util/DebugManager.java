@@ -10,8 +10,6 @@ import java.util.logging.Logger;
 
 public final class DebugManager
 {
-  public static int verbose = 0;
-
   public static int debug = 0;
   static {
     String prefix = "-agentlib:jdwp";
@@ -41,10 +39,9 @@ public final class DebugManager
           DebugManager.class.getCanonicalName() +
             " was already initialized earlier from the different source " +
             DebugManager.source);
-      } else if (verbose >= 1) {
-        logger.log(Level.WARNING,
-          "Re-initializing from the same object \"{0}\" as earlier", source);
       }
+      logger.log(Level.FINEST,
+        "Re-initializing from the same object \"{0}\" as earlier", source);
     }
   }
 

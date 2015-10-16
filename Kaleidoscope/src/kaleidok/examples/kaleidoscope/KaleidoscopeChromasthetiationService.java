@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
-import static kaleidok.util.DebugManager.debug;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 
@@ -99,7 +98,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
         cacheDir, HTTP_CACHE_APP_VERSION, httpCacheSize));
     } catch (IOException ex) {
       String msg = "Couldn't set up an HTTP cache";
-      if (debug >= 1)
+      if (KaleidoscopeChromasthetiationService.class.desiredAssertionStatus())
         throw new AssertionError(msg, ex);
 
       // else: use default cache storage
