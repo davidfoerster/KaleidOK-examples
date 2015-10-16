@@ -11,6 +11,13 @@ public final class Strings
 {
   private Strings() { }
 
+
+  public static boolean isEmpty( CharSequence s )
+  {
+    return s == null || s.length() == 0;
+  }
+
+
   public static String join( Collection<? extends CharSequence> ar, char separator )
   {
     if (ar.isEmpty())
@@ -32,6 +39,7 @@ public final class Strings
 
     return sb.toString();
   }
+
 
   /**
    * Writes the hexadecimal representation of an integer to a char array. If

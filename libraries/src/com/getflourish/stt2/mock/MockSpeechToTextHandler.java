@@ -21,10 +21,18 @@ import java.util.logging.Logger;
 import java.util.regex.*;
 
 import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.util.Strings.isEmpty;
 
 
 public class MockSpeechToTextHandler implements HttpHandler
 {
+  static {
+    Class<?> clazz = MockSpeechToTextHandler.class;
+    clazz.getClassLoader()
+      .setPackageAssertionStatus(clazz.getPackage().getName(), true);
+  }
+
+
   private static final Logger logger =
     Logger.getLogger(MockSpeechToTextHandler.class.getCanonicalName());
 
@@ -75,17 +83,30 @@ public class MockSpeechToTextHandler implements HttpHandler
 
     Map<String, String> q =
       Parsers.getQueryMap(t.getRequestURI(), DEFAULT_CHARSET);
-    assertTrue(q != null);
-    assertTrue("json".equals(q.get("output")));
-    assertTrue(!q.get("key").isEmpty());
-    assertTrue(!q.get("lang").isEmpty());
-    assertTrue(q.size() == 3);
+    if (q == null || q.isEmpty())
+      throwInvalid("No request parameters");
+    if (!"json".equals(q.get("output")))
+      throwInvalid("Invalid request parameter value: output=" + q.get("output"));
+    if (isEmpty(q.get("key")))
+      throwInvalid("Empty request parameter: key");
+    if (isEmpty(q.get("lang")))
+      throwInvalid("Empty request parameter: lang");
+    if (q.size() != 3)
+      throwInvalid("Superfluous request parameters");
 
     Map<String, String> contentType =
       Parsers.getHeaderValueMap(t.getRequestHeaders().getFirst(CONTENT_TYPE));
-    assertTrue("audio/x-flac".equals(contentType.get(null)));
-    float sampleRate = Float.parseFloat(contentType.get("rate"));
-    assertTrue(sampleRate > 0 && !Float.isInfinite(sampleRate));
+    if (!"audio/x-flac".equals(contentType.get(null)))
+      throwInvalid("Invalid request content-type: " + contentType.get(null));
+    float sampleRate;
+    try {
+      sampleRate = Float.parseFloat(contentType.get("rate"));
+      if (!(sampleRate > 0 && !Float.isInfinite(sampleRate)))
+        throw new IllegalArgumentException("Sampling rate must be positive and finite");
+    } catch (IllegalArgumentException ex) {
+      throw new IllegalArgumentException(
+        "Invalid request content-type parameter: rate=" + contentType.get("rate"), ex);
+    }
 
     byte[] flacBuffer;
     try (InputStream is = t.getRequestBody()) {
@@ -94,7 +115,8 @@ public class MockSpeechToTextHandler implements HttpHandler
     logger.log(Level.FINEST,
       "Received {0} bytes on request to {1}",
       new Object[]{flacBuffer.length, t.getRequestURI()});
-    assertTrue(flacBuffer.length > 86);
+    if (flacBuffer.length <= 86)
+      throwInvalid("Transmitted data only seems to contain FLAC header");
 
     Path tmpFilePath = createTempFile();
     if (tmpFilePath != null) {
@@ -105,7 +127,8 @@ public class MockSpeechToTextHandler implements HttpHandler
 
     double duration = testFlacFile(flacBuffer, sampleRate);
     if (!Double.isNaN(duration)) {
-      assertTrue(duration <= stt.getMaxTranscriptionInterval() * 1e-9);
+      if (duration > stt.getMaxTranscriptionInterval() * 1e-9)
+        throwInvalid("FLAC stream duration exceeds maximum transcription interval");
     } else {
       logger.finest("Couldn't determine duration of the submitted audio record");
     }
@@ -149,26 +172,30 @@ public class MockSpeechToTextHandler implements HttpHandler
       {
         fileOutput = r.readLine();
         if (fileOutput != null)
-          assertTrue(r.read() == -1);
+          assert r.read() == -1;
       }
     } catch (IOException ex) {
-      throw new Error(
-        "Your system configuration doesn't permit the validation of submitted audio data", ex);
+      logger.log(Level.WARNING,
+        "Your system configuration doesn't permit the validation of submitted audio data",
+        ex);
+      return Double.NaN;
     }
     while (true) {
       try {
-        assertTrue(pr.waitFor() == 0);
+        assert pr.waitFor() == 0;
         break;
       } catch (InterruptedException ex) {
         // keep waiting
       }
     }
 
-    assertTrue(fileOutput != null);
+    if (fileOutput == null)
+      throwInvalid("The type of the sent data is unknown");
     int p = fileOutput.indexOf(':');
-    assertTrue(p >= 0);
+    assert p >= 0;
     String[] fileSpec = fileOutput.substring(p + 2).split(", ");
-    assertTrue(fileSpec[0].startsWith("FLAC"));
+    if (!fileSpec[0].startsWith("FLAC"))
+      throwInvalid("The sent data doesn't look like a FLAC stream: " + fileOutput.substring(p + 2));
 
     double sampleRate = Double.NaN;
     long sampleCount = -1;
@@ -180,27 +207,38 @@ public class MockSpeechToTextHandler implements HttpHandler
         try {
           sampleRate = Double.parseDouble(m.group(1));
         } catch (NumberFormatException ex) {
-          throw new IllegalArgumentException(s, ex);
+          throw new AssertionError(s, ex);
         }
+        assert sampleRate > 0 && !Double.isInfinite(sampleRate);
+
         if (m.groupCount() >= 2)
         switch (m.group(2).charAt(0)) {
         case 'k':
           sampleRate *= 1000;
           break;
+
+        default:
+          throw new AssertionError("Unsupported magnitude prefix: " + m.group(2));
         }
-        assertTrue(sampleRate == expectedSampleRate);
       }
       else if ((m = SAMPLECOUNT_PATTERN.matcher(s)).matches())
       {
         try {
           sampleCount = Long.parseLong(m.group(1));
         } catch (NumberFormatException ex) {
-          throw new IllegalArgumentException(s, ex);
+          throw new AssertionError(s, ex);
         }
       }
     }
 
-    assertTrue(sampleRate > 0 && !Double.isInfinite(sampleRate));
+    if (Double.isNaN(sampleRate))
+      throwInvalid("Couldn't determine sample rate of submitted audio stream");
+    if (sampleRate != expectedSampleRate) {
+      throwInvalid(String.format(
+        "Sample rate of submitted audio stream (%f) doesn't match expectation (%f)",
+        sampleRate, expectedSampleRate));
+    }
+
     return (sampleCount >= 0) ? sampleCount / sampleRate : Double.NaN;
   }
 
@@ -233,17 +271,16 @@ public class MockSpeechToTextHandler implements HttpHandler
   }
 
 
-  protected static void assertTrue( boolean b )
-  {
-    if (!b)
-      throw new AssertionError();
-  }
-
-
   protected static void setContentType( HttpExchange t, String contentType )
   {
     t.getResponseHeaders().set(CONTENT_TYPE,
       contentType + "; charset=" + DEFAULT_CHARSET.name() + ';');
+  }
+
+
+  protected static void throwInvalid( String msg )
+  {
+    throw new IllegalArgumentException(msg);
   }
 
 
