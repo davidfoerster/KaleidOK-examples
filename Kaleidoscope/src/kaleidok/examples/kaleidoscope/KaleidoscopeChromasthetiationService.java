@@ -27,6 +27,7 @@ import java.util.logging.Level;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.DebugManager.debug;
+import static kaleidok.util.LoggingUtils.logThrown;
 
 
 public class KaleidoscopeChromasthetiationService extends ChromasthetiationService
@@ -102,8 +103,8 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
         throw new AssertionError(msg, ex);
 
       // else: use default cache storage
-      logger.log(Level.WARNING, "{0} in \"{1}\": {2}",
-        new Object[]{msg, cacheDir, ex.getLocalizedMessage()});
+      logThrown(logger, Level.WARNING, "{0} in \"{1}\"", ex,
+        new Object[]{msg, cacheDir});
     }
 
     builder.setCacheConfig(cacheConfig);
