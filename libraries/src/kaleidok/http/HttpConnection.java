@@ -3,7 +3,7 @@ package kaleidok.http;
 import kaleidok.http.util.MimeTypeMap;
 import kaleidok.http.util.Parsers;
 import kaleidok.http.util.Parsers.ContentType;
-import kaleidok.io.Readers;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -345,7 +345,7 @@ public class HttpConnection
           connect();
           try {
             try (Reader r = getReader()) {
-              body = Readers.readAll(r, null);
+              body = IOUtils.toString(r);
             }
           } finally {
             disconnect();
