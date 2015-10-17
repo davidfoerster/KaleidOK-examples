@@ -1,4 +1,4 @@
-package kaleidok.chromatik;
+package kaleidok.exaleads.chromatik;
 
 
 public class KeywordChromasthetiator<Flickr extends kaleidok.flickr.Flickr>

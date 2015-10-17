@@ -1,9 +1,9 @@
 package kaleidok.examples.kaleidoscope;
 
-import com.getflourish.stt2.RecorderIcon;
-import com.getflourish.stt2.STT;
-import com.getflourish.stt2.SttResponse;
-import com.getflourish.stt2.Transcription;
+import kaleidok.google.speech.RecorderIcon;
+import kaleidok.google.speech.STT;
+import kaleidok.google.speech.SttResponse;
+import kaleidok.google.speech.Transcription;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.util.DefaultValueParser;
 

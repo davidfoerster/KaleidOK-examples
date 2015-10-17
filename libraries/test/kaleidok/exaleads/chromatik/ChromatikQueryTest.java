@@ -1,6 +1,6 @@
-package kaleidok.chromatik;
+package kaleidok.exaleads.chromatik;
 
-import kaleidok.chromatik.data.ChromatikColor;
+import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.http.URLEncoding;
 import kaleidok.util.StringTokenIterator;
 import org.junit.Test;

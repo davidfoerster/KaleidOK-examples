@@ -1,4 +1,4 @@
-package com.getflourish.stt2;
+package kaleidok.google.speech;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 
-import static com.getflourish.stt2.STT.logger;
+import static kaleidok.google.speech.STT.logger;
 
 
 public class Transcription implements Runnable

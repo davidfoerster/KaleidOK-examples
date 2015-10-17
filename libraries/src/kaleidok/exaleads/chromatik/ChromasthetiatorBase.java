@@ -1,7 +1,7 @@
-package kaleidok.chromatik;
+package kaleidok.exaleads.chromatik;
 
-import kaleidok.chromatik.data.ChromatikColor;
-import kaleidok.chromatik.data.ChromatikResponse;
+import kaleidok.exaleads.chromatik.data.ChromatikColor;
+import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.flickr.SizeMap;

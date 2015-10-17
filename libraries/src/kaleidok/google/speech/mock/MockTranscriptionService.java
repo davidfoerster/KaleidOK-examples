@@ -1,8 +1,8 @@
-package com.getflourish.stt2.mock;
+package kaleidok.google.speech.mock;
 
-import com.getflourish.stt2.STT;
-import com.getflourish.stt2.SttResponse;
-import com.getflourish.stt2.TranscriptionService;
+import kaleidok.google.speech.STT;
+import kaleidok.google.speech.SttResponse;
+import kaleidok.google.speech.TranscriptionService;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.http.concurrent.FutureCallback;
 

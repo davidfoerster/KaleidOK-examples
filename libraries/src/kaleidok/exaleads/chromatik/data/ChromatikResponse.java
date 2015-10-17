@@ -1,4 +1,4 @@
-package kaleidok.chromatik.data;
+package kaleidok.exaleads.chromatik.data;
 
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;

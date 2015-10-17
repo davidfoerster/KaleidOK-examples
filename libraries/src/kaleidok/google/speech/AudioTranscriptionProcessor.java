@@ -1,4 +1,4 @@
-package com.getflourish.stt2;
+package kaleidok.google.speech;
 
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import static com.getflourish.stt2.STT.logger;
+import static kaleidok.google.speech.STT.logger;
 
 
 public class AudioTranscriptionProcessor implements AudioProcessor

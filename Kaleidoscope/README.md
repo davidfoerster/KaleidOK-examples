@@ -89,12 +89,12 @@ are optional and have sensible defaults.
    Uses the specified file (if any) as audio input in a continuous loop instead of
    a microphone line; the sample rate is always that of the audio file.
 
- * `com.getflourish.stt2.stt.interval` –
+ * `kaleidok.google.speech.stt.interval` –
    Sets the maximum duration of a speech record in milliseconds to send to the 
    speech-to-text service. Google's web service is supposed to handle 10–15 
    seconds, but a safer value seems to be around 8 seconds.
  
- * `com.getflourish.stt2.stt.interval.count` –
+ * `kaleidok.google.speech.stt.interval.count` –
    Allows some kind of continuous speech transcription beyond the limitations
    from above setting, by resuming recording immediately after an interval
    elapsed. With this setting you can configure, how many times recording is to

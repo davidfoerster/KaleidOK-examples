@@ -1,9 +1,9 @@
 package kaleidok.examples;
 
-import kaleidok.chromatik.data.ChromatikColor;
-import kaleidok.chromatik.ChromatikQuery;
+import kaleidok.exaleads.chromatik.data.ChromatikColor;
+import kaleidok.exaleads.chromatik.ChromatikQuery;
 import com.getflourish.stt.STT;
-import kaleidok.chromatik.data.ChromatikResponse;
+import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import processing.core.PApplet;
 import processing.core.PImage;
 import synesketch.SynesketchState;

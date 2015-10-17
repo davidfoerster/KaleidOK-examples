@@ -1,4 +1,4 @@
-package com.getflourish.stt2;
+package kaleidok.google.speech;
 
 import kaleidok.concurrent.DaemonThreadFactory;
 import org.apache.http.concurrent.FutureCallback;

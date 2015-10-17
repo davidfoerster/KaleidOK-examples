@@ -1,4 +1,4 @@
-package com.getflourish.stt2;
+package kaleidok.google.speech;
 
 
 public class SttResponse

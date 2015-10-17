@@ -1,6 +1,6 @@
-package com.getflourish.stt2.mock;
+package kaleidok.google.speech.mock;
 
-import com.getflourish.stt2.STT;
+import kaleidok.google.speech.STT;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import kaleidok.http.util.Parsers;

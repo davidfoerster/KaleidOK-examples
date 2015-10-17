@@ -1,4 +1,4 @@
-package kaleidok.chromatik;
+package kaleidok.exaleads.chromatik;
 
 import kaleidok.flickr.Flickr;
 

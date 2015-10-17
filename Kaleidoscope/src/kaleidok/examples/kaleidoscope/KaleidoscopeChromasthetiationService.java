@@ -1,7 +1,7 @@
 package kaleidok.examples.kaleidoscope;
 
-import kaleidok.chromatik.ChromasthetiationService;
-import kaleidok.chromatik.DocumentChromasthetiator;
+import kaleidok.exaleads.chromatik.ChromasthetiationService;
+import kaleidok.exaleads.chromatik.DocumentChromasthetiator;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.concurrent.GroupedThreadFactory;
 import kaleidok.flickr.Flickr;

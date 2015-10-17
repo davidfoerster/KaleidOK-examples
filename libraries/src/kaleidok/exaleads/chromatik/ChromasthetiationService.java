@@ -1,6 +1,6 @@
-package kaleidok.chromatik;
+package kaleidok.exaleads.chromatik;
 
-import kaleidok.chromatik.data.ChromatikResponse;
+import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.concurrent.GroupedThreadFactory;
 import kaleidok.util.BoundedCompletionQueue;
 import kaleidok.flickr.AsyncFlickr;

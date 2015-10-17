@@ -1,9 +1,9 @@
-package kaleidok.chromatik;
+package kaleidok.exaleads.chromatik;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import kaleidok.chromatik.data.ChromatikColor;
-import kaleidok.chromatik.data.ChromatikResponse;
+import kaleidok.exaleads.chromatik.data.ChromatikColor;
+import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.util.Strings;
 import org.apache.http.client.utils.URIBuilder;

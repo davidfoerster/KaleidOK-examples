@@ -1,6 +1,6 @@
-package com.getflourish.stt2;
+package kaleidok.google.speech;
 
-import com.getflourish.stt2.mock.MockTranscriptionService;
+import kaleidok.google.speech.mock.MockTranscriptionService;
 import kaleidok.util.Timer;
 import org.apache.http.concurrent.FutureCallback;
 
