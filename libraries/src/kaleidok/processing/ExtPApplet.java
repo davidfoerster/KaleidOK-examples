@@ -1,17 +1,23 @@
 package kaleidok.processing;
 
+import kaleidok.awt.ImageIO;
 import kaleidok.util.DefaultValueParser;
 import processing.core.PApplet;
 import processing.core.PImage;
 
 import javax.swing.JApplet;
+import javax.swing.SwingWorker;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
 
 
 /**
@@ -24,6 +30,21 @@ public class ExtPApplet extends PApplet
   public ExtPApplet( JApplet parent )
   {
     this.parent = parent;
+    registerMethod("post", this);
+  }
+
+
+  @Override
+  public void destroy()
+  {
+    unregisterMethod("post", this);
+    super.destroy();
+  }
+
+
+  public void post()
+  {
+    saveFilenames.handleEntries();
   }
 
 
@@ -169,5 +190,75 @@ public class ExtPApplet extends PApplet
     }
 
     image(img, dstLeft, dstTop, dstWidth, dstHeight, srcLeft, srcTop, srcWidth, srcHeight);
+  }
+
+
+  private final ImageSaveList saveFilenames = new ImageSaveList();
+
+
+  public void save( String filename, boolean fullFrame )
+  {
+    if (fullFrame) {
+      synchronized (saveFilenames) {
+        saveFilenames.add(filename);
+      }
+    } else {
+      save(filename);
+    }
+  }
+
+
+  @Override
+  public void save( String filename )
+  {
+    loadPixels();
+    saveImpl(filename);
+  }
+
+
+  protected void saveImpl( final String filename )
+  {
+    (new SwingWorker<Object, Object>() {
+      @Override
+      protected Object doInBackground() throws IOException
+      {
+        if ((g.format == RGB || g.format == ARGB) && filename.endsWith(".bmp")) {
+          Path filePath = Paths.get(savePath(filename));
+          try {
+            ImageIO.saveBmp32(filePath, width, height, pixels, 0).force();
+            return null;
+          } catch (UnsupportedOperationException ex) {
+            // try again with default code path
+          }
+        }
+
+        ExtPApplet.super.save(filename);
+        return null;
+      }
+    }).execute();
+  }
+
+
+  private class ImageSaveList extends HashSet<String>
+  {
+    @Override
+    public synchronized boolean add( String s )
+    {
+      return super.add(s);
+    }
+
+    public void handleEntries()
+    {
+      if (!isEmpty()) {
+        synchronized (this) {
+          if (!isEmpty()) {
+            loadPixels();
+            for (String fn : this)
+              saveImpl(fn);
+            clear();
+          }
+        }
+      }
+    }
   }
 }
