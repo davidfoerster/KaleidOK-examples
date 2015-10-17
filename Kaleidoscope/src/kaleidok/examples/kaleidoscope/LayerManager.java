@@ -40,12 +40,19 @@ public class LayerManager extends ArrayList<ImageLayer>
     super(8);
     this.parent = parent;
 
-    BackgroundLayer bg = getBackgroundLayer();
+    getBackgroundLayer();
     add(getSpectrogramLayer());
     add(getOuterMovingShape());
     add(getFoobarLayer());
     add(getCentreLayer());
 
+    setLayerProperties();
+  }
+
+
+  private void setLayerProperties()
+  {
+    BackgroundLayer bg = getBackgroundLayer();
     Properties prop = getLayerProperties();
     Package pack = ImageLayer.class.getPackage();
     int count = BeanUtils.applyBeanProperties(prop, pack, bg);
