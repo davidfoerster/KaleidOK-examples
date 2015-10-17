@@ -1,6 +1,7 @@
 package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.audio.processor.MinimFFTProcessor;
+import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -24,7 +25,7 @@ public class SpectrogramLayer extends CircularImageLayer
   private static final int MIN_FREQUENCY = 86;
 
 
-	public SpectrogramLayer( PApplet parent, int segmentCount,
+	public SpectrogramLayer( ExtPApplet parent, int segmentCount,
     float innerRadius, float outerRadius, MinimFFTProcessor spectrum,
     float sampleRate )
 	{

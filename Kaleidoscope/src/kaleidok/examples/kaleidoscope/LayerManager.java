@@ -9,6 +9,7 @@ import processing.core.PImage;
 
 import java.io.*;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -52,18 +53,32 @@ public class LayerManager extends ArrayList<ImageLayer>
 
   private void setLayerProperties()
   {
-    BackgroundLayer bg = getBackgroundLayer();
     Properties prop = getLayerProperties();
     Package pack = ImageLayer.class.getPackage();
+    MessageFormat screenshotPathPattern = getScreenshotPathPattern();
+
+    BackgroundLayer bg = getBackgroundLayer();
+    bg.screenshotPathPattern = screenshotPathPattern;
+
     int count = BeanUtils.applyBeanProperties(prop, pack, bg);
-    for (ImageLayer l: this)
+    for (ImageLayer l: this) {
       count += BeanUtils.applyBeanProperties(prop, pack, l);
+      l.screenshotPathPattern = screenshotPathPattern;
+    }
 
     if (count != prop.size()) {
       logger.log(Level.FINEST,
         "Only {0} of your {1} layer property settings were used",
         new Object[]{count, prop.size()});
     }
+  }
+
+
+  private MessageFormat getScreenshotPathPattern()
+  {
+    String pattern = parent.getParameter(
+      parent.getClass().getPackage().getName() + ".screenshots.pattern");
+    return (pattern != null) ? new MessageFormat(pattern) : null;
   }
 
 

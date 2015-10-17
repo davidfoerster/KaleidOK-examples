@@ -1,13 +1,12 @@
 package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.processing.ExtPApplet;
-import processing.core.PApplet;
 import processing.core.PImage;
 
 
 public class BackgroundLayer extends ImageLayer
 {
-  public BackgroundLayer( PApplet parent )
+  public BackgroundLayer( ExtPApplet parent )
   {
     super(parent);
   }

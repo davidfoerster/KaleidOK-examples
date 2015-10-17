@@ -4,6 +4,7 @@ import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -24,7 +25,7 @@ public class OuterMovingShape extends CircularImageLayer
   private double angle = 0, step = 0;
 
 
-  public OuterMovingShape( PApplet parent, int segmentCount, float radius )
+  public OuterMovingShape( ExtPApplet parent, int segmentCount, float radius )
   {
     super(parent, segmentCount, 0, radius);
   }

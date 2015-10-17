@@ -1,15 +1,17 @@
 package kaleidok.examples.kaleidoscope.layer;
 
+import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
-import processing.core.PApplet;
 import processing.core.PImage;
 
+import java.text.MessageFormat;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
 
 public abstract class ImageLayer implements Runnable
 {
-  protected final PApplet parent;
+  protected final ExtPApplet parent;
 
   public int wireframe = 0;
 
@@ -22,8 +24,10 @@ public abstract class ImageLayer implements Runnable
 
   private PImage currentImage = null;
 
+  public MessageFormat screenshotPathPattern = null;
 
-  public ImageLayer( PApplet parent )
+
+  public ImageLayer( ExtPApplet parent )
   {
     this.parent = parent;
   }
@@ -68,6 +72,15 @@ public abstract class ImageLayer implements Runnable
       } else {
         txFactor = imgHeight / imgWidth * 0.5f; // = 1 / imgAspect;
         tyFactor = 0.5f;
+      }
+
+      // don't save screenshots of the initial images
+      if (currentImage != null && screenshotPathPattern != null) {
+        StringBuffer screenshotPath =
+          screenshotPathPattern.format(
+            new Object[]{new Date(), parent.frameCount}, new StringBuffer(32),
+            null);
+        parent.save(screenshotPath.toString(), true);
       }
     }
     currentImage = img;

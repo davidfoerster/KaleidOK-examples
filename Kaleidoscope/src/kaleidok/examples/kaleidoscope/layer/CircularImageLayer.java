@@ -1,5 +1,6 @@
 package kaleidok.examples.kaleidoscope.layer;
 
+import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 
 
@@ -13,7 +14,7 @@ public abstract class CircularImageLayer extends ImageLayer
   private float[] segmentCoords = null;
 
 
-  public CircularImageLayer( PApplet parent, int segmentCount,
+  public CircularImageLayer( ExtPApplet parent, int segmentCount,
     float innerRadius, float outerRadius )
   {
     super(parent);
