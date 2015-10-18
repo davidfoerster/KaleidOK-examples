@@ -33,7 +33,6 @@ public class ChromasthetiationService
   private final ImageAsync imageAsync;
 
   private final AsyncFlickr flickr;
-  private boolean hasFlickrApiKey = false;
 
 
   public ChromasthetiationService( Executor executor,
@@ -88,11 +87,12 @@ public class ChromasthetiationService
   }
 
 
-  protected synchronized void setFlickrApiKey( FlickrBase flickr )
+  protected void setFlickrApiKey( FlickrBase flickr )
   {
     if (flickr.getApiKey() != null) {
-      hasFlickrApiKey = true;
-      this.flickr.setApiKey(flickr.getApiKey(), flickr.getApiSecret());
+      synchronized (this.flickr) {
+        this.flickr.setApiKey(flickr.getApiKey(), flickr.getApiSecret());
+      }
     }
   }
 
@@ -115,9 +115,9 @@ public class ChromasthetiationService
     {
       super(queryParams);
 
-      if (!hasFlickrApiKey)
-        setFlickrApiKey(queryParams.flickr);
       flickr = ChromasthetiationService.this.flickr;
+      if (flickr.getApiKey() == null)
+        setFlickrApiKey(queryParams.flickr);
 
       this.text = text;
       this.futureImageCallback = futureImageCallback;
