@@ -1,9 +1,8 @@
 package kaleidok.flickr.internal;
 
-import com.google.gson.*;
-import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Size;
 import kaleidok.flickr.SizeMap;
+import kaleidok.google.gson.TypeAdapterManager;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
@@ -20,21 +19,11 @@ public class FlickrBase
     } catch (URISyntaxException ex) {
       throw new AssertionError(ex);
     }
-  }
 
-
-  private static Gson gson = null;
-
-  public static Gson getGson()
-  {
-    if (gson == null) {
-      gson = new GsonBuilder()
-        .registerTypeAdapter(SizeMap.class, SizeMap.Deserializer.INSTANCE)
-        .registerTypeAdapter(
-          Size.Label.class, Size.Label.Deserializer.INSTANCE)
-        .create();
-    }
-    return gson;
+    TypeAdapterManager.registerTypeAdapter(
+      SizeMap.class, SizeMap.Deserializer.INSTANCE);
+    TypeAdapterManager.registerTypeAdapter(
+      Size.Label.class, Size.Label.Deserializer.INSTANCE);
   }
 
 

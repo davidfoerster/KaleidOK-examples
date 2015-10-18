@@ -1,6 +1,7 @@
 package kaleidok.http.responsehandler;
 
 import com.google.gson.Gson;
+import kaleidok.google.gson.TypeAdapterManager;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
 
@@ -11,24 +12,14 @@ import java.io.Reader;
 public class JsonResponseHandler<T> extends ReaderSource
   implements ResponseHandler<T>
 {
-  private static Gson defaultGson = null;
-
-  public static Gson getDefaultGson()
-  {
-    if (defaultGson == null)
-      defaultGson = new Gson();
-    return defaultGson;
-  }
-
-
-  public final Gson gson;
+  private final Gson gson;
 
   public final Class<? extends T> targetClass;
 
 
   public JsonResponseHandler( Class<? extends T> targetClass )
   {
-    this(targetClass, getDefaultGson());
+    this(targetClass, null);
   }
 
   public JsonResponseHandler( Class<? extends T> targetClass, Gson gson )
@@ -46,11 +37,17 @@ public class JsonResponseHandler<T> extends ReaderSource
   }
 
 
+  public Gson getGson()
+  {
+    return (gson != null) ? gson : TypeAdapterManager.getGson();
+  }
+
+
   @Override
   public T handleResponse( HttpResponse httpResponse ) throws IOException
   {
     try (Reader in = getReader(httpResponse)) {
-      return gson.fromJson(in, targetClass);
+      return getGson().fromJson(in, targetClass);
     }
   }
 }

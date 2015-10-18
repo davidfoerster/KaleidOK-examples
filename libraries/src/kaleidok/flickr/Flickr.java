@@ -11,6 +11,8 @@ import java.net.MalformedURLException;
 
 public class Flickr extends FlickrBase
 {
+  public Flickr() { }
+
   public Flickr( String apiKey, String apiSecret )
   {
     super(DEFAULT_URI_BASE, apiKey, apiSecret);

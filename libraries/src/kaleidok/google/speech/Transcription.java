@@ -6,7 +6,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import kaleidok.http.HttpConnection;
 import kaleidok.http.JsonHttpConnection;
-import kaleidok.http.responsehandler.JsonResponseHandler;
+import kaleidok.google.gson.TypeAdapterManager;
 import kaleidok.io.platform.PlatformPaths;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.http.concurrent.FutureCallback;
@@ -165,7 +165,7 @@ public class Transcription implements Runnable
       SttResponse response;
       do {
         response =
-          JsonResponseHandler.getDefaultGson().fromJson(jsonReader, SttResponse.class);
+          TypeAdapterManager.getGson().fromJson(jsonReader, SttResponse.class);
       } while ((response == null || response.isEmpty()) && jsonReader.peek() != JsonToken.END_DOCUMENT);
       return response;
     } catch (JsonSyntaxException ex) {

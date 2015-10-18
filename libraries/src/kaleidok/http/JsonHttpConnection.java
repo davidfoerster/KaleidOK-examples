@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import kaleidok.http.responsehandler.JsonElementResponseHandler;
 import kaleidok.http.responsehandler.JsonMimeTypeChecker;
-import kaleidok.http.responsehandler.JsonResponseHandler;
+import kaleidok.google.gson.TypeAdapterManager;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -54,7 +54,7 @@ public class JsonHttpConnection extends HttpConnection
 
   public <T> T get( Class<T> clazz ) throws IOException
   {
-    return get(clazz, JsonResponseHandler.getDefaultGson());
+    return get(clazz, TypeAdapterManager.getGson());
   }
 
   public <T> T get( Class<T> clazz, Gson gson ) throws IOException
@@ -99,7 +99,7 @@ public class JsonHttpConnection extends HttpConnection
 
   public <T> Callable<T> asCallable( Class<T> clazz )
   {
-    return asCallable(clazz, JsonResponseHandler.getDefaultGson());
+    return asCallable(clazz, TypeAdapterManager.getGson());
   }
 
   public <T> Callable<T> asCallable( final Class<T> clazz, final Gson gson )

@@ -15,19 +15,15 @@ public class AsyncFlickr extends Flickr
   private final JsonAsync async;
 
 
-  public AsyncFlickr( String apiKey, String apiSecret )
+  public AsyncFlickr()
   {
-    this(apiKey, apiSecret, null, null);
+    this(null, null);
   }
 
-
-  public AsyncFlickr( String apiKey, String apiSecret, Executor executor,
+  public AsyncFlickr( Executor executor,
     org.apache.http.client.fluent.Executor httpExecutor )
   {
-    super(apiKey, apiSecret);
-
     async = new JsonAsync().use(executor).use(httpExecutor);
-    async.gson = getGson();
   }
 
 

@@ -1,10 +1,9 @@
 package kaleidok.exaleads.chromatik;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.http.JsonHttpConnection;
+import kaleidok.google.gson.TypeAdapterManager;
 import kaleidok.util.Strings;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -54,12 +53,10 @@ public class ChromatikQuery
   public Map<Object, Object> opts = new HashMap<>();
 
 
-  protected static final Gson gson = new GsonBuilder()
-    .registerTypeAdapter(
-      ChromatikResponse.class, ChromatikResponse.Deserializer.INSTANCE)
-    .excludeFieldsWithoutExposeAnnotation()
-    .create();
-
+  static {
+    TypeAdapterManager.registerTypeAdapter(
+      ChromatikResponse.class, ChromatikResponse.Deserializer.INSTANCE);
+  }
 
   /**
    * Constructs a query object with the default result set size and no
@@ -118,7 +115,7 @@ public class ChromatikQuery
   protected static ChromatikResponse fetch( URL url ) throws IOException
   {
     return JsonHttpConnection.openURL(url)
-      .get(ChromatikResponse.class, gson);
+      .get(ChromatikResponse.class, TypeAdapterManager.getGson());
   }
 
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import kaleidok.http.responsehandler.JsonElementResponseHandler;
 import kaleidok.http.responsehandler.JsonResponseHandler;
+import kaleidok.google.gson.TypeAdapterManager;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
 
@@ -14,7 +15,7 @@ import static kaleidok.http.responsehandler.JsonMimeTypeChecker.MIME_TYPE_MAP;
 
 public class JsonAsync extends AsyncBase
 {
-  public Gson gson = JsonResponseHandler.getDefaultGson();
+  private Gson gson = null;
 
 
   public JsonAsync()
@@ -34,6 +35,18 @@ public class JsonAsync extends AsyncBase
   {
     super.use(concurrentExec);
     return this;
+  }
+
+
+  public Gson getGson()
+  {
+    Gson gson = this.gson;
+    return (gson != null) ? gson : TypeAdapterManager.getGson();
+  }
+
+  public void setGson( Gson gson )
+  {
+    this.gson = gson;
   }
 
 
@@ -67,11 +80,11 @@ public class JsonAsync extends AsyncBase
 
   private <T> JsonResponseHandler<T> getJsonResponseHandler( Class<T> clazz )
   {
-    Gson gson = this.gson;
+    Gson gson = getGson();
     JsonResponseHandler<?> lrh = lastResponseHandler;
 
     if (lrh == null || lrh.targetClass != clazz ||
-      lrh.gson != gson)
+      lrh.getGson() != gson)
     {
       lrh = new JsonResponseHandler<>(clazz, gson);
       lastResponseHandler = lrh;

@@ -39,13 +39,9 @@ public class ChromasthetiationService
     org.apache.http.client.fluent.Executor httpExecutor )
   {
     this.executor = executor;
-
     jsonAsync = new JsonAsync().use(executor).use(httpExecutor);
-    jsonAsync.gson = ChromatikQuery.gson;
-
     imageAsync = new ImageAsync().use(executor).use(httpExecutor);
-
-    flickr = new AsyncFlickr(null, null, executor, httpExecutor);
+    flickr = new AsyncFlickr(executor, httpExecutor);
   }
 
 
