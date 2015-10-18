@@ -45,9 +45,16 @@ public class FlickrBase
   protected URIBuilder ub;
 
 
+  protected FlickrBase()
+  {
+    this(null, null, null);
+  }
+
   protected FlickrBase( URI uriBase, String apiKey, String apiSecret )
   {
-    initQuery(uriBase, apiKey, apiSecret);
+    initQuery(
+      (uriBase != null) ? uriBase : DEFAULT_URI_BASE,
+      apiKey, apiSecret);
   }
 
 
@@ -90,6 +97,7 @@ public class FlickrBase
     }
 
     if (base != null) {
+      assert base.getScheme() != null && base.getHost() != null;
       this.uriBase = base;
       ub.setScheme(base.getScheme())
         .setUserInfo(base.getUserInfo())
@@ -115,6 +123,7 @@ public class FlickrBase
 
   protected URIBuilder copyUriBuilder()
   {
+    assert ub.getScheme() != null && ub.getHost() != null;
     return new URIBuilder()
       .setScheme(ub.getScheme())
       .setUserInfo(ub.getUserInfo())
