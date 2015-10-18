@@ -18,23 +18,9 @@ public class JsonAsync extends AsyncBase
   private Gson gson = null;
 
 
-  public JsonAsync()
+  public JsonAsync( org.apache.http.client.fluent.Async fluentAsync )
   {
-    super(MIME_TYPE_MAP);
-  }
-
-  @Override
-  public JsonAsync use( org.apache.http.client.fluent.Executor executor )
-  {
-    super.use(executor);
-    return this;
-  }
-
-  @Override
-  public JsonAsync use( java.util.concurrent.Executor concurrentExec )
-  {
-    super.use(concurrentExec);
-    return this;
+    super(fluentAsync, MIME_TYPE_MAP);
   }
 
 

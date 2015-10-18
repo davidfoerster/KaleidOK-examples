@@ -18,10 +18,11 @@ public abstract class AsyncBase
   public MimeTypeMap acceptedMimeTypes;
 
 
-  public AsyncBase( MimeTypeMap acceptedMimeTypes )
+  public AsyncBase( org.apache.http.client.fluent.Async fluentAsync,
+    MimeTypeMap acceptedMimeTypes )
   {
+    this.underlying = fluentAsync;
     this.acceptedMimeTypes = acceptedMimeTypes;
-    underlying = org.apache.http.client.fluent.Async.newInstance();
   }
 
 
@@ -53,19 +54,5 @@ public abstract class AsyncBase
         new ResponseMimeTypeChecker(acceptedMimeTypes),
         handler),
       callback);
-  }
-
-
-  public AsyncBase use( org.apache.http.client.fluent.Executor executor )
-  {
-    underlying.use(executor);
-    return this;
-  }
-
-
-  public AsyncBase use( java.util.concurrent.Executor concurrentExec )
-  {
-    underlying.use(concurrentExec);
-    return this;
   }
 }

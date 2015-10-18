@@ -13,29 +13,17 @@ import java.util.concurrent.Future;
 
 public class Async extends AsyncBase
 {
-  public Async( MimeTypeMap acceptedMimeTypes )
+  public Async( org.apache.http.client.fluent.Async fluentAsync,
+    MimeTypeMap acceptedMimeTypes )
   {
-    super(acceptedMimeTypes);
+    super(fluentAsync, acceptedMimeTypes);
   }
 
-  public Async()
+  public Async( org.apache.http.client.fluent.Async fluentAsync )
   {
-    this(new MimeTypeMap());
+    this(fluentAsync, new MimeTypeMap());
   }
 
-  @Override
-  public Async use( org.apache.http.client.fluent.Executor executor )
-  {
-    super.use(executor);
-    return this;
-  }
-
-  @Override
-  public Async use( java.util.concurrent.Executor concurrentExec )
-  {
-    super.use(concurrentExec);
-    return this;
-  }
 
   public Future<Content> execute( Request request )
   {

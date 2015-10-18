@@ -3,12 +3,13 @@ package kaleidok.exaleads.chromatik;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.concurrent.GroupedThreadFactory;
 import kaleidok.util.BoundedCompletionQueue;
-import kaleidok.flickr.AsyncFlickr;
+import kaleidok.flickr.FlickrAsync;
 import kaleidok.flickr.internal.FlickrBase;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.SizeMap;
 import kaleidok.http.async.ImageAsync;
 import kaleidok.http.async.JsonAsync;
+import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
 import synesketch.emotion.EmotionalState;
@@ -32,36 +33,29 @@ public class ChromasthetiationService
 
   private final ImageAsync imageAsync;
 
-  private final AsyncFlickr flickr;
+  private final FlickrAsync flickrAsync;
 
 
   public ChromasthetiationService( Executor executor,
-    org.apache.http.client.fluent.Executor httpExecutor )
+    JsonAsync jsonAsync, ImageAsync imageAsync, FlickrAsync flickrAsync )
   {
     this.executor = executor;
-    jsonAsync = new JsonAsync().use(executor).use(httpExecutor);
-    imageAsync = new ImageAsync().use(executor).use(httpExecutor);
-    flickr = new AsyncFlickr(executor, httpExecutor);
+    this.jsonAsync = jsonAsync;
+    this.imageAsync = imageAsync;
+    this.flickrAsync = flickrAsync;
   }
 
 
-  public ChromasthetiationService( Executor executor )
+  public ChromasthetiationService( Executor executor,
+    JsonAsync jsonAsync, ImageAsync imageAsync )
   {
-    this(executor, org.apache.http.client.fluent.Executor.newInstance());
+    this(executor, jsonAsync, imageAsync, new FlickrAsync(jsonAsync));
   }
 
 
-  public ChromasthetiationService( int threadPoolSize )
+  public ChromasthetiationService( Executor executor, Async fluentAsync )
   {
-    this((threadPoolSize == 0) ?
-      Executors.newCachedThreadPool(createThreadFactory()) :
-      Executors.newFixedThreadPool(threadPoolSize, createThreadFactory()));
-  }
-
-
-  public ChromasthetiationService()
-  {
-    this(0);
+    this(executor, new JsonAsync(fluentAsync), new ImageAsync(fluentAsync));
   }
 
 
@@ -86,14 +80,14 @@ public class ChromasthetiationService
   protected void setFlickrApiKey( FlickrBase flickr )
   {
     if (flickr.getApiKey() != null) {
-      synchronized (this.flickr) {
-        this.flickr.setApiKey(flickr.getApiKey(), flickr.getApiSecret());
+      synchronized (this.flickrAsync) {
+        this.flickrAsync.setApiKey(flickr.getApiKey(), flickr.getApiSecret());
       }
     }
   }
 
 
-  private class RunnableChromasthetiator extends KeywordChromasthetiator<AsyncFlickr>
+  private class RunnableChromasthetiator extends KeywordChromasthetiator<FlickrAsync>
     implements Runnable, FutureCallback<ChromatikResponse>
   {
     private final String text;
@@ -111,7 +105,7 @@ public class ChromasthetiationService
     {
       super(queryParams);
 
-      flickr = ChromasthetiationService.this.flickr;
+      flickr = ChromasthetiationService.this.flickrAsync;
       if (flickr.getApiKey() == null)
         setFlickrApiKey(queryParams.flickr);
 

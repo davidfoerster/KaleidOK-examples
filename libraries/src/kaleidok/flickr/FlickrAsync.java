@@ -6,24 +6,17 @@ import kaleidok.http.async.JsonAsync;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 
-public class AsyncFlickr extends Flickr
+public class FlickrAsync extends Flickr
 {
   private final JsonAsync async;
 
 
-  public AsyncFlickr()
+  public FlickrAsync( JsonAsync async )
   {
-    this(null, null);
-  }
-
-  public AsyncFlickr( Executor executor,
-    org.apache.http.client.fluent.Executor httpExecutor )
-  {
-    async = new JsonAsync().use(executor).use(httpExecutor);
+    this.async = async;
   }
 
 
