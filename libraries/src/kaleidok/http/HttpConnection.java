@@ -2,8 +2,8 @@ package kaleidok.http;
 
 import kaleidok.http.util.MimeTypeMap;
 import kaleidok.http.util.Parsers;
-import kaleidok.http.util.Parsers.ContentType;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.entity.ContentType;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -377,22 +377,22 @@ public class HttpConnection
       throw new IOException(ex);
     }
     if (responseContentType == null)
-      responseContentType = ContentType.EMPTY;
+      responseContentType = Parsers.EMPTY_CONTENT_TYPE;
   }
 
   public String getResponseMimeType() throws IOException
   {
     if (responseContentType == null)
       parseContentType();
-    return responseContentType.mimeType;
+    return responseContentType.getMimeType();
   }
 
   public Charset getResponseCharset( boolean allowDefault ) throws IOException
   {
     if (responseContentType == null)
       parseContentType();
-    return (responseContentType.charset != null || !allowDefault) ?
-      responseContentType.charset :
+    return (responseContentType.getCharset() != null || !allowDefault) ?
+      responseContentType.getCharset() :
       defaultCharset;
   }
 

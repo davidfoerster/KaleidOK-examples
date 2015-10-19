@@ -5,6 +5,7 @@ import kaleidok.http.util.Parsers;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
 
@@ -25,9 +26,9 @@ public class ResponseMimeTypeChecker
   public HttpResponse handleResponse( HttpResponse httpResponse )
     throws IOException
   {
-    Parsers.ContentType ct = Parsers.getContentType(httpResponse);
+    ContentType ct = Parsers.getContentType(httpResponse);
     if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty()) {
-      String mimeType = (ct != null) ? ct.mimeType : null;
+      String mimeType = (ct != null) ? ct.getMimeType() : null;
       if (acceptedMimeTypes.allows(mimeType) == null)
         throw new ClientProtocolException("Unsupported response MIME type: " + mimeType);
     }

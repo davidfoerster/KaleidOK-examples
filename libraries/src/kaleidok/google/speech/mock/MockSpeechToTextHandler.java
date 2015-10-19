@@ -2,11 +2,13 @@ package kaleidok.google.speech.mock;
 
 import kaleidok.google.speech.STT;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
+import kaleidok.http.requesthandler.MockRequestHandlerBase;
 import kaleidok.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
+import kaleidok.util.Strings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.entity.ContentType;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -21,10 +23,9 @@ import java.util.logging.Logger;
 import java.util.regex.*;
 
 import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
-import static kaleidok.util.Strings.isEmpty;
 
 
-public class MockSpeechToTextHandler implements HttpHandler
+public class MockSpeechToTextHandler extends MockRequestHandlerBase
 {
   static {
     Class<?> clazz = MockSpeechToTextHandler.class;
@@ -46,30 +47,20 @@ public class MockSpeechToTextHandler implements HttpHandler
 
 
   @Override
-  public void handle( HttpExchange t ) throws IOException
+  protected void doHandle( HttpExchange t ) throws IOException
   {
     String contextPath = t.getHttpContext().getPath(),
       uriPath = t.getRequestURI().getPath(),
       pathWithinContext = uriPath.substring(contextPath.length());
 
-    try {
-      switch (pathWithinContext) {
-      case "recognize":
-        if (handleRecognize(t))
-          break;
-
-      default:
-        t.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
+    switch (pathWithinContext) {
+    case "recognize":
+      if (handleRecognize(t))
         break;
-      }
-    } catch (NullPointerException | AssertionError ex) {
-      ex.printStackTrace();
-      handleException(t, ex, HttpURLConnection.HTTP_BAD_REQUEST);
-    } catch (Throwable ex) {
-      ex.printStackTrace();
-      handleException(t, ex, HttpURLConnection.HTTP_INTERNAL_ERROR);
-    } finally {
-      t.close();
+
+    default:
+      t.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
+      break;
     }
   }
 
@@ -83,29 +74,29 @@ public class MockSpeechToTextHandler implements HttpHandler
 
     Map<String, String> q =
       Parsers.getQueryMap(t.getRequestURI(), DEFAULT_CHARSET);
-    if (q == null || q.isEmpty())
-      throwInvalid("No request parameters");
-    if (!"json".equals(q.get("output")))
-      throwInvalid("Invalid request parameter value: output=" + q.get("output"));
-    if (isEmpty(q.get("key")))
-      throwInvalid("Empty request parameter: key");
-    if (isEmpty(q.get("lang")))
-      throwInvalid("Empty request parameter: lang");
-    if (q.size() != 3)
-      throwInvalid("Superfluous request parameters");
+    assert q != null && !q.isEmpty() : "No request parameters";
+    assert "json".equals(q.get("output")) :
+      "Invalid request parameter value: output=" + q.get("output");
+    assert !Strings.isEmpty(q.get("key")) : "Empty request parameter: key";
+    assert !Strings.isEmpty(q.get("lang")) : "Empty request parameter: lang";
+    assert q.size() == 3 : "Superfluous request parameters";
 
-    Map<String, String> contentType =
-      Parsers.getHeaderValueMap(t.getRequestHeaders().getFirst(CONTENT_TYPE));
-    if (!"audio/x-flac".equals(contentType.get(null)))
-      throwInvalid("Invalid request content-type: " + contentType.get(null));
+    ContentType contentType =
+      ContentType.parse(t.getRequestHeaders().getFirst(CONTENT_TYPE));
+    assert "audio/x-flac".equals(contentType.getMimeType()) :
+      "Invalid request content-type: " + contentType.getMimeType();
     float sampleRate;
     try {
-      sampleRate = Float.parseFloat(contentType.get("rate"));
-      if (!(sampleRate > 0 && !Float.isInfinite(sampleRate)))
-        throw new IllegalArgumentException("Sampling rate must be positive and finite");
+      sampleRate = Float.parseFloat(contentType.getParameter("rate"));
+      if (!(sampleRate > 0 && !Float.isInfinite(sampleRate))) {
+        throw new IllegalArgumentException(
+          "Sampling rate must be positive and finite");
+      }
     } catch (IllegalArgumentException ex) {
-      throw new IllegalArgumentException(
-        "Invalid request content-type parameter: rate=" + contentType.get("rate"), ex);
+      throw new AssertionError(
+        "Invalid request content-type parameter: rate=" +
+          contentType.getParameter("rate"),
+        ex);
     }
 
     byte[] flacBuffer;
@@ -115,8 +106,8 @@ public class MockSpeechToTextHandler implements HttpHandler
     logger.log(Level.FINEST,
       "Received {0} bytes on request to {1}",
       new Object[]{flacBuffer.length, t.getRequestURI()});
-    if (flacBuffer.length <= 86)
-      throwInvalid("Transmitted data only seems to contain FLAC header");
+    assert flacBuffer.length > 86 :
+      "Transmitted data only seems to contain FLAC header";
 
     Path tmpFilePath = createTempFile();
     if (tmpFilePath != null) {
@@ -127,14 +118,14 @@ public class MockSpeechToTextHandler implements HttpHandler
 
     double duration = testFlacFile(flacBuffer, sampleRate);
     if (!Double.isNaN(duration)) {
-      if (duration > stt.getMaxTranscriptionInterval() * 1e-9)
-        throwInvalid("FLAC stream duration exceeds maximum transcription interval");
+      assert duration <= stt.getMaxTranscriptionInterval() * 1e-9 :
+        "FLAC stream duration exceeds maximum transcription interval";
     } else {
       logger.finest("Couldn't determine duration of the submitted audio record");
     }
 
     byte[] transcriptionResult = normalTranscriptionResult;
-    setContentType(t, "application/json");
+    setContentType(t, ContentType.APPLICATION_JSON);
     t.sendResponseHeaders(HttpURLConnection.HTTP_OK, transcriptionResult.length);
     try (OutputStream out = t.getResponseBody()) {
       out.write(transcriptionResult);
@@ -189,13 +180,12 @@ public class MockSpeechToTextHandler implements HttpHandler
       }
     }
 
-    if (fileOutput == null)
-      throwInvalid("The type of the sent data is unknown");
+    assert fileOutput != null : "The type of the sent data is unknown";
     int p = fileOutput.indexOf(':');
     assert p >= 0;
     String[] fileSpec = fileOutput.substring(p + 2).split(", ");
-    if (!fileSpec[0].startsWith("FLAC"))
-      throwInvalid("The sent data doesn't look like a FLAC stream: " + fileOutput.substring(p + 2));
+    assert fileSpec[0].startsWith("FLAC") :
+      "The sent data doesn't look like a FLAC stream: " + fileOutput.substring(p + 2);
 
     double sampleRate = Double.NaN;
     long sampleCount = -1;
@@ -231,13 +221,11 @@ public class MockSpeechToTextHandler implements HttpHandler
       }
     }
 
-    if (Double.isNaN(sampleRate))
-      throwInvalid("Couldn't determine sample rate of submitted audio stream");
-    if (sampleRate != expectedSampleRate) {
-      throwInvalid(String.format(
-        "Sample rate of submitted audio stream (%f) doesn't match expectation (%f)",
-        sampleRate, expectedSampleRate));
-    }
+    assert !Double.isNaN(sampleRate) :
+      "Couldn't determine sample rate of submitted audio stream";
+    assert sampleRate == expectedSampleRate : String.format(
+      "Sample rate of submitted audio stream (%f) doesn't match expectation (%f)",
+      sampleRate, expectedSampleRate);
 
     return (sampleCount >= 0) ? sampleCount / sampleRate : Double.NaN;
   }
@@ -269,35 +257,6 @@ public class MockSpeechToTextHandler implements HttpHandler
       (p >= 0) ? fn.substring(p) : ".flac",
       PlatformPaths.NO_ATTRIBUTES);
   }
-
-
-  protected static void setContentType( HttpExchange t, String contentType )
-  {
-    t.getResponseHeaders().set(CONTENT_TYPE,
-      contentType + "; charset=" + DEFAULT_CHARSET.name() + ';');
-  }
-
-
-  protected static void throwInvalid( String msg )
-  {
-    throw new IllegalArgumentException(msg);
-  }
-
-
-  protected static void handleException( HttpExchange t, Throwable ex, int responseCode )
-    throws IOException
-  {
-    if (t.getResponseCode() < 0) {
-      setContentType(t, "text/plain");
-      t.sendResponseHeaders(responseCode, 0);
-      try (PrintStream out = new PrintStream(t.getResponseBody(), false, DEFAULT_CHARSET.name())) {
-        ex.printStackTrace(out);
-      }
-    }
-  }
-
-
-  public static final String CONTENT_TYPE = "Content-Type";
 
 
   private static final byte[]

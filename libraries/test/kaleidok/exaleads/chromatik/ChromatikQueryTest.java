@@ -2,7 +2,7 @@ package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.http.URLEncoding;
-import kaleidok.util.StringTokenIterator;
+import kaleidok.http.util.Parsers;
 import org.junit.Test;
 
 import java.util.*;
@@ -12,27 +12,9 @@ import static org.junit.Assert.*;
 
 public class ChromatikQueryTest
 {
-
   private Map<String, String> getParams( ChromatikQuery q )
   {
-    String qs = q.getUri().getRawQuery();
-    HashMap<String, String> m = new HashMap<>();
-    for (String p: new StringTokenIterator(qs, '&')) {
-      int split = p.indexOf('=');
-      String key, value;
-      if (split >= 0) {
-        key = URLEncoding.decode(p.substring(0, split));
-        value = URLEncoding.decode(p.substring(split + 1));
-      } else {
-        key = URLEncoding.decode(p);
-        value = null;
-      }
-
-      assertFalse(m.containsKey(key));
-      m.put(key, value);
-    }
-
-    return m;
+    return Parsers.getQueryMap(q.getUri(), URLEncoding.DEFAULT_CHARSET);
   }
 
 

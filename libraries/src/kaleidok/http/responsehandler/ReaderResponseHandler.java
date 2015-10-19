@@ -4,6 +4,7 @@ import kaleidok.http.util.Parsers;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,14 +33,12 @@ public class ReaderResponseHandler
   public Reader handleResponse( HttpResponse httpResponse )
     throws IOException
   {
-    Parsers.ContentType ct = Parsers.getContentType(httpResponse);
-    Charset charset;
-    if (ct != null && ct.charset != null) {
-      charset = ct.charset;
-    } else if (defaultCharset != null) {
+    ContentType ct = Parsers.getContentType(httpResponse);
+    Charset charset = (ct != null) ? ct.getCharset() : null;
+    if (charset == null) {
       charset = defaultCharset;
-    } else {
-      throw new ClientProtocolException("Server returned invalid charset");
+      if (charset == null)
+        throw new ClientProtocolException("Server returned invalid charset");
     }
     return new InputStreamReader(httpResponse.getEntity().getContent(), charset);
   }
