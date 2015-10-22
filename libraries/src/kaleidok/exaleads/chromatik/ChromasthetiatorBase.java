@@ -132,9 +132,10 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
       opts = new HashMap<>();
 
     // Use (up to) maxColors random colors from palette for search query
-    final Formatter fmt = logger.isLoggable(Level.FINE) ? new Formatter() : null;
-    if (fmt != null)
-      ((StringBuilder) fmt.out()).append("Colors:");
+    final Formatter fmt =
+      logger.isLoggable(Level.FINE) ?
+        new Formatter(new StringBuilder("Colors:")) :
+        null;
 
     for (int c: shuffle(palettes.getColors(emo), new Random(synState.getText().hashCode()))) {
       if (opts.size() >= maxColors)
@@ -144,8 +145,11 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
         fmt.format(" #%06x (%s),", cc.value, cc.groupName);
     }
 
-    if (fmt != null)
-      logger.log(Level.FINE, fmt.toString());
+    if (fmt != null) {
+      StringBuilder sb = (StringBuilder) fmt.out();
+      sb.setLength(sb.length() - 1);
+      logger.log(Level.FINE, sb.toString());
+    }
 
     return opts;
   }

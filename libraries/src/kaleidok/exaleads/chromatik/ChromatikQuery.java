@@ -185,10 +185,8 @@ public class ChromatikQuery
         {
           CharSequence key = toCharSequence(o.getKey()),
             value = toCharSequence(o.getValue());
-          assert key != null && key.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0 :
-            getContainsIllegalCharError(key, QUERY_OPT_NAMEDELIM);
-          assert value == null || value.toString().indexOf(QUERY_OPT_NAMEDELIM) < 0 :
-            getContainsIllegalCharError(value, QUERY_OPT_NAMEDELIM);
+          assert key != null && assertValidChars(key, QUERY_OPT_NAMEDELIM);
+          assert value == null || assertValidChars(value, QUERY_OPT_NAMEDELIM);
 
           sb.append(' ').append(key);
           if (value != null)
@@ -206,9 +204,11 @@ public class ChromatikQuery
   }
 
 
-  private static String getContainsIllegalCharError( CharSequence s, Character c )
+  private static boolean assertValidChars( CharSequence s, char c )
   {
-    return String.format("\"%s\" contains '%c'", s, c);
+    assert s.toString().indexOf(c) < 0 :
+      String.format("\"%s\" contains delimiter character '%c'", s, c);
+    return true;
   }
 
 
