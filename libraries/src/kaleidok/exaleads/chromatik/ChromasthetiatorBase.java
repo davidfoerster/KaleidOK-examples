@@ -160,7 +160,8 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
         break;
       ChromatikColor cc = new ChromatikColor(c);
       if (opts.put(cc, weight) == null && fmt != null)
-        fmt.format(" #%06x (%s),", cc.value, cc.groupName);
+        fmt.format(" #%06x (%s) at %.0f%%,",
+          cc.value, cc.groupName, weight * 100);
     }
 
     if (fmt != null) {
