@@ -17,6 +17,7 @@ import synesketch.emotion.EmotionalState;
 import java.awt.Image;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Random;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
@@ -136,7 +137,9 @@ public class ChromasthetiationService
       logger.log(Level.FINE, "Synesthetiation result:\n{0}", emoState);
 
       chromatikQuery.keywords = getQueryKeywords(emoState);
-      getQueryOptions(emoState, chromatikQuery.opts);
+
+      Random textRandom = new Random(emoState.getText().hashCode());
+      getQueryOptions(emoState, chromatikQuery.opts, textRandom);
       runChromatikQuery();
     }
 

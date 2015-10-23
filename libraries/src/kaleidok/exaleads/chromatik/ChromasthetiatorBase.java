@@ -90,7 +90,9 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
     EmotionalState emoState = synesthetiator.synesthetiseDirect(text);
     ChromatikQuery chromatikQuery = this.chromatikQuery;
     chromatikQuery.keywords = getQueryKeywords(emoState);
-    getQueryOptions(emoState, chromatikQuery.opts);
+
+    Random textRandom = new Random(text.hashCode());
+    getQueryOptions(emoState, chromatikQuery.opts, textRandom);
 
     ChromatikResponse queryResult = chromatikQuery.getResult();
     addFlickrPhotos(queryResult);
@@ -121,7 +123,7 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
 
 
   protected Map<Object, Object> getQueryOptions( EmotionalState synState,
-    Map<Object, Object> opts )
+    Map<Object, Object> opts, Random random )
   {
     Emotion emo = synState.getStrongestEmotion();
 
@@ -137,7 +139,11 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
         new Formatter(new StringBuilder("Colors:")) :
         null;
 
-    for (int c: shuffle(palettes.getColors(emo), new Random(synState.getText().hashCode()))) {
+    int[] palette = palettes.getColors(emo);
+    if (random != null)
+      palette = shuffle(palette, random);
+
+    for (int c: palette) {
       if (opts.size() >= maxColors)
         break;
       ChromatikColor cc = new ChromatikColor(c);
