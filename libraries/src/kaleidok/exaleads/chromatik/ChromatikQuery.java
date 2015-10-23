@@ -14,7 +14,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+
+import static kaleidok.exaleads.chromatik.ChromasthetiatorBase.logger;
 
 
 /**
@@ -277,6 +281,17 @@ public class ChromatikQuery
       sb.setCharAt(sb.length() - 1, ')');
     }
     return sb;
+  }
+
+
+  public void randomizeRequestedSubset( int expectedResultCount, Random random )
+  {
+    if (expectedResultCount > nhits) {
+      start = random.nextInt(expectedResultCount - nhits + 1);
+      logger.log(Level.FINEST,
+        "Randomized query result subset to start at %d of %d expected results",
+        new Object[]{start, expectedResultCount});
+    }
   }
 
 

@@ -38,6 +38,8 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
    */
   public int maxKeywords = 0;
 
+  public static int EXPECTED_NEUTRAL_RESULT_COUNT = 10000;
+
   // other instance attributes:
 
   public ChromatikQuery chromatikQuery;
@@ -94,7 +96,17 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
     Random textRandom = new Random(text.hashCode());
     getQueryOptions(emoState, chromatikQuery.opts, textRandom);
 
+    int queryStart = chromatikQuery.start;
+    if (chromatikQuery.keywords.isEmpty() &&
+      emoState.getStrongestEmotion().getType() == Emotion.NEUTRAL)
+    {
+      textRandom.setSeed(text.hashCode());
+      chromatikQuery.randomizeRequestedSubset(
+        EXPECTED_NEUTRAL_RESULT_COUNT, textRandom);
+    }
+
     ChromatikResponse queryResult = chromatikQuery.getResult();
+    chromatikQuery.start = queryStart;
     addFlickrPhotos(queryResult);
 
     return queryResult;

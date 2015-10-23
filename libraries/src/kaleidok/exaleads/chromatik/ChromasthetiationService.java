@@ -12,6 +12,7 @@ import kaleidok.http.async.JsonAsync;
 import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
+import synesketch.emotion.Emotion;
 import synesketch.emotion.EmotionalState;
 
 import java.awt.Image;
@@ -140,7 +141,17 @@ public class ChromasthetiationService
 
       Random textRandom = new Random(emoState.getText().hashCode());
       getQueryOptions(emoState, chromatikQuery.opts, textRandom);
+
+      int queryStart = chromatikQuery.start;
+      if (chromatikQuery.keywords.isEmpty() &&
+        emoState.getStrongestEmotion().getType() == Emotion.NEUTRAL)
+      {
+        textRandom.setSeed(emoState.getText().hashCode());
+        chromatikQuery.randomizeRequestedSubset(
+          EXPECTED_NEUTRAL_RESULT_COUNT, textRandom);
+      }
       runChromatikQuery();
+      chromatikQuery.start = queryStart;
     }
 
 
