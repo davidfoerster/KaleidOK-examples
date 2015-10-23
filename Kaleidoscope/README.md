@@ -77,7 +77,7 @@ are optional and have sensible defaults.
  * `kaleidok.examples.kaleidoscope.text` –
    Default text for the upper text input field (see point 3 under *Usage*)
 
- * `screen` and `fullscreen]` –
+ * `screen` and `fullscreen` –
    Move the Kaleidoscope window to the screen with the given index (-1 means
    default) and/or put it in fullscreen mode.
 
@@ -102,7 +102,7 @@ are optional and have sensible defaults.
    Defaults to 1, meaning no automatic resumption. 0 means unlimited
    resumption.
 
- * `kaleidok.examples.kaleidoscope.images.intial` –
+ * `kaleidok.examples.kaleidoscope.images.initial` –
    A space-separated list of URLs to use as initial images. Relative URLs are
    rooted in the `images` sub-directory of the applet path (inside `resources`
    in the development environment). Kaleidoscope displays 5 different images
