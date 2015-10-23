@@ -41,7 +41,7 @@ public class LayerManager extends ArrayList<ImageLayer>
     super(8);
     this.parent = parent;
 
-    getBackgroundLayer();
+    add(getBackgroundLayer());
     add(getSpectrogramLayer());
     add(getOuterMovingShape());
     add(getFoobarLayer());
@@ -57,10 +57,7 @@ public class LayerManager extends ArrayList<ImageLayer>
     Package pack = ImageLayer.class.getPackage();
     MessageFormat screenshotPathPattern = getScreenshotPathPattern();
 
-    BackgroundLayer bg = getBackgroundLayer();
-    bg.screenshotPathPattern = screenshotPathPattern;
-
-    int count = BeanUtils.applyBeanProperties(prop, pack, bg);
+    int count = 0;
     for (ImageLayer l: this) {
       count += BeanUtils.applyBeanProperties(prop, pack, l);
       l.screenshotPathPattern = screenshotPathPattern;
@@ -231,8 +228,10 @@ public class LayerManager extends ArrayList<ImageLayer>
     parent.translate(parent.width * 0.5f, parent.height * 0.5f);
     parent.scale(scale);
     for (Runnable l : this) {
-      parent.strokeWeight(strokeWeight);
-      l.run();
+      if (l != backgroundLayer) {
+        parent.strokeWeight(strokeWeight);
+        l.run();
+      }
     }
     parent.popMatrix();
   }

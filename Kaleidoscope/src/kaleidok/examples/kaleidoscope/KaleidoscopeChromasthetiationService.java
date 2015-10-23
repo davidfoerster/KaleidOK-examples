@@ -143,7 +143,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
   public void submit( String text )
   {
     submit(text, getChromasthetiator(),
-      null, chromasthetiationCallback, parent.getLayers().size() + 1);
+      null, chromasthetiationCallback, parent.getLayers().size());
   }
 
 
@@ -161,7 +161,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
       PImageFuture fImage = new PImageFuture(new PImage(image));
 
       LayerManager layers = parent.getLayers();
-      int idx = imageListIndex.getAndIncrement() % (layers.size() + 1) - 1;
+      int idx = imageListIndex.getAndIncrement() % layers.size();
       layers.get(idx).setNextImage(fImage);
     }
 
