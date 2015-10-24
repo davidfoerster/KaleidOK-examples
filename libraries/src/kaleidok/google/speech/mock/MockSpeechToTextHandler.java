@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.regex.*;
 
 import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.util.LoggingUtils.logThrown;
 
 
 public class MockSpeechToTextHandler extends MockRequestHandlerBase
@@ -176,7 +177,8 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
         assert pr.waitFor() == 0;
         break;
       } catch (InterruptedException ex) {
-        // keep waiting
+        logThrown(logger, Level.FINEST,
+          "Waiting for termination of {0} was interrupted", ex, pr);
       }
     }
 

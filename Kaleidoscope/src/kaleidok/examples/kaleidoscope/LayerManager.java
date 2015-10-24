@@ -199,7 +199,7 @@ public class LayerManager extends ArrayList<ImageLayer>
             img = futureImg.get();
             break;
           } catch (InterruptedException ex) {
-            // go on...
+            logger.log(Level.FINEST, "Waiting for images was interrupted", ex);
           }
         }
         assert img != null && img.width > 0 && img.height > 0 :

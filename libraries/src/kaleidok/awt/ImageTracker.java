@@ -86,14 +86,13 @@ public class ImageTracker implements ImageObserver
           !toolkit.prepareImage(image, -1, -1, this))
         {
           adjustImageFetcherPriority();
-          //DebugManager.printThreads(null, null, false);
-
           do {
             try {
               wait();
               break;
             } catch (InterruptedException ex) {
-              // go on...
+              logger.log(Level.FINEST,
+                "Waiting for image status was interrupted", ex);
             }
           } while ((infoFlags & infoMask) == 0);
         }
