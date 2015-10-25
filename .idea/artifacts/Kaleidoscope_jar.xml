@@ -1,22 +1,32 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="Kaleidoscope:jar">
+  <artifact type="jar" build-on-make="true" name="Kaleidoscope:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Kaleidoscope_jar</output-path>
     <root id="archive" name="Kaleidoscope.jar">
       <element id="module-output" name="Kaleidoscope" />
       <element id="module-output" name="libraries" />
       <element id="module-output" name="Synesketch" />
-      <element id="extracted-dir" path="/usr/share/java/jogl2.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="/usr/local/opt/processing/core/library/core.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/httpcomponents/fluent-hc/4.5/fluent-hc-4.5.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpclient/4.5/httpclient-4.5.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpcore/4.4.1/httpcore-4.4.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-logging/commons-logging/1.2/commons-logging-1.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.9/commons-codec-1.9.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="/usr/share/java/gluegen2-rt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/httpcomponents/httpclient-cache/4.5/httpclient-cache-4.5.jar" path-in-jar="/" />
       <element id="library" level="application" name="TarsosDSP" />
+      <element id="extracted-dir" path="/usr/local/opt/processing/core/library/core.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.4/gson-2.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/jakewharton/disklrucache/2.0.2/disklrucache-2.0.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/commons-io/commons-io/2.4/commons-io-2.4.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/Software/devel/processing-sketchbook/libraries/Minim/library/minim.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.3.1/gson-2.3.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/commons/commons-collections4/4.0/commons-collections4-4.0.jar" path-in-jar="/" />
       <element id="module-output" name="javaFlacEncoder" />
+      <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/gluegen-rt-natives-macosx-universal.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/gluegen-rt-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/gluegen-rt-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/gluegen-rt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/jogl-all-natives-macosx-universal.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/jogl-all-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/jogl-all-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/jogl-all.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
