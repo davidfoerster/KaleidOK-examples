@@ -99,7 +99,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private SttManager getSTT()
+  public SttManager getSTT()
   {
     if (stt == null)
       stt = new SttManager(this);

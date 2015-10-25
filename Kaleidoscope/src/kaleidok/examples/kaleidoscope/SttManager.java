@@ -130,4 +130,14 @@ public class SttManager
   {
     stt.end(doThrow);
   }
+
+
+  public void setRecorderStatus( boolean isRecording, boolean doThrow )
+  {
+    if (isRecording) {
+      begin(doThrow);
+    } else {
+      end(doThrow);
+    }
+  }
 }

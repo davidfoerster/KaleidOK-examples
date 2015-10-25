@@ -4,23 +4,15 @@ import kaleidok.processing.AppletLauncher;
 import kaleidok.processing.FudgedAppletViewerFactory;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchAppletWrapper;
-import kaleidok.swing.FullscreenEventListener;
 import kaleidok.util.AssertionUtils;
 
-import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.GraphicsDevice;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
+import javax.swing.JApplet;
 import java.io.IOException;
 
 
 public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
-  implements FullscreenEventListener
 {
-  private JPanel textFieldPanel = null;
-
-  private JTextField keywordField = null, messageField = null;
+  private KaleidoscopeControls controls = null;
 
 
   @Override
@@ -34,6 +26,7 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
           return new Kaleidoscope(parent);
         }
       };
+
     super.init();
   }
 
@@ -41,56 +34,17 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   @Override
   protected void initComponents()
   {
-    add(getTextFieldPanel(), BorderLayout.SOUTH);
-    getRootPane().addFullscreenEventListener(this);
-  }
-
-  private JPanel getTextFieldPanel()
-  {
-    if (textFieldPanel == null) {
-      textFieldPanel = new JPanel();
-      textFieldPanel.setLayout(new BoxLayout(textFieldPanel, BoxLayout.PAGE_AXIS));
-      textFieldPanel.add(getMessageField());
-      textFieldPanel.add(getKeywordField());
-    }
-    return textFieldPanel;
-  }
-
-  private JTextField getKeywordField()
-  {
-    if (keywordField == null) {
-      keywordField = new JTextField();
-    }
-    return keywordField;
-  }
-
-  private JTextField getMessageField()
-  {
-    if (messageField == null) {
-      messageField = new JTextField(getParameter(
-        this.getClass().getPackage().getName() + ".text"));
-      messageField.setAction(new AbstractAction()
-      {
-        @Override
-        public void actionPerformed( ActionEvent ev )
-        {
-          getSketch().getChromasthetiationService()
-            .submit(messageField.getText());
-        }
-      });
-    }
-    return messageField;
+    KaleidoscopeControls controls = getControls();
+    controls.setVisible(true);
   }
 
 
-  @Override
-  public void handleFullscreenStateChange( GraphicsDevice dev, Window w,
-    boolean fullscreen )
+  public KaleidoscopeControls getControls()
   {
-    getTextFieldPanel().setVisible(!fullscreen);
-    if (fullscreen) {
-      getSketch().requestFocusInWindow();
+    if (controls == null) {
+      controls = new KaleidoscopeControls(this);
     }
+    return controls;
   }
 
 
