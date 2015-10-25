@@ -1,5 +1,6 @@
 package kaleidok.processing;
 
+import kaleidok.util.PropertyLoader;
 import sun.applet.AppletViewer;
 import sun.applet.AppletViewerFactory;
 
@@ -130,32 +131,27 @@ public class AppletLauncher
   public AppletViewer launch( Class<? extends Applet> appletClass,
     String... args ) throws IOException
   {
-    Properties properties = new Properties();
-    if (args != null && args.length > 0 && args[0].equals("--params")) {
-      String paramsFile = args[1];
-      properties.load(
-        (paramsFile.length() == 1 && paramsFile.charAt(0) == '-') ?
-          new InputStreamReader(System.in) :
-          new FileReader(paramsFile));
-
-      args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
-    } else {
-      String propertiesPath = appletClass.getSimpleName() + ".properties";
-      File propertiesFile = new File(propertiesPath);
-      InputStream is = propertiesFile.exists() ?
-        new FileInputStream(propertiesFile) :
-        appletClass.getResourceAsStream(propertiesPath);
-      if (is != null) {
-        try (Reader reader = new InputStreamReader(is)) {
-          properties.load(reader);
-        }
-      } else {
-        Logger.getLogger(appletClass.getCanonicalName()).log(Level.INFO,
-          "No properties file found for applet class {0}; using default values",
-          appletClass.getCanonicalName());
+    Properties prop = new Properties();
+    {
+      String propPath = appletClass.getSimpleName() + ".properties";
+      if (PropertyLoader.load(prop, null, appletClass, propPath) == 0) {
+        Logger.getLogger(appletClass.getCanonicalName()).log(Level.CONFIG,
+          "No Applet properties file \"{0}\" found; using default values",
+          propPath);
       }
     }
-    return launch(appletClass, properties, args);
+
+    if (args != null && args.length > 0 && args[0].equals("--params")) {
+      String paramsFile = args[1];
+      prop.load(new InputStreamReader(
+        (paramsFile.length() == 1 && paramsFile.charAt(0) == '-') ?
+          System.in :
+          new FileInputStream(paramsFile)));
+
+      args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
+    }
+
+    return launch(appletClass, prop, args);
   }
 
 
@@ -175,7 +171,7 @@ public class AppletLauncher
     catch (IOException ex)
     {
       Logger.getAnonymousLogger().log(Level.SEVERE,
-        "Could not load default logging.properties file for " +
+        "Couldn't load default logging.properties file for " +
           appletClass.getCanonicalName(),
         ex);
     }

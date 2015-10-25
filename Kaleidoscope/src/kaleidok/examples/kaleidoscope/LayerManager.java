@@ -5,6 +5,7 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.BeanUtils;
+import kaleidok.util.PropertyLoader;
 import processing.core.PImage;
 
 import java.io.*;
@@ -47,11 +48,11 @@ public class LayerManager extends ArrayList<ImageLayer>
     add(getFoobarLayer());
     add(getCentreLayer());
 
-    setLayerProperties();
+    applyLayerProperties();
   }
 
 
-  private void setLayerProperties()
+  private void applyLayerProperties()
   {
     Properties prop = getLayerProperties();
     Package pack = ImageLayer.class.getPackage();
@@ -246,17 +247,18 @@ public class LayerManager extends ArrayList<ImageLayer>
   private Properties getLayerProperties()
   {
     if (layerProperties == null) {
+      String propFn = "layer.properties";
       layerProperties = new Properties();
-      if (layerPropertiesResource != null) {
-        try (Reader r = new InputStreamReader(layerPropertiesResource.openStream())) {
-          layerProperties.load(r);
-        } catch (IOException ex) {
-          logThrown(logger, Level.SEVERE,
-            "Couldn't load properties from {0}",
-            ex, layerPropertiesResource);
+      try {
+        if (PropertyLoader.load(layerProperties, null, ImageLayer.class, propFn) == 0) {
+          logger.log(Level.CONFIG,
+            "No layer properties file \"{0}\" found; using defaults",
+            propFn);
         }
-      } else {
-        logger.config("No layer properties file found");
+      } catch (IOException ex) {
+        logThrown(logger, Level.SEVERE,
+          "Couldn't load layer properties file \"{0}\"; using defaults", ex,
+          propFn);
       }
     }
     return layerProperties;
