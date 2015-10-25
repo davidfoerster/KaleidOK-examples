@@ -13,11 +13,7 @@ import java.awt.BorderLayout;
 import java.awt.GraphicsDevice;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Properties;
 
 
 public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
@@ -26,9 +22,6 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   private JPanel textFieldPanel = null;
 
   private JTextField keywordField = null, messageField = null;
-
-  private static final String paramBase =
-    KaleidoscopeApp.class.getPackage().getName() + '.';
 
 
   @Override
@@ -88,7 +81,8 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   private JTextField getMessageField()
   {
     if (messageField == null) {
-      messageField = new JTextField(getParameter(paramBase + "text"));
+      messageField = new JTextField(getParameter(
+        this.getClass().getPackage().getName() + ".text"));
       messageField.setAction(new AbstractAction()
       {
         @Override
