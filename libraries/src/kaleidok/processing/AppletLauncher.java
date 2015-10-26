@@ -16,6 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import static kaleidok.util.LoggingUtils.logThrown;
+
 
 public class AppletLauncher
 {
@@ -157,23 +159,21 @@ public class AppletLauncher
 
   public void loadLocalLoggerProperties( Class<?> appletClass )
   {
-    String loggingPath = "logging.properties";
-    File loggingFile = new File(loggingPath);
+    File loggingFile = new File("logging.properties");
     InputStream is = null;
     try
     {
       is = loggingFile.exists() ?
         new FileInputStream(loggingFile) :
-        appletClass.getResourceAsStream(File.separator + loggingPath);
+        appletClass.getClassLoader().getResourceAsStream(loggingFile.getPath());
       if (is != null)
         LogManager.getLogManager().readConfiguration(is);
     }
     catch (IOException ex)
     {
-      Logger.getAnonymousLogger().log(Level.SEVERE,
-        "Couldn't load default logging.properties file for " +
-          appletClass.getCanonicalName(),
-        ex);
+      logThrown(Logger.getAnonymousLogger(), Level.SEVERE,
+        "Couldn't load default {0} file for {1}", ex,
+        new Object[]{loggingFile.getPath(), appletClass.getName()});
     }
     finally
     {
