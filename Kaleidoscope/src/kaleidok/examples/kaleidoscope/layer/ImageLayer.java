@@ -26,6 +26,8 @@ public abstract class ImageLayer implements Runnable
 
   public MessageFormat screenshotPathPattern = null;
 
+  private StringBuffer screenshotPathPatternBuf = null;
+
 
   public ImageLayer( ExtPApplet parent )
   {
@@ -57,7 +59,7 @@ public abstract class ImageLayer implements Runnable
   }
 
 
-  public void setCurrentImage( PImage img )
+  public synchronized void setCurrentImage( PImage img )
   {
     if (img != null && img != currentImage)
     {
@@ -78,12 +80,20 @@ public abstract class ImageLayer implements Runnable
       if (currentImage != null && screenshotPathPattern != null) {
         StringBuffer screenshotPath =
           screenshotPathPattern.format(
-            new Object[]{new Date(), parent.frameCount}, new StringBuffer(32),
-            null);
+            new Object[]{new Date(), parent.frameCount},
+            getScreenshotPathPatternBuf(), null);
         parent.save(screenshotPath.toString(), true);
       }
     }
     currentImage = img;
+  }
+
+
+  private StringBuffer getScreenshotPathPatternBuf()
+  {
+    if (screenshotPathPatternBuf == null)
+      screenshotPathPatternBuf = new StringBuffer(1 << 5);
+    return screenshotPathPatternBuf;
   }
 
 
