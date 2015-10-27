@@ -106,7 +106,7 @@ public class OuterMovingShape extends CircularImageLayer
         if (pitchDetectionResult.isPitched())
         {
           float pitch = pitchDetectionResult.getPitch();
-          float stepDeg = PApplet.map((float) Math.log(pitch), 3.5f, 8.5f, -3f, 3f);
+          float stepDeg = PApplet.map((float) Math.log(pitch), 3f, 7f, -3f, 3f);
           /*System.out.format("Pitch: %.0f Hz, %.0f %%, %s; step = %.2f°\n",
             pitch, pitchDetectionResult.getProbability() * 100f, pitchDetectionResult.isPitched(), stepDeg);*/
           step = Math.toRadians(stepDeg);
