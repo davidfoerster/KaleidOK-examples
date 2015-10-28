@@ -6,7 +6,6 @@ import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchAppletWrapper;
 import kaleidok.swing.FullscreenEventListener;
 import kaleidok.util.AssertionUtils;
-import kaleidok.util.DefaultValueParser;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -35,22 +34,9 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
           return new Kaleidoscope(parent);
         }
       };
-
-    initWindowPosition();
     super.init();
   }
 
-  private void initWindowPosition()
-  {
-    int screenIndex = DefaultValueParser.parseInt(
-      getParameter("screen"), -1);
-    boolean fullscreen = DefaultValueParser.parseBoolean(
-      getParameter("fullscreen"), false);
-    if (screenIndex >= 0 || fullscreen) {
-      getRootPane().moveToScreen(screenIndex, fullscreen);
-    }
-    handleFullscreenStateChange(null, null, fullscreen);
-  }
 
   @Override
   protected void initComponents()

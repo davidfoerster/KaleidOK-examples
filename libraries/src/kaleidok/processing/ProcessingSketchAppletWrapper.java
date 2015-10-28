@@ -2,14 +2,13 @@ package kaleidok.processing;
 
 import kaleidok.swing.FullscreenAction;
 import kaleidok.swing.FullscreenRootPane;
+import kaleidok.util.DefaultValueParser;
 import processing.core.PApplet;
 
 import javax.swing.JApplet;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Frame;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 
 import static javax.swing.KeyStroke.getKeyStroke;
@@ -41,7 +40,27 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     }
     add(sketch, BorderLayout.CENTER);
 
+    initWindowBounds();
     initComponents();
+  }
+
+
+  protected void initWindowBounds()
+  {
+    int screenIndex = DefaultValueParser.parseInt(this, "screen", -1);
+    boolean fullscreen =
+      DefaultValueParser.parseBoolean(this, "fullscreen", false);
+    if (screenIndex >= 0 || fullscreen) {
+      getRootPane().moveToScreen(screenIndex, fullscreen);
+    }
+
+    Window w = getRootPane().getTopLevelWindow();
+    Rectangle screenBounds = w.getGraphicsConfiguration().getBounds();
+    w.setLocation(
+      DefaultValueParser.parseInt(this, "left", w.getX() - screenBounds.x) +
+        screenBounds.x,
+      DefaultValueParser.parseInt(this, "top", w.getY() - screenBounds.y) +
+        screenBounds.y);
   }
 
 
