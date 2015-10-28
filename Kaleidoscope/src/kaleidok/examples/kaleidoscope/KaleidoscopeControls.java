@@ -4,10 +4,13 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.net.URL;
 
 
 public class KaleidoscopeControls extends JFrame
 {
+  private static final String iconDir = "icons/";
+
   private final KaleidoscopeApp context;
 
   private JToggleButton recordingButton = null;
@@ -22,7 +25,7 @@ public class KaleidoscopeControls extends JFrame
     super("Kaleidoscope Controls");
     this.context = context;
 
-    setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     initComponents();
     pack();
   }
@@ -49,6 +52,16 @@ public class KaleidoscopeControls extends JFrame
       action.putValue(Action.SHORT_DESCRIPTION,
         "Start and stop recording");
       recordingButton = new JToggleButton(action);
+
+      ClassLoader cl = this.getClass().getClassLoader();
+      URL startIconUrl = cl.getResource(iconDir + "start.png"),
+        stopIconUrl = cl.getResource(iconDir + "stop.png");
+      assert startIconUrl != null && stopIconUrl != null;
+      recordingButton.setText(null);
+      recordingButton.setIcon(
+        new ImageIcon(startIconUrl, "Start recording"));
+      recordingButton.setSelectedIcon(
+        new ImageIcon(stopIconUrl, "Stop recording"));
     }
     return recordingButton;
   }
