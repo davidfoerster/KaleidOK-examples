@@ -1,5 +1,7 @@
 package kaleidok.examples.kaleidoscope;
 
+import kaleidok.swing.JRoundToggleButton;
+
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -13,7 +15,7 @@ public class KaleidoscopeControls extends JFrame
 
   private final KaleidoscopeApp context;
 
-  private JToggleButton recordingButton = null;
+  private JRoundToggleButton recordingButton = null;
 
   private JPanel textFieldPanel = null;
 
@@ -51,13 +53,15 @@ public class KaleidoscopeControls extends JFrame
         };
       action.putValue(Action.SHORT_DESCRIPTION,
         "Start and stop recording");
-      recordingButton = new JToggleButton(action);
+      recordingButton = new JRoundToggleButton(action);
+      recordingButton.paintUI = false;
+      recordingButton.setText(null);
+      recordingButton.setBorderPainted(false);
 
       ClassLoader cl = this.getClass().getClassLoader();
       URL startIconUrl = cl.getResource(iconDir + "start.png"),
         stopIconUrl = cl.getResource(iconDir + "stop.png");
       assert startIconUrl != null && stopIconUrl != null;
-      recordingButton.setText(null);
       recordingButton.setIcon(
         new ImageIcon(startIconUrl, "Start recording"));
       recordingButton.setSelectedIcon(
