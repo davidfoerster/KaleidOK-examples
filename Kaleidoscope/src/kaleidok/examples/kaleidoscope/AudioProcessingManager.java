@@ -8,18 +8,12 @@ import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.util.DefaultValueParser;
-import processing.core.PApplet;
 
-import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
-import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.Math.isPowerOfTwo;
 
@@ -91,7 +85,6 @@ public class AudioProcessingManager
         throw new AssertionError(param + " must be a power of 2");
 
       Runnable dispatcherRunnable;
-
       try {
         if (audioSource == null)
         {
@@ -101,32 +94,10 @@ public class AudioProcessingManager
         }
         else
         {
-          InputStream is = parent.createInputRaw(audioSource);
-          if (is == null)
-            throw new FileNotFoundException(audioSource);
-          if (!is.markSupported())
-            is = new ByteArrayInputStream(PApplet.loadBytes(is));
-          AudioInputStream ais = getAudioInputStream(is);
           audioDispatcher =
-            new AudioDispatcher(new ContinuousAudioInputStream(ais),
+            new AudioDispatcher(new ContinuousAudioInputStream(audioSource),
               bufferSize, bufferOverlap);
-
-          logger.config(audioDispatcher.getFormat().toString());
-
-          boolean play =
-            DefaultValueParser.parseBoolean(parent, paramBase + "input.play", false);
-          if (play)
-          {
-            dispatcherRunnable = audioDispatcher;
-            audioDispatcher.addAudioProcessor(new AudioPlayer(
-              JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
-              bufferSize));
-          }
-          else
-          {
-            dispatcherRunnable =
-              new DummyAudioPlayer().addToDispatcher(audioDispatcher);
-          }
+          dispatcherRunnable = initAudioPlayer(audioDispatcher);
         }
       } catch (IOException | UnsupportedAudioFileException | LineUnavailableException ex) {
         throw new Error(ex);
@@ -135,8 +106,27 @@ public class AudioProcessingManager
       audioDispatcher.addAudioProcessor(getVolumeLevelProcessor());
       audioDispatcher.addAudioProcessor(getFftProcessor());
 
+      logger.config(audioDispatcher.getFormat().toString());
       initAudioDispatcherThread(dispatcherRunnable);
     }
+  }
+
+
+  private Runnable initAudioPlayer( AudioDispatcher audioDispatcher )
+    throws LineUnavailableException
+  {
+    Runnable runnable;
+    if (DefaultValueParser.parseBoolean(parent,
+      parent.getClass().getPackage().getName() + ".audio.input.play", false))
+    {
+      runnable = audioDispatcher;
+      audioDispatcher.addAudioProcessor(new AudioPlayer(
+        JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
+        getAudioBufferSize()));
+    } else {
+      runnable = new DummyAudioPlayer().addToDispatcher(audioDispatcher);
+    }
+    return runnable;
   }
 
 

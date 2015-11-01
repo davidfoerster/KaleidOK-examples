@@ -3,9 +3,16 @@ package kaleidok.audio;
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
+import org.apache.commons.io.IOUtils;
 
 import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 
 public class ContinuousAudioInputStream implements TarsosDSPAudioInputStream
@@ -13,6 +20,7 @@ public class ContinuousAudioInputStream implements TarsosDSPAudioInputStream
   private final AudioInputStream underlying;
 
   private final TarsosDSPAudioFormat format;
+
 
   public ContinuousAudioInputStream( AudioInputStream source )
   {
@@ -25,6 +33,24 @@ public class ContinuousAudioInputStream implements TarsosDSPAudioInputStream
 
     underlying = source;
   }
+
+
+  public ContinuousAudioInputStream( InputStream is )
+    throws IOException, UnsupportedAudioFileException
+  {
+    this(AudioSystem.getAudioInputStream(
+      is.markSupported() ?
+        is :
+        new ByteArrayInputStream(IOUtils.toByteArray(is))));
+  }
+
+
+  public ContinuousAudioInputStream( String path )
+    throws IOException, UnsupportedAudioFileException
+  {
+    this(new BufferedInputStream(new FileInputStream(path)));
+  }
+
 
   @Override
   public long skip( long bytesToSkip ) throws IOException
@@ -43,6 +69,7 @@ public class ContinuousAudioInputStream implements TarsosDSPAudioInputStream
     return bytesToSkip - s + rv;
   }
 
+
   @Override
   public int read( byte[] b, int off, int len ) throws IOException
   {
@@ -54,17 +81,20 @@ public class ContinuousAudioInputStream implements TarsosDSPAudioInputStream
     return count;
   }
 
+
   @Override
   public void close() throws IOException
   {
     underlying.close();
   }
 
+
   @Override
   public TarsosDSPAudioFormat getFormat()
   {
     return format;
   }
+
 
   @Override
   public long getFrameLength()
