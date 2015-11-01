@@ -6,6 +6,7 @@ import kaleidok.google.speech.SttResponse;
 import kaleidok.google.speech.Transcription;
 import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.util.DefaultValueParser;
+import processing.event.KeyEvent;
 
 import java.text.Format;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +41,9 @@ public class SttManager
       .addAudioProcessor(stt.getAudioProcessor());
 
     initRecorderIcon();
+
+    parent.registerMethod("dispose", this);
+    parent.registerMethod("keyEvent", this);
   }
 
 
@@ -121,6 +125,8 @@ public class SttManager
     stt.shutdown();
   }
 
+  public void dispose() { shutdown(); }
+
   public void begin( boolean doThrow )
   {
     stt.begin(doThrow);
@@ -129,5 +135,21 @@ public class SttManager
   public void end( boolean doThrow )
   {
     stt.end(doThrow);
+  }
+
+
+  public void keyEvent( KeyEvent ev )
+  {
+    if (ev.getAction() == KeyEvent.TYPE) {
+      switch (ev.getKey()) {
+      case 'i':
+        begin(false);
+        break;
+
+      case 'o':
+        end(false);
+        break;
+      }
+    }
   }
 }

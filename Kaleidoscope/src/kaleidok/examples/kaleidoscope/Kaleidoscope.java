@@ -115,14 +115,6 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  @Override
-  public void destroy()
-  {
-    stt.shutdown();
-    super.destroy();
-  }
-
-
   private Point previousSize = null;
 
   @Override
@@ -143,21 +135,6 @@ public class Kaleidoscope extends ExtPApplet
     final Point previousSize = this.previousSize;
     return previousSize != null &&
       (width != previousSize.x || height != previousSize.y);
-  }
-
-
-  @Override
-  public void keyTyped()
-  {
-    switch (key) {
-    case 'i':
-      stt.begin(false);
-      break;
-
-    case 'o':
-      stt.end(false);
-      break;
-    }
   }
 
 
