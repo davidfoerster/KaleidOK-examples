@@ -35,7 +35,7 @@ public abstract class NotifyFuture<V> implements Future<V>
     {
       assert unit.convert(Long.MAX_VALUE, NANOSECONDS) >= timeout :
         String.format("%d %s overflows when converting to %s",
-          timeout, unit.name(), NANOSECONDS.name());
+          timeout, unit, NANOSECONDS);
 
       timeout = unit.toNanos(timeout);
       // unit = NANOSECONDS;

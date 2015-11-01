@@ -235,7 +235,8 @@ public class MimeTypeMap extends HashMap<String, Float>
   public static final Pattern MIME_TYPE_PATTERN = Pattern.compile(
     "^(?:\\*/\\*|[a-z\\.-]+/(?:\\*|[a-z\\.-]+))$");
 
-  private static final NumberFormat qFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
+  private static final NumberFormat qFormat =
+    NumberFormat.getNumberInstance(Locale.ROOT);
   static {
     qFormat.setMinimumIntegerDigits(1);
     qFormat.setMaximumIntegerDigits(1);
