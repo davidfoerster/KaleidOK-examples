@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import kaleidok.http.requesthandler.MockRequestHandlerBase;
 import kaleidok.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
+import kaleidok.util.AssertionUtils;
 import kaleidok.util.Strings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -29,9 +30,7 @@ import static kaleidok.util.LoggingUtils.logThrown;
 public class MockSpeechToTextHandler extends MockRequestHandlerBase
 {
   static {
-    Class<?> clazz = MockSpeechToTextHandler.class;
-    clazz.getClassLoader()
-      .setPackageAssertionStatus(clazz.getPackage().getName(), true);
+    AssertionUtils.enablePackageAssertions(MockSpeechToTextHandler.class);
   }
 
 

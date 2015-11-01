@@ -8,7 +8,7 @@ public final class AssertionUtils
   private AssertionUtils() { }
 
 
-  public static void enableAssertionsOnDebugging()
+  public static boolean enableAssertionsOnDebugging()
   {
     String prefix = "-agentlib:jdwp";
     for (String arg:
@@ -18,8 +18,16 @@ public final class AssertionUtils
         (arg.length() == prefix.length() || arg.charAt(prefix.length()) == '='))
       {
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
-        break;
+        return true;
       }
     }
+    return false;
+  }
+
+
+  public static void enablePackageAssertions( Class<?> clazz )
+  {
+    clazz.getClassLoader()
+      .setPackageAssertionStatus(clazz.getPackage().getName(), true);
   }
 }
