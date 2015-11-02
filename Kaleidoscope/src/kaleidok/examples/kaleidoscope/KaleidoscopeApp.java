@@ -34,6 +34,7 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
           return new Kaleidoscope(parent);
         }
       };
+    getRootPane().addFullscreenEventListener(this);
     super.init();
   }
 
@@ -42,7 +43,6 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   protected void initComponents()
   {
     add(getTextFieldPanel(), BorderLayout.SOUTH);
-    getRootPane().addFullscreenEventListener(this);
   }
 
   private JPanel getTextFieldPanel()
