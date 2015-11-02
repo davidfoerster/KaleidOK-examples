@@ -62,6 +62,10 @@ public class Kaleidoscope extends ExtPApplet
     ellipseMode(RADIUS);
     noiseDetail(4, 0.6f);
 
+    double framerate = DefaultValueParser.parseDouble(this,
+      "framerate", this.frameRate);
+    frameRate((float) framerate);
+
     int smoothingLevel = DefaultValueParser.parseInt(this,
       g.getClass().getCanonicalName() + ".smooth", 4);
     if (smoothingLevel > 0) {
@@ -76,7 +80,7 @@ public class Kaleidoscope extends ExtPApplet
     getAudioProcessingManager().getAudioDispatcherThread().start();
 
     if (DefaultValueParser.parseBoolean(
-      getParameter("display-framerate"), false))
+      getParameter("framerate.display"), false))
     {
       new FrameRateDisplay(this);
     }

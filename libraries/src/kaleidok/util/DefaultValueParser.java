@@ -47,6 +47,21 @@ public final class DefaultValueParser
   }
 
 
+  public static double parseDouble( String s, double defaultValue )
+    throws NumberFormatException
+  {
+    return (s != null && !s.isEmpty()) ?
+      Double.parseDouble(s) :
+      defaultValue;
+  }
+
+  public static double parseDouble( Applet a, String name, double defaultValue )
+    throws NumberFormatException
+  {
+    return parseDouble(a.getParameter(name), defaultValue);
+  }
+
+
   public static boolean parseBoolean( String s )
     throws IllegalArgumentException
   {
