@@ -83,7 +83,7 @@ public class AudioProcessingManager
       int bufferSize = getAudioBufferSize(),
         bufferOverlap = getAudioBufferOverlap();
 
-      Runnable dispatcherRunnable;
+      Runnable dispatcherRunnable = null;
       try {
         if (audioSource == null)
         {
@@ -115,7 +115,7 @@ public class AudioProcessingManager
             ais = new ContinuousAudioInputStream(audioSource);
           }
           audioDispatcher = new AudioDispatcher(ais, bufferSize, bufferOverlap);
-          dispatcherRunnable = initAudioPlayer(audioDispatcher);
+          dispatcherRunnable = initAudioPlayer(audioDispatcher, dispatcherRunnable);
         }
       } catch (IOException | UnsupportedAudioFileException | LineUnavailableException | JsonParseException ex) {
         throw new Error(ex);
@@ -130,7 +130,8 @@ public class AudioProcessingManager
   }
 
 
-  private Runnable initAudioPlayer( AudioDispatcher audioDispatcher )
+  private Runnable initAudioPlayer( AudioDispatcher audioDispatcher,
+    Runnable chained )
     throws LineUnavailableException, IOException
   {
     if (DefaultValueParser.parseBoolean(parent,
@@ -140,7 +141,7 @@ public class AudioProcessingManager
         JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
         getAudioBufferSize() - getAudioBufferOverlap()));
     }
-    return new DummyAudioPlayer().addToDispatcher(audioDispatcher);
+    return new DummyAudioPlayer().addToDispatcher(audioDispatcher, chained);
   }
 
 
