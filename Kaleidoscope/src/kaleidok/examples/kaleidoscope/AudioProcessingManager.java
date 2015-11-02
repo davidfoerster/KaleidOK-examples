@@ -2,12 +2,12 @@ package kaleidok.examples.kaleidoscope;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
-import be.tarsos.dsp.io.jvm.AudioPlayer;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import com.google.gson.JsonParseException;
 import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.MultiAudioInputStream;
+import kaleidok.audio.OffThreadAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.google.gson.TypeAdapterManager;
@@ -34,11 +34,11 @@ import static kaleidok.util.Math.isPowerOfTwo;
 public class AudioProcessingManager
 {
   public static int DEFAULT_AUDIO_SAMPLERATE = 32000;
-  public static int DEFAULT_AUDIO_BUFFERSIZE = 1 << 11;
+  public static int DEFAULT_AUDIO_BUFFERSIZE = 1 << 12;
 
   private final Kaleidoscope parent;
 
-  private int audioBufferSize = 0;
+  private int audioBufferSize = 0, audioBufferOverlap = 0;
   private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
 
@@ -80,21 +80,14 @@ public class AudioProcessingManager
     {
       String paramBase = parent.getClass().getPackage().getName() + ".audio.";
       String audioSource = parent.getParameter(paramBase + "input");
-
-      int bufferSize = getAudioBufferSize();
-      String param = paramBase + "bufferoverlap";
-      int bufferOverlap = DefaultValueParser.parseInt(parent,
-        param, bufferSize / 2);
-      if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
-        throw new AssertionError(param + " must be positive and less than buffersize");
-      if (bufferOverlap > 0 && !isPowerOfTwo(bufferOverlap))
-        throw new AssertionError(param + " must be a power of 2");
+      int bufferSize = getAudioBufferSize(),
+        bufferOverlap = getAudioBufferOverlap();
 
       Runnable dispatcherRunnable;
       try {
         if (audioSource == null)
         {
-          param =  paramBase + "samplerate";
+          String param =  paramBase + "samplerate";
           int sampleRate = DefaultValueParser.parseInt(parent,
             param, DEFAULT_AUDIO_SAMPLERATE);
           if (sampleRate <= 0)
@@ -138,20 +131,16 @@ public class AudioProcessingManager
 
 
   private Runnable initAudioPlayer( AudioDispatcher audioDispatcher )
-    throws LineUnavailableException
+    throws LineUnavailableException, IOException
   {
-    Runnable runnable;
     if (DefaultValueParser.parseBoolean(parent,
       parent.getClass().getPackage().getName() + ".audio.input.play", false))
     {
-      runnable = audioDispatcher;
-      audioDispatcher.addAudioProcessor(new AudioPlayer(
+      audioDispatcher.addAudioProcessor(new OffThreadAudioPlayer(
         JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
-        getAudioBufferSize()));
-    } else {
-      runnable = new DummyAudioPlayer().addToDispatcher(audioDispatcher);
+        getAudioBufferSize() - getAudioBufferOverlap()));
     }
-    return runnable;
+    return new DummyAudioPlayer().addToDispatcher(audioDispatcher);
   }
 
 
@@ -188,6 +177,25 @@ public class AudioProcessingManager
       audioBufferSize = bufferSize;
     }
     return audioBufferSize;
+  }
+
+
+  public int getAudioBufferOverlap()
+  {
+    if (audioBufferOverlap <= 0)
+    {
+      int bufferSize = getAudioBufferSize();
+      String param =
+        parent.getClass().getPackage().getName() + ".audio.overlap";
+      int bufferOverlap = DefaultValueParser.parseInt(parent,
+        param, bufferSize / 2);
+      if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
+        throw new AssertionError(param + " must be positive and less than buffersize");
+      if (bufferOverlap > 0 && !isPowerOfTwo(bufferOverlap))
+        throw new AssertionError(param + " must be a power of 2");
+      audioBufferOverlap = bufferOverlap;
+    }
+    return audioBufferOverlap;
   }
 
 

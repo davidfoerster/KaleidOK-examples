@@ -20,4 +20,11 @@ public final class Threads
     }
     return Arrays.asList(threads).subList(0, threadCount);
   }
+
+
+  public static void handleUncaught( Throwable throwable )
+  {
+    Thread thread = Thread.currentThread();
+    thread.getUncaughtExceptionHandler().uncaughtException(thread, throwable);
+  }
 }
