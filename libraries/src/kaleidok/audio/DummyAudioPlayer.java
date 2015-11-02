@@ -80,15 +80,17 @@ public class DummyAudioPlayer implements AudioProcessor
    * @param audioDispatcher  The audio dispatcher to wrap
    * @return  A wrapped audio dispatcher object
    */
-  public Runnable addToDispatcher( final AudioDispatcher audioDispatcher )
+  public Runnable addToDispatcher( final AudioDispatcher audioDispatcher,
+    Runnable chained )
   {
+    final Runnable _chained = (chained != null) ? chained : audioDispatcher;
     return new Runnable() {
       @Override
       public void run()
       {
         audioDispatcher.addAudioProcessor(DummyAudioPlayer.this);
         startTime = System.nanoTime();
-        audioDispatcher.run();
+        _chained.run();
       }
     };
   }

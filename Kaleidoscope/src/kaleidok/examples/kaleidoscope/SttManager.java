@@ -8,6 +8,7 @@ import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;
 
+import java.applet.Applet;
 import java.text.Format;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -107,16 +108,24 @@ public class SttManager
     {
       if (isIgnoreTranscriptionResult == null) {
         isIgnoreTranscriptionResult =
-          DefaultValueParser.parseBoolean(parent,
-            parent.getClass().getPackage().getName() + ".ignoreTranscription",
-            false);
-        if (isIgnoreTranscriptionResult) {
-          logger.config(
-            "Speech transcription results are configured to be ignored");
-        }
+          getParamIgnoreTranscriptionResult(parent);
       }
       return isIgnoreTranscriptionResult;
     }
+  }
+
+
+  static boolean getParamIgnoreTranscriptionResult( Applet parent )
+  {
+    boolean isIgnoreTranscriptionResult =
+      DefaultValueParser.parseBoolean(parent,
+        parent.getClass().getPackage().getName() + ".ignoreTranscription",
+        false);
+    if (isIgnoreTranscriptionResult) {
+      logger.config(
+        "Speech transcription results are configured to be ignored");
+    }
+    return isIgnoreTranscriptionResult;
   }
 
 

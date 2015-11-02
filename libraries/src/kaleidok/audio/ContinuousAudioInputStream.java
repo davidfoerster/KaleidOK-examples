@@ -1,7 +1,6 @@
 package kaleidok.audio;
 
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
-import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import org.apache.commons.io.IOUtils;
 
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public class ContinuousAudioInputStream implements TarsosDSPAudioInputStream
+public class ContinuousAudioInputStream implements ResettableAudioStream
 {
   private final AudioInputStream underlying;
 
@@ -100,5 +99,12 @@ public class ContinuousAudioInputStream implements TarsosDSPAudioInputStream
   public long getFrameLength()
   {
     return underlying.getFrameLength();
+  }
+
+
+  @Override
+  public void reset() throws IOException
+  {
+    underlying.reset();
   }
 }
