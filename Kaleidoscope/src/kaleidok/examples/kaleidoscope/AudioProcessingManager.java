@@ -92,6 +92,7 @@ public class AudioProcessingManager
             param, DEFAULT_AUDIO_SAMPLERATE);
           if (sampleRate <= 0)
             throw new AssertionError(param + " must be positive");
+
           audioDispatcher =
             fromDefaultMicrophone(sampleRate, bufferSize, bufferOverlap);
           dispatcherRunnable = audioDispatcher;
@@ -329,11 +330,16 @@ public class AudioProcessingManager
       if (checkRunning())
         return;
 
+      MultiAudioInputStream ais = audioInputStream;
       double streamLength =
-        audioInputStream.getCurrentStream().getFrameLength() /
-          (double) audioInputStream.getFormat().getSampleRate();
+        ais.getCurrentStream().getFrameLength() /
+          (double) ais.getFormat().getSampleRate();
       timer.setInitialDelay((int)(streamLength * 1e3));
       timer.start();
+
+      logger.log(Level.FINE,
+        "Playing back audio file {0} of {1}",
+        new Object[]{ais.getCurrentIdx() + 1, ais.streams.size()});
     }
 
 
