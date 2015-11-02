@@ -81,15 +81,8 @@ public class AudioProcessingManager
       String paramBase = parent.getClass().getPackage().getName() + ".audio.";
       String audioSource = parent.getParameter(paramBase + "input");
 
-      String param =  paramBase + "samplerate";
-      int sampleRate = DefaultValueParser.parseInt(parent,
-        param, DEFAULT_AUDIO_SAMPLERATE);
-      if (sampleRate <= 0)
-        throw new AssertionError(param + " must be positive");
-
       int bufferSize = getAudioBufferSize();
-
-      param = paramBase + "bufferoverlap";
+      String param = paramBase + "bufferoverlap";
       int bufferOverlap = DefaultValueParser.parseInt(parent,
         param, bufferSize / 2);
       if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
@@ -101,7 +94,11 @@ public class AudioProcessingManager
       try {
         if (audioSource == null)
         {
-
+          param =  paramBase + "samplerate";
+          int sampleRate = DefaultValueParser.parseInt(parent,
+            param, DEFAULT_AUDIO_SAMPLERATE);
+          if (sampleRate <= 0)
+            throw new AssertionError(param + " must be positive");
           audioDispatcher =
             fromDefaultMicrophone(sampleRate, bufferSize, bufferOverlap);
           dispatcherRunnable = audioDispatcher;
