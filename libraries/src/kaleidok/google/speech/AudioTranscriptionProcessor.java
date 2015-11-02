@@ -212,15 +212,18 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
   private static final float maxSample = 2;
 
+  /*
+   * TODO: Use AudioEvent#getByteBuffer()
+   */
   private static int[] convertTo16Bit( AudioEvent ev, int[] conversionBuffer )
   {
     final float[] audioFloat = ev.getFloatBuffer();
-    final int len = audioFloat.length - ev.getOverlap();
+    final int offset = ev.getOverlap();
+    final int len = audioFloat.length - offset;
     final int[] audioInt =
       (conversionBuffer != null && len <= conversionBuffer.length) ?
         conversionBuffer :
         new int[len];
-    final int offset = ev.getOverlap() / 2;
     for (int i = 0; i < len; i++) {
       final float sample = audioFloat[i + offset];
       assert sample >= -maxSample && sample <= maxSample :
