@@ -12,6 +12,7 @@ import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.DefaultValueParser;
 import org.apache.http.client.fluent.Async;
+import org.apache.http.client.fluent.Executor;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import processing.core.PImage;
@@ -46,11 +47,17 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
 
 
   private KaleidoscopeChromasthetiationService( Kaleidoscope parent,
-    java.util.concurrent.Executor executor,
-    org.apache.http.client.fluent.Executor httpExecutor )
+    ExecutorService executor, Executor httpExecutor )
   {
     super(executor, Async.newInstance().use(executor).use(httpExecutor));
     this.parent = parent;
+    //parent.registerMethod("dispose", this);
+  }
+
+
+  public void dispose()
+  {
+    shutdown();
   }
 
 

@@ -29,7 +29,7 @@ public class ChromasthetiationService
 {
   public static int DEFAULT_THREAD_POOL_SIZE = 4;
 
-  private final Executor executor;
+  private final ExecutorService executor;
 
   private final JsonAsync jsonAsync;
 
@@ -38,7 +38,7 @@ public class ChromasthetiationService
   private final FlickrAsync flickrAsync;
 
 
-  public ChromasthetiationService( Executor executor,
+  public ChromasthetiationService( ExecutorService executor,
     JsonAsync jsonAsync, ImageAsync imageAsync, FlickrAsync flickrAsync )
   {
     this.executor = executor;
@@ -48,16 +48,22 @@ public class ChromasthetiationService
   }
 
 
-  public ChromasthetiationService( Executor executor,
+  public ChromasthetiationService( ExecutorService executor,
     JsonAsync jsonAsync, ImageAsync imageAsync )
   {
     this(executor, jsonAsync, imageAsync, new FlickrAsync(jsonAsync));
   }
 
 
-  public ChromasthetiationService( Executor executor, Async fluentAsync )
+  public ChromasthetiationService( ExecutorService executor, Async fluentAsync )
   {
     this(executor, new JsonAsync(fluentAsync), new ImageAsync(fluentAsync));
+  }
+
+
+  public void shutdown()
+  {
+    executor.shutdown();
   }
 
 

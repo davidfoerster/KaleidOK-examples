@@ -130,4 +130,10 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   {
     sketch.stop();
   }
+
+  @Override
+  public void destroy()
+  {
+    sketch.destroy();
+  }
 }

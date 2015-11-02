@@ -42,6 +42,14 @@ public class AudioProcessingManager
   AudioProcessingManager( Kaleidoscope parent )
   {
     this.parent = parent;
+    parent.registerMethod("dispose", this);
+  }
+
+
+  public void dispose()
+  {
+    if (audioDispatcher != null)
+      audioDispatcher.stop();
   }
 
 
