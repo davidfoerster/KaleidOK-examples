@@ -27,6 +27,7 @@
       <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/jogl-all-natives-windows-amd64.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/jogl-all-natives-windows-i586.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/local/src/processing/core/library/jogl-all.jar" path-in-jar="/" />
+      <element id="file-copy" path="$PROJECT_DIR$/Kaleidoscope/README.md" />
     </root>
   </artifact>
 </component>
