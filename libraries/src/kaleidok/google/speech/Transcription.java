@@ -22,6 +22,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.Level;
 
 import static kaleidok.google.speech.STT.logger;
@@ -42,7 +43,7 @@ public class Transcription implements Runnable
     this(JsonHttpConnection.openURL(url));
     connection.setRequestMethod("POST");
     connection.setRequestProperty("Content-Type",
-      String.format("%s; rate=%.0f;", mimeType, sampleRate));
+      String.format(Locale.ROOT, "%s; rate=%.0f;", mimeType, sampleRate));
     connection.setDoOutput(true);
     connection.setChunkedStreamingMode(0);
   }
