@@ -108,7 +108,7 @@ public class Transcription implements Runnable
     Path path =
       PlatformPaths.getDataDir(this.getClass().getPackage().getName())
         .resolve(logfilePattern.format(new Date()));
-    logger.log(Level.FINE, "Recorded speech written to \"{0}\"", path);
+    logger.log(Level.FINE, "Recorded speech will be written to \"{0}\"", path);
     return new BufferedOutputStream(
       Files.newOutputStream(path, logfileOpenOptions));
   }

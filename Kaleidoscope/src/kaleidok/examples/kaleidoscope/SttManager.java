@@ -9,6 +9,7 @@ import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;
 
 import java.applet.Applet;
+import java.lang.reflect.InvocationTargetException;
 import java.text.Format;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -57,7 +58,8 @@ public class SttManager
         Transcription.buildLogfileFormat(null, logFilePattern) : null;
     } catch (ReflectiveOperationException ex) {
       throw new IllegalArgumentException(
-        "Cannot parse log file pattern: " + logFilePattern, ex);
+        "Cannot parse log file pattern: " + logFilePattern,
+        (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
     }
   }
 
