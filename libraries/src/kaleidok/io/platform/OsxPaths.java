@@ -8,7 +8,7 @@ public class OsxPaths extends UnixPaths
   @Override
   protected Path getCacheDirImpl()
   {
-    return getDataDir().resolve("Caches");
+    return getHomeDir().resolve("Library/Caches");
   }
 
 
