@@ -10,10 +10,8 @@ import static java.lang.Math.log10;
 import static kaleidok.util.Math.clamp;
 
 
-public class FrameRateDisplay
+public class FrameRateDisplay extends Plugin<PApplet>
 {
-  private final PApplet p;
-
   public int offsetX = 4, offsetY = 4;
 
   public int textSize = 8, textColor = 0xff00ff00;
@@ -33,14 +31,11 @@ public class FrameRateDisplay
   public TimeUnit timeUnit = TimeUnit.MILLISECONDS;
 
 
-  public FrameRateDisplay( PApplet p )
+  public FrameRateDisplay( PApplet sketch )
   {
+    super(sketch);
     sampledFrameRate[0] = '0';
     sampledFrameRateLength = 1;
-
-    this.p = p;
-    p.registerMethod("pre", this);
-    p.registerMethod("draw", this);
   }
 
 
@@ -49,6 +44,7 @@ public class FrameRateDisplay
     return frameRateSampleFrequencyMask + 1;
   }
 
+
   public void setFrameRateSampleFrequency( int frameRateSampleFrequency )
   {
     frameRateSampleFrequencyMask =
@@ -56,12 +52,14 @@ public class FrameRateDisplay
   }
 
 
+  @Override
   public void pre()
   {
     drawStartTime = System.nanoTime();
   }
 
 
+  @Override
   public void draw()
   {
     p.textSize(textSize);

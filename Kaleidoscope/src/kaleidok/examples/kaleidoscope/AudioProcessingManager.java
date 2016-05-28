@@ -11,6 +11,7 @@ import kaleidok.audio.OffThreadAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.google.gson.TypeAdapterManager;
+import kaleidok.processing.Plugin;
 import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;
 
@@ -31,12 +32,10 @@ import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.Math.isPowerOfTwo;
 
 
-public class AudioProcessingManager
+public class AudioProcessingManager extends Plugin<Kaleidoscope>
 {
   public static int DEFAULT_AUDIO_SAMPLERATE = 32000;
   public static int DEFAULT_AUDIO_BUFFERSIZE = 1 << 12;
-
-  private final Kaleidoscope parent;
 
   private int audioBufferSize = 0, audioBufferOverlap = 0;
   private AudioDispatcher audioDispatcher;
@@ -46,10 +45,9 @@ public class AudioProcessingManager
   private MinimFFTProcessor fftProcessor;
 
 
-  AudioProcessingManager( Kaleidoscope parent )
+  AudioProcessingManager( Kaleidoscope sketch )
   {
-    this.parent = parent;
-    parent.registerMethod("dispose", this);
+    super(sketch);
   }
 
 
@@ -78,8 +76,8 @@ public class AudioProcessingManager
   {
     if (audioDispatcher == null)
     {
-      String paramBase = parent.getClass().getPackage().getName() + ".audio.";
-      String audioSource = parent.getParameter(paramBase + "input");
+      String paramBase = p.getClass().getPackage().getName() + ".audio.";
+      String audioSource = p.getParameter(paramBase + "input");
       int bufferSize = getAudioBufferSize(),
         bufferOverlap = getAudioBufferOverlap();
 
@@ -88,7 +86,7 @@ public class AudioProcessingManager
         if (audioSource == null)
         {
           String param =  paramBase + "samplerate";
-          int sampleRate = DefaultValueParser.parseInt(parent,
+          int sampleRate = DefaultValueParser.parseInt(p,
             param, DEFAULT_AUDIO_SAMPLERATE);
           if (sampleRate <= 0)
             throw new AssertionError(param + " must be positive");
@@ -101,17 +99,17 @@ public class AudioProcessingManager
         {
           TarsosDSPAudioInputStream ais;
           if (audioSource.endsWith(".json")) {
-            replayAction = new ReplayAction(audioSource);
+            replayAction = new ReplayAction(p, audioSource);
             ais = replayAction.audioInputStream;
             dispatcherRunnable = new Runnable()
+            {
+              @Override
+              public void run()
               {
-                @Override
-                public void run()
-                {
-                  replayAction.doReplayItem(0);
-                  audioDispatcher.run();
-                }
-              };
+                replayAction.doReplayItem(0);
+                audioDispatcher.run();
+              }
+            };
           } else {
             ais = new ContinuousAudioInputStream(audioSource);
           }
@@ -135,8 +133,8 @@ public class AudioProcessingManager
     Runnable chained )
     throws LineUnavailableException, IOException
   {
-    if (DefaultValueParser.parseBoolean(parent,
-      parent.getClass().getPackage().getName() + ".audio.input.play", false))
+    if (DefaultValueParser.parseBoolean(p,
+      p.getClass().getPackage().getName() + ".audio.input.play", false))
     {
       audioDispatcher.addAudioProcessor(new OffThreadAudioPlayer(
         JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
@@ -155,7 +153,7 @@ public class AudioProcessingManager
         @Override
         public void run()
         {
-          parent.getLayers().waitForImages();
+          p.getLayers().waitForImages();
           dispatcher.run();
         }
       },
@@ -171,8 +169,8 @@ public class AudioProcessingManager
     if (audioBufferSize <= 0)
     {
       String param =
-        parent.getClass().getPackage().getName() + ".audio.buffersize";
-      int bufferSize = DefaultValueParser.parseInt(parent, param,
+        p.getClass().getPackage().getName() + ".audio.buffersize";
+      int bufferSize = DefaultValueParser.parseInt(p, param,
         DEFAULT_AUDIO_BUFFERSIZE);
       if (bufferSize <= 0 || !isPowerOfTwo(bufferSize))
         throw new AssertionError(param + " must be a power of 2");
@@ -188,8 +186,8 @@ public class AudioProcessingManager
     {
       int bufferSize = getAudioBufferSize();
       String param =
-        parent.getClass().getPackage().getName() + ".audio.overlap";
-      int bufferOverlap = DefaultValueParser.parseInt(parent,
+        p.getClass().getPackage().getName() + ".audio.overlap";
+      int bufferOverlap = DefaultValueParser.parseInt(p,
         param, bufferSize / 2);
       if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
         throw new AssertionError(param + " must be positive and less than buffersize");
@@ -220,7 +218,7 @@ public class AudioProcessingManager
   private ReplayAction replayAction = null;
 
 
-  public class ReplayAction implements ActionListener
+  public static class ReplayAction extends Plugin<Kaleidoscope> implements ActionListener
   {
     public final ReplayList replayList;
 
@@ -233,17 +231,19 @@ public class AudioProcessingManager
     private Boolean ignoreTranscriptionResult = null;
 
 
-    private ReplayAction( String filename )
+    private ReplayAction( Kaleidoscope sketch, String filename )
       throws IOException, JsonParseException, UnsupportedAudioFileException
     {
-      this(TypeAdapterManager.getGson().fromJson(
+      this(sketch, TypeAdapterManager.getGson().fromJson(
         new FileReader(filename), ReplayList.class));
     }
 
 
-    private ReplayAction( ReplayList replayList )
+    private ReplayAction( Kaleidoscope sketch, ReplayList replayList )
       throws IOException, JsonParseException, UnsupportedAudioFileException
     {
+      super(sketch);
+
       if (replayList.items.length == 0)
         throw new NoSuchElementException("Empty replay list");
 
@@ -261,7 +261,6 @@ public class AudioProcessingManager
         throw new UnsupportedAudioFileException("Mismatching audio formats");
       }
 
-      parent.registerMethod("keyEvent", this);
       timer = new Timer(0, this);
       timer.setRepeats(false);
       this.replayList = replayList;
@@ -347,7 +346,7 @@ public class AudioProcessingManager
     public void actionPerformed( ActionEvent ev )
     {
       if (!isIgnoreTranscriptionResult()) {
-        parent.getChromasthetiationService()
+        p.getChromasthetiationService()
           .submit(replayList.items[idx].transcription);
       }
 
@@ -359,7 +358,7 @@ public class AudioProcessingManager
     {
       if (ignoreTranscriptionResult == null) {
         ignoreTranscriptionResult =
-          SttManager.getParamIgnoreTranscriptionResult(parent);
+          SttManager.getParamIgnoreTranscriptionResult(p);
       }
       return ignoreTranscriptionResult;
     }

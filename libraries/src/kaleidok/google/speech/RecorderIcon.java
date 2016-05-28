@@ -1,12 +1,11 @@
 package kaleidok.google.speech;
 
+import kaleidok.processing.Plugin;
 import processing.core.PApplet;
 
 
-public class RecorderIcon
+public class RecorderIcon extends Plugin<PApplet>
 {
-  protected final PApplet p;
-
   protected final STT stt;
 
 
@@ -19,12 +18,10 @@ public class RecorderIcon
   public int fillColor = 0xffff0000, strokeColor = 0xc0ffffff;
 
 
-  public RecorderIcon( PApplet p, STT stt )
+  public RecorderIcon( PApplet sketch, STT stt )
   {
-    this.p = p;
+    super(sketch);
     this.stt = stt;
-
-    p.registerMethod("draw", this);
   }
 
 

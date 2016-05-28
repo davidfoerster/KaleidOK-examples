@@ -5,6 +5,7 @@ import kaleidok.google.speech.STT;
 import kaleidok.google.speech.SttResponse;
 import kaleidok.google.speech.Transcription;
 import kaleidok.concurrent.AbstractFutureCallback;
+import kaleidok.processing.Plugin;
 import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;
 
@@ -17,41 +18,36 @@ import java.util.logging.Level;
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 
 
-public class SttManager
+public class SttManager extends Plugin<Kaleidoscope>
 {
-  private final Kaleidoscope parent;
-
   private final STT stt;
 
 
-  SttManager( Kaleidoscope parent )
+  SttManager( Kaleidoscope sketch )
   {
-    this.parent = parent;
+    super(sketch);
 
     stt = new STT(new SttResponseHandler(),
-      parent.parseStringOrFile(parent.getParameter("com.google.developer.api.key"), '@'));
+      sketch.parseStringOrFile(sketch.getParameter("com.google.developer.api.key"), '@'));
     String paramBase = stt.getClass().getCanonicalName() + '.';
-    stt.setLanguage(parent.getParameter(paramBase + "language", "en"));
+    stt.setLanguage(sketch.getParameter(paramBase + "language", "en"));
     stt.setMaxTranscriptionInterval(
-      DefaultValueParser.parseInt(parent, paramBase + "interval", 8000),
+      DefaultValueParser.parseInt(sketch, paramBase + "interval", 8000),
       TimeUnit.MILLISECONDS);
     stt.intervalSequenceCountMax =
-      DefaultValueParser.parseInt(parent, paramBase + "interval.count",
+      DefaultValueParser.parseInt(sketch, paramBase + "interval.count",
         stt.intervalSequenceCountMax);
     stt.logfilePattern = getLogfilePattern();
-    parent.getAudioProcessingManager().getAudioDispatcher()
+    sketch.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
 
     initRecorderIcon();
-
-    parent.registerMethod("dispose", this);
-    parent.registerMethod("keyEvent", this);
   }
 
 
   private Format getLogfilePattern()
   {
-    String logFilePattern = parent.getParameter(
+    String logFilePattern = p.getParameter(
       stt.getClass().getCanonicalName() + ".log.pattern");
     try {
       return (logFilePattern != null) ?
@@ -67,13 +63,13 @@ public class SttManager
   private boolean initRecorderIcon()
   {
     String strEnabled =
-      parent.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
+      p.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
     boolean bEnabled = !"forceoff".equals(strEnabled) &&
       (!STT.isLoggingStatus() ||
          DefaultValueParser.parseBoolean(strEnabled, true));
 
     if (bEnabled) {
-      RecorderIcon ri = new RecorderIcon(parent, stt);
+      RecorderIcon ri = new RecorderIcon(p, stt);
     }
 
     return bEnabled;
@@ -97,7 +93,7 @@ public class SttManager
           new Object[]{topAlternative.confidence, topAlternative.transcript});
 
         if (!isIgnoreTranscriptionResult()) {
-          parent.getChromasthetiationService()
+          p.getChromasthetiationService()
             .submit(topAlternative.transcript);
         }
       } else {
@@ -110,7 +106,7 @@ public class SttManager
     {
       if (isIgnoreTranscriptionResult == null) {
         isIgnoreTranscriptionResult =
-          getParamIgnoreTranscriptionResult(parent);
+          getParamIgnoreTranscriptionResult(p);
       }
       return isIgnoreTranscriptionResult;
     }
