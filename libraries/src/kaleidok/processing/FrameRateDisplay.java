@@ -1,5 +1,6 @@
 package kaleidok.processing;
 
+import kaleidok.util.DefaultValueParser;
 import kaleidok.util.Strings;
 import processing.core.PApplet;
 
@@ -36,6 +37,17 @@ public class FrameRateDisplay extends Plugin<PApplet>
     super(sketch);
     sampledFrameRate[0] = '0';
     sampledFrameRateLength = 1;
+  }
+
+
+  public static FrameRateDisplay fromConfiguration( ExtPApplet sketch )
+  {
+    return
+      DefaultValueParser.parseBoolean(
+        sketch.getParameter("framerate.display"), false)
+      ?
+        new FrameRateDisplay(sketch) :
+        null;
   }
 
 

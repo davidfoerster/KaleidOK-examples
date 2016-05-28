@@ -1,6 +1,8 @@
 package kaleidok.google.speech;
 
+import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
+import kaleidok.util.DefaultValueParser;
 import processing.core.PApplet;
 
 
@@ -22,6 +24,20 @@ public class RecorderIcon extends Plugin<PApplet>
   {
     super(sketch);
     this.stt = stt;
+  }
+
+
+  public static RecorderIcon fromConfiguration( ExtPApplet sketch, STT stt,
+    boolean defaultOn )
+  {
+    String strEnabled =
+      sketch.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
+    return
+      (!"forceoff".equals(strEnabled) &&
+        (defaultOn || DefaultValueParser.parseBoolean(strEnabled, true)))
+      ?
+        new RecorderIcon(sketch, stt) :
+        null;
   }
 
 

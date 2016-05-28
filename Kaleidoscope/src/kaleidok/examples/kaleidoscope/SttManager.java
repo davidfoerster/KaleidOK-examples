@@ -41,7 +41,7 @@ public class SttManager extends Plugin<Kaleidoscope>
     sketch.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
 
-    initRecorderIcon();
+    RecorderIcon.fromConfiguration(sketch, stt, !STT.isLoggingStatus());
   }
 
 
@@ -57,22 +57,6 @@ public class SttManager extends Plugin<Kaleidoscope>
         "Cannot parse log file pattern: " + logFilePattern,
         (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
     }
-  }
-
-
-  private boolean initRecorderIcon()
-  {
-    String strEnabled =
-      p.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
-    boolean bEnabled = !"forceoff".equals(strEnabled) &&
-      (!STT.isLoggingStatus() ||
-         DefaultValueParser.parseBoolean(strEnabled, true));
-
-    if (bEnabled) {
-      RecorderIcon ri = new RecorderIcon(p, stt);
-    }
-
-    return bEnabled;
   }
 
 

@@ -78,12 +78,7 @@ public class Kaleidoscope extends ExtPApplet
     getChromasthetiationService();
     getSTT();
     getAudioProcessingManager().getAudioDispatcherThread().start();
-
-    if (DefaultValueParser.parseBoolean(
-      getParameter("framerate.display"), false))
-    {
-      new FrameRateDisplay(this);
-    }
+    FrameRateDisplay.fromConfiguration(this);
   }
 
 
