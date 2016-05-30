@@ -2,7 +2,7 @@ package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.concurrent.GroupedThreadFactory;
-import kaleidok.util.BoundedCompletionQueue;
+import kaleidok.containers.BoundedCompletionQueue;
 import kaleidok.flickr.FlickrAsync;
 import kaleidok.flickr.internal.FlickrBase;
 import kaleidok.flickr.FlickrException;

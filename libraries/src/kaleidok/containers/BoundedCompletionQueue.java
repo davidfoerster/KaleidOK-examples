@@ -1,4 +1,4 @@
-package kaleidok.util;
+package kaleidok.containers;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -27,17 +27,17 @@ public class BoundedCompletionQueue<E> implements Queue<E>
 
   public BoundedCompletionQueue( int permits )
   {
-    this(new ArrayDeque<E>(), permits);
+    this(new ArrayDeque<>(), permits);
   }
 
   public BoundedCompletionQueue( int permits, int capacity )
   {
-    this(new ArrayDeque<E>(capacity), permits);
+    this(new ArrayDeque<>(capacity), permits);
   }
 
   public BoundedCompletionQueue( int permits, Collection<? extends E> other )
   {
-    this(new ArrayDeque<E>(other), permits);
+    this(new ArrayDeque<>(other), permits);
   }
 
 
@@ -47,14 +47,19 @@ public class BoundedCompletionQueue<E> implements Queue<E>
   }
 
 
-  public synchronized void release( int permits )
+  public synchronized void release( int n )
   {
-    if (permits < 0)
-      throw new IllegalArgumentException(Integer.toString(permits));
+    if (n < 0)
+      throw new IllegalArgumentException(Integer.toString(n));
 
-    this.permits += permits;
-    if (this.permits > maxPermits)
-      throw new IllegalStateException("Too many permits returned");
+    long newPermits = (long) this.permits + n;
+    if (newPermits > maxPermits)
+    {
+      throw new IllegalStateException(String.format(
+        "Too many permits returned: %d (max. %d)", n, maxPermits));
+    }
+
+    permits = (int) newPermits;
   }
 
   public void release()
@@ -68,12 +73,19 @@ public class BoundedCompletionQueue<E> implements Queue<E>
     if (n < 0)
       throw new IllegalArgumentException(Integer.toString(n));
 
-    completed += n;
-    if (completed >= maxPermits) {
-      if (completed > maxPermits)
-        throw new IllegalStateException("More completed than permitted");
+    long newCompleted = (long) completed + n;
+    if (newCompleted >= maxPermits) {
+      if (newCompleted != maxPermits)
+      {
+        throw new IllegalStateException(String.format(
+          "More items completed (%d) than permitted (%d)",
+          n, maxPermits - completed));
+      }
+
       clear();
     }
+
+    completed = (int) newCompleted;
   }
 
   public void completeItem()
@@ -112,6 +124,7 @@ public class BoundedCompletionQueue<E> implements Queue<E>
     return underlying.toArray();
   }
 
+  @SuppressWarnings("SuspiciousToArrayCall")
   @Override
   public synchronized <T> T[] toArray( T[] a )
   {
