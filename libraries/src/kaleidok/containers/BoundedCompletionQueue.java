@@ -1,10 +1,12 @@
 package kaleidok.containers;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.function.Consumer;
 
 import static org.apache.commons.collections4.iterators.UnmodifiableIterator.unmodifiableIterator;
 
@@ -17,33 +19,44 @@ public class BoundedCompletionQueue<E> implements Queue<E>
 
   private int permits, completed = 0;
 
+  private Collection<E> removedItems;
 
-  private BoundedCompletionQueue( Queue<E> underlying, int permits )
+  public Consumer<Collection<? super E>> completionCallback = null;
+
+
+  private BoundedCompletionQueue( Queue<E> underlying, int permits, int capacityHint )
   {
     this.underlying = underlying;
     this.maxPermits = permits;
     this.permits = permits;
+    this.removedItems = new ArrayList<>(capacityHint);
   }
 
   public BoundedCompletionQueue( int permits )
   {
-    this(new ArrayDeque<>(), permits);
+    this(new ArrayDeque<>(), permits, 0);
   }
 
   public BoundedCompletionQueue( int permits, int capacity )
   {
-    this(new ArrayDeque<>(capacity), permits);
+    this(new ArrayDeque<>(capacity), permits, capacity);
   }
 
   public BoundedCompletionQueue( int permits, Collection<? extends E> other )
   {
-    this(new ArrayDeque<>(other), permits);
+    this(new ArrayDeque<>(other), permits, other.size());
   }
 
 
   public int availablePermits()
   {
     return permits;
+  }
+
+
+  public int getCompleted()
+  {
+    return completed;
   }
 
 
@@ -60,6 +73,9 @@ public class BoundedCompletionQueue<E> implements Queue<E>
     }
 
     permits = (int) newPermits;
+
+    if (newPermits + completed == maxPermits && this.isEmpty())
+      doCompletionCallback();
   }
 
   public void release()
@@ -83,6 +99,7 @@ public class BoundedCompletionQueue<E> implements Queue<E>
       }
 
       clear();
+      doCompletionCallback();
     }
 
     completed = (int) newCompleted;
@@ -91,6 +108,16 @@ public class BoundedCompletionQueue<E> implements Queue<E>
   public void completeItem()
   {
     completeItems(1);
+  }
+
+
+  protected void doCompletionCallback()
+  {
+    Consumer<Collection<? super E>> completionCallback =
+      this.completionCallback;
+    if (completionCallback != null)
+      completionCallback.accept(removedItems);
+    removedItems = null;
   }
 
 

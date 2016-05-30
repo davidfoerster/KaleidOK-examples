@@ -150,7 +150,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
   public void submit( String text )
   {
     submit(text, getChromasthetiator(),
-      null, chromasthetiationCallback, parent.getLayers().size());
+      null, chromasthetiationCallback, null, parent.getLayers().size());
   }
 
 
