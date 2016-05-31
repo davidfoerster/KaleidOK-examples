@@ -1,8 +1,10 @@
 package kaleidok.examples.kaleidoscope;
 
+import kaleidok.containers.Reference;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.util.DefaultValueParser;
+import processing.event.KeyEvent;
 
 import javax.swing.JApplet;
 
@@ -34,11 +36,14 @@ public class Kaleidoscope extends ExtPApplet
    */
   private SttManager stt;
 
+  private Reference<ExportService> exportService;
+
 
   public Kaleidoscope( JApplet parent )
   {
     super(parent);
   }
+
 
   @Override
   public void setup()
@@ -69,6 +74,7 @@ public class Kaleidoscope extends ExtPApplet
     getChromasthetiationService();
     getSTT();
     getAudioProcessingManager().getAudioDispatcherThread().start();
+    getExportService();
     FrameRateDisplay.fromConfiguration(this);
   }
 
@@ -105,6 +111,20 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  private ExportService getExportService()
+  {
+    if (exportService == null)
+    {
+      exportService = new Reference<>(
+        ExportService.fromConfiguration(this,
+          (callback) ->
+            getChromasthetiationService().
+              setImageQueueCompletionCallback(callback)));
+    }
+    return exportService.item;
+  }
+
+
   private Point previousSize = null;
 
   @Override
@@ -112,6 +132,28 @@ public class Kaleidoscope extends ExtPApplet
   {
     layers.run();
     previousSize.setLocation(width, height);
+  }
+
+
+  @Override
+  public void keyPressed( KeyEvent ev )
+  {
+    if (ev.getAction() == KeyEvent.TYPE)
+    {
+      switch (ev.getKey())
+      {
+      case 'r':
+        ExportService es = getExportService();
+        if (es != null)
+        {
+          es.schedule();
+          return;
+        }
+        break;
+      }
+    }
+
+    super.keyPressed(ev);
   }
 
 

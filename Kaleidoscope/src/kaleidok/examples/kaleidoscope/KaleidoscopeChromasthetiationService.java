@@ -6,6 +6,7 @@ import kaleidok.concurrent.AbstractFutureCallback;
 import kaleidok.concurrent.GroupedThreadFactory;
 import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
+import kaleidok.flickr.Photo;
 import kaleidok.http.cache.DiskLruHttpCacheStorage;
 import kaleidok.http.cache.ExecutorSchedulingStrategy;
 import kaleidok.io.platform.PlatformPaths;
@@ -20,11 +21,13 @@ import processing.core.PImage;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
@@ -44,6 +47,8 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
 
   private final ChromasthetiationCallback chromasthetiationCallback =
     new ChromasthetiationCallback();
+
+  private ImageQueueCompletionCallback imageQueueCompletionCallback = null;
 
 
   private KaleidoscopeChromasthetiationService( Kaleidoscope parent,
@@ -147,10 +152,16 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
   }
 
 
-  public void submit( String text )
+  public void submit( final String text )
   {
+    Consumer<Collection<? super Photo>> imageQueueCompletionCallback =
+      (this.imageQueueCompletionCallback != null) ?
+        (photos) -> this.imageQueueCompletionCallback.accept(text, photos) :
+        null;
+
     submit(text, getChromasthetiator(),
-      null, chromasthetiationCallback, null, parent.getLayers().size());
+      null, chromasthetiationCallback, imageQueueCompletionCallback,
+      parent.getLayers().size());
   }
 
 
@@ -188,5 +199,28 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
       }
       super.failed(ex);
     }
+  }
+
+
+  public interface ImageQueueCompletionCallback
+  {
+    void accept( String text, Collection<? super Photo> photos );
+  }
+
+
+  public void setImageQueueCompletionCallback(
+    ImageQueueCompletionCallback imageQueueCompletionCallback )
+  {
+    this.imageQueueCompletionCallback = imageQueueCompletionCallback;
+  }
+
+
+  public void setImageQueueCompletionCallback(
+    final Consumer<String> imageQueueCompletionCallback )
+  {
+    setImageQueueCompletionCallback(
+      (imageQueueCompletionCallback != null) ?
+        ( text, photos ) -> imageQueueCompletionCallback.accept(text) :
+        null);
   }
 }
