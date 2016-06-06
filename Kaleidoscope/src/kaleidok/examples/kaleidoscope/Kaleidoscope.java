@@ -136,24 +136,21 @@ public class Kaleidoscope extends ExtPApplet
 
 
   @Override
-  public void keyPressed( KeyEvent ev )
+  public void keyTyped( KeyEvent ev )
   {
-    if (ev.getAction() == KeyEvent.TYPE)
+    switch (ev.getKey())
     {
-      switch (ev.getKey())
+    case 'r':
+      ExportService es = getExportService();
+      if (es != null)
       {
-      case 'r':
-        ExportService es = getExportService();
-        if (es != null)
-        {
-          es.schedule();
-          return;
-        }
-        break;
+        es.schedule();
+        return;
       }
+      break;
     }
 
-    super.keyPressed(ev);
+    super.keyTyped(ev);
   }
 
 
