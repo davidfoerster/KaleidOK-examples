@@ -12,20 +12,23 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
 
   private float sampleRate = 0;
 
-  private final int bufferSize;
+  private final float[] sampleBuffer;
 
   private int avgType = 0, avgParam1, avgParam2;
 
+
   public MinimFFTProcessor( int bufferSize )
   {
-    this.bufferSize = bufferSize;
+    this.sampleBuffer = new float[bufferSize];
   }
+
 
   public void noAverages()
   {
     avgType = 0;
     updateAverages();
   }
+
 
   public void linAverages( int bands )
   {
@@ -34,6 +37,7 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
     updateAverages();
   }
 
+
   public void logAverages( int minBandwidth, int bandsPerOctave )
   {
     avgType = 2;
@@ -41,6 +45,7 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
     avgParam2 = bandsPerOctave;
     updateAverages();
   }
+
 
   private void updateAverages()
   {
@@ -64,23 +69,28 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
     }
   }
 
+
   public boolean isReady()
   {
     return fft != null;
   }
+
 
   @Override
   public boolean process( AudioEvent audioEvent )
   {
     if (fft == null) {
       sampleRate = audioEvent.getSampleRate();
-      fft = new FFT(bufferSize, sampleRate);
+      fft = new FFT(sampleBuffer.length, sampleRate);
       updateAverages();
     }
 
-    fft.forward(audioEvent.getFloatBuffer());
+    System.arraycopy(
+      audioEvent.getFloatBuffer(), 0, sampleBuffer, 0, sampleBuffer.length);
+    fft.forward(sampleBuffer);
     return true;
   }
+
 
   @Override
   public void processingFinished()
@@ -88,32 +98,38 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
     // Nothing to do here
   }
 
+
   @Override
   public float get( int n )
   {
     return fft.getAvg(n);
   }
 
+
   @Override
   public int size()
   {
-    return bufferSize;
+    return sampleBuffer.length;
   }
+
 
   public float getSampleRate()
   {
     return sampleRate;
   }
 
+
   public float getBin( float freq )
   {
     return fft.freqToIndex(freq);
   }
 
+
   public float getFreq( float bin )
   {
     return getFreq((int) bin);
   }
+
 
   public float getFreq( int bin )
   {
