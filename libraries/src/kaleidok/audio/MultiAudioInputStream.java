@@ -18,7 +18,7 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
 
   public MultiAudioInputStream()
   {
-    this(new ArrayList<TarsosDSPAudioInputStream>());
+    this(new ArrayList<>());
   }
 
   public MultiAudioInputStream( List<TarsosDSPAudioInputStream> streams )
@@ -79,7 +79,17 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
   public void close() throws IOException
   {
     for (TarsosDSPAudioInputStream stream: streams)
-      stream.close();
+    {
+      if (stream != null)
+        stream.close();
+    }
+  }
+
+
+  public void clear() throws IOException
+  {
+    close();
+    streams.clear();
   }
 
 
