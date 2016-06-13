@@ -10,12 +10,10 @@ public final class AssertionUtils
 
   public static boolean enableAssertionsOnDebugging()
   {
-    String prefix = "-agentlib:jdwp";
     for (String arg:
       ManagementFactory.getRuntimeMXBean().getInputArguments())
     {
-      if (arg.startsWith(prefix) &&
-        (arg.length() == prefix.length() || arg.charAt(prefix.length()) == '='))
+      if (Strings.startsWithToken(arg, "-agentlib:jdwp", '='))
       {
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
         return true;

@@ -41,6 +41,13 @@ public final class Strings
   }
 
 
+  public static boolean startsWithToken( String s, String prefix, char delimiter )
+  {
+    return s.startsWith(prefix) &&
+      (s.length() == prefix.length() || s.charAt(prefix.length()) == delimiter);
+  }
+
+
   /**
    * Writes the hexadecimal representation of an integer to a char array. If
    * the array is too short to hold all necessary digits, it'll only contain
