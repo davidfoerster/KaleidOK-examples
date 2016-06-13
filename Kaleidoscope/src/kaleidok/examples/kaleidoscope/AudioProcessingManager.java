@@ -1,6 +1,7 @@
 package kaleidok.examples.kaleidoscope;
 
 import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import com.google.gson.JsonParseException;
@@ -22,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -191,7 +193,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
         param, bufferSize / 2);
       if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
         throw new AssertionError(param + " must be positive and less than buffersize");
-      if (bufferOverlap > 0 && !isPowerOfTwo(bufferOverlap))
+      if (!isPowerOfTwo(bufferOverlap))
         throw new AssertionError(param + " must be a power of 2");
       audioBufferOverlap = bufferOverlap;
     }
@@ -244,29 +246,65 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     {
       super(sketch);
 
-      if (replayList.items.length == 0)
-        throw new NoSuchElementException("Empty replay list");
-
-      audioInputStream = new MultiAudioInputStream(
-        new ArrayList<TarsosDSPAudioInputStream>(replayList.items.length));
-
-      for (ReplayList.Item item: replayList.items) {
-        audioInputStream.streams.add(
-          new ContinuousAudioInputStream(new URL(item.url).openStream()));
-      }
-
-      if (!audioInputStream.isFormatCompatible(
-        audioInputStream.streams.get(0).getFormat()))
-      {
-        throw new UnsupportedAudioFileException("Mismatching audio formats");
-      }
-
+      this.replayList = replayList;
+      audioInputStream = makeMultiAudioStream(replayList.items);
       timer = new Timer(0, this);
       timer.setRepeats(false);
-      this.replayList = replayList;
 
       logger.log(Level.CONFIG,
         "Replaying recorded interaction \"{0}\"", replayList.name);
+    }
+
+
+    private static MultiAudioInputStream makeMultiAudioStream(
+      ReplayList.Item[] items )
+      throws IOException, UnsupportedAudioFileException
+    {
+      if (items.length == 0)
+        throw new NoSuchElementException("Empty replay list");
+
+      MultiAudioInputStream audioInputStream = new MultiAudioInputStream(
+        new ArrayList<>(items.length));
+
+      TarsosDSPAudioFormat format = null;
+      try
+      {
+        for (ReplayList.Item item : items)
+        {
+          TarsosDSPAudioInputStream ais;
+          {
+            InputStream is = item.url.openStream();
+            try
+            {
+              ais = new ContinuousAudioInputStream(is);
+            }
+            catch (IOException | UnsupportedAudioFileException ex)
+            {
+              is.close();
+              throw ex;
+            }
+          }
+          if (format == null)
+          {
+            format = ais.getFormat();
+          }
+          else if (!ais.getFormat().matches(format))
+          {
+            ais.close();
+            throw new UnsupportedAudioFileException(String.format(
+              "Mismatching audio formats: \"%s\" vs. \"%s\"",
+              ais.getFormat(), format));
+          }
+          audioInputStream.streams.add(ais);
+        }
+      }
+      catch (IOException | UnsupportedAudioFileException ex)
+      {
+        audioInputStream.clear();
+        throw ex;
+      }
+
+      return audioInputStream;
     }
 
 
@@ -374,7 +412,9 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
     public static class Item
     {
-      public String url, transcription;
+      public URL url;
+
+      public String transcription;
     }
   }
 }
