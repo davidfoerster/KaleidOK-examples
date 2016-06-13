@@ -107,6 +107,15 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
 
 
   @Override
+  public float[] get( float[] a, int offset, int first, int length )
+  {
+    for (int last = first + length; first < last; first++, offset++)
+      a[offset] = get(first);
+    return a;
+  }
+
+
+  @Override
   public int size()
   {
     return sampleBuffer.length;

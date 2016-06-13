@@ -46,6 +46,22 @@ public class FFTProcessor implements AudioProcessor, Spectrum
     return amplitudes[bin];
   }
 
+
+  @Override
+  public float[] get( float[] a, int offset, int first, int length )
+  {
+    System.arraycopy(amplitudes, first, a, offset, length);
+    return a;
+  }
+
+
+  @Override
+  public float[] get( float[] a )
+  {
+    return (a != null) ? get(a, 0, 0, size()) : amplitudes.clone();
+  }
+
+
   @Override
   public int size()
   {
