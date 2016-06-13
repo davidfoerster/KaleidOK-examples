@@ -66,18 +66,10 @@ public final class Arrays
     public int indexOf( final Object o )
     {
       final E[] a = this.a;
-      final int len = a.length;
 
-      if (o == null) {
-        for (int i = 0; i < len; i++) {
-          if (a[i] == null)
-            return i;
-        }
-      } else {
-        for (int i = 0; i < len; i++) {
-          if (o.equals(a[i]))
-            return i;
-        }
+      for (int i = 0; i < a.length; i++) {
+        if (Objects.equals(o, a[i]))
+          return i;
       }
 
       return -1;
@@ -89,16 +81,9 @@ public final class Arrays
     {
       final E[] a = this.a;
 
-      if (o == null) {
-        for (int i = a.length - 1; i >= 0; i--) {
-          if (a[i] == null)
-            return i;
-        }
-      } else {
-        for (int i = a.length - 1; i >= 0; i--) {
-          if (o.equals(a[i]))
-            return i;
-        }
+      for (int i = a.length - 1; i >= 0; i--) {
+        if (Objects.equals(o, a[i]))
+          return i;
       }
 
       return -1;
@@ -115,33 +100,24 @@ public final class Arrays
 
       final List<?> ol = (List<?>) o;
       final E[] a = this.a;
-      final int len = a.length;
       if (ol.size() != a.length)
         return false;
 
       if (ol instanceof RandomAccess) {
-        for (int i = 0; i < len; i++) {
-          if (!equals(a[i], ol.get(i)))
+        for (int i = 0; i < a.length; i++) {
+          if (!Objects.equals(a[i], ol.get(i)))
             return false;
         }
       } else {
         int i = 0;
         final Iterator<?> it = ol.iterator();
-        while (i < len && it.hasNext()) {
-          if (!equals(a[i++], it.next()))
+        while (i < a.length) {
+          if (!Objects.equals(a[i++], it.next()))
             return false;
         }
-        if (i < len || it.hasNext())
-          return false;
       }
 
       return true;
-    }
-
-
-    public static boolean equals( Object a, Object b )
-    {
-      return (a == b) || (a != null && a.equals(b));
     }
 
 
