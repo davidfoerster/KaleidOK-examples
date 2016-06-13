@@ -13,16 +13,17 @@ public final class Arrays
     ar = ar.clone();
 
     for (int i = ar.length - 1; i > 0; i--)
-    {
-      int index = rnd.nextInt(i + 1);
-
-      // Simple swap
-      int a = ar[index];
-      ar[index] = ar[i];
-      ar[i] = a;
-    }
+      swap(ar, i, rnd.nextInt(i + 1));
 
     return ar;
+  }
+
+
+  public static void swap( int[] ar, int i, int j )
+  {
+    int e = ar[j];
+    ar[j] = ar[i];
+    ar[i] = e;
   }
 
 
