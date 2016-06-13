@@ -16,7 +16,7 @@ public class VolumeLevelProcessor implements AudioProcessor
   public boolean process( AudioEvent audioEvent )
   {
     float[] buf = audioEvent.getFloatBuffer();
-    /**
+    /*
      * We could simply use AudioEvent#getRMS() here, but it relies on a
      * numerically unstable sum of squares implementation.
      */

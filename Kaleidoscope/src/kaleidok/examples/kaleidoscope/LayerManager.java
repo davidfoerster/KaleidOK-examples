@@ -8,8 +8,9 @@ import kaleidok.util.BeanUtils;
 import kaleidok.util.PropertyLoader;
 import processing.core.PImage;
 
-import java.io.*;
-import java.net.URL;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -161,7 +162,8 @@ public class LayerManager extends ArrayList<ImageLayer>
           if (!strImage.isEmpty()) {
             char c = strImage.charAt(0);
             if (c != '/' && c != File.separatorChar &&
-              strImage.indexOf(':') < 0) {
+              strImage.indexOf(':') < 0)
+            {
               strImage = "/images/" + strImage;
             }
             PImageFuture image = parent.getImageFuture(strImage);
@@ -243,16 +245,22 @@ public class LayerManager extends ArrayList<ImageLayer>
 
   private Properties getLayerProperties()
   {
-    if (layerProperties == null) {
+    if (layerProperties == null)
+    {
       String propFn = "layer.properties";
       layerProperties = new Properties();
-      try {
-        if (PropertyLoader.load(layerProperties, null, ImageLayer.class, propFn) == 0) {
+      try
+      {
+        if (PropertyLoader.load(
+          layerProperties, null, ImageLayer.class, propFn) == 0)
+        {
           logger.log(Level.CONFIG,
             "No layer properties file \"{0}\" found; using defaults",
             propFn);
         }
-      } catch (IOException ex) {
+      }
+      catch (IOException ex)
+      {
         logThrown(logger, Level.SEVERE,
           "Couldn't load layer properties file \"{0}\"; using defaults", ex,
           propFn);

@@ -147,7 +147,7 @@ public class Kaleidoscope extends ExtPApplet
   {
     if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {
       s = new String((s.length() == 2 && s.charAt(1) == '-') ?
-          loadBytes(System.in) : loadBytes(s.substring(1)));
+        loadBytes(System.in) : loadBytes(s.substring(1)));
       String ls = System.getProperty("line.separator");
       int sLen = s.length(), lsLen = ls.length();
       while (sLen >= lsLen && s.startsWith(ls, sLen - lsLen))

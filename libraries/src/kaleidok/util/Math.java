@@ -80,7 +80,7 @@ public final class Math
   private static String getBoundsExceededMessage( int offset, int len, int bufSize )
   {
     return String.format(
-      "%2$ is 0, %1$d, %2$d or %3$d are negative, or %1$d + %2$d ≥ %3$d",
+      "%2$d is 0, %1$d, %2$d or %3$d are negative, or %1$d + %2$d ≥ %3$d",
       offset, len, bufSize);
   }
 
@@ -101,15 +101,15 @@ public final class Math
 
   public static boolean isPowerOfTwo( long number )
   {
-    if (number > 0)
+    if (number >= 0)
       return (number & (number - 1)) == 0;
     throw new IllegalArgumentException("number is negative");
   }
 
 
-  public static int divCeil( int divident, int divisor )
+  public static int divCeil( int dividend, int divisor )
   {
-    return (divident - 1) / divisor + 1;
+    return (dividend - 1) / divisor + 1;
   }
 
 

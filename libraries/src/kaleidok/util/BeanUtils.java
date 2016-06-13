@@ -85,7 +85,8 @@ public final class BeanUtils
     }
 
     throw new IllegalArgumentException(
-      prefixName + " doesn't contain " + className);
+      className + " is no class of package " + prefixName +
+        " or its subpackages");
   }
 
 
