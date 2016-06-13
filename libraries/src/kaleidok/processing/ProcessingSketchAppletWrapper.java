@@ -10,6 +10,7 @@ import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.InvocationTargetException;
 
 import static javax.swing.KeyStroke.getKeyStroke;
 
@@ -35,8 +36,8 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
     T sketch;
     try {
       sketch = getSketchThrows();
-    } catch (InstantiationException ex) {
-      throw new Error(ex);
+    } catch (InvocationTargetException ex) {
+      throw new Error(ex.getCause());
     }
     add(sketch, BorderLayout.CENTER);
 
@@ -100,13 +101,13 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   {
     if (sketch == null) try {
       return getSketchThrows();
-    } catch (InstantiationException ex) {
-      ex.printStackTrace();
+    } catch (InvocationTargetException ex) {
+      ex.getCause().printStackTrace();
     }
     return sketch;
   }
 
-  protected T getSketchThrows() throws InstantiationException
+  protected T getSketchThrows() throws InvocationTargetException
   {
     if (sketch == null) {
       sketch = sketchFactory.createInstance(this);

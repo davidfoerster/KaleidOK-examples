@@ -2,12 +2,15 @@ package kaleidok.examples.kaleidoscope;
 
 import kaleidok.processing.AppletLauncher;
 import kaleidok.processing.FudgedAppletViewerFactory;
-import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchAppletWrapper;
+import kaleidok.processing.SimplePAppletFactory;
 import kaleidok.swing.FullscreenEventListener;
 import kaleidok.util.AssertionUtils;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.GraphicsDevice;
 import java.awt.Window;
@@ -26,14 +29,7 @@ public class KaleidoscopeApp extends ProcessingSketchAppletWrapper<Kaleidoscope>
   @Override
   public void init()
   {
-    sketchFactory = new PAppletFactory<Kaleidoscope>()
-      {
-        @Override
-        public Kaleidoscope createInstance( JApplet parent ) throws InstantiationException
-        {
-          return new Kaleidoscope(parent);
-        }
-      };
+    sketchFactory = new SimplePAppletFactory<>(Kaleidoscope.class);
     getRootPane().addFullscreenEventListener(this);
     super.init();
   }
