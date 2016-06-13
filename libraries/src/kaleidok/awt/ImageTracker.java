@@ -115,7 +115,8 @@ public class ImageTracker implements ImageObserver
   {
     final ThreadGroup tg = AppContext.getAppContext().getThreadGroup();
 
-    if (newPriority > tg.getMaxPriority()) {
+    if (newPriority > tg.getMaxPriority())
+    {
       logger.log(Level.WARNING,
         "The requested thread priority {0} exceeds the maximum priority {1} " +
           "of the pertaining thread group \"{2}\"",
@@ -125,12 +126,19 @@ public class ImageTracker implements ImageObserver
 
     synchronized (IMAGE_FETCHER_ADJUSTMENT_LOCK)
     {
-      for (final Thread t: Threads.getThreads(tg, false)) {
-        if (t.getName().startsWith("Image Fetcher ")) {
+      for (final Thread t: Threads.getThreads(tg, false))
+      {
+        if (t == null)
+          break;
+
+        if (t.getName().startsWith("Image Fetcher "))
+        {
           final int oldPriority = t.getPriority();
-          if (newPriority != oldPriority) {
+          if (newPriority != oldPriority)
+          {
             t.setPriority(newPriority);
-            if (logger.isLoggable(Level.FINEST)) {
+            if (logger.isLoggable(Level.FINEST))
+            {
               logger.log(Level.FINEST,
                 "Changed priority of thread \"{0}\" ({1}) from {2} to {3}",
                 new Object[]{t.getName(), t.getId(), oldPriority, newPriority});

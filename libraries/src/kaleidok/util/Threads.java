@@ -10,15 +10,16 @@ public final class Threads
   private Threads() { }
 
 
-  public static List<Thread> getThreads( ThreadGroup threadGroup, boolean recurse )
+  public static Thread[] getThreads( ThreadGroup threadGroup, boolean recurse )
   {
-    Thread[] threads = new Thread[1 << 4];
+    Thread[] threads = new Thread[8];
     int threadCount;
     while ((threadCount = threadGroup.enumerate(threads, recurse)) >= threads.length) {
+      assert threads.length <= Integer.MAX_VALUE / 2 && threadCount < Integer.MAX_VALUE;
       threads = new Thread[
         Math.max(threads.length * 2, threadCount + 1)];
     }
-    return Arrays.asList(threads).subList(0, threadCount);
+    return threads;
   }
 
 
