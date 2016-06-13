@@ -1,5 +1,6 @@
 package kaleidok.util;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -124,13 +125,9 @@ public final class Arrays
     @Override
     public int hashCode()
     {
-      final E[] a = this.a;
       int hashCode = 1;
-      for (E e: a) {
-        hashCode *= 31;
-        if (e != null)
-          hashCode += e.hashCode();
-      }
+      for (E e: a)
+        hashCode = 31 * hashCode + ((e != null) ? e.hashCode() : 0);
       return hashCode;
     }
 
@@ -150,17 +147,15 @@ public final class Arrays
 
 
     @Override
-    public <T> T[] toArray( final T[] dst )
+    public <T> T[] toArray( T[] dst )
     {
       final E[] src = this.a;
       if (dst.length < src.length) {
         //noinspection unchecked
-        return (T[]) java.util.Arrays.copyOf(src, src.length, dst.getClass());
+        dst = (T[]) Array.newInstance(dst.getClass().getComponentType(), src.length);
       }
-      for (int i = src.length - 1; i >= 0; i--) {
-        //noinspection unchecked
-        dst[i] = (T) src[i];
-      }
+      //noinspection SuspiciousSystemArraycopy
+      System.arraycopy(src, 0, dst, 0, src.length);
       java.util.Arrays.fill(dst, src.length, dst.length, null);
       return dst;
     }
