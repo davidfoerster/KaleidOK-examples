@@ -8,7 +8,11 @@ import processing.core.PApplet;
 import javax.swing.JApplet;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Frame;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
 
@@ -86,9 +90,10 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
 
   private void fudgeAppletViewer()
   {
-    Container current = this, parent;
-    while ((parent = current.getParent()) != null) {
-      current = parent;
+    for (Container current = this.getParent();
+      current != null;
+      current = current.getParent())
+    {
       if (current instanceof Frame) {
         FudgedAppletViewerFactory.fudgeAppletViewer((Frame) current);
         break;
