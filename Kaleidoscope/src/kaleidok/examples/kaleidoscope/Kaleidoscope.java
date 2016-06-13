@@ -26,9 +26,6 @@ public class Kaleidoscope extends ExtPApplet
    */
   private AudioProcessingManager audioProcessingManager;
 
-  /**
-   *
-   */
   private KaleidoscopeChromasthetiationService chromasthetiationService;
 
   /**

@@ -62,7 +62,7 @@ public final class BeanUtils
       throw new IllegalArgumentException(
         String.format(
           "Cannot set value of property \"%s.%s\" to \"%s\"",
-          o.getClass().getName(), name, entry.getValue().toString()),
+          o.getClass().getName(), name, entry.getValue()),
         (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
     }
 

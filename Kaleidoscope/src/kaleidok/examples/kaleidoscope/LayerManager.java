@@ -238,9 +238,6 @@ public class LayerManager extends ArrayList<ImageLayer>
   }
 
 
-  private static final URL layerPropertiesResource =
-    ImageLayer.class.getResource("layer.properties");
-
   private Properties layerProperties = null;
 
 
