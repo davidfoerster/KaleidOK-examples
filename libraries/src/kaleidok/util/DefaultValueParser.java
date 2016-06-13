@@ -146,7 +146,7 @@ public final class DefaultValueParser
   public static <T> T parse( String s, T defaultValue, Class<T> clazz )
     throws IllegalArgumentException
   {
-    if (clazz == String.class || clazz == CharSequence.class) {
+    if (clazz.isAssignableFrom(String.class)) {
       //noinspection unchecked
       return (s != null) ? (T) s : defaultValue;
     }
