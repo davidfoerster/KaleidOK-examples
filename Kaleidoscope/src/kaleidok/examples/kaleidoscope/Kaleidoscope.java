@@ -62,17 +62,11 @@ public class Kaleidoscope extends ExtPApplet
     ellipseMode(RADIUS);
     noiseDetail(4, 0.6f);
 
-    double framerate = DefaultValueParser.parseDouble(this,
-      "framerate", this.frameRate);
-    frameRate((float) framerate);
+    frameRate((float) DefaultValueParser.parseDouble(this,
+      "framerate", this.frameRate));
 
-    int smoothingLevel = DefaultValueParser.parseInt(this,
-      g.getClass().getCanonicalName() + ".smooth", 4);
-    if (smoothingLevel > 0) {
-      smooth(smoothingLevel);
-    } else {
-      noSmooth();
-    }
+    smooth(DefaultValueParser.parseInt(this,
+      g.getClass().getCanonicalName() + ".smooth", 4));
 
     getLayers();
     getChromasthetiationService();
@@ -166,4 +160,14 @@ public class Kaleidoscope extends ExtPApplet
     return s;
   }
 
+
+  @Override
+  public void smooth( int level )
+  {
+    if (level > 0) {
+      super.smooth(level);
+    } else {
+      super.noSmooth();
+    }
+  }
 }
