@@ -62,7 +62,7 @@ public class LayerManager extends ArrayList<ImageLayer>
     int count = 0;
     for (ImageLayer l: this) {
       count += BeanUtils.applyBeanProperties(prop, pack, l);
-      l.screenshotPathPattern = screenshotPathPattern;
+      l.setScreenshotPathPattern(screenshotPathPattern);
     }
 
     if (count != prop.size()) {

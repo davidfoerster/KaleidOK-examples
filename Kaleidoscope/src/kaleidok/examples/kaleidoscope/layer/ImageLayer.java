@@ -2,6 +2,7 @@ package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
+import kaleidok.util.SynchronizedFormat;
 import processing.core.PImage;
 
 import java.text.MessageFormat;
@@ -18,18 +19,12 @@ public abstract class ImageLayer implements Runnable
   private final AtomicReference<PImageFuture> nextImage =
     new AtomicReference<>();
 
-  private float txFactor = 1;
+  private CurrentImage currentImage = CurrentImage.NULL_IMAGE;
 
-  private float tyFactor = 1;
-
-  private PImage currentImage = null;
-
-  public MessageFormat screenshotPathPattern = null;
-
-  private StringBuffer screenshotPathPatternBuf = null;
+  private final SynchronizedFormat screenshotPathPattern = new SynchronizedFormat();
 
 
-  public ImageLayer( ExtPApplet parent )
+  protected ImageLayer( ExtPApplet parent )
   {
     this.parent = parent;
   }
@@ -55,18 +50,52 @@ public abstract class ImageLayer implements Runnable
       if (next != null && next.width > 0 && next.height > 0)
         setCurrentImage(next);
     }
-    return currentImage;
+    return currentImage.image;
   }
 
 
-  public synchronized void setCurrentImage( PImage img )
+  public void setCurrentImage( PImage image )
   {
-    if (img != null && img != currentImage)
+    if (image != null)
     {
-      assert img.width > 0 && img.height > 0 :
-        img + " has width or height ≤0";
+      // don't save screenshots of the initial images
+      PImage currentImage = this.currentImage.image;
+      if (currentImage != null && currentImage != image)
+        saveScreenshot();
+    }
+    this.currentImage = CurrentImage.newInstance(image);
+  }
+
+
+  private static final class CurrentImage
+  {
+    public final float txFactor, tyFactor;
+
+    public final PImage image;
+
+    public static final CurrentImage NULL_IMAGE = new CurrentImage();
+
+
+    public static CurrentImage newInstance( PImage image )
+    {
+      return (image != null) ? new CurrentImage(image) : NULL_IMAGE;
+    }
+
+
+    private CurrentImage()
+    {
+      txFactor = 1;
+      tyFactor = 1;
+      image = null;
+    }
+
+
+    private CurrentImage( PImage image )
+    {
+      assert image.width > 0 && image.height > 0 :
+        image + " has width or height ≤0";
       float
-        imgWidth = img.width, imgHeight = img.height,
+        imgWidth = image.width, imgHeight = image.height,
         imgAspect = imgWidth / imgHeight;
       if (imgAspect <= 1) {
         txFactor = 0.5f;
@@ -76,29 +105,41 @@ public abstract class ImageLayer implements Runnable
         tyFactor = 0.5f;
       }
 
-      // don't save screenshots of the initial images
-      if (currentImage != null && screenshotPathPattern != null) {
-        StringBuffer screenshotPath =
-          screenshotPathPattern.format(
-            new Object[]{new Date(), parent.frameCount},
-            getScreenshotPathPatternBuf(), null);
-        parent.save(screenshotPath.toString(), true);
-      }
+      this.image = image;
     }
-    currentImage = img;
   }
 
 
-  private StringBuffer getScreenshotPathPatternBuf()
+  private void saveScreenshot()
   {
-    if (screenshotPathPatternBuf == null)
-      screenshotPathPatternBuf = new StringBuffer(1 << 5);
-    return screenshotPathPatternBuf;
+    if (screenshotPathPattern.hasUnderlying())
+    {
+      String pathName;
+      synchronized (screenshotPathPattern)
+      {
+        pathName = screenshotPathPattern.hasUnderlying() ?
+          screenshotPathPattern.format(
+            new Object[]{ new Date(), parent.frameCount }, null) :
+          null;
+      }
+      if (pathName != null)
+        parent.save(pathName, true);
+    }
+  }
+
+
+  public void setScreenshotPathPattern( MessageFormat format )
+  {
+    synchronized (screenshotPathPattern)
+    {
+      screenshotPathPattern.setUnderlying(format);
+    }
   }
 
 
   protected void drawVertex( float x, float y )
   {
-    parent.vertex(x, y, x * txFactor + 0.5f, y * tyFactor + 0.5f);
+    CurrentImage img = currentImage;
+    parent.vertex(x, y, x * img.txFactor + 0.5f, y * img.tyFactor + 0.5f);
   }
 }
