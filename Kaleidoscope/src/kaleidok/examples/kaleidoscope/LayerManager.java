@@ -12,22 +12,25 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 
-public class LayerManager extends ArrayList<ImageLayer>
-  implements Runnable
+public class LayerManager implements List<ImageLayer>, Runnable
 {
   private static final int MIN_IMAGES = 5;
 
   private final Kaleidoscope parent;
+
+  private final List<ImageLayer> layers = new ArrayList<>(8);
 
   public List<PImageFuture> images; // list to hold input images
 
@@ -40,14 +43,13 @@ public class LayerManager extends ArrayList<ImageLayer>
 
   LayerManager( Kaleidoscope parent )
   {
-    super(8);
     this.parent = parent;
 
-    add(getBackgroundLayer());
-    add(getSpectrogramLayer());
-    add(getOuterMovingShape());
-    add(getFoobarLayer());
-    add(getCentreLayer());
+    layers.add(getBackgroundLayer());
+    layers.add(getSpectrogramLayer());
+    layers.add(getOuterMovingShape());
+    layers.add(getFoobarLayer());
+    layers.add(getCentreLayer());
 
     applyLayerProperties();
   }
@@ -267,5 +269,187 @@ public class LayerManager extends ArrayList<ImageLayer>
       }
     }
     return layerProperties;
+  }
+
+
+  @Override
+  public int size()
+  {
+    return layers.size();
+  }
+
+  @Override
+  public boolean isEmpty()
+  {
+    return layers.isEmpty();
+  }
+
+  @Override
+  public boolean contains( Object o )
+  {
+    return layers.contains(o);
+  }
+
+  @Override
+  public Iterator<ImageLayer> iterator()
+  {
+    return layers.iterator();
+  }
+
+  @Override
+  public Object[] toArray()
+  {
+    return layers.toArray();
+  }
+
+  @Override
+  public <T> T[] toArray( T[] a )
+  {
+    //noinspection SuspiciousToArrayCall
+    return layers.toArray(a);
+  }
+
+  @Override
+  public boolean add( ImageLayer imageLayer )
+  {
+    return layers.add(imageLayer);
+  }
+
+  @Override
+  public boolean remove( Object o )
+  {
+    return layers.remove(o);
+  }
+
+  @Override
+  public boolean containsAll( Collection<?> c )
+  {
+    return layers.containsAll(c);
+  }
+
+  @Override
+  public boolean addAll( Collection<? extends ImageLayer> c )
+  {
+    return layers.addAll(c);
+  }
+
+  @Override
+  public boolean addAll( int index, Collection<? extends ImageLayer> c )
+  {
+    return layers.addAll(index, c);
+  }
+
+  @Override
+  public boolean removeAll( Collection<?> c )
+  {
+    return layers.removeAll(c);
+  }
+
+  @Override
+  public boolean retainAll( Collection<?> c )
+  {
+    return layers.retainAll(c);
+  }
+
+  @Override
+  public void replaceAll( UnaryOperator<ImageLayer> operator )
+  {
+    layers.replaceAll(operator);
+  }
+
+  @Override
+  public void sort( Comparator<? super ImageLayer> c )
+  {
+    layers.sort(c);
+  }
+
+  @Override
+  public void clear()
+  {
+    layers.clear();
+  }
+
+  @Override
+  public ImageLayer get( int index )
+  {
+    return layers.get(index);
+  }
+
+  @Override
+  public ImageLayer set( int index, ImageLayer element )
+  {
+    return layers.set(index, element);
+  }
+
+  @Override
+  public void add( int index, ImageLayer element )
+  {
+    layers.add(index, element);
+  }
+
+  @Override
+  public ImageLayer remove( int index )
+  {
+    return layers.remove(index);
+  }
+
+  @Override
+  public int indexOf( Object o )
+  {
+    return layers.indexOf(o);
+  }
+
+  @Override
+  public int lastIndexOf( Object o )
+  {
+    return layers.lastIndexOf(o);
+  }
+
+  @Override
+  public ListIterator<ImageLayer> listIterator()
+  {
+    return layers.listIterator();
+  }
+
+  @Override
+  public ListIterator<ImageLayer> listIterator( int index )
+  {
+    return layers.listIterator(index);
+  }
+
+  @Override
+  public List<ImageLayer> subList( int fromIndex, int toIndex )
+  {
+    return layers.subList(fromIndex, toIndex);
+  }
+
+  @Override
+  public Spliterator<ImageLayer> spliterator()
+  {
+    return layers.spliterator();
+  }
+
+  @Override
+  public boolean removeIf( Predicate<? super ImageLayer> filter )
+  {
+    return layers.removeIf(filter);
+  }
+
+  @Override
+  public Stream<ImageLayer> stream()
+  {
+    return layers.stream();
+  }
+
+  @Override
+  public Stream<ImageLayer> parallelStream()
+  {
+    return layers.parallelStream();
+  }
+
+  @Override
+  public void forEach( Consumer<? super ImageLayer> action )
+  {
+    layers.forEach(action);
   }
 }
