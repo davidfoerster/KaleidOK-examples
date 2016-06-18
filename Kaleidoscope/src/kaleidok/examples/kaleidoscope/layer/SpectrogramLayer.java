@@ -18,24 +18,24 @@ import static kaleidok.util.Math.log2;
  */
 public class SpectrogramLayer extends CircularImageLayer
 {
-	private final MinimFFTProcessor avgSpectrum;
+  private final MinimFFTProcessor avgSpectrum;
 
   private double exponent = 1.125;
 
   private static final int MIN_FREQUENCY = 86;
 
 
-	public SpectrogramLayer( ExtPApplet parent, int segmentCount,
+  public SpectrogramLayer( ExtPApplet parent, int segmentCount,
     float innerRadius, float outerRadius, MinimFFTProcessor spectrum,
     float sampleRate )
-	{
-		super(parent, segmentCount, innerRadius, outerRadius);
+  {
+    super(parent, segmentCount, innerRadius, outerRadius);
     avgSpectrum = spectrum;
 
     float nyquistFreq = sampleRate / 2;
     avgSpectrum.logAverages(MIN_FREQUENCY,
       (int) ceil(segmentCount / log2(nyquistFreq / MIN_FREQUENCY)));
-	}
+  }
 
 
   @Override
@@ -130,8 +130,8 @@ public class SpectrogramLayer extends CircularImageLayer
    * @see #getScaleFactor()
    */
   @Override
-	public void run()
-	{
+  public void run()
+  {
     final PApplet parent = this.parent;
 
     if (wireframe >= 2)
@@ -154,11 +154,11 @@ public class SpectrogramLayer extends CircularImageLayer
     assert segmentCount <= avgSpectrum.size() :
       segmentCount + " > " + avgSpectrum.size();
 
-	  parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
+    parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.scale(getOuterRadius());
 
-		PImage img;
-		if (wireframe <= 0 && (img = getCurrentImage()) != null) {
+    PImage img;
+    if (wireframe <= 0 && (img = getCurrentImage()) != null) {
       parent.noStroke();
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
       parent.texture(img); // set the texture to use
@@ -169,19 +169,19 @@ public class SpectrogramLayer extends CircularImageLayer
       parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     }
 
-	  for (int i = 0; i <= segmentCount; i += 2)
-	  {
-	    int imi = i % segmentCount; // make sure the end equals the start
+    for (int i = 0; i <= segmentCount; i += 2)
+    {
+      int imi = i % segmentCount; // make sure the end equals the start
 
       float x = avgSpectrum.get(imi / 2);
       // scale the intensity value and adjust its dynamic range:
-	    float dynamicOuter = (float) pow(x * scaleFactor, exponent);
+      float dynamicOuter = (float) pow(x * scaleFactor, exponent);
 
-	    drawCircleVertex(imi, scaledInnerRadius);
-	    drawCircleVertex(imi + 1, dynamicOuter * outerScale + scaledInnerRadius);
-	  }
+      drawCircleVertex(imi, scaledInnerRadius);
+      drawCircleVertex(imi + 1, dynamicOuter * outerScale + scaledInnerRadius);
+    }
 
-		parent.endShape(); // finalize the Shape
-		parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-	}
+    parent.endShape(); // finalize the Shape
+    parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
+  }
 }

@@ -15,12 +15,12 @@ import static processing.core.PApplet.map;
  */
 public class FoobarLayer extends CircularImageLayer
 {
-	public FoobarLayer( ExtPApplet parent, int segmentCount,
+  public FoobarLayer( ExtPApplet parent, int segmentCount,
     float innerRadius, float outerRadius )
-	{
-		super(parent, segmentCount, innerRadius, outerRadius);
+  {
+    super(parent, segmentCount, innerRadius, outerRadius);
     setScaleFactor(0.5f);
-	}
+  }
 
 
   /**
@@ -81,15 +81,15 @@ public class FoobarLayer extends CircularImageLayer
 
 
   public void run()
-	{
+  {
     final PApplet parent = this.parent;
-	  final float
+    final float
       innerOffset = this.innerOffset,
       outerOffset = this.outerOffset,
       innerScale = this.innerScale,
       outerScale = 1 - outerOffset,
       fc1 = parent.frameCount * 0.01f,
-	    fc2 = parent.frameCount * 0.02f;
+      fc2 = parent.frameCount * 0.02f;
 
     if (wireframe >= 2)
     {
@@ -117,35 +117,35 @@ public class FoobarLayer extends CircularImageLayer
       drawDebugCircle(outerScaled);
     }
 
-		parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-		parent.scale(getOuterRadius());
+    parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
+    parent.scale(getOuterRadius());
 
-		parent.stroke(255); // set stroke to white
+    parent.stroke(255); // set stroke to white
     parent.strokeWeight(parent.g.strokeWeight / getOuterRadius());
-		parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
-		PImage img;
-		if (wireframe <= 0 && (img = getCurrentImage()) != null) {
-			parent.texture(img); // set the texture to use
-		} else {
-			parent.noFill();
-		}
+    parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
+    PImage img;
+    if (wireframe <= 0 && (img = getCurrentImage()) != null) {
+      parent.texture(img); // set the texture to use
+    } else {
+      parent.noFill();
+    }
 
-		final int segmentCount = getSegmentCount();
-	  for (int i = 0; i <= segmentCount; i++) {
-	    int im = i % segmentCount; // make sure the end equals the start
+    final int segmentCount = getSegmentCount();
+    for (int i = 0; i <= segmentCount; i++) {
+      int im = i % segmentCount; // make sure the end equals the start
 
-	    // each vertex has a noise-based dynamic movement
-	    float dynamicInner = parent.noise(fc1 + im);
-	    float dynamicOuter = parent.noise(fc2 + im);
+      // each vertex has a noise-based dynamic movement
+      float dynamicInner = parent.noise(fc1 + im);
+      float dynamicOuter = parent.noise(fc2 + im);
 
       drawCircleVertex(im, dynamicInner * innerScale + innerOffset);
       drawCircleVertex(im, dynamicOuter * outerScale + outerOffset);
-	    //drawCircleVertex(im, map(dynamicInner, 0, 1, innerOffset, innerOffset + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * getScaleFactor()));
-	    //drawCircleVertex(im, map(dynamicOuter, 0, 1, innerOffset + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * (1 - getScaleFactor()), 1));
-	  }
+      //drawCircleVertex(im, map(dynamicInner, 0, 1, innerOffset, innerOffset + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * getScaleFactor()));
+      //drawCircleVertex(im, map(dynamicOuter, 0, 1, innerOffset + (getOuterRadius() - getInnerRadius()) / getOuterRadius() * (1 - getScaleFactor()), 1));
+    }
 
-		parent.endShape(); // finalize the Shape
-		parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-	}
+    parent.endShape(); // finalize the Shape
+    parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
+  }
 
 }
