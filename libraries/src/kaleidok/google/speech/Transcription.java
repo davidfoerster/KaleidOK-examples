@@ -141,7 +141,7 @@ public class Transcription implements Runnable
   }
 
 
-  public SttResponse transcribe() throws IOException
+  public SttResponse transcribe() throws IOException, JsonSyntaxException
   {
     try {
       SttResponse response;
@@ -160,7 +160,8 @@ public class Transcription implements Runnable
   }
 
 
-  protected SttResponse parse( Reader source ) throws IOException
+  protected static SttResponse parse( Reader source )
+    throws IOException, JsonSyntaxException
   {
     try (JsonReader jsonReader = new JsonReader(source)) {
       jsonReader.setLenient(true);
@@ -170,9 +171,6 @@ public class Transcription implements Runnable
           TypeAdapterManager.getGson().fromJson(jsonReader, SttResponse.class);
       } while ((response == null || response.isEmpty()) && jsonReader.peek() != JsonToken.END_DOCUMENT);
       return response;
-    } catch (JsonSyntaxException ex) {
-      throw new IOException(
-        "PARSE ERROR: Speech could not be interpreted.", ex);
     } catch (JsonIOException ex) {
       throw new IOException(ex);
     }
