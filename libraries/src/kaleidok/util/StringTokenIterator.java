@@ -23,12 +23,12 @@ public class StringTokenIterator implements Iterable<String>, Iterator<String>
   {
     if (begin >= 0)
       return true;
-    if (end >= source.length())
+    if (this.end >= source.length())
       return false;
 
-    int newEnd = source.indexOf(delimiter, end + 1);
-    begin = end + 1;
-    end = (newEnd >= 0) ? newEnd : source.length();
+    begin = this.end + 1;
+    int end = source.indexOf(delimiter, begin);
+    this.end = (end >= 0) ? end : source.length();
     return true;
   }
 
