@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonToken;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.google.gson.TypeAdapterManager;
 import kaleidok.io.platform.PlatformPaths;
+import kaleidok.util.Threads;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.http.concurrent.FutureCallback;
 
@@ -123,17 +124,16 @@ public class Transcription implements Runnable
     try {
       try {
         result = transcribe();
-      } catch (Exception ex) {
-        if (callback != null) {
-          callback.failed(ex);
-        } else {
-          Thread current = Thread.currentThread();
-          current.getUncaughtExceptionHandler().uncaughtException(current, ex);
-        }
-        return;
+      } finally {
+        dispose();
       }
-    } finally {
-      dispose();
+    } catch (IOException | JsonSyntaxException ex) {
+      if (callback != null) {
+        callback.failed(ex);
+      } else {
+        Threads.handleUncaught(ex);
+      }
+      return;
     }
 
     if (callback != null)
@@ -143,20 +143,16 @@ public class Transcription implements Runnable
 
   public SttResponse transcribe() throws IOException, JsonSyntaxException
   {
-    try {
-      SttResponse response;
-      if (!logger.isLoggable(Level.FINEST)) {
-        response = parse(connection.getReader());
-      } else {
-        String strResponse = connection.getBody();
-        logger.log(Level.FINEST, strResponse);
-        response = parse(new StringReader(strResponse));
-        logResponse(response);
-      }
-      return response;
-    } catch (IOException ex) {
-      throw new IOException("Network connection failure", ex);
+    SttResponse response;
+    if (!logger.isLoggable(Level.FINEST)) {
+      response = parse(connection.getReader());
+    } else {
+      String strResponse = connection.getBody();
+      logger.log(Level.FINEST, strResponse);
+      response = parse(new StringReader(strResponse));
+      logResponse(response);
     }
+    return response;
   }
 
 
