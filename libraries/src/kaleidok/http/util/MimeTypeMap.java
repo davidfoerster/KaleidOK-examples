@@ -15,10 +15,12 @@ public class MimeTypeMap extends HashMap<String, Float>
 {
   private static final long serialVersionUID = -6412623527769040820L;
 
+  public static final char WILDCARD_CHAR = '*';
+
   /**
    * Wildcard string for any MIME type
    */
-  public static final String WILDCARD = "*/*";
+  public static final String WILDCARD = WILDCARD_CHAR + "/" + WILDCARD_CHAR;
 
   /**
    * Wrapped float value 0 (because of its frequent occurrence)
@@ -145,12 +147,16 @@ public class MimeTypeMap extends HashMap<String, Float>
     if (!wildcards || WILDCARD.equals(mime))
       return null;
 
-    if (mime != null) {
+    if (mime != null)
+    {
       int p = mime.indexOf('/') + 1;
       assert p > 0 && p < mime.length() :
         "'/' doesn't occur before the last character of \"" + mime + '\"';
-      if (mime.charAt(p) != '*') {
-        mime = mime.substring(0, p) + '*';
+      if (mime.charAt(p) != WILDCARD_CHAR)
+      {
+        StringBuilder buf = new StringBuilder(p + 1);
+        buf.append(mime, 0, p).append(WILDCARD_CHAR);
+        mime = buf.toString();
         q = get(mime);
         if (q != null)
           return (q > 0) ? mime : null;
