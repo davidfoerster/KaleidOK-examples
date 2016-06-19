@@ -118,7 +118,10 @@ public class SttManager extends Plugin<Kaleidoscope>
 
 
   @Override
-  public void dispose() { shutdown(); }
+  protected void onDispose()
+  {
+    shutdown();
+  }
 
 
   public void begin( boolean doThrow )

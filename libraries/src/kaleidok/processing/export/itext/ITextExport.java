@@ -108,9 +108,8 @@ public class ITextExport extends AbstractFrameRecorder
 
 
   @Override
-  public void dispose()
+  protected void onDispose()
   {
-    super.dispose();
     close();
   }
 }

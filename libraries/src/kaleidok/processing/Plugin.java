@@ -76,15 +76,20 @@ public class Plugin<P extends PApplet>
   }
 
 
-  public void dispose()
+  public final void dispose()
   {
-    if (!p.finished)
+    onDispose();
+
+    if (!registeredHooks.isEmpty() && !p.finished)
     {
       for (HookMethod m: registeredHooks)
         p.unregisterMethod(m.name(), this);
+      registeredHooks.clear();
     }
   }
 
+
+  protected void onDispose() { }
 
   public void pre() { }
 
