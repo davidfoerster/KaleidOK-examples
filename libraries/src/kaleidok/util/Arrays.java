@@ -9,6 +9,12 @@ public final class Arrays
   private Arrays() { }
 
 
+  @SuppressWarnings("unused")
+  public static final Object[] EMPTY_OBJECTS = {};
+
+  public static final Class<?>[] EMPTY_CLASSES = {};
+
+
   public static int[] shuffle( int[] ar, Random rnd )
   {
     ar = ar.clone();
