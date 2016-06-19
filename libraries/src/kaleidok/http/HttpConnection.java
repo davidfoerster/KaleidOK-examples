@@ -72,12 +72,13 @@ public class HttpConnection
     }
   }
 
-  protected static HttpConnection openURL( URL url, Class<? extends HttpConnection> clazz )
+
+  protected static <T extends HttpConnection>
+  T openURL( URL url, Class<T> clazz )
     throws IOException, ReflectiveOperationException
   {
     checkHttpProtocol(url);
-    Constructor<? extends HttpConnection> ctor =
-      clazz.getConstructor(constructorArgumentTypes);
+    Constructor<T> ctor = clazz.getConstructor(constructorArgumentTypes);
     return ctor.newInstance(url.openConnection());
   }
 

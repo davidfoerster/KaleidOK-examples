@@ -24,10 +24,12 @@ public class JsonHttpConnection extends HttpConnection
     setDoInput(true);
   }
 
+
+  @SuppressWarnings("MethodOverridesStaticMethodOfSuperclass")
   public static JsonHttpConnection openURL( URL url ) throws IOException
   {
     try {
-      return (JsonHttpConnection) openURL(url, JsonHttpConnection.class);
+      return openURL(url, JsonHttpConnection.class);
     } catch (ReflectiveOperationException e) {
       throw new Error(e);
     }
