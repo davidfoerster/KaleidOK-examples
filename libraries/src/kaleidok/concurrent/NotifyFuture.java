@@ -45,15 +45,12 @@ public abstract class NotifyFuture<V> implements Future<V>
       final long endTime = now + timeout;
 
       synchronized (this) {
-        if (!isDone()) {
-          now = System.nanoTime();
-          do {
-            wait(Math.max(NANOSECONDS.toMillis(endTime - now), 1));
-          } while (!isDone() && (now = System.nanoTime()) < endTime);
-          if (now >= endTime)
-            throw new TimeoutException();
-        }
+        //noinspection CallToNativeMethodWhileLocked
+        while (!isDone() && (now = System.nanoTime()) < endTime)
+          NANOSECONDS.timedWait(this, endTime - now);
       }
+      if (now >= endTime)
+        throw new TimeoutException();
     }
   }
 }
