@@ -73,16 +73,17 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
       throw new NullPointerException("entry");
 
     DiskLruCache.Editor editor = diskCache.edit(toInternalKey(key));
-    if (editor == null) {
-      //throw new HttpCacheUpdateException("Entry is being edited already");
-      return;
-    }
-
-    try {
-      serialize(key, entry, editor.newOutputStream(0));
-      editor.commit();
-    } finally {
-      editor.abortUnlessCommitted();
+    if (editor != null)
+    {
+      try
+      {
+        serialize(key, entry, editor.newOutputStream(0));
+        editor.commit();
+      }
+      finally
+      {
+        editor.abortUnlessCommitted();
+      }
     }
   }
 
