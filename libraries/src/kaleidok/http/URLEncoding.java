@@ -182,8 +182,8 @@ public final class URLEncoding
         s.position(currentRunOffset);
 
         boolean isEndOfInput = s.limit() == s.capacity();
-        CoderResult cr = CoderResult.OVERFLOW;
-        while (cr.isOverflow())
+        CoderResult cr;
+        do
         {
           cr = enc.encode(s, bytes, isEndOfInput);
           if (isEndOfInput && cr.isUnderflow())
@@ -208,6 +208,7 @@ public final class URLEncoding
           bytes.limit(bytes.capacity());
           bytes.rewind();
         }
+        while (cr.isOverflow());
 
         assert !s.hasRemaining();
         s.limit(s.capacity());
