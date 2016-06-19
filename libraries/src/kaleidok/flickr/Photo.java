@@ -18,7 +18,7 @@ public abstract class Photo implements Serializable
 
   public Photo( CharSequence url )
   {
-    fromUrl(url);
+    parseUrl(url);
   }
 
 
@@ -27,17 +27,17 @@ public abstract class Photo implements Serializable
     "(?<server>\\d+)/(?<photoId>\\d+)_(?<secret>\\p{XDigit}+)" +
     "(?:_\\p{Alpha})?\\.(?<ext>jpg|png|gif)$");
 
-  public boolean fromUrl( CharSequence url )
+  public void parseUrl( CharSequence url )
   {
     Matcher m = URL_PATTERN.matcher(url);
-    if (m.matches()) {
-      farm = m.group("farm");
-      server = m.group("server");
-      id = m.group("photoId");
-      secret = m.group("secret");
-      extension = m.group("ext");
-    }
-    return m.matches();
+    if (!m.matches())
+      throw new IllegalArgumentException(url.toString());
+
+    farm = m.group("farm");
+    server = m.group("server");
+    id = m.group("photoId");
+    secret = m.group("secret");
+    extension = m.group("ext");
   }
 
 
