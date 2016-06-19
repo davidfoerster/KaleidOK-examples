@@ -48,29 +48,17 @@ public class MimeTypeMap extends HashMap<String, Float>
     super(initialCapacity);
   }
 
-  /**
-   * Constructs a new MIME type set.
-   *
-   * @param allowAll  If {@code true}, adds the wildcard MIME type with the
-   *   default weight.
-   */
-  public MimeTypeMap( boolean allowAll ) {
-    if (allowAll)
-      put(WILDCARD, null);
-  }
 
   /**
-   * Constructs a new MIME type with one entry.
+   * Add the wildcard MIME entry to this map.
    *
-   * @param mime  A MIME type string
-   * @param q  A rating for the MIME type
-   * @param allowAll  Whether to add the wildcard entry
-   * @see #MimeTypeMap(boolean)
+   * @return see {@link #put(String, Float)}
    */
-  public MimeTypeMap( String mime, Float q, boolean allowAll ) {
-    this(allowAll);
-    put(mime, q);
+  public Float allowAll()
+  {
+    return put(WILDCARD, null);
   }
+
 
   /**
    * Adds or replaces a MIME type with a given preference rating to this set.
