@@ -76,17 +76,18 @@ public abstract class MockRequestHandlerBase implements HttpHandler
       "Expected " + APPLICATION_FORM_URLENCODED.getMimeType() + " data";
     String sContentLength = headers.getFirst(CONTENT_LENGTH);
     String sFormData;
-    if (sContentLength != null) {
+    if (sContentLength != null)
+    {
       final byte[] buf = new byte[Integer.parseInt(sContentLength)];
-      long count = 0;
+      int count;
       try (InputStream bodyStream = t.getRequestBody()) {
-        int rv;
-        while (count < buf.length && (rv = bodyStream.read(buf, (int) count, buf.length)) >= 0)
-          count += rv;
+        count = IOUtils.read(bodyStream, buf);
       }
       assert count == buf.length : "Content length mismatch";
       sFormData = new String(buf, contentType.getCharset());
-    } else {
+    }
+    else
+    {
       try (InputStream bodyStream = t.getRequestBody()) {
         sFormData = IOUtils.toString(bodyStream, contentType.getCharset());
       }
@@ -95,11 +96,22 @@ public abstract class MockRequestHandlerBase implements HttpHandler
   }
 
 
+  @SuppressWarnings("ThrowCaughtLocally")
   protected static boolean isEmpty( HttpExchange exchange ) throws IOException
   {
-    String contentLength = exchange.getRequestHeaders().getFirst(CONTENT_LENGTH);
-    if (contentLength != null && Long.parseLong(contentLength) != 0)
-      return false;
+    String sContentLength = exchange.getRequestHeaders().getFirst(CONTENT_LENGTH);
+    if (sContentLength != null) try
+    {
+      long iContentLength = Long.parseLong(sContentLength);
+      if (iContentLength < 0)
+        throw new NumberFormatException("Negative value: " + iContentLength);
+      return iContentLength == 0;
+    }
+    catch (NumberFormatException ex)
+    {
+      throw new IOException("Invalid " + CONTENT_LENGTH + " field value", ex);
+    }
+
     try (InputStream in = exchange.getRequestBody()) {
       return in.read() == -1;
     }
