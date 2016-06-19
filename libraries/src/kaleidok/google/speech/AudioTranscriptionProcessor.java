@@ -6,10 +6,12 @@ import javaFlacEncoder.FLACEncoder;
 import javaFlacEncoder.FLACOutputStream;
 import javaFlacEncoder.FLACStreamOutputStream;
 import javaFlacEncoder.StreamConfiguration;
+import kaleidok.util.Arrays;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.stream.DoubleStream;
 
 import static kaleidok.google.speech.STT.logger;
 
@@ -212,9 +214,6 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
   private static final float maxSample = 2;
 
-  /*
-   * TODO: Use AudioEvent#getByteBuffer()
-   */
   private static int[] convertTo16Bit( AudioEvent ev, int[] conversionBuffer )
   {
     final float[] audioFloat = ev.getFloatBuffer();
@@ -234,21 +233,15 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   }
 
 
-  private static String getSampleValueErrorMessage( float[] samples, int idx )
+  @SuppressWarnings("OptionalGetWithoutIsPresent")
+  private static String getSampleValueErrorMessage( final float[] aSamples,
+    int idx )
   {
-    float outOfRangeSample = samples[idx],
-      min = samples[0], max = samples[0];
-    for (int i = 1; i < samples.length; i++) {
-      final float sample = samples[i];
-      if (min > sample) {
-        min = sample;
-      } else if (max < sample) {
-        max = sample;
-      }
-    }
-
+    assert aSamples.length != 0;
+    DoubleStream sSamples = Arrays.stream(aSamples);
     return String.format(
       "Encountered sample value %g at index %d; min=%g, max=%g",
-      outOfRangeSample, idx, min, max);
+      aSamples[idx], idx,
+      sSamples.min().getAsDouble(), sSamples.max().getAsDouble());
   }
 }

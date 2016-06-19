@@ -2,6 +2,8 @@ package kaleidok.util;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 
 public final class Arrays
@@ -31,6 +33,17 @@ public final class Arrays
     int e = ar[j];
     ar[j] = ar[i];
     ar[i] = e;
+  }
+
+
+  public static DoubleStream stream( final float[] a, int offset, int end )
+  {
+    return IntStream.range(offset, end).mapToDouble((i) -> a[i]);
+  }
+
+  public static DoubleStream stream( final float[] a )
+  {
+    return stream(a, 0, a.length);
   }
 
 
