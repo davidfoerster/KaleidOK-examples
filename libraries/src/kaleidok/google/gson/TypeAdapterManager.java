@@ -24,9 +24,11 @@ public final class TypeAdapterManager
   }
 
 
-  public static class TypeAdapterMap extends HashMap<Type, Object>
+  public static class TypeAdapterMap
   {
-    private Gson gson = null;
+    private final Map<Type, Object> map = new HashMap<>();
+
+    private volatile Gson gson = null;
 
 
     protected TypeAdapterMap() { }
@@ -40,7 +42,7 @@ public final class TypeAdapterManager
         synchronized (this) {
           if (gson == null) {
             final GsonBuilder gsonBuilder = new GsonBuilder();
-            for (Map.Entry<Type, Object> e: entrySet())
+            for (Map.Entry<Type, Object> e: map.entrySet())
               gsonBuilder.registerTypeAdapter(e.getKey(), e.getValue());
             gson = gsonBuilder.create();
           }
@@ -50,7 +52,6 @@ public final class TypeAdapterManager
     }
 
 
-    @Override
     public Object put( Type key, Object value )
     {
       if (key == null)
@@ -61,7 +62,7 @@ public final class TypeAdapterManager
       }
       Object prev;
       synchronized (this) {
-        prev = super.put(key, value);
+        prev = map.put(key, value);
         if (prev != value)
           gson = null;
       }
