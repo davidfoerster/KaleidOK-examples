@@ -35,7 +35,7 @@ public class Async extends AsyncBase
   public Future<Content> execute( Request request,
     FutureCallback<Content> callback )
   {
-    return execute(request, new ContentResponseHandler(), callback);
+    return execute(request, getContentResponseHandler(), callback);
   }
 
 
@@ -51,5 +51,15 @@ public class Async extends AsyncBase
     FutureCallback<T> callback )
   {
     return super.execute(request, handler, callback);
+  }
+
+
+  private static ContentResponseHandler contentResponseHandler = null;
+
+  public static ContentResponseHandler getContentResponseHandler()
+  {
+    if (contentResponseHandler == null)
+      contentResponseHandler = new ContentResponseHandler();
+    return contentResponseHandler;
   }
 }
