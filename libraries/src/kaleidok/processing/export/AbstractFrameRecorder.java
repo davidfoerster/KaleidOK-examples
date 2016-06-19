@@ -12,13 +12,13 @@ public abstract class AbstractFrameRecorder extends Plugin<PApplet>
   private AtomicReference<State> state = new AtomicReference<>(State.OFF);
 
 
-  public AbstractFrameRecorder( PApplet sketch )
+  protected AbstractFrameRecorder( PApplet sketch )
   {
     super(sketch);
   }
 
 
-  abstract public boolean isReady();
+  public abstract boolean isReady();
 
 
   public void schedule()

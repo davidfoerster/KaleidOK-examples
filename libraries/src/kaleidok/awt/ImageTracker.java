@@ -55,6 +55,7 @@ public class ImageTracker implements ImageObserver
   }
 
 
+  @SuppressWarnings("NakedNotify")
   @Override
   public boolean imageUpdate( Image image, int infoFlags, int x, int y,
     int width, int height )

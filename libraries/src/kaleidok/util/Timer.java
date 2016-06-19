@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Timer
 {
-  private long savedTime, totalTime;
+  private long savedTime = -1, totalTime;
 
 
   public Timer()
@@ -16,7 +16,7 @@ public class Timer
 
   public Timer( long totalTime, TimeUnit unit )
   {
-    reset(totalTime, unit);
+    this.totalTime = unit.toNanos(totalTime);
   }
 
 

@@ -49,7 +49,7 @@ public abstract class ReadyImageFuture extends NotifyFuture<Image>
   }
 
 
-  public ReadyImageFuture( Image image )
+  protected ReadyImageFuture( Image image )
   {
     this.image = image;
   }

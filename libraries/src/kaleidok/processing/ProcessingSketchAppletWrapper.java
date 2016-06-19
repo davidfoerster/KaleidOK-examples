@@ -1,9 +1,10 @@
 package kaleidok.processing;
 
-import kaleidok.swing.FullscreenAction;
+import kaleidok.swing.FullscreenAction.Mode;
 import kaleidok.swing.FullscreenRootPane;
 import kaleidok.util.DefaultValueParser;
 import processing.core.PApplet;
+import processing.core.PConstants;
 
 import javax.swing.JApplet;
 import javax.swing.JRootPane;
@@ -13,6 +14,7 @@ import java.awt.Container;
 import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
 
@@ -27,8 +29,8 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
 
 
   private static final KeyStroke fullscreenKeystroke =
-    (PApplet.platform == PApplet.MACOSX) ?
-      getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK) :
+    (PApplet.platform == PConstants.MACOSX) ?
+      getKeyStroke(KeyEvent.VK_F, InputEvent.META_DOWN_MASK) :
       getKeyStroke(KeyEvent.VK_F11, 0);
 
 
@@ -76,7 +78,7 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
   protected JRootPane createRootPane()
   {
     FullscreenRootPane rootPane = new FullscreenRootPane();
-    rootPane.registerKeyAction(FullscreenAction.Mode.TOGGLE, fullscreenKeystroke);
+    rootPane.registerKeyAction(Mode.TOGGLE, fullscreenKeystroke);
     return rootPane;
   }
 
@@ -118,7 +120,7 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
       sketch = sketchFactory.createInstance(this);
       sketch.init();
       sketch.addKeyListener(getRootPane().createKeyListener(
-        FullscreenAction.Mode.TOGGLE, fullscreenKeystroke));
+        Mode.TOGGLE, fullscreenKeystroke));
       sketchFactory = null;
     }
     return sketch;

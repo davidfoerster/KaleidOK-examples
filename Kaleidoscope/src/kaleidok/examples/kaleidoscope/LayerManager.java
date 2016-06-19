@@ -2,6 +2,7 @@ package kaleidok.examples.kaleidoscope;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.examples.kaleidoscope.layer.*;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.BeanUtils;
@@ -18,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
@@ -27,6 +29,8 @@ import static kaleidok.util.LoggingUtils.logThrown;
 public class LayerManager implements List<ImageLayer>, Runnable
 {
   private static final int MIN_IMAGES = 5;
+
+  private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
   private final Kaleidoscope parent;
 
@@ -106,7 +110,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
       AudioProcessingManager apm = parent.getAudioProcessingManager();
       AudioDispatcher audioDispatcher = apm.getAudioDispatcher();
       audioDispatcher.addAudioProcessor(new PitchProcessor(
-        PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
+        PitchEstimationAlgorithm.FFT_YIN,
         audioDispatcher.getFormat().getSampleRate(),
         apm.getAudioBufferSize(),
         outerMovingShape.getPitchDetectionHandler()));
@@ -158,7 +162,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
       if (imagesParam == null) {
         this.images = new ArrayList<>(MIN_IMAGES);
       } else {
-        String[] images = imagesParam.split("\\s+");
+        String[] images = WHITESPACE_PATTERN.split(imagesParam);
         this.images = new ArrayList<>(Math.max(images.length, MIN_IMAGES));
         for (String strImage : images) {
           if (!strImage.isEmpty()) {
@@ -166,6 +170,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
             if (c != '/' && c != File.separatorChar &&
               strImage.indexOf(':') < 0)
             {
+              //noinspection StringConcatenationInLoop
               strImage = "/images/" + strImage;
             }
             PImageFuture image = parent.getImageFuture(strImage);
@@ -174,11 +179,9 @@ public class LayerManager implements List<ImageLayer>, Runnable
             } else {
               String msg = "Couldn't load image";
               Throwable ex = new FileNotFoundException(strImage);
-              if (LayerManager.class.desiredAssertionStatus()) {
+              if (LayerManager.class.desiredAssertionStatus())
                 throw new AssertionError(msg, ex);
-              } else {
-                logger.log(Level.WARNING, msg, ex);
-              }
+              logger.log(Level.WARNING, msg, ex);
             }
           }
         }
@@ -208,7 +211,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
           }
         }
         assert img != null && img.width > 0 && img.height > 0 :
-          String.valueOf(img) + " has width or height ≤0";
+          img + " has width or height ≤0";
       } catch (ExecutionException ex) {
         throw new RuntimeException(ex.getCause());
       }

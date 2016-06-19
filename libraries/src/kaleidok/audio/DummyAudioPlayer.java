@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class DummyAudioPlayer implements AudioProcessor
 {
-  private static Logger logger =
+  private static final Logger logger =
     Logger.getLogger(DummyAudioPlayer.class.getCanonicalName());
 
   private long startTime = -1, startSample = -1;
@@ -84,14 +84,10 @@ public class DummyAudioPlayer implements AudioProcessor
     Runnable chained )
   {
     final Runnable _chained = (chained != null) ? chained : audioDispatcher;
-    return new Runnable() {
-      @Override
-      public void run()
-      {
+    return () -> {
         audioDispatcher.addAudioProcessor(DummyAudioPlayer.this);
         startTime = System.nanoTime();
         _chained.run();
-      }
-    };
+      };
   }
 }

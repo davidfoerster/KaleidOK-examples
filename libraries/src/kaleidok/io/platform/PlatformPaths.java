@@ -1,12 +1,11 @@
 package kaleidok.io.platform;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 
 
+@SuppressWarnings("unused")
 public final class PlatformPaths
 {
   private PlatformPaths() { }
@@ -16,6 +15,7 @@ public final class PlatformPaths
 
   static final PlatformPathsBase platform;
   static {
+    @SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")
     String os = System.getProperty("os.name").replace(" ", "");
     platform =
       os.startsWith("Windows") ? new WindowsPaths() :
@@ -40,7 +40,8 @@ public final class PlatformPaths
 
   public static Path createTempDirectory( String prefix ) throws IOException
   {
-    return createTempDirectory( prefix, (FileAttribute[]) null );
+    //noinspection ConfusingArgumentToVarargsMethod
+    return createTempDirectory( prefix, (FileAttribute<?>[]) null);
   }
 
   public static Path createTempDirectory( String prefix,
@@ -53,7 +54,8 @@ public final class PlatformPaths
 
   public static Path createTempFile( String prefix, String suffix ) throws IOException
   {
-    return createTempFile(prefix, suffix, (FileAttribute[]) null);
+    //noinspection ConfusingArgumentToVarargsMethod
+    return createTempFile(prefix, suffix, (FileAttribute<?>[]) null);
   }
 
   public static Path createTempFile( String prefix, String suffix,
@@ -71,7 +73,8 @@ public final class PlatformPaths
 
   public static Path getCacheDir( String name ) throws IOException
   {
-    return getCacheDir(name, (FileAttribute[]) null);
+    //noinspection ConfusingArgumentToVarargsMethod
+    return getCacheDir(name, (FileAttribute<?>[]) null);
   }
 
   public static Path getCacheDir( String name, FileAttribute<?>... attrs )
@@ -88,7 +91,8 @@ public final class PlatformPaths
 
   public static Path getDataDir( String name ) throws IOException
   {
-    return getDataDir(name, (FileAttribute[]) null);
+    //noinspection ConfusingArgumentToVarargsMethod
+    return getDataDir(name, (FileAttribute<?>[]) null);
   }
 
   public static Path getDataDir( String name, FileAttribute<?>... attrs )

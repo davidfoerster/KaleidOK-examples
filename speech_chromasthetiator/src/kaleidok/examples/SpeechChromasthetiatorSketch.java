@@ -31,6 +31,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
 
   public int maxKeywords = 1;
 
+  @SuppressWarnings("FieldMayBeStatic")
   public final boolean autoRecord = true;
 
   // other instance attributes:
@@ -51,6 +52,8 @@ public class SpeechChromasthetiatorSketch extends PApplet
 
   private final Random rnd = new Random();
 
+
+  @SuppressWarnings("OverlyBroadCatchBlock")
   @Override
   public void setup()
   {
@@ -70,9 +73,9 @@ public class SpeechChromasthetiatorSketch extends PApplet
     stt.setLanguage("en");
 
     chromatikQuery = new ChromatikQuery();
-    chromatikQuery.nhits = 10;
+    chromatikQuery.nHits = 10;
 
-    resultSet = new ArrayList<PImage>(chromatikQuery.nhits);
+    resultSet = new ArrayList<>(chromatikQuery.nHits);
 
     size(800, 200);
 
@@ -83,6 +86,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
     }
   }
 
+
   @Override
   public void draw()
   {
@@ -90,6 +94,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
     drawQuery();
     drawResultSet();
   }
+
 
   private void drawQuery()
   {
@@ -112,7 +117,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
     noStroke();
 
     y += 1;
-    for (Map.Entry<Object, Object> o: chromatikQuery.opts.entrySet()) {
+    for (Map.Entry<?, ?> o: chromatikQuery.opts.entrySet()) {
       if (o.getKey() instanceof ChromatikColor) {
         ChromatikColor c = (ChromatikColor) o.getKey();
 
@@ -133,6 +138,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
     }
   }
 
+
   private void drawResultSet()
   {
     int imgXpos = 5;
@@ -141,6 +147,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
       imgXpos += 75 + 5;
     }
   }
+
 
   @Override
   public void keyPressed ()
@@ -151,6 +158,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
     }
   }
 
+
   @Override
   public void keyReleased ()
   {
@@ -158,6 +166,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
       stt.end();
     }
   }
+
 
   /**
    * Callback method for {@link #stt}
@@ -181,6 +190,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
       ex.printStackTrace();
     }
   }
+
 
   /**
    * Callback method for {@link #synesthetiator}
@@ -207,6 +217,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
     //redraw();
     draw();
   }
+
 
   private void updateQuery()
   {
@@ -241,6 +252,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
     }
   }
 
+
   private void updateResultSet( ChromatikResponse response )
   {
     resultSet.clear();
@@ -265,6 +277,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
     }
   }
 
+
   private int[] shuffleArray(int[] ar)
   {
     ar = ar.clone();
@@ -282,9 +295,10 @@ public class SpeechChromasthetiatorSketch extends PApplet
     return ar;
   }
 
+
   static String[] findStrongestAffectWords(List<AffectWord> affectWords, int maxCount)
   {
-    affectWords = new ArrayList<AffectWord>(affectWords);
+    affectWords = new ArrayList<>(affectWords);
     Collections.sort(affectWords, AffectWord.WeightSumComparator.getInstance());
 
     if (maxCount < 0 || maxCount > affectWords.size())
@@ -295,6 +309,7 @@ public class SpeechChromasthetiatorSketch extends PApplet
 
     return resultWords;
   }
+
 
   static String joinStrings(String[] ar, char separator)
   {
@@ -315,6 +330,8 @@ public class SpeechChromasthetiatorSketch extends PApplet
     return sb.toString();
   }
 
+
+  @SuppressWarnings("MethodOverridesStaticMethodOfSuperclass")
   public static void main( String... args )
   {
     new SpeechChromasthetiatorSketch().runSketch(args);

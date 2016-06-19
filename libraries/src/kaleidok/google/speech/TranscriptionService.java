@@ -27,9 +27,9 @@ public class TranscriptionService
 
   protected final ExecutorService executor =
     new ThreadPoolExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
-      new ArrayBlockingQueue<Runnable>(3), executorThreadFactory);
+      new ArrayBlockingQueue<>(3), executorThreadFactory);
 
-  protected final static ThreadFactory executorThreadFactory =
+  protected static final ThreadFactory executorThreadFactory =
     new DaemonThreadFactory("Speech transcription", true);
 
 

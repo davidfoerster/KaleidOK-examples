@@ -39,17 +39,18 @@ public class Size
       int p, offset = 0;
       while ((p = s.indexOf(' ', offset)) >= 0)
       {
-        if (transformed == null)
-          transformed = new StringBuilder(s.length() - 1);
-
         if (p + 1 >= s.length())
           throw new IllegalArgumentException(s);
+
+        if (transformed == null)
+          transformed = new StringBuilder(s.length() - 1);
 
         char c = s.charAt(p + 1);
         switch (Character.getType(c))
         {
         case Character.LOWERCASE_LETTER:
           c = toUpperCase(c);
+          // fall through
 
         case Character.UPPERCASE_LETTER:
         case Character.DECIMAL_DIGIT_NUMBER:

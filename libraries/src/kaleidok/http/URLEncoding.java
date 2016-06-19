@@ -24,8 +24,7 @@ public final class URLEncoding
     ESCAPE_PREFIX = '%',
     SPACE_ESCAPER = '+';
 
-  private static final BitSet dontNeedEncoding = new BitSet(128);
-  static {
+  private static final BitSet dontNeedEncoding = new BitSet(128) {{
     /* The list of characters that are not encoded has been determined as
      * follows:
      *
@@ -59,18 +58,18 @@ public final class URLEncoding
      */
 
     for (int i = 'A'; i <= 'Z'; i++) {
-      dontNeedEncoding.set(i);
-      dontNeedEncoding.set(i | LOWERCASE_BIT);
+      set(i);
+      set(i | LOWERCASE_BIT);
     }
     for (int i = '0'; i <= '9'; i++) {
-      dontNeedEncoding.set(i);
+      set(i);
     }
-    dontNeedEncoding.set(' '); // Encoding a space to a "+" is done in the encode() method.
-    dontNeedEncoding.set('-');
-    dontNeedEncoding.set('_');
-    dontNeedEncoding.set('.');
-    dontNeedEncoding.set('*');
-  }
+    set(' '); // Encoding a space to a "+" is done in the encode() method.
+    set('-');
+    set('_');
+    set('.');
+    set('*');
+  }};
 
 
   public static String encode( String s )
@@ -95,18 +94,18 @@ public final class URLEncoding
   }
 
   /**
-   * Translates a string into <code>application/x-www-form-urlencoded</code>
-   * format using a specific encoding scheme. This method uses the supplied
-   * encoding scheme to obtain the bytes for unsafe characters.
+   * Translates a string into {@code application/x-www-form-urlencoded} format
+   * using a specific encoding scheme. This method uses the supplied encoding
+   * scheme to obtain the bytes for unsafe characters.
    * <p>
    * <em><strong>Note:</strong> The <a href=
    * "http://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars">
    * World Wide Web Consortium Recommendation</a> states that UTF-8 should be
    * used. Not doing so may introduce incompatibilities.</em>
    *
-   * @param   s   <code>String</code> to be translated.
+   * @param   s   {@code String} to be translated.
    * @param   charset   The name of a supported character encoding.
-   * @return  the translated <code>CharSequence</code>.
+   * @return  the translated {@code CharSequence}.
    * @see #decode(CharSequence, Charset)
    */
   public static CharSequence encode( CharSequence s, Charset charset )
@@ -268,7 +267,7 @@ public final class URLEncoding
   }
 
   /**
-   * Decodes a <code>application/x-www-form-urlencoded</code> string using a
+   * Decodes a {@code application/x-www-form-urlencoded} string using a
    * specific encoding scheme. The supplied encoding is used to determine what
    * characters are represented by any consecutive sequences of the form
    * "<code>%<i>xy</i></code>".
@@ -278,9 +277,9 @@ public final class URLEncoding
    * World Wide Web Consortium Recommendation</a> states that UTF-8 should be
    * used. Not doing so may introduce incompatibilities.</em>
    *
-   * @param s the <code>CharSequence</code> to decode
+   * @param s the {@code CharSequence} to decode
    * @param charset   A supported character encoding.
-   * @return the newly decoded <code>CharSequence</code>
+   * @return the newly decoded {@code CharSequence}
    * @see #encode(CharSequence, Charset)
    */
   public static CharSequence decode( CharSequence s, Charset charset )
@@ -331,12 +330,12 @@ public final class URLEncoding
           dec.reset();
         }
 
-      /*
-       * Starting with this instance of %, process all consecutive substrings
-       * of the form %xy. Each substring %xy will yield a byte. Convert all
-       * consecutive  bytes obtained this way to whatever character(s) they
-       * represent in the provided encoding.
-       */
+        /*
+         * Starting with this instance of %, process all consecutive substrings
+         * of the form %xy. Each substring %xy will yield a byte. Convert all
+         * consecutive bytes obtained this way to whatever character(s) they
+         * represent in the provided encoding.
+         */
         boolean reachedEndOfSequence = false;
         do
         {
@@ -372,17 +371,19 @@ public final class URLEncoding
           {
             if (cr.isOverflow()) {
               throw new AssertionError(new BufferOverflowException());
-            } else if (cr.isMalformed()) {
-              throw new IllegalArgumentException(new MalformedInputException(cr.length()));
-            } else {
-              assert cr.isUnmappable() :
-                cr + " is expected to have an \"unmappable\" condition";
-              byte[] unmappable = new byte[cr.length()];
-              bytes.get(unmappable);
-              throw new IllegalArgumentException(
-                Arrays.toString(unmappable) + " are unmappable from " + charset.name(),
-                new UnmappableCharacterException(cr.length()));
             }
+            if (cr.isMalformed()) {
+              throw new IllegalArgumentException(
+                new MalformedInputException(cr.length()));
+            }
+            assert cr.isUnmappable() :
+              cr + " is expected to have an \"unmappable\" condition";
+            byte[] unmappable = new byte[cr.length()];
+            bytes.get(unmappable);
+            throw new IllegalArgumentException(
+              Arrays.toString(unmappable) + " are unmappable from " +
+                charset.name(),
+              new UnmappableCharacterException(cr.length()));
           }
 
           assert chars.arrayOffset() == 0;
@@ -425,7 +426,7 @@ public final class URLEncoding
 
   private static int countEscapeSequences( CharSequence s, int begin, final int end )
   {
-    assert begin >= 0 && end <= s.length() :
+    assert 0 <= begin && begin <= end && end <= s.length() :
       String.format("0 ≤ %d ≤ %d ≤ %d doesn't hold", begin, end, s.length());
     int escapedCount = 0;
     while (begin < end) {

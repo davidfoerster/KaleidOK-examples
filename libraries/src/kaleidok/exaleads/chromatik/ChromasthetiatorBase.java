@@ -2,6 +2,7 @@ package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
+import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.flickr.SizeMap;
@@ -21,7 +22,7 @@ import static kaleidok.util.Arrays.shuffle;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 
-public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr>
+public abstract class ChromasthetiatorBase<F extends Flickr>
 {
   static final Logger logger =
     Logger.getLogger(ChromasthetiationService.class.getPackage().getName());
@@ -50,10 +51,10 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
 
   protected SynesketchPalette palettes;
 
-  protected Flickr flickr;
+  protected F flickr;
 
 
-  public ChromasthetiatorBase( Applet parent )
+  protected ChromasthetiatorBase( Applet parent )
   {
     this.parent = parent;
 
@@ -65,11 +66,18 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
     palettes = new SynesketchPalette("standard");
 
     chromatikQuery = new ChromatikQuery();
-    chromatikQuery.nhits = 10;
+    chromatikQuery.nHits = 10;
   }
 
 
-  protected ChromasthetiatorBase( ChromasthetiatorBase<?> other )
+  /**
+   * Construct a new chromasthetiator with the same parent applet and
+   * parameters as the original, but don't copy the reference to
+   * {@link #flickr} (as it may have an incompatible type).
+   *
+   * @param other  The original chromasthetiator
+   */
+  protected ChromasthetiatorBase( ChromasthetiatorBase<? extends Flickr> other )
   {
     parent = other.parent;
     maxColors = other.maxColors;
@@ -77,11 +85,10 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
     chromatikQuery = new ChromatikQuery(other.chromatikQuery);
     synesthetiator = other.synesthetiator;
     palettes = other.palettes;
-    flickr = (Flickr) other.flickr;
   }
 
 
-  public void setFlickrApi( Flickr flickr )
+  public void setFlickrApi( F flickr )
   {
     this.flickr = flickr;
   }
@@ -146,6 +153,7 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
       opts = new HashMap<>();
 
     // Use (up to) maxColors random colors from palette for search query
+    @SuppressWarnings({ "resource", "IOResourceOpenedButNotSafelyClosed" })
     final Formatter fmt =
       logger.isLoggable(Level.FINE) ?
         new Formatter(new StringBuilder("Colors:")) :
@@ -160,8 +168,10 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
         break;
       ChromatikColor cc = new ChromatikColor(c);
       if (opts.put(cc, weight) == null && fmt != null)
+      {
         fmt.format(" #%06x (%s) at %.0f%%,",
           cc.value, cc.groupName, weight * 100);
+      }
     }
 
     if (fmt != null) {
@@ -178,6 +188,7 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
   {
     logger.log(Level.FINE, "Found {0} search results", response.hits);
 
+    Flickr flickr = this.flickr;
     for (ChromatikResponse.Result imgInfo: response.results)
       imgInfo.flickrPhoto = new FlickrPhoto(imgInfo);
   }
@@ -249,10 +260,8 @@ public abstract class ChromasthetiatorBase<Flickr extends kaleidok.flickr.Flickr
   {
     if (maxCount < 0 || maxCount > affectWords.size())
       maxCount = affectWords.size();
-    if (maxCount == 0) {
-      //noinspection unchecked
-      return Collections.EMPTY_LIST;
-    }
+    if (maxCount == 0)
+      return Collections.emptyList();
 
     ArrayList<String> resultWords = new ArrayList<>(maxCount);
     Comparator<AffectWord> comp = AffectWord.SquareWeightSumComparator.INSTANCE;

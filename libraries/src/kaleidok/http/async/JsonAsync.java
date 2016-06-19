@@ -75,6 +75,8 @@ public class JsonAsync extends AsyncBase
       lrh = new JsonResponseHandler<>(clazz, gson);
       lastResponseHandler = lrh;
     }
+
+    //noinspection unchecked
     return (JsonResponseHandler<T>) lrh;
   }
 

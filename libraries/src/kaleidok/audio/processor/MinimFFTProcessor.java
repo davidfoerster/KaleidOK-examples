@@ -122,24 +122,28 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
   }
 
 
+  @Override
   public float getSampleRate()
   {
     return sampleRate;
   }
 
 
+  @Override
   public float getBin( float freq )
   {
     return fft.freqToIndex(freq);
   }
 
 
+  @Override
   public float getFreq( float bin )
   {
     return getFreq((int) bin);
   }
 
 
+  @Override
   public float getFreq( int bin )
   {
     return fft.getAverageCenterFrequency(bin);

@@ -78,7 +78,7 @@ public final class Parsers
    * @return A content type object holding the MIME type and the charset
    *    specified in the HTTP response
    *
-   * @throws org.apache.http.ParseException see {@link ContentType#parse(String)}
+   * @throws ParseException see {@link ContentType#parse(String)}
    * @throws UnsupportedCharsetException see {@link Charset#forName(String)}
    */
   public static ContentType getContentType( HttpURLConnection con )
@@ -90,7 +90,6 @@ public final class Parsers
 
 
   public static ContentType getContentType( HttpResponse response )
-    throws ClientProtocolException
   {
     return ContentType.get(response.getEntity());
   }

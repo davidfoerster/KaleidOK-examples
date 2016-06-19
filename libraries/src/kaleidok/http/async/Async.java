@@ -25,10 +25,12 @@ public class Async extends AsyncBase
   }
 
 
+  @Override
   public Future<Content> execute( Request request )
   {
     return execute(request, (FutureCallback<Content>) null);
   }
+
 
   public Future<Content> execute( Request request,
     FutureCallback<Content> callback )
@@ -36,11 +38,13 @@ public class Async extends AsyncBase
     return execute(request, new ContentResponseHandler(), callback);
   }
 
+
   @Override
   public <T> Future<T> execute( Request request, ResponseHandler<T> handler )
   {
     return super.execute(request, handler);
   }
+
 
   @Override
   public <T> Future<T> execute( Request request, ResponseHandler<T> handler,

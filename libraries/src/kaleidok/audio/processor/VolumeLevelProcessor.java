@@ -8,11 +8,14 @@ public class VolumeLevelProcessor implements AudioProcessor
 {
   private double level = Double.NaN;
 
+
   public double getLevel()
   {
     return level;
   }
 
+
+  @Override
   public boolean process( AudioEvent audioEvent )
   {
     float[] buf = audioEvent.getFloatBuffer();
@@ -23,6 +26,7 @@ public class VolumeLevelProcessor implements AudioProcessor
     level = Math.sqrt(kaleidok.util.Math.sumOfSquares(buf) / buf.length);
     return true;
   }
+
 
   @Override
   public void processingFinished()

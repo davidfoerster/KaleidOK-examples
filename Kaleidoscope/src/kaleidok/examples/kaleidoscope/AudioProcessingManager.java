@@ -53,6 +53,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
+  @Override
   public void dispose()
   {
     if (audioDispatcher != null)
@@ -87,7 +88,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       try {
         if (audioSource == null)
         {
-          String param =  paramBase + "samplerate";
+          String param = paramBase + "samplerate";
           int sampleRate = DefaultValueParser.parseInt(p,
             param, DEFAULT_AUDIO_SAMPLERATE);
           if (sampleRate <= 0)
@@ -103,14 +104,10 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
           if (audioSource.endsWith(".json")) {
             replayAction = new ReplayAction(p, audioSource);
             ais = replayAction.audioInputStream;
-            dispatcherRunnable = new Runnable()
+            dispatcherRunnable = () ->
             {
-              @Override
-              public void run()
-              {
-                replayAction.doReplayItem(0);
-                audioDispatcher.run();
-              }
+              replayAction.doReplayItem(0);
+              audioDispatcher.run();
             };
           } else {
             ais = new ContinuousAudioInputStream(audioSource);
@@ -150,14 +147,10 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   {
     if (audioDispatcherThread == null)
     {
-      audioDispatcherThread = new Thread(new Runnable()
+      audioDispatcherThread = new Thread(() ->
       {
-        @Override
-        public void run()
-        {
-          p.getLayers().waitForImages();
-          dispatcher.run();
-        }
+        p.getLayers().waitForImages();
+        dispatcher.run();
       },
         "Audio dispatching");
       audioDispatcherThread.setDaemon(true);
@@ -220,9 +213,10 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   private ReplayAction replayAction = null;
 
 
-  public static class ReplayAction extends Plugin<Kaleidoscope> implements ActionListener
+  public static final class ReplayAction extends Plugin<Kaleidoscope>
+    implements ActionListener
   {
-    public final ReplayList replayList;
+    private final ReplayList replayList;
 
     public final MultiAudioInputStream audioInputStream;
 
@@ -266,9 +260,9 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       MultiAudioInputStream audioInputStream = new MultiAudioInputStream(
         new ArrayList<>(items.length));
 
-      TarsosDSPAudioFormat format = null;
       try
       {
+        TarsosDSPAudioFormat format = null;
         for (ReplayList.Item item : items)
         {
           TarsosDSPAudioInputStream ais;
@@ -308,6 +302,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     }
 
 
+    @Override
     public void keyEvent( KeyEvent ev )
     {
       if (ev.getAction() == KeyEvent.TYPE) {

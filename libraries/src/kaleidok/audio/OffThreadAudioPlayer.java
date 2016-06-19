@@ -49,6 +49,7 @@ public class OffThreadAudioPlayer implements AudioProcessor
   public boolean process( AudioEvent audioEvent )
   {
     byte[] aBuf = audioEvent.getByteBuffer();
+    //noinspection ArrayEquality
     if (outBuf == null || outBuf.array() != aBuf) {
       outBuf = ByteBuffer.wrap(aBuf);
     }
@@ -66,6 +67,7 @@ public class OffThreadAudioPlayer implements AudioProcessor
   @Override
   public void processingFinished()
   {
+    outBuf = null;
     try {
       out.close();
     } catch (IOException ex) {
@@ -96,14 +98,14 @@ public class OffThreadAudioPlayer implements AudioProcessor
       final SourceDataLine line = this.line;
       final byte[] aBuf = new byte[line.getBufferSize()];
       final ByteBuffer bBuf = ByteBuffer.wrap(aBuf);
-      int n, read, written;
 
       line.start();
       try {
+        int read;
         while ((read = in.read(bBuf)) >= 0) {
-          written = 0;
+          int written = 0;
           while (written < read) {
-            n = line.write(aBuf, written, read);
+            int n = line.write(aBuf, written, read);
             assert n > 0;
             written += n;
           }

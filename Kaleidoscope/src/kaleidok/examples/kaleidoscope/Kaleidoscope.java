@@ -157,7 +157,7 @@ public class Kaleidoscope extends ExtPApplet
   /**
    * Tells, whether the size of this sketch changed since the last frame.
    *
-   * @return <code>true</code>, if changed; <code>false</code> otherwise
+   * @return {@code true}, if changed; {@code false} otherwise
    */
   public boolean wasResized()
   {
@@ -168,9 +168,9 @@ public class Kaleidoscope extends ExtPApplet
 
 
   /**
-   * If the supplied string <code>s</code> begins with <code>filePrefix</code>,
-   * its remainder is interpreted as a path to a file, whose content shall be
-   * returned. The special path <code>"-"</code> is interpreted as the standard
+   * If the supplied string {@code s} begins with {@code filePrefix}, its
+   * remainder is interpreted as a path to a file, whose content shall be
+   * returned. The special path {@code "-"} is interpreted as the standard
    * input stream of this process. The default encoding of this runtime
    * environment is used to decode the bytes of that stream into a string and
    * all terminating platform-specific line separators are removed from its
@@ -188,6 +188,7 @@ public class Kaleidoscope extends ExtPApplet
       s = new String((s.length() == 2 && s.charAt(1) == '-') ?
         loadBytes(System.in) : loadBytes(s.substring(1)));
       String ls = System.getProperty("line.separator");
+      assert !ls.isEmpty();
       int sLen = s.length(), lsLen = ls.length();
       while (sLen >= lsLen && s.startsWith(ls, sLen - lsLen))
         sLen -= lsLen;
@@ -203,7 +204,7 @@ public class Kaleidoscope extends ExtPApplet
     if (level > 0) {
       super.smooth(level);
     } else {
-      super.noSmooth();
+      noSmooth();
     }
   }
 }

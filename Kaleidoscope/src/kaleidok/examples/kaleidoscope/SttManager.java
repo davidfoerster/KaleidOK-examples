@@ -116,12 +116,16 @@ public class SttManager extends Plugin<Kaleidoscope>
     stt.shutdown();
   }
 
+
+  @Override
   public void dispose() { shutdown(); }
+
 
   public void begin( boolean doThrow )
   {
     stt.begin(doThrow);
   }
+
 
   public void end( boolean doThrow )
   {
@@ -129,6 +133,7 @@ public class SttManager extends Plugin<Kaleidoscope>
   }
 
 
+  @Override
   public void keyEvent( KeyEvent ev )
   {
     if (ev.getAction() == KeyEvent.TYPE) {

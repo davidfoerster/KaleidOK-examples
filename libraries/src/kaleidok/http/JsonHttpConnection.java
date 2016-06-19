@@ -33,13 +33,15 @@ public class JsonHttpConnection extends HttpConnection
     }
   }
 
+
   public JsonElement get() throws IOException
   {
     if (json != null) {
       synchronized (this) {
         if (json == null) {
           try (Reader reader = getReader()) {
-            JsonElement json = JsonElementResponseHandler.getDefaultJsonParser().parse(reader);
+            JsonElement json =
+              JsonElementResponseHandler.getDefaultJsonParser().parse(reader);
             this.json = json;
             return json;
           } finally {
@@ -48,15 +50,17 @@ public class JsonHttpConnection extends HttpConnection
         }
       }
     }
-    if (!(json instanceof JsonElement))
-      throw getPreviouslyParsedException();
-    return (JsonElement) json;
+    if (json instanceof JsonElement)
+      return (JsonElement) json;
+    throw getPreviouslyParsedException();
   }
+
 
   public <T> T get( Class<T> clazz ) throws IOException
   {
     return get(clazz, TypeAdapterManager.getGson());
   }
+
 
   public <T> T get( Class<T> clazz, Gson gson ) throws IOException
   {
@@ -73,11 +77,12 @@ public class JsonHttpConnection extends HttpConnection
         }
       }
     }
-    if (!clazz.isAssignableFrom(json.getClass()))
+    if (!clazz.isInstance(json))
       throw getPreviouslyParsedException();
     //noinspection unchecked
     return (T) json;
   }
+
 
   private IllegalStateException getPreviouslyParsedException()
   {
@@ -88,30 +93,18 @@ public class JsonHttpConnection extends HttpConnection
 
   public Callable<JsonElement> asCallable()
   {
-    return new Callable<JsonElement>()
-      {
-        @Override
-        public JsonElement call() throws IOException
-        {
-          return get();
-        }
-      };
+    return this::get;
   }
+
 
   public <T> Callable<T> asCallable( Class<T> clazz )
   {
     return asCallable(clazz, TypeAdapterManager.getGson());
   }
 
+
   public <T> Callable<T> asCallable( final Class<T> clazz, final Gson gson )
   {
-    return new Callable<T>()
-      {
-        @Override
-        public T call() throws IOException
-        {
-          return get(clazz, gson);
-        }
-      };
+    return () -> get(clazz, gson);
   }
 }

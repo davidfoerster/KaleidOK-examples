@@ -2,6 +2,7 @@ package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
+import processing.core.PConstants;
 
 
 public abstract class CircularImageLayer extends ImageLayer
@@ -90,7 +91,7 @@ public abstract class CircularImageLayer extends ImageLayer
   protected void drawDebugCircle( float radius )
   {
     PApplet parent = this.parent;
-    assert parent.g.ellipseMode == PApplet.RADIUS;
+    assert parent.g.ellipseMode == PConstants.RADIUS;
     parent.noFill();
     parent.ellipse(0, 0, radius, radius);
   }

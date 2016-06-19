@@ -16,14 +16,14 @@ import java.util.Map;
 public class ChromatikClientSketch extends PApplet
 {
 
-  @SuppressWarnings("ConstantConditions")
+  @Override
   public void setup()
   {
     size(800, 200);
 
     // Set up query
     ChromatikQuery q = new ChromatikQuery();
-    q.nhits = 10;
+    q.nHits = 10;
     q.keywords = "";
     q.opts.put(new ChromatikColor(0xeb5252), 0.25f);
     q.opts.put(new ChromatikColor(0x9feb52), 0.18f);
@@ -42,6 +42,7 @@ public class ChromatikClientSketch extends PApplet
 
     noLoop();
   }
+
 
   /**
    * Draws a visual representation of a query.
@@ -62,7 +63,7 @@ public class ChromatikClientSketch extends PApplet
     rect(x - 1, 24, 200, 26);
     noStroke();
 
-    for (Map.Entry<Object, Object> o: q.opts.entrySet()) {
+    for (Map.Entry<?, ?> o: q.opts.entrySet()) {
       if (o.getKey() instanceof ChromatikColor) {
         ChromatikColor c = (ChromatikColor) o.getKey();
 
@@ -82,6 +83,7 @@ public class ChromatikClientSketch extends PApplet
       }
     }
   }
+
 
   /**
    * Fetches and draws the images of a query result set.
@@ -115,6 +117,8 @@ public class ChromatikClientSketch extends PApplet
     }
   }
 
+
+  @SuppressWarnings("MethodOverridesStaticMethodOfSuperclass")
   public static void main( String... args )
   {
     new ChromatikClientSketch().runSketch(args);

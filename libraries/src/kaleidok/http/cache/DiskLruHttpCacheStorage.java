@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Map;
 
 
+@SuppressWarnings("unused")
 public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
 {
   /**
@@ -225,6 +226,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   }
 
 
+  @Override
   public void close() throws IOException
   {
     diskCache.close();

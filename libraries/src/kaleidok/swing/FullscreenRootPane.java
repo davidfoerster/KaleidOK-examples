@@ -66,7 +66,10 @@ public class FullscreenRootPane extends JRootPane
   {
     Window w = getTopLevelWindow();
     if (w == null)
-      throw new IllegalComponentStateException(this + " has no top-level window.");
+    {
+      throw new IllegalComponentStateException(
+        this + " has no top-level window.");
+    }
 
     if (i >= 0) {
       GraphicsDevice[] devs =
@@ -141,6 +144,7 @@ public class FullscreenRootPane extends JRootPane
   }
 
 
+  /*
   private static class FullscreenFocusListener implements FocusListener
   {
     private static FullscreenFocusListener INSTANCE = null;
@@ -175,6 +179,7 @@ public class FullscreenRootPane extends JRootPane
       ((Frame) ev.getSource()).setAlwaysOnTop(alwaysOnTop);
     }
   }
+  */
 
 
   public void registerKeyAction( FullscreenAction.Mode mode,

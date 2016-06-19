@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
@@ -24,6 +25,7 @@ public abstract class MockRequestHandlerBase implements HttpHandler
     CONTENT_LENGTH = "content-length";
 
 
+  @SuppressWarnings({ "OverlyBroadCatchBlock", "ProhibitedExceptionCaught", "ErrorNotRethrown" })
   @Override
   public void handle( HttpExchange exchange ) throws IOException
   {
@@ -54,9 +56,12 @@ public abstract class MockRequestHandlerBase implements HttpHandler
     throws IOException
   {
     if (t.getResponseCode() < 0) {
-      setContentType(t, ContentType.TEXT_PLAIN.withCharset(DEFAULT_CHARSET));
+      Charset chs = DEFAULT_CHARSET;
+      setContentType(t, ContentType.TEXT_PLAIN.withCharset(chs));
       t.sendResponseHeaders(responseCode, 0);
-      try (PrintStream out = new PrintStream(t.getResponseBody(), false, DEFAULT_CHARSET.name())) {
+      try (PrintStream out =
+        new PrintStream(t.getResponseBody(), false, chs.name()))
+      {
         ex.printStackTrace(out);
       }
     }

@@ -5,6 +5,7 @@ import kaleidok.examples.kaleidoscope.Kaleidoscope;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.CyclingList;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PImage;
 
 import java.util.List;
@@ -53,11 +54,12 @@ public class CentreMovingShape extends CircularImageLayer
    * <pre>
    * radius = level ^ exp
    * </pre>
-   * where <code>level</code> is assumed to lie between 0 and 1, so that
-   * the same can be true for <code>radius</code>.
+   * where {@code level} is assumed to lie between 0 and 1, so that the same
+   * can be true for {@code radius}.
    *
    * @param exp  An exponent
    */
+  @SuppressWarnings("RedundantMethodOverride")
   @Override
   public void setScaleFactor( float exp )
   {
@@ -92,12 +94,11 @@ public class CentreMovingShape extends CircularImageLayer
    * <pre>
    * l = (a * x) ^ exponent
    * </pre>
-   * where <code>a</code> is the result of
+   * where {@code a} is the result of
    * <code>{@link #getScaleFactor()}</code>.
    * <p>
-   * <code>l</code> is more or less assumed to lie between 0 and 1, which
-   * holds true for <code>x</code> between 0 and <code>a</code> and a
-   * non-negative <code>exponent</code>.
+   * {@code l} is more or less assumed to lie between 0 and 1, which holds true
+   * for {@code x} between 0 and {@code a} and a non-negative {@code exponent}.
    *
    * @see #getExponent()
    * @see #getScaleFactor()
@@ -125,7 +126,7 @@ public class CentreMovingShape extends CircularImageLayer
     parent.scale(getOuterRadius());
     parent.rotate(parent.frameCount * -0.002f); // rotate around this center --anticlockwise
 
-    parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
+    parent.beginShape(PConstants.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
     PImage img;
     if (wireframe <= 0 && (img = getCurrentImage()) != null) {
       parent.texture(img); // set the texture to use

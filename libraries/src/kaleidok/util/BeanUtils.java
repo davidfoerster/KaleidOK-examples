@@ -77,11 +77,10 @@ public final class BeanUtils
       className = clazz.getCanonicalName();
 
     if (className.startsWith(prefixName)) {
-      if (className.length() == prefixName.length()) {
+      if (className.length() == prefixName.length())
         return null;
-      } else if (className.charAt(prefixName.length()) == '.') {
+      if (className.charAt(prefixName.length()) == '.')
         return className.substring(prefixName.length() + 1);
-      }
     }
 
     throw new IllegalArgumentException(
@@ -97,14 +96,14 @@ public final class BeanUtils
     Object val;
     if (prefix != null) {
       key = prefix + '.' + name;
-      val = prop.get(key);
+      val = prop.getProperty(key);
       if (val == null) {
         key = key.substring(prefix.length());
-        val = prop.get(key);
+        val = prop.getProperty(key);
       }
     } else {
       key = name;
-      val = prop.get(key);
+      val = prop.getProperty(key);
     }
     return (val != null) ? new AbstractMap.SimpleEntry<>(key, val) : null;
   }

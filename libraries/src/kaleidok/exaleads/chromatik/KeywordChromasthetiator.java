@@ -1,12 +1,22 @@
 package kaleidok.exaleads.chromatik;
 
 
-public class KeywordChromasthetiator<Flickr extends kaleidok.flickr.Flickr>
-  extends ChromasthetiatorBase<Flickr>
+import kaleidok.flickr.Flickr;
+
+
+public class KeywordChromasthetiator<F extends Flickr>
+  extends ChromasthetiatorBase<F>
 {
   private String keywords;
 
-  KeywordChromasthetiator( ChromasthetiatorBase<?> other )
+  /**
+   * Analogous to
+   * {@link ChromasthetiatorBase#ChromasthetiatorBase(ChromasthetiatorBase)}
+   *
+   * @param other  The original chromasthetiator
+   * @see ChromasthetiatorBase#ChromasthetiatorBase(ChromasthetiatorBase)
+   */
+  KeywordChromasthetiator( ChromasthetiatorBase<? extends Flickr> other )
   {
     super(other);
     keywords = other.getQueryKeywords();

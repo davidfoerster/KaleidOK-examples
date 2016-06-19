@@ -120,6 +120,7 @@ public final class DefaultValueParser
     try {
       Method m = wrapperClass.getMethod("valueOf", valueOfParameterTypes);
       if (!wrapperClass.isAssignableFrom(m.getReturnType())) {
+        //noinspection ThrowCaughtLocally
         throw new ClassCastException(String.format(
           "Cannot assign return type %s of %s#%s(%s) to %s",
           m.getReturnType().getName(),
@@ -155,7 +156,7 @@ public final class DefaultValueParser
         T value = valueOf(s, clazz);
         if (value != null)
           return value;
-      } catch (IllegalArgumentException ex) {
+      } catch (IllegalArgumentException ignored) {
         // go to default
       }
     }

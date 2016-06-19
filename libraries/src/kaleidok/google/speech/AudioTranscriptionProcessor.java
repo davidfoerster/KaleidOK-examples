@@ -226,7 +226,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
         new int[len];
     for (int i = 0; i < len; i++) {
       final float sample = audioFloat[i + offset];
-      assert sample >= -maxSample && sample <= maxSample :
+      assert Math.abs(sample) <= maxSample :
         getSampleValueErrorMessage(audioFloat, i + offset);
       audioInt[i] = (int) (sample * (Short.MAX_VALUE / maxSample));
     }

@@ -80,7 +80,7 @@ public class ITextExport extends AbstractFrameRecorder
     Document doc = this.doc;
     if (doc != null)
     {
-      System.out.format("Exporting frame %d...\n", p.frameCount);
+      System.out.format("Exporting frame %d...%n", p.frameCount);
 
       PGraphics g = this.p.g;
       PdfDocument pdfDoc = doc.getPdfDocument();

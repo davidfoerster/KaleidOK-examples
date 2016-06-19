@@ -21,6 +21,7 @@ class ReadyImageFutureImpl extends ReadyImageFuture implements ImageObserver
   }
 
 
+  @Override
   protected boolean prepareImpl( Component comp, int width, int height )
   {
     boolean done = comp.prepareImage(image, width, height, this);
@@ -34,6 +35,7 @@ class ReadyImageFutureImpl extends ReadyImageFuture implements ImageObserver
   }
 
 
+  @SuppressWarnings("NakedNotify")
   @Override
   public boolean imageUpdate( Image img, int infoFlags, int x, int y, int width, int height )
   {

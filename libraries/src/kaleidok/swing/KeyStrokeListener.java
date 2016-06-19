@@ -10,7 +10,7 @@ public abstract class KeyStrokeListener implements KeyListener
   public KeyStroke stroke;
 
 
-  public KeyStrokeListener( KeyStroke stroke )
+  protected KeyStrokeListener( KeyStroke stroke )
   {
     this.stroke = stroke;
   }

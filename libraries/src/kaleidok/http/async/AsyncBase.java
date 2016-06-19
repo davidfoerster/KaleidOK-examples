@@ -18,7 +18,7 @@ public abstract class AsyncBase
   public MimeTypeMap acceptedMimeTypes;
 
 
-  public AsyncBase( org.apache.http.client.fluent.Async fluentAsync,
+  protected AsyncBase( org.apache.http.client.fluent.Async fluentAsync,
     MimeTypeMap acceptedMimeTypes )
   {
     this.underlying = fluentAsync;

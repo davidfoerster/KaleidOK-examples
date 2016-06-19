@@ -80,6 +80,7 @@ public class FlickrAsync extends Flickr
       lcb = new FlickrFutureCallback<>(nested);
       this.lastCallback = lcb;
     }
+    //noinspection unchecked
     return (FlickrFutureCallback<T>) lcb;
   }
 }

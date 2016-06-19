@@ -2,21 +2,23 @@ package kaleidok.util;
 
 import java.util.*;
 
+import static java.lang.Math.max;
 
-public class CyclingList<T> implements List<T>
+
+public class CyclingList<E> implements List<E>
 {
-  private final List<T> list;
+  private final List<E> list;
 
   private int nextIdx;
 
 
-  public CyclingList( List<T> list, int nextIdx )
+  public CyclingList( List<E> list, int nextIdx )
   {
     this.list = list;
-    setNext(nextIdx);
+    this.nextIdx = max(nextIdx, -1);
   }
 
-  public CyclingList( List<T> list )
+  public CyclingList( List<E> list )
   {
     this.list = list;
     nextIdx = -1;
@@ -25,10 +27,10 @@ public class CyclingList<T> implements List<T>
 
   public void setNext( int idx )
   {
-    this.nextIdx = java.lang.Math.max(idx, -1);
+    this.nextIdx = max(idx, -1);
   }
 
-  public T getNext()
+  public E getNext()
   {
     int len = this.size();
     if (len == 0)
@@ -57,7 +59,7 @@ public class CyclingList<T> implements List<T>
   }
 
   @Override
-  public Iterator<T> iterator()
+  public Iterator<E> iterator()
   {
     return list.iterator();
   }
@@ -69,15 +71,16 @@ public class CyclingList<T> implements List<T>
   }
 
   @Override
-  public <T1> T1[] toArray( T1[] a )
+  public <T> T[] toArray( T[] a )
   {
+    //noinspection SuspiciousToArrayCall
     return list.toArray(a);
   }
 
   @Override
-  public boolean add( T t )
+  public boolean add( E e )
   {
-    return list.add(t);
+    return list.add(e);
   }
 
   @Override
@@ -93,13 +96,13 @@ public class CyclingList<T> implements List<T>
   }
 
   @Override
-  public boolean addAll( Collection<? extends T> c )
+  public boolean addAll( Collection<? extends E> c )
   {
     return list.addAll(c);
   }
 
   @Override
-  public boolean addAll( int index, Collection<? extends T> c )
+  public boolean addAll( int index, Collection<? extends E> c )
   {
     return list.addAll(index, c);
   }
@@ -125,7 +128,7 @@ public class CyclingList<T> implements List<T>
   @Override
   public boolean equals( Object o )
   {
-    return list.equals(o);
+    return o instanceof CyclingList && list.equals(o);
   }
 
   @Override
@@ -135,25 +138,25 @@ public class CyclingList<T> implements List<T>
   }
 
   @Override
-  public T get( int index )
+  public E get( int index )
   {
     return list.get(index);
   }
 
   @Override
-  public T set( int index, T element )
+  public E set( int index, E element )
   {
     return list.set(index, element);
   }
 
   @Override
-  public void add( int index, T element )
+  public void add( int index, E element )
   {
     list.add(index, element);
   }
 
   @Override
-  public T remove( int index )
+  public E remove( int index )
   {
     return list.remove(index);
   }
@@ -171,19 +174,19 @@ public class CyclingList<T> implements List<T>
   }
 
   @Override
-  public ListIterator<T> listIterator()
+  public ListIterator<E> listIterator()
   {
     return list.listIterator();
   }
 
   @Override
-  public ListIterator<T> listIterator( int index )
+  public ListIterator<E> listIterator( int index )
   {
     return list.listIterator(index);
   }
 
   @Override
-  public List<T> subList( int fromIndex, int toIndex )
+  public List<E> subList( int fromIndex, int toIndex )
   {
     return list.subList(fromIndex, toIndex);
   }

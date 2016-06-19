@@ -28,7 +28,7 @@ public abstract class FlickrResponseDeserializer<T>
 
     default:
       throw new JsonParseException(
-        "Invalid status code: " + String.valueOf(stat));
+        "Invalid status code: " + stat);
     }
   }
 }

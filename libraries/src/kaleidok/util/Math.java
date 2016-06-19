@@ -116,12 +116,12 @@ public final class Math
   public static long clamp( long x, long min, long max )
   {
     assert min <= max : min + " > " + max;
-    return java.lang.Math.min(java.lang.Math.max(x, min), max);
+    return min(max(x, min), max);
   }
 
   public static int clamp( int x, int min, int max )
   {
     assert min <= max : min + " > " + max;
-    return java.lang.Math.min(java.lang.Math.max(x, min), max);
+    return min(max(x, min), max);
   }
 }

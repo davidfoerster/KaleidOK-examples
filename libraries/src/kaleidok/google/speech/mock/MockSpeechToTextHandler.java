@@ -27,6 +27,7 @@ import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 
+@SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")
 public class MockSpeechToTextHandler extends MockRequestHandlerBase
 {
   static {
@@ -57,6 +58,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     case "recognize":
       if (handleRecognize(t))
         break;
+      // fall through
 
     default:
       t.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
@@ -89,6 +91,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     try {
       sampleRate = Float.parseFloat(contentType.getParameter("rate"));
       if (!(sampleRate > 0 && !Float.isInfinite(sampleRate))) {
+        //noinspection ThrowCaughtLocally
         throw new IllegalArgumentException(
           "Sampling rate must be positive and finite");
       }
@@ -148,8 +151,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     SAMPLERATE_PATTERN = Pattern.compile("^(\\d+(?:\\.\\d*)?) (k)?Hz$"),
     SAMPLECOUNT_PATTERN = Pattern.compile("^(\\d+) samples$");
 
-  private static double testFlacFile( byte flacData[], float expectedSampleRate )
-    throws IOException
+  private static double testFlacFile( byte[] flacData, float expectedSampleRate )
   {
     Process pr;
     String fileOutput;
@@ -162,8 +164,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
         new BufferedReader(new InputStreamReader(pr.getInputStream())))
       {
         fileOutput = r.readLine();
-        if (fileOutput != null)
-          assert r.read() == -1;
+        assert fileOutput == null || r.read() == -1;
       }
     } catch (IOException ex) {
       logger.log(Level.WARNING,
@@ -242,7 +243,8 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       return null;
 
     if (tempDir == null) {
-      tempDir = PlatformPaths.getTempDir().resolve(this.getClass().getCanonicalName());
+      tempDir =
+        PlatformPaths.getTempDir().resolve(this.getClass().getCanonicalName());
       try {
         Files.createDirectory(tempDir);
       } catch (FileAlreadyExistsException ex) {
@@ -260,6 +262,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
   }
 
 
+  @SuppressWarnings({ "unused", "HardcodedLineSeparator" })
   private static final byte[]
     normalTranscriptionResult = (
         "{\"result\":[]}\n" +

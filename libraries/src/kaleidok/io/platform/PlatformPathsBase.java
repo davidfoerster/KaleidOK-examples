@@ -9,6 +9,7 @@ import java.nio.file.attribute.FileAttribute;
 import static kaleidok.io.platform.PlatformPaths.NO_ATTRIBUTES;
 
 
+@SuppressWarnings({ "unused", "MethodMayBeStatic" })
 public class PlatformPathsBase
 {
   protected PlatformPathsBase() { }
@@ -57,7 +58,8 @@ public class PlatformPathsBase
 
   public Path createTempDirectory( String prefix ) throws IOException
   {
-    return createTempDirectory( prefix, (FileAttribute[]) null );
+    //noinspection ConfusingArgumentToVarargsMethod
+    return createTempDirectory( prefix, (FileAttribute<?>[]) null );
   }
 
   public Path createTempDirectory( String prefix,
@@ -72,7 +74,8 @@ public class PlatformPathsBase
 
   public Path createTempFile( String prefix, String suffix ) throws IOException
   {
-    return createTempFile(prefix, suffix, (FileAttribute[]) null);
+    //noinspection ConfusingArgumentToVarargsMethod
+    return createTempFile(prefix, suffix, (FileAttribute<?>[]) null);
   }
 
   public Path createTempFile( String prefix, String suffix,
@@ -102,7 +105,8 @@ public class PlatformPathsBase
 
   public Path getCacheDir( String name ) throws IOException
   {
-    return getCacheDir(name, (FileAttribute[]) null);
+    //noinspection ConfusingArgumentToVarargsMethod
+    return getCacheDir(name, (FileAttribute<?>[]) null);
   }
 
   public Path getCacheDir( String name, FileAttribute<?>... attrs )
@@ -134,7 +138,8 @@ public class PlatformPathsBase
 
   public Path getDataDir( String name ) throws IOException
   {
-    return getDataDir(name, (FileAttribute[]) null);
+    //noinspection ConfusingArgumentToVarargsMethod
+    return getDataDir(name, (FileAttribute<?>[]) null);
   }
 
   public Path getDataDir( String name, FileAttribute<?>... attrs )

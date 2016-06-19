@@ -4,8 +4,10 @@ import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PImage;
 
 
@@ -15,10 +17,10 @@ import processing.core.PImage;
  * <pre>
  * v = (a * log(pitchFrequency) + b) / frameRate
  * </pre>
- * Where <code>a</code> and <code>b</code> are some suitable (currently
- * hard-coded) values and <code>v</code> is the angular velocity.
+ * Where {@code a} and {@code b} are some suitable (currently hard-coded)
+ * values and {@code v} is the angular velocity.
  *
- * @see be.tarsos.dsp.pitch.PitchProcessor
+ * @see PitchProcessor
  */
 public class OuterMovingShape extends CircularImageLayer
 {
@@ -31,6 +33,7 @@ public class OuterMovingShape extends CircularImageLayer
   }
 
 
+  @Override
   public void run()
   {
     final PApplet parent = this.parent;
@@ -53,7 +56,7 @@ public class OuterMovingShape extends CircularImageLayer
     }
     parent.rotate((float) angle); // rotate around this center
 
-    parent.beginShape(PApplet.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
+    parent.beginShape(PConstants.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
     PImage img;
     if (wireframe <= 0 && (img = getCurrentImage()) != null) {
       parent.texture(img); // set the texture to use
@@ -78,7 +81,7 @@ public class OuterMovingShape extends CircularImageLayer
 
   /**
    * @return The pitch detection handler of this shape
-   * @see be.tarsos.dsp.pitch.PitchProcessor#PitchProcessor(PitchProcessor.PitchEstimationAlgorithm, float, int, PitchDetectionHandler)
+   * @see PitchProcessor#PitchProcessor(PitchEstimationAlgorithm, float, int, PitchDetectionHandler)
    */
   public PitchDetectionHandler getPitchDetectionHandler()
   {

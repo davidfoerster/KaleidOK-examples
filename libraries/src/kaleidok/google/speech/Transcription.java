@@ -70,6 +70,7 @@ public class Transcription implements Runnable
   public static final Constructor<? extends Format>
     DEFAULT_LOGFILE_PATTERN_FORMAT;
 
+  @SuppressWarnings("unused")
   public static final String
     DEFAULT_LOGFILE_PATTERN = "yyyy-MM-dd_HH:mm:ss.SSS.'flac'";
 
@@ -178,7 +179,7 @@ public class Transcription implements Runnable
   }
 
 
-  protected void logResponse( SttResponse response )
+  protected static void logResponse( SttResponse response )
   {
     if (response != null) {
       SttResponse.Result.Alternative alternative = response.getTopAlternative();
@@ -201,7 +202,10 @@ public class Transcription implements Runnable
       }
       try {
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
+        {
+          //noinspection resource
           connection.getInputStream().close();
+        }
       } catch (IOException ex) {
         ex.printStackTrace();
       }

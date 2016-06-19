@@ -2,12 +2,9 @@ package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.concurrent.GroupedThreadFactory;
-import kaleidok.flickr.Photo;
+import kaleidok.flickr.*;
 import kaleidok.containers.BoundedCompletionQueue;
-import kaleidok.flickr.FlickrAsync;
 import kaleidok.flickr.internal.FlickrBase;
-import kaleidok.flickr.FlickrException;
-import kaleidok.flickr.SizeMap;
 import kaleidok.http.async.ImageAsync;
 import kaleidok.http.async.JsonAsync;
 import org.apache.http.client.fluent.Async;
@@ -76,7 +73,8 @@ public class ChromasthetiationService
   }
 
 
-  public void submit( String text, ChromasthetiatorBase queryParams,
+  public void submit( String text,
+    ChromasthetiatorBase<? extends Flickr> queryParams,
     FutureCallback<Future<Image>> futureImageCallback,
     FutureCallback<Image> imageCallback,
     Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
@@ -100,7 +98,8 @@ public class ChromasthetiationService
   }
 
 
-  private class RunnableChromasthetiator extends KeywordChromasthetiator<FlickrAsync>
+  private class RunnableChromasthetiator
+    extends KeywordChromasthetiator<FlickrAsync>
     implements Runnable, FutureCallback<ChromatikResponse>
   {
     private final String text;
@@ -112,7 +111,27 @@ public class ChromasthetiationService
     private final BoundedCompletionQueue<Photo> photoQueue;
 
 
-    public RunnableChromasthetiator( ChromasthetiatorBase<?> queryParams,
+    /**
+     * Constructs a new chromasthetiator based on the parent applet and
+     * parameters like
+     * {@link ChromasthetiatorBase#ChromasthetiatorBase(ChromasthetiatorBase)}
+     * and adds the source string as well as various callback objects to allow
+     * it to be used as a {@link Runnable}, e. g. in an {@link Executor}.
+     *
+     * @param queryParams  The original chromasthetiator
+     * @param text  The text to chromasthetiate
+     * @param futureImageCallback  A callback that provides a {@link Future} to
+     *   the images passed to {@link #imageCallback}
+     * @param imageCallback  A callback for each of the images that are going
+     *   to fetched as a result of this chromasthetiation
+     * @param imageQueueCompletionCallback  A callback that completes once
+     *   <em>all actually available</em> images have been fetched (at most
+     *   {@code maxCount})
+     * @param maxCount  Fetch up to this many images from the chromasthetiation
+     *   result
+     */
+    public RunnableChromasthetiator(
+      ChromasthetiatorBase<? extends Flickr> queryParams,
       String text, FutureCallback<Future<Image>> futureImageCallback,
       FutureCallback<Image> imageCallback,
       Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
@@ -127,7 +146,7 @@ public class ChromasthetiationService
       this.text = text;
       this.futureImageCallback = futureImageCallback;
       this.imageCallback = imageCallback;
-      photoQueue = new BoundedCompletionQueue<>(maxCount, chromatikQuery.nhits);
+      photoQueue = new BoundedCompletionQueue<>(maxCount, chromatikQuery.nHits);
       photoQueue.completionCallback = imageQueueCompletionCallback;
     }
 
@@ -149,6 +168,7 @@ public class ChromasthetiationService
         }
         return;
       }
+      //noinspection HardcodedLineSeparator
       logger.log(Level.FINE, "Synesthetiation result:\n{0}", emoState);
 
       chromatikQuery.keywords = getQueryKeywords(emoState);
@@ -205,6 +225,7 @@ public class ChromasthetiationService
 
     private void dispatchQueue()
     {
+      FlickrAsync flickr = this.flickr;
       synchronized (photoQueue) {
         Photo photo;
         while ((photo = photoQueue.poll()) != null) {
@@ -219,6 +240,10 @@ public class ChromasthetiationService
 
     private void releaseQueuePermit()
     {
+      /*
+       * TODO: Wait until all pictures are actually displayed on the screen so
+       * they appear in a screenshot at that time.
+       */
       synchronized (photoQueue) {
         photoQueue.release();
         dispatchQueue();
@@ -226,7 +251,7 @@ public class ChromasthetiationService
     }
 
 
-    private class PhotoSizesCallback implements FutureCallback<SizeMap>
+    private final class PhotoSizesCallback implements FutureCallback<SizeMap>
     {
       private final Photo photo;
 

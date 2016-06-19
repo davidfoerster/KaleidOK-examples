@@ -3,6 +3,7 @@ package kaleidok.examples.kaleidoscope.layer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PImage;
 
 import static java.lang.Math.ceil;
@@ -62,6 +63,7 @@ public class SpectrogramLayer extends CircularImageLayer
    * @param scaleFactor  A scale factor
    * @see #run()
    */
+  @SuppressWarnings("RedundantMethodOverride")
   @Override
   public void setScaleFactor( float scaleFactor )
   {
@@ -119,12 +121,10 @@ public class SpectrogramLayer extends CircularImageLayer
    * <pre>
    * l = (a * x) ^ exponent
    * </pre>
-   * where <code>a</code> is the result of
-   * <code>{@link #getScaleFactor()}</code>.
+   * where {@code a} is the result of {@code {@link #getScaleFactor()}}.
    * <p>
-   * <code>l</code> is more or less assumed to lie between 0 and 1, which
-   * holds true for <code>x</code> between 0 and <code>a</code> and a
-   * non-negative <code>exponent</code>.
+   * {@code l} is more or less assumed to lie between 0 and 1, which holds true
+   * for {@code x} between 0 and {@code a} and a non-negative {@code exponent}.
    *
    * @see #getExponent()
    * @see #getScaleFactor()
@@ -160,13 +160,13 @@ public class SpectrogramLayer extends CircularImageLayer
     PImage img;
     if (wireframe <= 0 && (img = getCurrentImage()) != null) {
       parent.noStroke();
-      parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
+      parent.beginShape(PConstants.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
       parent.texture(img); // set the texture to use
     } else {
       parent.noFill();
       parent.stroke(0, 255, 0);
       parent.strokeWeight(parent.g.strokeWeight * 0.5f / getOuterRadius());
-      parent.beginShape(PApplet.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
+      parent.beginShape(PConstants.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     }
 
     for (int i = 0; i <= segmentCount; i += 2)

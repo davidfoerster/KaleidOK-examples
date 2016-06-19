@@ -13,6 +13,7 @@ import java.util.Set;
 import static java.nio.file.attribute.PosixFilePermissions.asFileAttribute;
 
 
+@SuppressWarnings("OctalInteger")
 public class UnixPaths extends PlatformPathsBase
 {
   @Override

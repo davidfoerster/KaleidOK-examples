@@ -29,13 +29,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 
-public class KaleidoscopeChromasthetiationService extends ChromasthetiationService
+public final class KaleidoscopeChromasthetiationService
+  extends ChromasthetiationService
 {
+  @SuppressWarnings("HardcodedLineSeparator")
+  private static final Pattern KEY_SEPARATOR_PATTERN =
+    Pattern.compile(":|\r?\n");
+
   public static long DEFAULT_HTTP_CACHE_SIZE = 50L << 20;
 
   private static final int HTTP_CACHE_APP_VERSION = 1;
@@ -43,7 +49,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
 
   private final Kaleidoscope parent;
 
-  private DocumentChromasthetiator chromasthetiator;
+  private DocumentChromasthetiator<Flickr> chromasthetiator;
 
   private final ChromasthetiationCallback chromasthetiationCallback =
     new ChromasthetiationCallback();
@@ -60,6 +66,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
   }
 
 
+  @SuppressWarnings("unused")
   public void dispose()
   {
     shutdown();
@@ -121,20 +128,20 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
 
     builder.setCacheConfig(cacheConfig);
     return new KaleidoscopeChromasthetiationService(parent, executor,
-      org.apache.http.client.fluent.Executor.newInstance(builder.build()));
+      Executor.newInstance(builder.build()));
   }
 
 
-  private DocumentChromasthetiator getChromasthetiator()
+  private DocumentChromasthetiator<Flickr> getChromasthetiator()
   {
     if (chromasthetiator == null)
     {
-      chromasthetiator = new DocumentChromasthetiator(parent);
+      chromasthetiator = new DocumentChromasthetiator<>(parent);
 
       String data = parent.parseStringOrFile(
         parent.getParameter("com.flickr.api.key"), '@');
       if (data != null) {
-        String[] keys = data.split(":|\r?\n", 2);
+        String[] keys = KEY_SEPARATOR_PATTERN.split(data, 2);
         if (keys.length != 2) {
           throw new IllegalArgumentException(
             "Malformed Flickr API key: " + data);
@@ -146,7 +153,7 @@ public class KaleidoscopeChromasthetiationService extends ChromasthetiationServi
         chromasthetiator.getClass().getPackage().getName() + ".maxKeywords",
         chromasthetiator.maxKeywords);
 
-      chromasthetiator.chromatikQuery.nhits = 10;
+      chromasthetiator.chromatikQuery.nHits = 10;
     }
     return chromasthetiator;
   }

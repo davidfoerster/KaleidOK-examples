@@ -2,15 +2,17 @@ package kaleidok.concurrent;
 
 import org.apache.http.concurrent.FutureCallback;
 
+import java.util.Objects;
+
 
 public abstract class NestedFutureCallback<T, N> implements FutureCallback<T>
 {
   public final FutureCallback<N> nested;
 
 
-  public NestedFutureCallback( FutureCallback<N> nested )
+  protected NestedFutureCallback( FutureCallback<N> nested )
   {
-    assert nested != null;
+    Objects.requireNonNull(nested);
     this.nested = nested;
   }
 

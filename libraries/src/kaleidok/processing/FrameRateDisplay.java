@@ -11,6 +11,7 @@ import static java.lang.Math.log10;
 import static kaleidok.util.Math.clamp;
 
 
+@SuppressWarnings("unused")
 public class FrameRateDisplay extends Plugin<PApplet>
 {
   public int offsetX = 4, offsetY = 4;

@@ -42,6 +42,7 @@ public class ExtPApplet extends PApplet
   }
 
 
+  @SuppressWarnings("unused")
   public void post()
   {
     saveFilenames.handleEntries();
@@ -67,7 +68,7 @@ public class ExtPApplet extends PApplet
   {
     if (documentBase == null) {
       URL documentBase = parent.getDocumentBase();
-      if (documentBase.getProtocol().equals("file")) {
+      if ("file".equals(documentBase.getProtocol())) {
         documentBase = this.getClass().getProtectionDomain().getCodeSource().getLocation();
         try {
           documentBase = new URL(documentBase, documentBase.getPath() + "data/");
@@ -115,7 +116,7 @@ public class ExtPApplet extends PApplet
       } catch (MalformedURLException ex) {
         throw new IllegalArgumentException(ex);
       }
-      if (url.getProtocol().equals("file")) {
+      if ("file".equals(url.getProtocol())) {
         File file;
         try {
           file = new File(url.toURI());
@@ -179,20 +180,13 @@ public class ExtPApplet extends PApplet
         srcTop = (img.height - srcHeight) / 2;
       }
       break;
-
-    default:
-      if (resizeMode == null) {
-        throw new NullPointerException("mode");
-      } else {
-        // If this section is ever reached, somebody forgot to implement a case of this switch block.
-        throw new AssertionError();
-      }
     }
 
     image(img, dstLeft, dstTop, dstWidth, dstHeight, srcLeft, srcTop, srcWidth, srcHeight);
   }
 
 
+  @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
   private final ImageSaveList saveFilenames = new ImageSaveList();
 
 
@@ -227,7 +221,7 @@ public class ExtPApplet extends PApplet
           try {
             ImageIO.saveBmp32(filePath, width, height, pixels, 0).force();
             return null;
-          } catch (UnsupportedOperationException ex) {
+          } catch (UnsupportedOperationException ignored) {
             // try again with default code path
           }
         }
@@ -239,6 +233,7 @@ public class ExtPApplet extends PApplet
   }
 
 
+  @SuppressWarnings("serial")
   private class ImageSaveList extends HashSet<String>
   {
     @Override

@@ -75,9 +75,9 @@ public class MimeTypeMap extends HashMap<String, Float>
    * @param value  A preference rating; {@code null} is the default
    * @return  The rating previously associated with this MIME type (may be
    *   {@code null})
-   * @see java.util.Map#put(Object, Object)
-   * @throws java.lang.UnsupportedOperationException if this map is frozen.
-   * @throws java.lang.IllegalArgumentException if the MIME type string is
+   * @see Map#put(Object, Object)
+   * @throws UnsupportedOperationException if this map is frozen.
+   * @throws IllegalArgumentException if the MIME type string is
    *   invalid or the preference rating is not between 0 and 1.
    */
   @Override
@@ -155,8 +155,9 @@ public class MimeTypeMap extends HashMap<String, Float>
       }
     }
 
-    q = get(WILDCARD);
-    return (q != null && q > 0) ? WILDCARD : null;
+    mime = WILDCARD;
+    q = get(mime);
+    return (q != null && q > 0) ? mime : null;
   }
 
   /**
@@ -220,10 +221,10 @@ public class MimeTypeMap extends HashMap<String, Float>
   }
 
   /**
-   * @see java.util.Map#remove(Object)
+   * @see Map#remove(Object)
    * @param key  A key top remove
    * @return  The previously associated preference rating
-   * @throws java.lang.UnsupportedOperationException if this set is frozen.
+   * @throws UnsupportedOperationException if this set is frozen.
    */
   @Override
   public Float remove( Object key )
@@ -233,7 +234,7 @@ public class MimeTypeMap extends HashMap<String, Float>
   }
 
   public static final Pattern MIME_TYPE_PATTERN = Pattern.compile(
-    "^(?:\\*/\\*|[a-z\\.-]+/(?:\\*|[a-z\\.-]+))$");
+    "^(?:\\*/\\*|[a-z.-]+/(?:\\*|[a-z.-]+))$");
 
   private static final NumberFormat qFormat =
     NumberFormat.getNumberInstance(Locale.ROOT);

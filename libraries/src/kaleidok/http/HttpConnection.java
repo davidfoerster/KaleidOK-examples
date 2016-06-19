@@ -19,6 +19,8 @@ import static kaleidok.http.HttpConnection.ConnectionState.CONNECTED;
 import static kaleidok.http.HttpConnection.ConnectionState.DISCONNECTED;
 import static kaleidok.http.HttpConnection.ConnectionState.UNCONNECTED;
 
+
+@SuppressWarnings("unused")
 public class HttpConnection
 {
   public static final String HTTP_PROTOCOL = "http";

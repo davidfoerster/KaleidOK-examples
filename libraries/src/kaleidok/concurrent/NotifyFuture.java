@@ -9,6 +9,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 public abstract class NotifyFuture<V> implements Future<V>
 {
+  @SuppressWarnings("WaitNotInLoop")
   protected void waitFor() throws InterruptedException
   {
     if (!isDone()) {

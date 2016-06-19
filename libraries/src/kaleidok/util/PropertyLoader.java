@@ -80,7 +80,7 @@ public final class PropertyLoader
         "Can't use an absolute resource and path name here");
     }
 
-    String[] a = new String[]{ resourceAndFilePath };
+    String[] a = { resourceAndFilePath };
     return load(prop, charset, classLoaderReference, a, a);
   }
 }

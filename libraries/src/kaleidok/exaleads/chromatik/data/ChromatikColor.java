@@ -2,6 +2,8 @@ package kaleidok.exaleads.chromatik.data;
 
 import kaleidok.util.Strings;
 
+import java.awt.Color;
+
 import static java.lang.Math.max;
 import static java.lang.Math.round;
 import static kaleidok.util.Math.square;
@@ -44,7 +46,7 @@ public class ChromatikColor
    */
   public ChromatikColor( int r, int g, int b )
   {
-    float[] hsb = java.awt.Color.RGBtoHSB(r, g, b, null);
+    float[] hsb = Color.RGBtoHSB(r, g, b, null);
 
     if (hsb[1] < SATURATION_BINS[0] / (255 * 2))
     {

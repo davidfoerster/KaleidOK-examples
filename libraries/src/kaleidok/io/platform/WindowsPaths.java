@@ -16,6 +16,7 @@ public class WindowsPaths extends PlatformPathsBase
   @Override
   protected Path getCacheDirImpl()
   {
+    //noinspection SpellCheckingInspection
     return getEnvDir("LOCALAPPDATA", getHomeDir());
   }
 
@@ -23,6 +24,7 @@ public class WindowsPaths extends PlatformPathsBase
   @Override
   protected Path getDataDirImpl()
   {
+    //noinspection SpellCheckingInspection
     return getEnvDir("APPDATA", getHomeDir());
   }
 

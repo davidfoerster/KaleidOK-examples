@@ -27,6 +27,7 @@ public class ChromatikResponse
     @Expose
     public int width, height;
 
+    @SuppressWarnings("SpellCheckingInspection")
     @Expose
     public String thumbnailurl, squarethumbnailurl;
 

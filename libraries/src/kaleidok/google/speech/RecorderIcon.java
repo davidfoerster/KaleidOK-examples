@@ -4,6 +4,7 @@ import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
 import kaleidok.util.DefaultValueParser;
 import processing.core.PApplet;
+import processing.core.PConstants;
 
 
 public class RecorderIcon extends Plugin<PApplet>
@@ -32,6 +33,7 @@ public class RecorderIcon extends Plugin<PApplet>
   {
     String strEnabled =
       sketch.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
+    //noinspection SpellCheckingInspection
     return
       (!"forceoff".equals(strEnabled) &&
         (defaultOn || DefaultValueParser.parseBoolean(strEnabled, true)))
@@ -41,13 +43,14 @@ public class RecorderIcon extends Plugin<PApplet>
   }
 
 
+  @Override
   public void draw()
   {
     PApplet p = this.p;
     switch (stt.getStatus()) {
     case RECORDING:
       int previousEllipseMode = p.g.ellipseMode;
-      p.ellipseMode(PApplet.RADIUS);
+      p.ellipseMode(PConstants.RADIUS);
       p.fill(fillColor);
       p.stroke(strokeColor);
       p.strokeWeight(strokeWeight);

@@ -18,7 +18,7 @@ public class PImageFuture implements Future<PImage>
 
   private final Future<Image> underlying;
 
-  private PImage image = null;
+  private volatile PImage image = null;
 
 
   public PImageFuture( PImage image )

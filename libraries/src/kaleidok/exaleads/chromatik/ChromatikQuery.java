@@ -34,7 +34,7 @@ public class ChromatikQuery
   /**
    * Maximum result set section size
    */
-  public int nhits;
+  public int nHits;
 
   /**
    * Search keywords (if any) separated by spaces
@@ -52,7 +52,7 @@ public class ChromatikQuery
    *
    * To add a color to a search query, construct a {@link ChromatikColor}
    * object and use it as the key to the option entry. The value is the
-   * weight of that color as a {@link java.lang.Number} object between 0 and 1.
+   * weight of that color as a {@link Number} object between 0 and 1.
    */
   public Map<Object, Object> opts = new HashMap<>();
 
@@ -75,14 +75,14 @@ public class ChromatikQuery
   /**
    * Constructs a query object with preset parameters.
    *
-   * @param nhits  Result set size
+   * @param nHits  Result set size
    * @param keywords  Query keywords
    * @param colors  RGB color values to search for; the weight is the inverse
    *   of the amount of colors
    */
-  public ChromatikQuery( int nhits, String keywords, int... colors )
+  public ChromatikQuery( int nHits, String keywords, int... colors )
   {
-    this.nhits = nhits;
+    this.nHits = nHits;
     this.keywords = (keywords != null) ? keywords : "";
     this.baseUri = DEFAULT_URI;
 
@@ -174,7 +174,7 @@ public class ChromatikQuery
   {
     URIBuilder ub = new URIBuilder(baseUri)
       .addParameter(QUERY_START, Integer.toString(start))
-      .addParameter(QUERY_NHITS, Integer.toString(nhits));
+      .addParameter(QUERY_NHITS, Integer.toString(nHits));
 
     String searchQuery = keywords;
     if (!opts.isEmpty())
@@ -183,7 +183,7 @@ public class ChromatikQuery
       sb.append(searchQuery);
       buildColorSubquery(sb);
 
-      for (Map.Entry<Object, Object> o: opts.entrySet())
+      for (Map.Entry<?, ?> o: opts.entrySet())
       {
         if (!(o.getKey() instanceof ChromatikColor))
         {
@@ -222,7 +222,7 @@ public class ChromatikQuery
     Map<String, Number> colorGroups = new HashMap<>(8);
     double totalWeight = 0;
 
-    for (Map.Entry<Object, Object> o: opts.entrySet())
+    for (Map.Entry<?, ?> o: opts.entrySet())
     {
       if (o.getKey() instanceof ChromatikColor)
       {
@@ -286,8 +286,8 @@ public class ChromatikQuery
 
   public void randomizeRequestedSubset( int expectedResultCount, Random random )
   {
-    if (expectedResultCount > nhits) {
-      start = random.nextInt(expectedResultCount - nhits + 1);
+    if (expectedResultCount > nHits) {
+      start = random.nextInt(expectedResultCount - nHits + 1);
       logger.log(Level.FINEST,
         "Randomized query result subset to start at %d of %d expected results",
         new Object[]{start, expectedResultCount});
@@ -316,11 +316,13 @@ public class ChromatikQuery
   }
 
 
+  @SuppressWarnings("SpellCheckingInspection")
   private static final String
     QUERY_START = "start",
     QUERY_NHITS = "nhits",
     QUERY_QUERY = "q";
 
+  @SuppressWarnings("SpellCheckingInspection")
   private static final char
     QUERY_OPT_NAMEDELIM = ':',
     QUERY_OPT_VALUEDELIM = '/';
@@ -329,6 +331,7 @@ public class ChromatikQuery
   public static final URI DEFAULT_URI;
   static {
     try {
+      //noinspection SpellCheckingInspection
       DEFAULT_URI =
         new URI("http", "chromatik.labs.exalead.com", "/searchphotos", null);
     } catch (URISyntaxException ex) {
@@ -337,6 +340,7 @@ public class ChromatikQuery
   }
 
 
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
   public static final String
     QUERY_OPT_COLOR = "color",
     QUERY_OPT_COLORGROUP = "colorgroup",
@@ -349,6 +353,7 @@ public class ChromatikQuery
     QUERY_OPT_RIGHTS = "rights";
 
 
+  @SuppressWarnings("SpellCheckingInspection")
   public static final int QUERY_NHITS_DEFAULT = 40;
 
   public static final float MAX_COLOR_WEIGHT = 0.25f;

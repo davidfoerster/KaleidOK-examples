@@ -31,7 +31,7 @@ public final class ImageIO
 
     long
       len = (long) width * height,
-      imageSize = len * (Integer.SIZE / Byte.SIZE),
+      imageSize = len * Integer.BYTES,
       fileSize = imageSize + BMP_OVERALLHEADER_SIZE;
 
     if (len + offset > pixels.length)
@@ -62,7 +62,7 @@ public final class ImageIO
   public static MappedByteBuffer saveBmp32( FileChannel fc, boolean close,
     int width, int height, int[] pixels, int offset ) throws IOException
   {
-    long fileSize = (long) width * height * (Integer.SIZE / Byte.SIZE) + BMP_OVERALLHEADER_SIZE;
+    long fileSize = (long) width * height * Integer.BYTES + BMP_OVERALLHEADER_SIZE;
     MappedByteBuffer map;
     try {
       map = fc.map(FileChannel.MapMode.READ_WRITE, fc.position(), fileSize);
@@ -79,7 +79,7 @@ public final class ImageIO
     int width, int height, int[] pixels, int offset )
     throws IOException, UnsupportedOperationException
   {
-    try (FileChannel fc  = FileChannel.open(path, MMAP_SAVE_OPTIONS)) {
+    try (FileChannel fc = FileChannel.open(path, MMAP_SAVE_OPTIONS)) {
       return saveBmp32(fc, true, width, height, pixels, offset);
     }
   }

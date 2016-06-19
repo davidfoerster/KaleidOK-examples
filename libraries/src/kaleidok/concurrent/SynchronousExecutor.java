@@ -4,8 +4,8 @@ import java.util.concurrent.Executor;
 
 
 /**
- * This <code>Executor</code> implementation executes submitted tasks
- * synchronously upon submission in the submitting thread.
+ * This {@code Executor} implementation executes submitted tasks synchronously
+ * upon submission in the submitting thread.
  * <p>
  * A possible use case is testing and debugging of task or event driven code.
  */

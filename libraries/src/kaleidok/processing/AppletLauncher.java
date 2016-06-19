@@ -143,7 +143,7 @@ public class AppletLauncher
       }
     }
 
-    if (args != null && args.length > 0 && args[0].equals("--params")) {
+    if (args != null && args.length > 0 && "--params".equals(args[0])) {
       String paramsFile = args[1];
       prop.load(new InputStreamReader(
         (paramsFile.length() == 1 && paramsFile.charAt(0) == '-') ?
@@ -157,7 +157,7 @@ public class AppletLauncher
   }
 
 
-  public void loadLocalLoggerProperties( Class<?> appletClass )
+  public static void loadLocalLoggerProperties( Class<?> appletClass )
   {
     File loggingFile = new File("logging.properties");
     InputStream is = null;

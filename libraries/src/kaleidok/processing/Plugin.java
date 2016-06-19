@@ -11,7 +11,7 @@ import java.util.Map;
 
 
 @SuppressWarnings("unused")
-public abstract class Plugin<P extends PApplet>
+public class Plugin<P extends PApplet>
 {
   public enum HookMethod {
     pre, draw, post, pause, resume, dispose,
@@ -49,7 +49,9 @@ public abstract class Plugin<P extends PApplet>
 
   private void registerHooks()
   {
-    final Class<? extends Plugin> clazz = this.getClass();
+    @SuppressWarnings("unchecked")
+    final Class<? extends Plugin<P>> clazz =
+      (Class<? extends Plugin<P>>) this.getClass();
 
     for (Map.Entry<HookMethod, Class<?>[]> e: HOOK_METHODS.entrySet())
     {
@@ -58,7 +60,8 @@ public abstract class Plugin<P extends PApplet>
       try
       {
         if (method == HookMethod.dispose ||
-          clazz.getMethod(method.name(), argsTypes).getDeclaringClass() != Plugin.class)
+          clazz.getMethod(method.name(), argsTypes).getDeclaringClass() !=
+            Plugin.class)
         {
           p.registerMethod(method.name(), this);
           registeredHooks.add(method);
