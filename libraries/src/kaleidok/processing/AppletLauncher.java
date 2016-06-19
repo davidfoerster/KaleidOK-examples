@@ -98,8 +98,8 @@ public class AppletLauncher
     }
 
     if (args != null) {
-      int i;
-      for (i = 0; i < args.length; i++) {
+      int i = 0;
+      while (i < args.length) {
         final String arg = args[i];
         switch (arg) {
         case "-p":
@@ -122,6 +122,7 @@ public class AppletLauncher
         default:
           throw new IllegalArgumentException("Illegal parameter: " + arg);
         }
+        i++;
       }
     }
 
