@@ -268,36 +268,7 @@ public class ChromasthetiationService
         photo.setSizes(sizes);
         Future<Image> fImage = imageAsync.execute(
           Request.Get(photo.getLargestImageSize().source),
-          new FutureCallback<Image>()
-          {
-            @Override
-            public void completed( Image image )
-            {
-              logger.log(Level.FINE, "Downloaded image {0}",
-                photo.getLargestImageSize().source);
-              photoQueue.completeItem();
-              imageCallback.completed(image);
-            }
-
-            @Override
-            public void failed( Exception ex )
-            {
-              logThrown(logger,
-                (ex instanceof IOException) ? Level.SEVERE : Level.FINER,
-                "Couldn't download {0}",
-                ex, photo.getLargestImageSize().source);
-
-              imageCallback.failed(ex);
-              releaseQueuePermit();
-            }
-
-            @Override
-            public void cancelled()
-            {
-              imageCallback.cancelled();
-              releaseQueuePermit();
-            }
-          });
+          new ImageCallback(photo));
 
         if (futureImageCallback != null)
           futureImageCallback.completed(fImage);
@@ -323,6 +294,47 @@ public class ChromasthetiationService
       public void cancelled()
       {
         RunnableChromasthetiator.this.cancelled();
+        releaseQueuePermit();
+      }
+    }
+
+
+    private final class ImageCallback implements FutureCallback<Image>
+    {
+      private final Photo photo;
+
+
+      private ImageCallback( Photo photo )
+      {
+        this.photo = photo;
+      }
+
+
+      @Override
+      public void completed( Image image )
+      {
+        logger.log(Level.FINE, "Downloaded image {0}",
+          photo.getLargestImageSize().source);
+        photoQueue.completeItem();
+        imageCallback.completed(image);
+      }
+
+      @Override
+      public void failed( Exception ex )
+      {
+        logThrown(logger,
+          (ex instanceof IOException) ? Level.SEVERE : Level.FINER,
+          "Couldn't download {0}",
+          ex, photo.getLargestImageSize().source);
+
+        imageCallback.failed(ex);
+        releaseQueuePermit();
+      }
+
+      @Override
+      public void cancelled()
+      {
+        imageCallback.cancelled();
         releaseQueuePermit();
       }
     }
