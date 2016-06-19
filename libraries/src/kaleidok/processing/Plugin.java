@@ -76,16 +76,39 @@ public class Plugin<P extends PApplet>
   }
 
 
+  protected void registerHook( HookMethod hookMethod )
+  {
+    if (registeredHooks.add(hookMethod))
+      p.registerMethod(hookMethod.name(), this);
+  }
+
+
+  protected void unregisterHook( HookMethod hookMethod )
+  {
+    switch (hookMethod)
+    {
+    case dispose:
+      throw new UnsupportedOperationException(
+        "Cannot remove " + hookMethod.name() + " hook");
+
+    default:
+      if (registeredHooks.remove(hookMethod))
+        p.unregisterMethod(hookMethod.name(), this);
+      break;
+    }
+  }
+
+
   public final void dispose()
   {
-    onDispose();
-
     if (!registeredHooks.isEmpty() && !p.finished)
     {
       for (HookMethod m: registeredHooks)
         p.unregisterMethod(m.name(), this);
       registeredHooks.clear();
     }
+
+    onDispose();
   }
 
 
