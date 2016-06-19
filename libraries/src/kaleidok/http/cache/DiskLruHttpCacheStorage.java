@@ -90,13 +90,11 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   @Override
   public HttpCacheEntry getEntry( String key ) throws IOException
   {
-    DiskLruCache.Snapshot snapshot = diskCache.get(toInternalKey(key));
-    if (snapshot != null) try {
-      return deserialize(key, snapshot.getInputStream(0));
-    } finally {
-      snapshot.close();
+    try (DiskLruCache.Snapshot snapshot = diskCache.get(toInternalKey(key))) {
+      return (snapshot != null)  ?
+        deserialize(key, snapshot.getInputStream(0)) :
+        null;
     }
-    return null;
   }
 
 
