@@ -29,8 +29,7 @@ public class ExportService extends ITextExport
   }
 
 
-  public static ExportService fromConfiguration( PApplet sketch,
-    Consumer<Consumer<String>> initiator )
+  public static ExportService fromConfiguration( PApplet sketch )
   {
     if (!DefaultValueParser.parseBoolean(sketch,
       ITextExport.class.getPackage().getName(), false))
@@ -52,9 +51,6 @@ public class ExportService extends ITextExport
         ex, outputPath);
       return null;
     }
-
-    if (initiator != null)
-      initiator.accept(es.getCallback());
 
     return es;
   }

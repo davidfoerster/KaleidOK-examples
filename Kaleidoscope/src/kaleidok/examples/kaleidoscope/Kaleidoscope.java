@@ -115,11 +115,12 @@ public class Kaleidoscope extends ExtPApplet
   {
     if (exportService == null)
     {
-      exportService = new Reference<>(
-        ExportService.fromConfiguration(this,
-          (callback) ->
-            getChromasthetiationService().
-              setImageQueueCompletionCallback(callback)));
+      exportService = new Reference<>(ExportService.fromConfiguration(this));
+      if (exportService.item != null)
+      {
+        getChromasthetiationService()
+          .setImageQueueCompletionCallback(exportService.item.getCallback());
+      }
     }
     return exportService.item;
   }
