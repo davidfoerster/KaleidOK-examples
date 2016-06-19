@@ -54,14 +54,6 @@ public abstract class ReadyImageFuture extends NotifyFuture<Image>
     this.image = image;
   }
 
-  public ReadyImageFuture( Component comp, Image image, int width, int height,
-    FutureCallback<Image> callback )
-  {
-    this(image);
-    this.callback = callback;
-    prepareImpl(comp, width, height);
-  }
-
 
   protected abstract boolean prepareImpl( Component comp, int width, int height );
 

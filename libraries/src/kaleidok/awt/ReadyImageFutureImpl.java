@@ -17,7 +17,9 @@ class ReadyImageFutureImpl extends ReadyImageFuture implements ImageObserver
   public ReadyImageFutureImpl( Component comp, Image image, int width, int height,
     FutureCallback<Image> callback )
   {
-    super(comp, image, width, height, callback);
+    super(image);
+    this.callback = callback;
+    prepare(comp, width, height);
   }
 
 
