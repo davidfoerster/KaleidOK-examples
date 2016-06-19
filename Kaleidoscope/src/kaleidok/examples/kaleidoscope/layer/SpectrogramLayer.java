@@ -30,7 +30,8 @@ public class SpectrogramLayer extends CircularImageLayer
     float innerRadius, float outerRadius, MinimFFTProcessor spectrum,
     float sampleRate )
   {
-    super(parent, segmentCount, innerRadius, outerRadius);
+    super(parent);
+    init(segmentCount, innerRadius, outerRadius);
     avgSpectrum = spectrum;
 
     float nyquistFreq = sampleRate / 2;

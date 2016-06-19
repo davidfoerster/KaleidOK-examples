@@ -29,7 +29,8 @@ public class OuterMovingShape extends CircularImageLayer
 
   public OuterMovingShape( ExtPApplet parent, int segmentCount, float radius )
   {
-    super(parent, segmentCount, 0, radius);
+    super(parent);
+    init(segmentCount, 0, radius);
   }
 
 

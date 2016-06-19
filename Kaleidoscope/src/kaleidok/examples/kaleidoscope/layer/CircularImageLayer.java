@@ -15,10 +15,14 @@ public abstract class CircularImageLayer extends ImageLayer
   private float[] segmentCoords = null;
 
 
-  public CircularImageLayer( ExtPApplet parent, int segmentCount,
-    float innerRadius, float outerRadius )
+  protected CircularImageLayer( ExtPApplet parent )
   {
     super(parent);
+  }
+
+
+  protected void init( int segmentCount, float innerRadius, float outerRadius )
+  {
     setSegmentCount(segmentCount);
     setInnerRadius(innerRadius);
     setOuterRadius(outerRadius);

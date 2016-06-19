@@ -41,7 +41,8 @@ public class CentreMovingShape extends CircularImageLayer
     CyclingList<PImageFuture> images, int segmentCount, float innerRadius,
     float outerRadius, VolumeLevelProcessor volumeLevelProcessor )
   {
-    super(parent, segmentCount, innerRadius, outerRadius);
+    super(parent);
+    init(segmentCount, innerRadius, outerRadius);
     setNextImage(images.getNext());
     this.images = images;
     this.volumeLevelProcessor = volumeLevelProcessor;

@@ -19,8 +19,9 @@ public class FoobarLayer extends CircularImageLayer
   public FoobarLayer( ExtPApplet parent, int segmentCount,
     float innerRadius, float outerRadius )
   {
-    super(parent, segmentCount, innerRadius, outerRadius);
-    setScaleFactor(0.5f);
+    super(parent);
+    super.setScaleFactor(0.5f);
+    init(segmentCount, innerRadius, outerRadius);
   }
 
 
