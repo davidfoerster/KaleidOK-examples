@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import static kaleidok.http.HttpConnection.ConnectionState.CONNECTED;
+import static kaleidok.http.HttpConnection.ConnectionState.DISCONNECTED;
+import static kaleidok.http.HttpConnection.ConnectionState.UNCONNECTED;
 
 public class HttpConnection
 {
@@ -26,31 +29,37 @@ public class HttpConnection
 
   public Charset defaultCharset;
 
-  protected ContentType responseContentType;
+  private volatile ContentType responseContentType;
 
-  protected InputStream inputStream;
+  private InputStream inputStream;
 
-  protected Reader reader;
+  private Reader reader;
 
-  protected String body;
+  private volatile String body;
 
-  public static int
-    UNCONNECTED = 0,
-    CONNECTED = 1,
-    DISCONNECTED = 2;
 
-  private int state = UNCONNECTED;
+  public enum ConnectionState
+  {
+    UNCONNECTED,
+    CONNECTED,
+    DISCONNECTED
+  }
+
+  private volatile ConnectionState state = UNCONNECTED;
+
 
   public HttpConnection( HttpURLConnection c )
   {
     this(c, new MimeTypeMap());
   }
 
+
   public HttpConnection( HttpURLConnection c, MimeTypeMap acceptedMimeTypes )
   {
     this.c = c;
     this.acceptedMimeTypes = acceptedMimeTypes;
   }
+
 
   public static HttpConnection openURL( URL url ) throws IOException
   {
@@ -70,6 +79,7 @@ public class HttpConnection
     return ctor.newInstance(url.openConnection());
   }
 
+
   private static void checkHttpProtocol( URL url ) throws IOException
   {
     String p = url.getProtocol(), h = HTTP_PROTOCOL;
@@ -78,28 +88,49 @@ public class HttpConnection
       throw new IOException("Unsupported protocol: " + p);
   }
 
+
   private static final Class<?>[] constructorArgumentTypes =
     new Class<?>[]{ HttpURLConnection.class };
+
 
   /**
    * @see HttpURLConnection#connect()
    */
-  public synchronized void connect() throws IOException
+  public void connect() throws IOException
   {
-    if (state == CONNECTED)
-      return;
-    if (state != UNCONNECTED)
-      throw new IllegalStateException();
+    if (!checkConnectionState()) {
+      synchronized (this) {
+        if (!checkConnectionState()) {
+          MimeTypeMap acceptedMimeTypes = this.acceptedMimeTypes;
+          if (acceptedMimeTypes != null) {
+            String accept = acceptedMimeTypes.toString();
+            if (!accept.isEmpty())
+              c.setRequestProperty("Accept", accept);
+          }
 
-    if (acceptedMimeTypes != null) {
-      String accept = acceptedMimeTypes.toString();
-      if (!accept.isEmpty())
-        c.setRequestProperty("Accept", accept);
+          c.connect();
+          state = CONNECTED;
+        }
+      }
     }
-
-    c.connect();
-    state = CONNECTED;
   }
+
+
+  private boolean checkConnectionState()
+  {
+    switch (state)
+    {
+    case UNCONNECTED:
+      return false;
+
+    case CONNECTED:
+      return true;
+
+    default:
+      throw new IllegalStateException();
+    }
+  }
+
 
   /**
    * @see HttpURLConnection#setConnectTimeout(int)
@@ -109,6 +140,7 @@ public class HttpConnection
     c.setConnectTimeout(timeout);
   }
 
+
   /**
    * @see HttpURLConnection#getConnectTimeout()
    */
@@ -116,6 +148,7 @@ public class HttpConnection
   {
     return c.getConnectTimeout();
   }
+
 
   /**
    * @see HttpURLConnection#setReadTimeout(int)
@@ -125,6 +158,7 @@ public class HttpConnection
     c.setReadTimeout(timeout);
   }
 
+
   /**
    * @see HttpURLConnection#getReadTimeout()
    */
@@ -132,6 +166,7 @@ public class HttpConnection
   {
     return c.getReadTimeout();
   }
+
 
   /**
    * @see HttpURLConnection#getURL()
@@ -141,6 +176,7 @@ public class HttpConnection
     return c.getURL();
   }
 
+
   /**
    * @see HttpURLConnection#getContentLength()
    */
@@ -148,6 +184,7 @@ public class HttpConnection
   {
     return (getContentEncoding() == null) ? c.getContentLength() : -1;
   }
+
 
   /**
    * @see HttpURLConnection#getContentLengthLong()
@@ -157,6 +194,7 @@ public class HttpConnection
     return (getContentEncoding() == null) ? c.getContentLengthLong() : -1;
   }
 
+
   /**
    * @see HttpURLConnection#getContentEncoding()
    */
@@ -164,6 +202,7 @@ public class HttpConnection
   {
     return c.getContentEncoding();
   }
+
 
   /**
    * @see HttpURLConnection#getContentType()
@@ -173,6 +212,7 @@ public class HttpConnection
     return c.getContentType();
   }
 
+
   /**
    * @see HttpURLConnection#getHeaderField(String)
    */
@@ -181,10 +221,12 @@ public class HttpConnection
     return c.getHeaderField(name);
   }
 
+
   public Map<String, List<String>> getHeaderFields()
   {
     return c.getHeaderFields();
   }
+
 
   /**
    * @see HttpURLConnection#getHeaderFieldInt(String, int)
@@ -194,6 +236,7 @@ public class HttpConnection
     return c.getHeaderFieldInt(name, Default);
   }
 
+
   /**
    * @see HttpURLConnection#getHeaderFieldLong(String, long)
    */
@@ -201,6 +244,7 @@ public class HttpConnection
   {
     return c.getHeaderFieldLong(name, Default);
   }
+
 
   /**
    * @see HttpURLConnection#getInputStream()
@@ -212,6 +256,7 @@ public class HttpConnection
 
       InputStream rawInputStream = null;
       try {
+        MimeTypeMap acceptedMimeTypes = this.acceptedMimeTypes;
         if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty()) {
           String mimeType = getResponseMimeType();
           if (acceptedMimeTypes.allows(mimeType) == null)
@@ -239,6 +284,7 @@ public class HttpConnection
     return inputStream;
   }
 
+
   /**
    * @see HttpURLConnection#getOutputStream()
    */
@@ -248,6 +294,7 @@ public class HttpConnection
     return c.getOutputStream();
   }
 
+
   /**
    * @see HttpURLConnection#setDoOutput(boolean)
    */
@@ -255,6 +302,7 @@ public class HttpConnection
   {
     c.setDoOutput(b);
   }
+
 
   /**
    * @see HttpURLConnection#setDoInput(boolean)
@@ -264,6 +312,7 @@ public class HttpConnection
     c.setDoInput(b);
   }
 
+
   /**
    * @see HttpURLConnection#getDoInput()
    */
@@ -271,6 +320,7 @@ public class HttpConnection
   {
     return c.getDoInput();
   }
+
 
   /**
    * @see HttpURLConnection#getDoOutput()
@@ -280,6 +330,7 @@ public class HttpConnection
     return c.getDoOutput();
   }
 
+
   /**
    * @see HttpURLConnection#setUseCaches(boolean)
    */
@@ -287,6 +338,7 @@ public class HttpConnection
   {
     c.setUseCaches(b);
   }
+
 
   /**
    * @see HttpURLConnection#getUseCaches()
@@ -296,6 +348,7 @@ public class HttpConnection
     return c.getUseCaches();
   }
 
+
   /**
    * @see HttpURLConnection#setRequestProperty(String, String)
    */
@@ -303,6 +356,7 @@ public class HttpConnection
   {
     c.setRequestProperty(key, value);
   }
+
 
   /**
    * @see HttpURLConnection#addRequestProperty(String, String)
@@ -312,6 +366,7 @@ public class HttpConnection
     c.addRequestProperty(key, value);
   }
 
+
   /**
    * @see HttpURLConnection#getRequestProperty(String)
    */
@@ -320,10 +375,12 @@ public class HttpConnection
     return c.getRequestProperty(key);
   }
 
+
   public Map<String, List<String>> getRequestProperties()
   {
     return c.getRequestProperties();
   }
+
 
   public synchronized Reader getReader() throws IOException
   {
@@ -337,64 +394,72 @@ public class HttpConnection
     return reader;
   }
 
-  public String getBody() throws IOException
+
+  public synchronized String getBody() throws IOException
   {
-    if (body == null) {
-      synchronized (this) {
-        if (body == null) {
-          connect();
-          try {
-            try (Reader r = getReader()) {
-              body = IOUtils.toString(r);
-            }
-          } finally {
-            disconnect();
-          }
-        }
+    if (body == null)
+    {
+      connect();
+      try (Reader r = getReader())
+      {
+        body = IOUtils.toString(r);
+      }
+      finally
+      {
+        disconnect();
       }
     }
     return body;
   }
 
+
   public Callable<String> getBodyAsCallable()
   {
-    return new Callable<String>()
-      {
-        @Override
-        public String call() throws Exception
-        {
-          return getBody();
-        }
-      };
+    return this::getBody;
   }
 
-  private synchronized void parseContentType() throws IOException
+
+  private void parseContentType() throws IOException
   {
-    connect();
-    try {
-      responseContentType = Parsers.getContentType(c);
-    } catch (IllegalArgumentException ex) {
-      throw new IOException(ex);
-    }
     if (responseContentType == null)
-      responseContentType = Parsers.EMPTY_CONTENT_TYPE;
+    {
+      synchronized (this)
+      {
+        if (responseContentType == null)
+        {
+          connect();
+
+          try
+          {
+            responseContentType = Parsers.getContentType(c);
+          }
+          catch (IllegalArgumentException ex)
+          {
+            throw new IOException(ex);
+          }
+
+          if (responseContentType == null)
+            responseContentType = Parsers.EMPTY_CONTENT_TYPE;
+        }
+      }
+    }
   }
+
 
   public String getResponseMimeType() throws IOException
   {
-    if (responseContentType == null)
-      parseContentType();
+    parseContentType();
     return responseContentType.getMimeType();
   }
 
+
   public Charset getResponseCharset( boolean allowDefault ) throws IOException
   {
-    if (responseContentType == null)
-      parseContentType();
-    return (responseContentType.getCharset() != null || !allowDefault) ?
-      responseContentType.getCharset() :
-      defaultCharset;
+    parseContentType();
+    Charset chs = responseContentType.getCharset();
+    return (chs != null || !allowDefault) ? chs : defaultCharset;
   }
+
 
   /**
    * @see HttpURLConnection#setRequestMethod(String)
@@ -404,6 +469,7 @@ public class HttpConnection
     c.setRequestMethod(method);
   }
 
+
   /**
    * @see HttpURLConnection#getRequestMethod()
    */
@@ -411,6 +477,7 @@ public class HttpConnection
   {
     return c.getRequestMethod();
   }
+
 
   /**
    * @see HttpURLConnection#getResponseCode()
@@ -421,6 +488,7 @@ public class HttpConnection
     return c.getResponseCode();
   }
 
+
   /**
    * @see HttpURLConnection#getResponseMessage()
    */
@@ -430,6 +498,7 @@ public class HttpConnection
     return c.getResponseMessage();
   }
 
+
   /**
    * @see HttpURLConnection#getHeaderFieldKey(int)
    */
@@ -438,6 +507,7 @@ public class HttpConnection
     return c.getHeaderFieldKey(n);
   }
 
+
   /**
    * @see HttpURLConnection#getHeaderField(int)
    */
@@ -445,6 +515,7 @@ public class HttpConnection
   {
     return c.getHeaderField(n);
   }
+
 
   /**
    * @see HttpURLConnection#disconnect()
@@ -455,6 +526,7 @@ public class HttpConnection
     c.disconnect();
   }
 
+
   /**
    * @see HttpURLConnection#getErrorStream()
    */
@@ -463,10 +535,12 @@ public class HttpConnection
     return c.getErrorStream();
   }
 
-  public int getState()
+
+  public ConnectionState getState()
   {
     return state;
   }
+
 
   /**
    * @see HttpURLConnection#setChunkedStreamingMode(int)

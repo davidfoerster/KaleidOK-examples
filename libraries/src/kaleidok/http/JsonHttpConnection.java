@@ -14,7 +14,8 @@ import java.util.concurrent.Callable;
 
 public class JsonHttpConnection extends HttpConnection
 {
-  protected Object json;
+  private volatile Object json;
+
 
   public JsonHttpConnection( HttpURLConnection c )
   {

@@ -4,7 +4,6 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
-import kaleidok.http.HttpConnection;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.google.gson.TypeAdapterManager;
 import kaleidok.io.platform.PlatformPaths;
@@ -26,6 +25,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 
 import static kaleidok.google.speech.STT.logger;
+import static kaleidok.http.HttpConnection.ConnectionState.CONNECTED;
 
 
 public class Transcription implements Runnable
@@ -193,7 +193,7 @@ public class Transcription implements Runnable
 
   public void dispose()
   {
-    if (connection.getState() == HttpConnection.CONNECTED) {
+    if (connection.getState() == CONNECTED) {
       if (outputStream != null) try {
         outputStream.close();
       } catch (IOException ex) {
