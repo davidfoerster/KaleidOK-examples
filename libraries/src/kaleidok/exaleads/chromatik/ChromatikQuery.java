@@ -8,6 +8,7 @@ import kaleidok.util.Strings;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,8 +25,10 @@ import static kaleidok.exaleads.chromatik.ChromasthetiatorBase.logger;
 /**
  * Holds all the parameters to build a Chromatik image search query.
  */
-public class ChromatikQuery
+public class ChromatikQuery implements Serializable, Cloneable
 {
+  private static final long serialVersionUID = -4020430402877695173L;
+
   /**
    * The start index of the requested section of the result set
    */
@@ -54,7 +57,7 @@ public class ChromatikQuery
    * object and use it as the key to the option entry. The value is the
    * weight of that color as a {@link Number} object between 0 and 1.
    */
-  public Map<Object, Object> opts = new HashMap<>();
+  public Map<Serializable, Serializable> opts = new HashMap<>();
 
 
   static {

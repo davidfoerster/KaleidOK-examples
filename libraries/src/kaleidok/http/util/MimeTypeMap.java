@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
  */
 public class MimeTypeMap extends HashMap<String, Float>
 {
+  private static final long serialVersionUID = -6412623527769040820L;
+
   /**
    * Wildcard string for any MIME type
    */

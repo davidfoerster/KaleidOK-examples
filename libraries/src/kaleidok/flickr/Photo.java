@@ -1,11 +1,14 @@
 package kaleidok.flickr;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.regex.*;
 
 
-public abstract class Photo
+public abstract class Photo implements Serializable
 {
+  private static final long serialVersionUID = 4182367015571487353L;
+
   public String farm, server, id, secret, extension;
 
   private SizeMap sizes;

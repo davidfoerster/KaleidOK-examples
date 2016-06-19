@@ -3,6 +3,7 @@ package kaleidok.exaleads.chromatik.data;
 import kaleidok.util.Strings;
 
 import java.awt.Color;
+import java.io.Serializable;
 
 import static java.lang.Math.max;
 import static java.lang.Math.round;
@@ -12,8 +13,10 @@ import static kaleidok.util.Math.square;
 /**
  * Represents one of Chromatik’s preset colors.
  */
-public class ChromatikColor
+public class ChromatikColor implements Serializable
 {
+  private static final long serialVersionUID = 2666896595111396584L;
+
   /**
    * RGB color value
    */

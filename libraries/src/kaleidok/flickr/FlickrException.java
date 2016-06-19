@@ -2,6 +2,8 @@ package kaleidok.flickr;
 
 public class FlickrException extends Exception
 {
+  private static final long serialVersionUID = -4119100918511688709L;
+
   private int errorCode;
 
   private String pertainingObject;

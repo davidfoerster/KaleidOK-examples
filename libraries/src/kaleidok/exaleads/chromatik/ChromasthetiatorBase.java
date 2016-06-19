@@ -12,6 +12,7 @@ import synesketch.emotion.*;
 
 import java.applet.Applet;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -141,8 +142,9 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
   }
 
 
-  protected Map<Object, Object> getQueryOptions( EmotionalState synState,
-    Map<Object, Object> opts, Random random )
+  protected Map<Serializable, Serializable> getQueryOptions(
+    EmotionalState synState, Map<Serializable, Serializable> opts,
+    Random random )
   {
     Emotion emo = synState.getStrongestEmotion();
 

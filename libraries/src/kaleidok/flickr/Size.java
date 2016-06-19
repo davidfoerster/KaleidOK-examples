@@ -4,16 +4,23 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.annotations.Expose;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 
 
-public class Size
+public class Size implements Serializable
 {
+  private static final long serialVersionUID = 6935510737803562177L;
+
+  @Expose
   public Label label;
 
+  @Expose
   public int width, height;
 
+  @Expose
   public String source;
 
 

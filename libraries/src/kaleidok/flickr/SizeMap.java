@@ -5,14 +5,19 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.annotations.Expose;
 import kaleidok.flickr.internal.FlickrResponseDeserializer;
 
 import java.lang.reflect.Type;
 import java.util.TreeMap;
 
 
+@SuppressWarnings("SpellCheckingInspection")
 public class SizeMap extends TreeMap<Size.Label, Size>
 {
+  private static final long serialVersionUID = -8966551070440870922L;
+
+  @Expose
   public boolean canblog, canprint, candownload;
 
 

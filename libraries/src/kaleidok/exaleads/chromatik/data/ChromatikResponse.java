@@ -4,17 +4,23 @@ import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import kaleidok.flickr.Photo;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 
 
-public class ChromatikResponse
+public class ChromatikResponse implements Serializable
 {
+  private static final long serialVersionUID = 198977843581142016L;
+
   public int hits;
 
   public Result[] results;
 
-  public static class Result
+
+  public static class Result implements Serializable
   {
+    private static final long serialVersionUID = 7448038875557807767L;
+
     @Expose
     public int ind;
 
