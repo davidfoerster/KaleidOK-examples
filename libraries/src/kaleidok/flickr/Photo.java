@@ -14,12 +14,7 @@ public abstract class Photo implements Serializable
   private SizeMap sizes;
 
 
-  public Photo() { }
-
-  public Photo( CharSequence url )
-  {
-    parseUrl(url);
-  }
+  protected Photo() { }
 
 
   public static final Pattern URL_PATTERN = Pattern.compile(

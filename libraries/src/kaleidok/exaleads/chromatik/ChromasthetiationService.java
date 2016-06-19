@@ -35,7 +35,7 @@ public class ChromasthetiationService
 
   private final ImageAsync imageAsync;
 
-  private final FlickrAsync flickrAsync;
+  protected final FlickrAsync flickrAsync;
 
 
   public ChromasthetiationService( ExecutorService executor,
@@ -88,13 +88,10 @@ public class ChromasthetiationService
   }
 
 
-  protected void setFlickrApiKey( FlickrBase flickr )
+  protected void setFlickrApiKey( String key, String secret )
   {
-    if (flickr.getApiKey() != null) {
-      synchronized (this.flickrAsync) {
-        this.flickrAsync.setApiKey(flickr.getApiKey(), flickr.getApiSecret());
-      }
-    }
+    if (key != null)
+      flickrAsync.setApiKey(key, secret);
   }
 
 
@@ -141,7 +138,10 @@ public class ChromasthetiationService
 
       flickr = ChromasthetiationService.this.flickrAsync;
       if (flickr.getApiKey() == null)
-        setFlickrApiKey(queryParams.flickr);
+      {
+        setFlickrApiKey(queryParams.flickr.getApiKey(),
+          queryParams.flickr.getApiSecret());
+      }
 
       this.text = text;
       this.futureImageCallback = futureImageCallback;
@@ -211,9 +211,11 @@ public class ChromasthetiationService
         return;
       }
 
+      Flickr flickr = this.flickr;
       synchronized (photoQueue) {
         for (ChromatikResponse.Result imgInfo : response.results) {
-          final FlickrPhoto flickrPhoto = new FlickrPhoto(imgInfo);
+          final FlickrPhoto flickrPhoto =
+            FlickrPhoto.fromChromatikResponseResult(flickr, imgInfo);
           imgInfo.flickrPhoto = flickrPhoto;
           photoQueue.add(flickrPhoto);
         }

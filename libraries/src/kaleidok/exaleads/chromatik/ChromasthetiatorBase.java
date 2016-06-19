@@ -192,17 +192,33 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
 
     Flickr flickr = this.flickr;
     for (ChromatikResponse.Result imgInfo: response.results)
-      imgInfo.flickrPhoto = new FlickrPhoto(imgInfo);
+    {
+      imgInfo.flickrPhoto =
+        FlickrPhoto.fromChromatikResponseResult(flickr, imgInfo);
+    }
   }
 
 
-  protected class FlickrPhoto extends Photo
+  protected static class FlickrPhoto extends Photo
   {
-    public FlickrPhoto() { }
+    private static final long serialVersionUID = -4527884875677374872L;
 
-    public FlickrPhoto( ChromatikResponse.Result imgInfo )
+    protected transient Flickr flickr;
+
+
+    public FlickrPhoto( Flickr flickr )
     {
-      super(imgInfo.squarethumbnailurl);
+      Objects.requireNonNull(flickr);
+      this.flickr = flickr;
+    }
+
+
+    public static FlickrPhoto fromChromatikResponseResult( Flickr flickr,
+      ChromatikResponse.Result imgInfo )
+    {
+      FlickrPhoto photo = new FlickrPhoto(flickr);
+      photo.parseUrl(imgInfo.squarethumbnailurl);
+      return photo;
     }
 
 

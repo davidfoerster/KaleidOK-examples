@@ -146,7 +146,9 @@ public final class KaleidoscopeChromasthetiationService
           throw new IllegalArgumentException(
             "Malformed Flickr API key: " + data);
         }
-        chromasthetiator.setFlickrApi(new Flickr(keys[0], keys[1]));
+        Flickr flickr = new Flickr();
+        flickr.setApiKey(keys[0], keys[1]);
+        chromasthetiator.setFlickrApi(flickr);
       }
 
       chromasthetiator.maxKeywords = DefaultValueParser.parseInt(parent,

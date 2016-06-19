@@ -34,16 +34,9 @@ public class FlickrBase
   protected URIBuilder ub;
 
 
-  protected FlickrBase()
+  public FlickrBase()
   {
-    this(null, null, null);
-  }
-
-  protected FlickrBase( URI uriBase, String apiKey, String apiSecret )
-  {
-    initQuery(
-      (uriBase != null) ? uriBase : DEFAULT_URI_BASE,
-      apiKey, apiSecret);
+    initQueryBase(DEFAULT_URI_BASE, null, null);
   }
 
 
@@ -75,17 +68,25 @@ public class FlickrBase
   }
 
 
-  private static final String QUERY_API_KEY = "api_key";
+  protected static final String QUERY_API_KEY = "api_key";
 
-  private void initQuery( URI base, String apiKey, String apiSecret )
+  protected void initQuery( URI base, String apiKey, String apiSecret )
   {
-    if (ub == null) {
+    initQueryBase(base, apiKey, apiSecret);
+  }
+
+  private void initQueryBase( URI base, String apiKey, String apiSecret )
+  {
+    if (ub == null)
+    {
+      //noinspection SpellCheckingInspection
       ub = new URIBuilder()
         .setParameter("format", "json")
         .setParameter("nojsoncallback", "1");
     }
 
-    if (base != null) {
+    if (base != null && !base.equals(this.uriBase))
+    {
       assert base.getScheme() != null && base.getHost() != null;
       this.uriBase = base;
       ub.setScheme(base.getScheme())
