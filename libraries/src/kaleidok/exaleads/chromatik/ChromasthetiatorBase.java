@@ -83,7 +83,7 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
     parent = other.parent;
     maxColors = other.maxColors;
     maxKeywords = other.maxKeywords;
-    chromatikQuery = new ChromatikQuery(other.chromatikQuery);
+    chromatikQuery = other.chromatikQuery.clone();
     synesthetiator = other.synesthetiator;
     palettes = other.palettes;
   }

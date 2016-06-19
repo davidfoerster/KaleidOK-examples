@@ -98,13 +98,28 @@ public class ChromatikQuery implements Serializable, Cloneable
   }
 
 
-  public ChromatikQuery( ChromatikQuery other )
+  @SuppressWarnings({ "unchecked", "CloneCallsConstructors" })
+  @Override
+  public ChromatikQuery clone()
   {
-    start = other.start;
-    nhits = other.nhits;
-    keywords = other.keywords;
-    baseUri = other.baseUri;
-    opts = new HashMap<>(other.opts);
+    ChromatikQuery other;
+    try
+    {
+      other = (ChromatikQuery) super.clone();
+    }
+    catch (CloneNotSupportedException ex)
+    {
+      throw new InternalError(ex);
+    }
+    if (other.opts != null)
+    {
+      other.opts =
+        (other.opts instanceof HashMap) ?
+          (Map<Serializable, Serializable>)
+            ((HashMap<Serializable, Serializable>) other.opts).clone() :
+          new HashMap<>(other.opts);
+    }
+    return other;
   }
 
 
