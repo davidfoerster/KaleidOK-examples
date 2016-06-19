@@ -1,4 +1,4 @@
-package kaleidok.containers;
+package kaleidok.util.containers;
 
 public interface FloatList
 {

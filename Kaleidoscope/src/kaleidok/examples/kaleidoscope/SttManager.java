@@ -4,7 +4,7 @@ import kaleidok.google.speech.RecorderIcon;
 import kaleidok.google.speech.STT;
 import kaleidok.google.speech.SttResponse;
 import kaleidok.google.speech.Transcription;
-import kaleidok.concurrent.AbstractFutureCallback;
+import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.processing.Plugin;
 import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;

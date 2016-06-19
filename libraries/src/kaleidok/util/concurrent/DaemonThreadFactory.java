@@ -1,4 +1,4 @@
-package kaleidok.concurrent;
+package kaleidok.util.concurrent;
 
 import java.util.concurrent.ThreadFactory;
 

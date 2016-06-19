@@ -1,10 +1,9 @@
 package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
-import kaleidok.concurrent.GroupedThreadFactory;
+import kaleidok.util.concurrent.GroupedThreadFactory;
 import kaleidok.flickr.*;
-import kaleidok.containers.BoundedCompletionQueue;
-import kaleidok.flickr.internal.FlickrBase;
+import kaleidok.util.containers.BoundedCompletionQueue;
 import kaleidok.http.async.ImageAsync;
 import kaleidok.http.async.JsonAsync;
 import org.apache.http.client.fluent.Async;

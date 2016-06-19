@@ -1,6 +1,6 @@
 package kaleidok.awt;
 
-import kaleidok.concurrent.NotifyFuture;
+import kaleidok.util.concurrent.NotifyFuture;
 import org.apache.http.concurrent.FutureCallback;
 
 import java.awt.Component;

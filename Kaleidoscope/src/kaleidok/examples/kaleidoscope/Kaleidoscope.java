@@ -1,6 +1,6 @@
 package kaleidok.examples.kaleidoscope;
 
-import kaleidok.containers.Reference;
+import kaleidok.util.containers.Reference;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.util.DefaultValueParser;

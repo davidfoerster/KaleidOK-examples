@@ -1,6 +1,6 @@
 package kaleidok.audio.spectrum;
 
-import kaleidok.containers.FloatList;
+import kaleidok.util.containers.FloatList;
 
 
 public interface Spectrum extends FloatList

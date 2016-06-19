@@ -1,6 +1,6 @@
 package kaleidok.util;
 
-import kaleidok.containers.FloatList;
+import kaleidok.util.containers.FloatList;
 
 import static java.lang.Math.*;
 

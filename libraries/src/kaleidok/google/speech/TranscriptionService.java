@@ -1,6 +1,6 @@
 package kaleidok.google.speech;
 
-import kaleidok.concurrent.DaemonThreadFactory;
+import kaleidok.util.concurrent.DaemonThreadFactory;
 import org.apache.http.concurrent.FutureCallback;
 
 import java.net.MalformedURLException;

@@ -1,4 +1,4 @@
-package kaleidok.containers;
+package kaleidok.util.containers;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
