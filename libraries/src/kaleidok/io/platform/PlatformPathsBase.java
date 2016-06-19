@@ -15,6 +15,13 @@ public class PlatformPathsBase
   protected PlatformPathsBase() { }
 
 
+  static Path getEnvDir( String envName, Path defaultPath )
+  {
+    String dir = System.getenv(envName);
+    return (dir != null && !dir.isEmpty()) ? Paths.get(dir) : defaultPath;
+  }
+
+
   private Path homeDir;
 
   public Path getHomeDir()

@@ -1,7 +1,6 @@
 package kaleidok.io.platform;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 
 public class WindowsPaths extends PlatformPathsBase
@@ -26,12 +25,5 @@ public class WindowsPaths extends PlatformPathsBase
   {
     //noinspection SpellCheckingInspection
     return getEnvDir("APPDATA", getHomeDir());
-  }
-
-
-  private Path getEnvDir( String envName, Path defaultPath )
-  {
-    String dir = System.getenv(envName);
-    return (dir != null && !dir.isEmpty()) ? Paths.get(dir) : defaultPath;
   }
 }
