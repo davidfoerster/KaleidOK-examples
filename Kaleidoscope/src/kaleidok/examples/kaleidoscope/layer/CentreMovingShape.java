@@ -1,7 +1,7 @@
 package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.audio.processor.VolumeLevelProcessor;
-import kaleidok.examples.kaleidoscope.Kaleidoscope;
+import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.PImageFuture;
 import kaleidok.util.CyclingList;
 import processing.core.PApplet;
@@ -28,7 +28,7 @@ public class CentreMovingShape extends CircularImageLayer
   private double exponent = 0.5;
 
 
-  public CentreMovingShape( Kaleidoscope parent, List<PImageFuture> images,
+  public CentreMovingShape( ExtPApplet parent, List<PImageFuture> images,
     int segmentCount, float innerRadius, float outerRadius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
@@ -37,7 +37,7 @@ public class CentreMovingShape extends CircularImageLayer
   }
 
 
-  private CentreMovingShape( Kaleidoscope parent,
+  private CentreMovingShape( ExtPApplet parent,
     CyclingList<PImageFuture> images, int segmentCount, float innerRadius,
     float outerRadius, VolumeLevelProcessor volumeLevelProcessor )
   {
