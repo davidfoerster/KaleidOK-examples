@@ -19,7 +19,7 @@ import static kaleidok.util.Threads.handleUncaught;
 
 public class OffThreadAudioPlayer implements AudioProcessor
 {
-  private final Thread offThread;
+  public final Thread offThread;
 
   private final AudioFormat format;
 
@@ -39,7 +39,6 @@ public class OffThreadAudioPlayer implements AudioProcessor
     line.open();
 
     offThread = new AudioPlayerThread(pipe.source(), line);
-    offThread.start();
   }
 
 

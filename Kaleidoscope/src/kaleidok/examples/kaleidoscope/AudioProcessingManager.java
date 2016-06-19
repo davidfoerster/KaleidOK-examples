@@ -135,9 +135,11 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     if (DefaultValueParser.parseBoolean(p,
       p.getClass().getPackage().getName() + ".audio.input.play", false))
     {
-      audioDispatcher.addAudioProcessor(new OffThreadAudioPlayer(
+      OffThreadAudioPlayer player = new OffThreadAudioPlayer(
         JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
-        getAudioBufferSize() - getAudioBufferOverlap()));
+        getAudioBufferSize() - getAudioBufferOverlap());
+      player.offThread.start();
+      audioDispatcher.addAudioProcessor(player);
     }
     return new DummyAudioPlayer().addToDispatcher(audioDispatcher, chained);
   }
