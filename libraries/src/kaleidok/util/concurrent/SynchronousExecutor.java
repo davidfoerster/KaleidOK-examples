@@ -9,6 +9,7 @@ import java.util.concurrent.Executor;
  * <p>
  * A possible use case is testing and debugging of task or event driven code.
  */
+@SuppressWarnings("unused")
 public class SynchronousExecutor implements Executor
 {
   public static final SynchronousExecutor INSTANCE =
