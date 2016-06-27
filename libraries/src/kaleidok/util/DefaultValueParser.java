@@ -4,7 +4,6 @@ package kaleidok.util;
 import java.applet.Applet;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,7 +106,7 @@ public final class DefaultValueParser
   public static <T> T valueOf( String s, Class<T> targetClass )
     throws IllegalArgumentException
   {
-    Class<?> wrapperClass = getWrapperType(targetClass);
+    Class<?> wrapperClass = Reflection.getWrapperType(targetClass);
     if (wrapperClass == Character.class) {
       if (s.length() != 1) {
         throw new IllegalArgumentException(
@@ -162,29 +161,6 @@ public final class DefaultValueParser
     }
     return defaultValue;
   }
-
-
-  public static Class<?> getWrapperType( Class<?> clazz )
-  {
-    return clazz.isPrimitive() ? PRIMITIVES_TO_WRAPPERS.get(clazz) : clazz;
-  }
-
-  public static final Collection<Class<?>> WRAPPER_TYPES =
-    Arrays.asImmutableList(new Class<?>[]{
-      Boolean.class, Character.class, Byte.class, Short.class,
-      Integer.class, Long.class, Float.class, Double.class
-    });
-
-  private static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS =
-    new HashMap<Class<?>, Class<?>>(16) {{
-      for (Class<?> clazz: WRAPPER_TYPES) {
-        try {
-          put((Class<?>) clazz.getDeclaredField("TYPE").get(null), clazz);
-        } catch (NoSuchFieldException | IllegalAccessException ex) {
-          throw new AssertionError(ex);
-        }
-      }
-    }};
 
 
   private static final Map<String, Boolean> BOOLEAN_WORDS =
