@@ -1,6 +1,5 @@
 package kaleidok.examples.kaleidoscope;
 
-import kaleidok.util.containers.Reference;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.util.DefaultValueParser;
@@ -9,6 +8,7 @@ import processing.event.KeyEvent;
 import javax.swing.JApplet;
 
 import java.awt.Point;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 
@@ -36,7 +36,8 @@ public class Kaleidoscope extends ExtPApplet
    */
   private SttManager stt;
 
-  private Reference<ExportService> exportService;
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+  private Optional<ExportService> exportService;
 
 
   public Kaleidoscope( JApplet parent )
@@ -111,18 +112,19 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private ExportService getExportService()
+  private Optional<ExportService> getExportService()
   {
     if (exportService == null)
     {
-      exportService = new Reference<>(ExportService.fromConfiguration(this));
-      if (exportService.item != null)
+      exportService =
+        Optional.ofNullable(ExportService.fromConfiguration(this));
+      if (exportService.isPresent())
       {
         getChromasthetiationService()
-          .setImageQueueCompletionCallback(exportService.item.getCallback());
+          .setImageQueueCompletionCallback(exportService.get().getCallback());
       }
     }
-    return exportService.item;
+    return exportService;
   }
 
 
@@ -142,10 +144,10 @@ public class Kaleidoscope extends ExtPApplet
     switch (ev.getKey())
     {
     case 'r':
-      ExportService es = getExportService();
-      if (es != null)
+      Optional<ExportService> es = getExportService();
+      if (es.isPresent())
       {
-        es.schedule();
+        es.get().schedule();
         return;
       }
       break;
