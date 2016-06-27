@@ -7,6 +7,7 @@ import kaleidok.util.DefaultValueParser;
 import processing.core.PApplet;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -29,6 +30,7 @@ public class ExportService extends ITextExport
   }
 
 
+  @SuppressWarnings("resource")
   public static ExportService fromConfiguration( PApplet sketch )
   {
     if (!DefaultValueParser.parseBoolean(sketch,
@@ -37,12 +39,13 @@ public class ExportService extends ITextExport
       return null;
     }
 
-    ExportService es = new ExportService(sketch);
-    Path outputPath = PlatformPaths.getTempDir().resolve("kaleidok-screenshot.pdf");
+    // TODO: Implement a configurable/selectable target path
+    Path outputPath =
+      PlatformPaths.getTempDir().resolve("kaleidok-screenshot.pdf");
+    OutputStream outputStream;
     try
     {
-      // TODO: Implement a configurable/selectable target path
-      es.setOutput(Files.newOutputStream(outputPath));
+      outputStream = Files.newOutputStream(outputPath);
     }
     catch (IOException ex)
     {
@@ -52,6 +55,8 @@ public class ExportService extends ITextExport
       return null;
     }
 
+    ExportService es = new ExportService(sketch);
+    es.setOutput(outputStream);
     return es;
   }
 
