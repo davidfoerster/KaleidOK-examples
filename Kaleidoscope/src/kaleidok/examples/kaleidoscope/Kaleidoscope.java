@@ -46,17 +46,24 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  private static final int
+    DEFAULT_PAPPLET_LENGTH = 100,
+    DEFAULT_KALEIDOSCOPE_LENGTH = 1000;
+
+
   @Override
   public void setup()
   {
     Point size = new Point(width, height);
-    if (size.x == 100 && size.y == 100) {
+    if (size.x == DEFAULT_PAPPLET_LENGTH && size.y == DEFAULT_PAPPLET_LENGTH)
+    {
       /*
        * Default dimensions mean, the surrounding layout manager didn't resize
        * this sketch yet; use more sensible default dimensions instead (and set
        * them thereafter).
        */
-      size.setLocation(1000, 1000);
+      size.x = DEFAULT_KALEIDOSCOPE_LENGTH;
+      size.y = DEFAULT_KALEIDOSCOPE_LENGTH;
     }
     this.size(size.x, size.y, OPENGL); // keep size, but use the OpenGL renderer
     previousSize = size;
