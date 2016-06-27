@@ -135,26 +135,38 @@ public class AppletLauncher
     String... args ) throws IOException
   {
     Properties prop = new Properties();
+    String propPath = appletClass.getSimpleName() + ".properties";
+    boolean hasDefaultProperties =
+      PropertyLoader.load(prop, null, appletClass, propPath) > 0;
+
+    if (args != null && args.length > 0 && "--params".equals(args[0]))
     {
-      String propPath = appletClass.getSimpleName() + ".properties";
-      if (PropertyLoader.load(prop, null, appletClass, propPath) == 0) {
-        Logger.getLogger(appletClass.getCanonicalName()).log(Level.CONFIG,
-          "No Applet properties file \"{0}\" found; using default values",
-          propPath);
+      if (args.length < 2)
+      {
+        throw new IllegalArgumentException(
+          "Option \"--params\" requires an argument");
       }
-    }
-
-    if (args != null && args.length > 0 && "--params".equals(args[0])) {
-      String paramsFile = args[1];
-      prop.load(new InputStreamReader(
-        (paramsFile.length() == 1 && paramsFile.charAt(0) == '-') ?
-          System.in :
-          new FileInputStream(paramsFile)));
-
+      try (Reader r = new InputStreamReader(openFilenameArgument(args[1])))
+      {
+        prop.load(r);
+      }
       args = (args.length > 2) ? Arrays.copyOfRange(args, 2, args.length) : null;
+    }
+    else if (!hasDefaultProperties)
+    {
+      Logger.getLogger(appletClass.getCanonicalName()).log(Level.CONFIG,
+        "No Applet properties file \"{0}\" found; using default values",
+        propPath);
     }
 
     return launch(appletClass, prop, args);
+  }
+
+
+  private static InputStream openFilenameArgument( String arg )
+    throws FileNotFoundException
+  {
+    return "-".equals(arg) ? System.in : new FileInputStream(arg);
   }
 
 
