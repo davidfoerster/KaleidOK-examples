@@ -40,7 +40,6 @@ public final class Reflection
 
   public static Class<?> getPrimitiveType( Class<?> clazz )
   {
-    Class<?> primitive = PRIMITIVES_TO_WRAPPERS.get(clazz);
-    return (primitive != null && primitive.isPrimitive()) ? primitive : null;
+    return clazz.isPrimitive() ? clazz : PRIMITIVES_TO_WRAPPERS.get(clazz);
   }
 }
