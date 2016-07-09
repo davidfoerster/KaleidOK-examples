@@ -61,7 +61,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
 
   private void applyLayerProperties()
   {
-    Properties prop = getLayerProperties();
+    Properties prop = loadLayerProperties();
     Package pack = ImageLayer.class.getPackage();
     MessageFormat screenshotPathPattern = getScreenshotPathPattern();
 
@@ -245,31 +245,25 @@ public class LayerManager implements List<ImageLayer>, Runnable
   }
 
 
-  private Properties layerProperties = null;
-
-
-  private Properties getLayerProperties()
+  private static Properties loadLayerProperties()
   {
-    if (layerProperties == null)
+    String propFn = "layer.properties";
+    Properties layerProperties = new Properties();
+    try
     {
-      String propFn = "layer.properties";
-      layerProperties = new Properties();
-      try
+      if (PropertyLoader.load(
+        layerProperties, null, ImageLayer.class, propFn) == 0)
       {
-        if (PropertyLoader.load(
-          layerProperties, null, ImageLayer.class, propFn) == 0)
-        {
-          logger.log(Level.CONFIG,
-            "No layer properties file \"{0}\" found; using defaults",
-            propFn);
-        }
-      }
-      catch (IOException ex)
-      {
-        logThrown(logger, Level.SEVERE,
-          "Couldn't load layer properties file \"{0}\"; using defaults", ex,
+        logger.log(Level.CONFIG,
+          "No layer properties file \"{0}\" found; using defaults",
           propFn);
       }
+    }
+    catch (IOException ex)
+    {
+      logThrown(logger, Level.SEVERE,
+        "Couldn't load layer properties file \"{0}\"; using defaults", ex,
+        propFn);
     }
     return layerProperties;
   }
