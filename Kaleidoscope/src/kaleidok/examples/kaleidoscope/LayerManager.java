@@ -64,17 +64,30 @@ public class LayerManager implements List<ImageLayer>, Runnable
     Properties prop = loadLayerProperties();
     Package pack = ImageLayer.class.getPackage();
     MessageFormat screenshotPathPattern = getScreenshotPathPattern();
+    Set<String> appliedProperties =
+      logger.isLoggable(Level.FINEST) ? new HashSet<>(prop.size() * 2) : null;
 
-    int count = 0;
-    for (ImageLayer l: this) {
-      count += BeanUtils.applyBeanProperties(prop, pack, l);
+    for (ImageLayer l: this)
+    {
+      BeanUtils.applyBeanProperties(prop, pack, l, appliedProperties);
       l.setScreenshotPathPattern(screenshotPathPattern);
     }
 
-    if (count != prop.size()) {
+    if (appliedProperties != null && appliedProperties.size() < prop.size())
+    {
+      Map<String, String> unappliedProperties =
+        new HashMap<>(Math.max(prop.size() - appliedProperties.size(), 0) * 2);
+      for (Map.Entry<Object, Object> entry: prop.entrySet())
+      {
+        String key = (String) entry.getKey();
+        if (!appliedProperties.contains(key))
+          unappliedProperties.put(key, (String) entry.getValue());
+      }
       logger.log(Level.FINEST,
-        "Only {0} of your {1} layer property settings were used",
-        new Object[]{count, prop.size()});
+        "The following {0} of your {1} layer property settings were not " +
+          "used: {2}",
+        new Object[]{
+          unappliedProperties.size(), prop.size(), unappliedProperties});
     }
   }
 

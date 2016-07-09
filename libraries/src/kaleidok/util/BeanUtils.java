@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 
 public final class BeanUtils
@@ -17,7 +18,7 @@ public final class BeanUtils
 
 
   public static int applyBeanProperties( Properties prop, Package root,
-    Object bean )
+    Object bean, Set<String> appliedProperties )
   {
     String prefix = removePrefix(root, bean.getClass());
     PropertySetter ps = null;
@@ -33,7 +34,11 @@ public final class BeanUtils
         {
           ps = new PropertyDescriptorSetter(prop, prefix, pd, wm, bean);
           if (ps.tryAssignment())
+          {
             count++;
+            if (appliedProperties != null)
+              appliedProperties.add(ps.getEntry().getKey());
+          }
         }
       }
 
@@ -41,7 +46,11 @@ public final class BeanUtils
       {
         ps = new FieldPropertySetter(prop, prefix, f, bean);
         if (ps.tryAssignment())
+        {
           count++;
+          if (appliedProperties != null)
+            appliedProperties.add(ps.getEntry().getKey());
+        }
       }
     }
     catch (IntrospectionException ex)
