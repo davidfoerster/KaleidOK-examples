@@ -1,7 +1,7 @@
 package kaleidok.util;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 
@@ -17,7 +17,7 @@ public final class Reflection
 
 
   private static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS =
-    new HashMap<Class<?>, Class<?>>(WRAPPER_TYPES.size() * 3) {{
+    new IdentityHashMap<Class<?>, Class<?>>(WRAPPER_TYPES.size() * 3) {{
       for (Class<?> clazz: WRAPPER_TYPES)
       {
         Class<?> primitive;
