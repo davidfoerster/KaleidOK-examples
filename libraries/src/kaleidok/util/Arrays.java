@@ -16,6 +16,9 @@ public final class Arrays
 
   public static final Class<?>[] EMPTY_CLASSES = {};
 
+  @SuppressWarnings("unused")
+  public static final String[] EMPTY_STRINGS = {};
+
 
   public static int[] shuffle( int[] ar, Random rnd )
   {

@@ -1,5 +1,6 @@
 package kaleidok.http;
 
+import kaleidok.util.Strings;
 import org.junit.Test;
 
 import java.io.PrintWriter;
@@ -187,16 +188,23 @@ public class URLEncodingTest
     StringBuilder sb = new StringBuilder(RANDOM_TEST_LENGTH);
     for (int i = 0; i < RANDOM_TEST_COUNT; i++)
     {
-      sb.setLength(0);
-      appendRandom(sb, MIN_CODE_POINT, MAX_CODE_POINT, 1, sb.capacity() / 2);
-      String unicodeStr = sb.toString();
+      for (Charset chs: CHARSETS)
+      {
+        String unicodeStr;
+        if (chs.contains(UTF_8))
+        {
+          sb.setLength(0);
+          appendRandom(sb, MIN_CODE_POINT, MAX_CODE_POINT, 1, sb.capacity() / 2);
+          unicodeStr = sb.toString();
+        }
+        else
+        {
+          ByteBuffer bytes = ByteBuffer.allocate(getRandom(1, RANDOM_TEST_LENGTH));
+          rand.nextBytes(bytes.array());
+          unicodeStr = ignoreUnmappable(bytes, chs);
+        }
 
-      ByteBuffer bytes = ByteBuffer.allocate(getRandom(1, RANDOM_TEST_LENGTH));
-      rand.nextBytes(bytes.array());
-
-      for (Charset chs: CHARSETS) {
-        test(decode, chs.contains(UTF_8) ? unicodeStr : ignoreUnmappable(bytes, chs),
-          chs);
+        test(decode, unicodeStr, chs);
       }
     }
   }
@@ -223,7 +231,7 @@ public class URLEncodingTest
   {
     String urlEncoded = URLEncoder.encode(s, chs.name());
     assertEquals(
-      new String(s.getBytes(chs), chs),
+      replaceUnmappable(s, chs),
       decode(urlEncoded, chs));
   }
 
@@ -259,12 +267,9 @@ public class URLEncodingTest
   private static void expectIllegalArgumentException( boolean decode, String s,
     Charset chs, Class<? extends Throwable> expectedCause )
   {
-    Object result;
+    String result;
     try {
-      String strResult = decode ?
-        decode(s, chs) :
-        encode(s, chs);
-      result = '"' + strResult + '"';
+      result = decode ? decode(s, chs) : encode(s, chs);
       if (expectedCause == null)
         expectedCause = IllegalArgumentException.class;
     } catch (IllegalArgumentException ex) {
@@ -277,20 +282,21 @@ public class URLEncodingTest
 
       StringWriter writer = new StringWriter();
       PrintWriter printWriter = new PrintWriter(writer, false);
-      printWriter.println(':');
       ex.printStackTrace(printWriter);
       printWriter.close();
       result = writer.toString();
     }
 
     fail(String.format(
-      "Expected an %s when %scoding \"%s\"; instead I got %s",
-      expectedCause.getCanonicalName(), decode ? "de" : "en", s, result.toString()));
+      "Expected an %s when %scoding \"%s\"; instead I got:%n%s",
+      expectedCause.getCanonicalName(), decode ? "de" : "en", s, result));
   }
 
   private static String replaceUnmappable( String s, Charset chs )
   {
-    return chs.contains(UTF_8) ? s : new String(s.getBytes(chs), chs);
+    return (chs.contains(UTF_8) || (chs.contains(US_ASCII) && Strings.isAscii(s)) ?
+      s :
+      new String(s.getBytes(chs), chs));
   }
 
   private static String ignoreUnmappable( ByteBuffer bytes, Charset chs )
@@ -328,7 +334,7 @@ public class URLEncodingTest
   {
     for (; count > 0; count--) {
       int c = getRandomCodePoint(minChar, maxChar);
-      if (Character.charCount(c) == 1) {
+      if (!isSupplementaryCodePoint(c)) {
         buf.append((char) c);
       } else {
         buf.append(highSurrogate(c)).append(lowSurrogate(c));

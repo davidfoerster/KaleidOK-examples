@@ -118,4 +118,20 @@ public final class Strings
 
     return dst;
   }
+
+
+  public static boolean isAscii( int c )
+  {
+    return (c & ~0x7f) == 0;
+  }
+
+  public static boolean isAscii( CharSequence s )
+  {
+    for (int i = 0, len = s.length(); i < len; i++)
+    {
+      if (!isAscii(s.charAt(i)))
+        return false;
+    }
+    return true;
+  }
 }
