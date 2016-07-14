@@ -22,5 +22,6 @@
     <orderEntry type="library" name="commons-io:commons-io:2.4" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.4" level="project" />
     <orderEntry type="library" name="com.itextpdf:layout:7.0.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="org.slf4j:slf4j-nop:1.7.10" level="project" />
   </component>
 </module>

@@ -34,7 +34,10 @@ public class URLEncodingTest
       add(Charset.forName("ISO-8859-15"));
 
       for (int i = 1250; i <= 1252; i ++)
+      {
+        //noinspection InjectedReferences
         add(Charset.forName("Windows-" + i));
+      }
 
       Charset defaultPlatformCharset = Charset.defaultCharset();
       if (!contains(defaultPlatformCharset))
@@ -91,6 +94,7 @@ public class URLEncodingTest
       assertEquals(SPACE_ESCAPER, encode(" ", chs));
   }
 
+  @SuppressWarnings("JUnitTestMethodWithNoAssertions")
   @Test
   public void testDecode4() throws UnsupportedEncodingException
   {
@@ -98,6 +102,7 @@ public class URLEncodingTest
     testDecode("%");
   }
 
+  @SuppressWarnings("JUnitTestMethodWithNoAssertions")
   @Test
   public void testEncode4() throws UnsupportedEncodingException
   {
@@ -105,18 +110,21 @@ public class URLEncodingTest
     testEncode("%");
   }
 
+  @SuppressWarnings({ "JUnitTestMethodWithNoAssertions", "SpellCheckingInspection" })
   @Test
   public void testDecode5() throws UnsupportedEncodingException
   {
     testDecode("Föøβäя +&% bàç!?");
   }
 
+  @SuppressWarnings({ "JUnitTestMethodWithNoAssertions", "SpellCheckingInspection" })
   @Test
   public void testEncode5() throws UnsupportedEncodingException
   {
     testEncode("Föøβäя +&% bàç!?");
   }
 
+  @SuppressWarnings("JUnitTestMethodWithNoAssertions")
   @Test
   public void testDecode6()
   {
@@ -130,13 +138,14 @@ public class URLEncodingTest
     decodeExpectIllegalArgumentException("%20-%2", UTF_8);
   }
 
+  @SuppressWarnings("JUnitTestMethodWithNoAssertions")
   @Test
   public void testEncode6()
   {
-    assertTrue(isValidCodePoint(MAX_CODE_POINT));
+    assert isValidCodePoint(MAX_CODE_POINT);
 
     String surrogatePair = new String(toChars(MAX_CODE_POINT));
-    assertEquals(2, surrogatePair.length());
+    assert surrogatePair.length() == 2;
 
     // Disabled, since unmappable characters should be replaced, not reported
     /*
@@ -155,6 +164,7 @@ public class URLEncodingTest
       UTF_8, MalformedInputException.class);
   }
 
+  @SuppressWarnings("JUnitTestMethodWithNoAssertions")
   @Test
   public void testDecode7()
     throws UnsupportedEncodingException, MalformedInputException
@@ -162,6 +172,7 @@ public class URLEncodingTest
     testRandom(true);
   }
 
+  @SuppressWarnings("JUnitTestMethodWithNoAssertions")
   @Test
   public void testEncode7()
     throws UnsupportedEncodingException, MalformedInputException
@@ -334,7 +345,7 @@ public class URLEncodingTest
       int c = getRandom(minChar, maxChar);
       if (!isValidCodePoint(c) || isISOControl(c))
         continue;
-      if (c <= Character.MAX_VALUE && isSurrogate((char) c))
+      if (c <= MAX_VALUE && isSurrogate((char) c))
         continue;
       UnicodeBlock block = UnicodeBlock.of(c);
       if (block == null || block == UnicodeBlock.SPECIALS || block == UnicodeBlock.PRIVATE_USE_AREA)
@@ -346,9 +357,10 @@ public class URLEncodingTest
   private static int getRandom( int min, int max )
   {
     assert min <= max : min + " > " + max;
-    assert (long) max - (long) min + 1 < Integer.MAX_VALUE :
+    //noinspection UnnecessaryExplicitNumericCast
+    assert (long) max - (long) min + 1 <= Integer.MAX_VALUE :
       String.format("(%d - %d + 1) overflows", max, min);
 
-    return (int)(rand.nextDouble() * (max - min + 1)) + min;
+    return rand.nextInt(max - min + 1) + min;
   }
 }

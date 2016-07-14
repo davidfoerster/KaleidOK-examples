@@ -1,15 +1,19 @@
 package kaleidok.http;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.http.ContentTypeHeader;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import kaleidok.http.responsehandler.JsonMimeTypeChecker;
 import kaleidok.http.util.MimeTypeMap;
+import org.apache.http.entity.ContentType;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
 
@@ -21,10 +25,13 @@ public class HttpConnectionTest
 {
   public static final String
     PATH = "/",
-    MIME_TYPE = "text/plain",
+    MIME_TYPE = ContentType.TEXT_PLAIN.getMimeType(),
     BODY = "¿Föøbår…‽";
 
-  public static final Charset CHARSET = Charset.forName("utf-8");
+  public static final Charset CHARSET = StandardCharsets.UTF_8;
+
+  public static final String CONTENT_TYPE =
+    MIME_TYPE + ";charset=" + CHARSET.name();
 
   private static final byte[] BODY_BYTES = BODY.getBytes(CHARSET);
 
@@ -34,14 +41,16 @@ public class HttpConnectionTest
 
   public HttpConnection con;
 
-  public void setUp(ResponseDefinitionBuilder r) throws Exception
+
+  public void setUp(ResponseDefinitionBuilder r) throws IOException
   {
-    setUp(r, MIME_TYPE + ";charset=" + CHARSET.name());
+    setUp(r, CONTENT_TYPE);
   }
 
-  public void setUp(ResponseDefinitionBuilder r, String contentType) throws Exception
+
+  public void setUp(ResponseDefinitionBuilder r, String contentType) throws IOException
   {
-    r.withHeader("Content-Type", contentType);
+    r.withHeader(ContentTypeHeader.KEY, contentType);
     stubFor(get(urlEqualTo(PATH)).willReturn(r));
 
     con = HttpConnection.openURL(
@@ -50,7 +59,7 @@ public class HttpConnectionTest
 
 
   @Test
-  public void testGetBody() throws Exception
+  public void testGetBody() throws IOException
   {
     setUp(aResponse().withBody(BODY_BYTES));
     assertEquals(BODY, con.getBody());
@@ -58,7 +67,7 @@ public class HttpConnectionTest
 
 
   @Test
-  public void testGetBodyDeflate() throws Exception
+  public void testGetBodyDeflate() throws IOException
   {
     setUp(aResponse()
       .withBody(deflate(BODY_BYTES, true))
@@ -98,12 +107,13 @@ public class HttpConnectionTest
 
 
   @Test
-  public void testGetBodyGzip() throws Exception
+  public void testGetBodyGzip() throws IOException
   {
     ByteArrayOutputStream buf = new ByteArrayOutputStream();
-    GZIPOutputStream comp = new GZIPOutputStream(buf);
-    comp.write(BODY_BYTES);
-    comp.finish();
+    try (GZIPOutputStream comp = new GZIPOutputStream(buf))
+    {
+      comp.write(BODY_BYTES);
+    }
 
     setUp(aResponse()
       .withBody(buf.toByteArray())
@@ -113,7 +123,7 @@ public class HttpConnectionTest
 
 
   @Test
-  public void testGetResponseContentType() throws Exception
+  public void testGetResponseContentType() throws IOException
   {
     setUp(aResponse());
     assertEquals(MIME_TYPE, con.getResponseMimeType());
@@ -123,7 +133,7 @@ public class HttpConnectionTest
 
 
   @Test
-  public void testGetResponseMimeType1() throws Exception
+  public void testGetResponseMimeType1() throws IOException
   {
     setUp(aResponse());
     con.acceptedMimeTypes.put(MIME_TYPE, null);
@@ -131,7 +141,7 @@ public class HttpConnectionTest
   }
 
   @Test
-  public void testGetResponseMimeType2() throws Exception
+  public void testGetResponseMimeType2() throws IOException
   {
     setUp(aResponse());
     con.acceptedMimeTypes.put("text/*", null);
@@ -140,7 +150,7 @@ public class HttpConnectionTest
 
 
   @Test
-  public void testGetResponseMimeType3() throws Exception
+  public void testGetResponseMimeType3() throws IOException
   {
     setUp(aResponse());
     con.acceptedMimeTypes.put(MimeTypeMap.WILDCARD, null);
@@ -149,7 +159,7 @@ public class HttpConnectionTest
 
 
   @Test
-  public void testGetResponseMimeType4() throws Exception
+  public void testGetResponseMimeType4() throws IOException
   {
     setUp(aResponse());
     con.acceptedMimeTypes = JsonMimeTypeChecker.MIME_TYPE_MAP;

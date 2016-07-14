@@ -10,15 +10,16 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 
+@SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")
 public class ChromatikQueryTest
 {
-  private Map<String, String> getParams( ChromatikQuery q )
+  private static Map<String, String> getParams( ChromatikQuery q )
   {
     return Parsers.getQueryMap(q.getUri(), URLEncoding.DEFAULT_CHARSET);
   }
 
 
-  private List<String> getOpts( Map<String, String> m )
+  private static List<String> getOpts( Map<String, String> m )
   {
     String q = m.get("q");
     if (q == null)
@@ -33,7 +34,7 @@ public class ChromatikQueryTest
         .split(" +");
       int i = 0, j = 0;
       while (j < a.length) {
-        if (a[j].equals("OPT")) {
+        if ("OPT".equals(a[j])) {
           j++;
           assertTrue(j < a.length);
           assertTrue(a[j].startsWith("color:"));
@@ -60,7 +61,7 @@ public class ChromatikQueryTest
 
 
   @Test
-  public void testGetQueryString1() throws Exception
+  public void testGetQueryString1()
   {
     ChromatikQuery q = new ChromatikQuery();
     q.start = 42;
@@ -74,7 +75,7 @@ public class ChromatikQueryTest
 
 
   @Test
-  public void testGetQueryString2() throws Exception
+  public void testGetQueryString2()
   {
     String keywords = "foo bar";
     Map<String, String> p = getParams(new ChromatikQuery(10, keywords, null));
@@ -88,7 +89,7 @@ public class ChromatikQueryTest
 
 
   @Test
-  public void testGetQueryString3() throws Exception
+  public void testGetQueryString3()
   {
     Map<String, String> p = getParams(new ChromatikQuery(10, null, 0xe51919));
 
@@ -101,7 +102,7 @@ public class ChromatikQueryTest
 
 
   @Test
-  public void testGetQueryString4() throws Exception
+  public void testGetQueryString4()
   {
     String keywords = "foo bar";
     Map<String, String> p = getParams(new ChromatikQuery(10, keywords, 0xe51919));
@@ -115,7 +116,7 @@ public class ChromatikQueryTest
 
 
   @Test
-  public void testGetQueryString5() throws Exception
+  public void testGetQueryString5()
   {
     ChromatikQuery q = new ChromatikQuery(10, null, null) {{
         opts.put(new ChromatikColor(0xe51919), 0.07);
@@ -142,7 +143,7 @@ public class ChromatikQueryTest
 
 
   @Test
-  public void testGetQueryString6() throws Exception
+  public void testGetQueryString6()
   {
     ChromatikQuery q = new ChromatikQuery(10, null, null) {{
         opts.put(new ChromatikColor(0xe51919), 0.07);

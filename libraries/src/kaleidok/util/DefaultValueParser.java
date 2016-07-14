@@ -164,7 +164,7 @@ public final class DefaultValueParser
 
 
   private static final Map<String, Boolean> BOOLEAN_WORDS =
-    new HashMap<String, Boolean>(16) {{
+    new HashMap<String, Boolean>(12) {{
       put("true", TRUE);
       put("false", FALSE);
       put("yes", TRUE);

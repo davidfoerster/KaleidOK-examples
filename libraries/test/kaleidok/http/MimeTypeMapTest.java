@@ -11,13 +11,14 @@ import static kaleidok.http.util.MimeTypeMap.WILDCARD;
 import static org.junit.Assert.*;
 
 
+@SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")
 public class MimeTypeMapTest
 {
   MimeTypeMap m;
 
 
   @Before
-  public void setUp() throws Exception
+  public void setUp()
   {
     m = new MimeTypeMap() {{
       put(WILDCARD, .5f);
@@ -28,7 +29,7 @@ public class MimeTypeMapTest
 
 
   @Test
-  public void testAllows() throws Exception
+  public void testAllows()
   {
     assertEquals(WILDCARD, m.allows("application/octetstream"));
     assertEquals("text/*", m.allows("text/html"));
@@ -37,7 +38,7 @@ public class MimeTypeMapTest
 
 
   @Test
-  public void testToString() throws Exception
+  public void testToString()
   {
     List<String> strAccept = Arrays.asList(m.toString().split("\\s*,\\s*"));
     assertEquals(m.size(), strAccept.size());
