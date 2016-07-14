@@ -196,10 +196,14 @@ public final class KaleidoscopeChromasthetiationService
     @Override
     public void failed( Exception ex )
     {
-      if (ex == null) {
+      if (ex == null)
+      {
         logger.fine("Chromasthetiation aborted");
-      } else if (ex instanceof FlickrException) {
-        switch (((FlickrException) ex).getErrorCode()) {
+      }
+      else if (ex instanceof FlickrException)
+      {
+        switch (((FlickrException) ex).getErrorCode())
+        {
         case 1: // Photo not found
         case 2: // Permission denied
           logger.log(Level.FINE, "Flickr says: {0}", ex.getLocalizedMessage());

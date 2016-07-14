@@ -1,13 +1,17 @@
 package kaleidok.exaleads.chromatik.data;
 
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 
 public class ChromatikColorTest
 {
-  @org.junit.Test
-  public void testColorPredefined() {
-    for (int i = 0; i < ChromatikColor.COLORS.length; i++) {
+  @Test
+  public void testColorPredefined()
+  {
+    for (int i = 0; i < ChromatikColor.COLORS.length; i++)
+    {
       int c1 = ChromatikColor.COLORS[i];
       ChromatikColor c2 = new ChromatikColor(c1);
       assertEquals(c1, c2.value);
@@ -15,9 +19,12 @@ public class ChromatikColorTest
     }
   }
 
-  @org.junit.Test
-  public void testColorGrayscale() {
-    for (int i = 1; i <= ChromatikColor.HUE_COLS; i++) {
+
+  @Test
+  public void testColorGrayscale()
+  {
+    for (int i = 1; i <= ChromatikColor.HUE_COLS; i++)
+    {
       int brightness = i * 255 / 12;
       ChromatikColor gray = new ChromatikColor(brightness, brightness, brightness);
       assertEquals(gray.value & 0xff, (gray.value >>> 8) & 0xff);
@@ -34,9 +41,11 @@ public class ChromatikColorTest
     }
   }
 
+
   public static void main(String[] args)
   {
-    for (int i = 0; i < ChromatikColor.COLORS.length; i++) {
+    for (int i = 0; i < ChromatikColor.COLORS.length; i++)
+    {
       int c1 = ChromatikColor.COLORS[i];
       ChromatikColor c2 = new ChromatikColor(c1);
       System.out.format("%#08x => %#08x %c (%s)%n", c1, c2.value, (c1 == c2.value) ? ' ' : '!', c2.groupName);

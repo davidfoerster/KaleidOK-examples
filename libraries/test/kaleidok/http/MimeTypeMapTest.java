@@ -15,6 +15,7 @@ public class MimeTypeMapTest
 {
   MimeTypeMap m;
 
+
   @Before
   public void setUp() throws Exception
   {
@@ -25,6 +26,7 @@ public class MimeTypeMapTest
     }};
   }
 
+
   @Test
   public void testAllows() throws Exception
   {
@@ -32,6 +34,7 @@ public class MimeTypeMapTest
     assertEquals("text/*", m.allows("text/html"));
     assertNull(m.allows("text/plain"));
   }
+
 
   @Test
   public void testToString() throws Exception

@@ -548,8 +548,8 @@ public class HttpConnection
   /**
    * @see HttpURLConnection#setChunkedStreamingMode(int)
    */
-  public void setChunkedStreamingMode( int chunklen )
+  public void setChunkedStreamingMode( int chunkLen )
   {
-    c.setChunkedStreamingMode(chunklen);
+    c.setChunkedStreamingMode(chunkLen);
   }
 }

@@ -28,6 +28,7 @@ public class HttpConnectionTest
 
   private static final byte[] BODY_BYTES = BODY.getBytes(CHARSET);
 
+
   @Rule
   public WireMockRule wireMockRule = new WireMockRule();
 
@@ -47,12 +48,14 @@ public class HttpConnectionTest
       new URL("http", "localhost", wireMockRule.port(), PATH));
   }
 
+
   @Test
   public void testGetBody() throws Exception
   {
     setUp(aResponse().withBody(BODY_BYTES));
     assertEquals(BODY, con.getBody());
   }
+
 
   @Test
   public void testGetBodyDeflate() throws Exception
@@ -62,6 +65,7 @@ public class HttpConnectionTest
       .withHeader("Content-Encoding", "deflate"));
     assertEquals(BODY, con.getBody());
   }
+
 
   /*
   @Test
@@ -73,6 +77,7 @@ public class HttpConnectionTest
     assertEquals(BODY, con.getBody());
   }
   */
+
 
   private static byte[] deflate( byte[] data, boolean wrapped )
   {
@@ -91,6 +96,7 @@ public class HttpConnectionTest
     return dst.toByteArray();
   }
 
+
   @Test
   public void testGetBodyGzip() throws Exception
   {
@@ -105,6 +111,7 @@ public class HttpConnectionTest
     assertEquals(BODY, con.getBody());
   }
 
+
   @Test
   public void testGetResponseContentType() throws Exception
   {
@@ -113,6 +120,7 @@ public class HttpConnectionTest
     assertEquals(CHARSET, con.getResponseCharset(false));
     assertTrue(con.c.getContentLengthLong() <= 0);
   }
+
 
   @Test
   public void testGetResponseMimeType1() throws Exception
@@ -130,6 +138,7 @@ public class HttpConnectionTest
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 
+
   @Test
   public void testGetResponseMimeType3() throws Exception
   {
@@ -137,6 +146,7 @@ public class HttpConnectionTest
     con.acceptedMimeTypes.put(MimeTypeMap.WILDCARD, null);
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
+
 
   @Test
   public void testGetResponseMimeType4() throws Exception

@@ -8,7 +8,7 @@ import static kaleidok.util.Math.*;
 
 public class MathTest
 {
-  private static final float[] floatArray = new float[]{
+  private static final float[] floatArray = {
       0, 2, 4, 7, -15, -4, 0, 23, 1, 1, 0, 42
     };
 
@@ -23,6 +23,7 @@ public class MathTest
     assertEquals(expected, sumOfSquares(floatArray), delta);
   }
 
+
   @Test
   public void testSumOfSquares2()
   {
@@ -32,6 +33,7 @@ public class MathTest
       sumOfSquares(floatArray, 1, floatArray.length - 1), delta);
   }
 
+
   @Test
   public void testSumOfSquares3()
   {
@@ -40,6 +42,7 @@ public class MathTest
     assertEquals(square(floatArray[floatArray.length - 1]),
       sumOfSquares(floatArray, floatArray.length - 1, 1), 0f);
   }
+
 
   @Test
   public void testSumOfSquares4()
