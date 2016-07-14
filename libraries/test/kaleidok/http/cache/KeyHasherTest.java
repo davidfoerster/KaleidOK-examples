@@ -1,5 +1,6 @@
 package kaleidok.http.cache;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.security.MessageDigest;
@@ -22,22 +23,20 @@ public class KeyHasherTest
     "https://farm3.staticflickr.com:443/2204/2761237669_6f1f7ec949_b.jpg"
   };
 
-  private final KeyHasher kh;
+  private Map<String, String> km;
+
+
+  @Before
+  public void setUp() throws NoSuchAlgorithmException
   {
-    try {
-      kh = new KeyHasher(MessageDigest.getInstance("SHA-384"));
-    } catch (NoSuchAlgorithmException ex) {
-      throw new AssertionError(ex);
+    KeyHasher kh = new KeyHasher(MessageDigest.getInstance("SHA-384"));
+    km = new HashMap<>(EXTERNAL_KEYS.length * 2);
+    for (String k : EXTERNAL_KEYS)
+    {
+      k = km.put(k, kh.toInternalKey(k));
+      assert k == null : '\"' + k + "\" was already inserted earlier";
     }
   }
-
-  private final Map<String, String> km =
-    new HashMap<String, String>(EXTERNAL_KEYS.length * 2) {{
-      for (String k: EXTERNAL_KEYS) {
-        assert !containsKey(k) : '\"' + k + "\" was already inserted earlier";
-        put(k, kh.toInternalKey(k));
-      }
-    }};
 
 
   @Test
