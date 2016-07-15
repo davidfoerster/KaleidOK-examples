@@ -136,7 +136,7 @@ public class HttpConnectionTest
   public void testGetResponseMimeType1() throws IOException
   {
     setUp(aResponse());
-    con.acceptedMimeTypes.put(MIME_TYPE, null);
+    con.getAcceptedMimeTypes().put(MIME_TYPE, null);
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 
@@ -144,7 +144,7 @@ public class HttpConnectionTest
   public void testGetResponseMimeType2() throws IOException
   {
     setUp(aResponse());
-    con.acceptedMimeTypes.put("text/*", null);
+    con.getAcceptedMimeTypes().put("text/*", null);
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 
@@ -153,7 +153,7 @@ public class HttpConnectionTest
   public void testGetResponseMimeType3() throws IOException
   {
     setUp(aResponse());
-    con.acceptedMimeTypes.put(MimeTypeMap.WILDCARD, null);
+    con.getAcceptedMimeTypes().put(MimeTypeMap.WILDCARD, null);
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 
@@ -162,7 +162,7 @@ public class HttpConnectionTest
   public void testGetResponseMimeType4() throws IOException
   {
     setUp(aResponse());
-    con.acceptedMimeTypes = JsonMimeTypeChecker.MIME_TYPE_MAP;
+    con.setAcceptedMimeTypes(JsonMimeTypeChecker.MIME_TYPE_MAP);
     assertEquals(MIME_TYPE, con.getResponseMimeType());
   }
 }

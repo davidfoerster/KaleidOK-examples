@@ -27,7 +27,7 @@ public class HttpConnection
 
   final HttpURLConnection c;
 
-  public MimeTypeMap acceptedMimeTypes;
+  private volatile MimeTypeMap acceptedMimeTypes;
 
   public Charset defaultCharset;
 
@@ -96,6 +96,21 @@ public class HttpConnection
     new Class<?>[]{ HttpURLConnection.class };
 
 
+  public MimeTypeMap getAcceptedMimeTypes()
+  {
+    return acceptedMimeTypes;
+  }
+
+
+  public synchronized void setAcceptedMimeTypes( MimeTypeMap acceptedMimeTypes )
+  {
+    if (state != UNCONNECTED)
+      throw new IllegalStateException();
+
+    this.acceptedMimeTypes = acceptedMimeTypes;
+  }
+
+
   /**
    * @see HttpURLConnection#connect()
    */
@@ -106,6 +121,7 @@ public class HttpConnection
         if (!checkConnectionState()) {
           MimeTypeMap acceptedMimeTypes = this.acceptedMimeTypes;
           if (acceptedMimeTypes != null) {
+            acceptedMimeTypes.freeze();
             String accept = acceptedMimeTypes.toString();
             if (!accept.isEmpty())
               c.setRequestProperty("Accept", accept);
