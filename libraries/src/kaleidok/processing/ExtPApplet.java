@@ -17,7 +17,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import static kaleidok.util.Arrays.EMPTY_STRINGS;
 
 
 /**
@@ -27,25 +32,12 @@ public class ExtPApplet extends PApplet
 {
   private JApplet parent;
 
+  public final Set<String> saveFilenames = new ImageSaveSet(this);
+
+
   public ExtPApplet( JApplet parent )
   {
     this.parent = parent;
-    registerMethod("post", this);
-  }
-
-
-  @Override
-  public void destroy()
-  {
-    unregisterMethod("post", this);
-    super.destroy();
-  }
-
-
-  @SuppressWarnings("unused")
-  public void post()
-  {
-    saveFilenames.handleEntries();
   }
 
 
@@ -107,6 +99,7 @@ public class ExtPApplet extends PApplet
     super.keyPressed(e);
   }
 
+
   public PImageFuture getImageFuture( String path )
   {
     URL url = this.getClass().getResource(path);
@@ -130,10 +123,12 @@ public class ExtPApplet extends PApplet
     return (url != null) ? getImageFuture(url) : null;
   }
 
+
   public PImageFuture getImageFuture( URL url )
   {
     return getImageFuture(url, -1, -1);
   }
+
 
   public PImageFuture getImageFuture( URL url, int width, int height )
   {
@@ -186,16 +181,10 @@ public class ExtPApplet extends PApplet
   }
 
 
-  @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-  private final ImageSaveList saveFilenames = new ImageSaveList();
-
-
   public void save( String filename, boolean fullFrame )
   {
     if (fullFrame) {
-      synchronized (saveFilenames) {
-        saveFilenames.add(filename);
-      }
+      saveFilenames.add(filename);
     } else {
       save(filename);
     }
@@ -234,27 +223,137 @@ public class ExtPApplet extends PApplet
   }
 
 
-  @SuppressWarnings("serial")
-  private class ImageSaveList extends HashSet<String>
+  public static class ImageSaveSet
+    extends Plugin<ExtPApplet> implements Set<String>
   {
-    @Override
-    public synchronized boolean add( String s )
+    private final HashSet<String> underlying = new HashSet<>();
+
+
+    private ImageSaveSet( ExtPApplet parent )
     {
-      return super.add(s);
+      super(parent);
     }
 
-    public void handleEntries()
+
+    @Override
+    public void post()
     {
-      if (!isEmpty()) {
-        synchronized (this) {
-          if (!isEmpty()) {
-            loadPixels();
+      if (!isEmpty())
+      {
+        synchronized (this)
+        {
+          if (!isEmpty())
+          {
+            final ExtPApplet p = this.p;
+            p.loadPixels();
             for (String fn : this)
-              saveImpl(fn);
+              p.saveImpl(fn);
             clear();
           }
         }
       }
+    }
+
+
+    @Override
+    protected void onDispose()
+    {
+      clear();
+    }
+
+
+    @Override
+    public int size()
+    {
+      return underlying.size();
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+      return underlying.isEmpty();
+    }
+
+    @Override
+    public synchronized boolean contains( Object o )
+    {
+      return underlying.contains(o);
+    }
+
+    @Override
+    public Iterator<String> iterator()
+    {
+      return underlying.iterator();
+    }
+
+    @Override
+    public synchronized Object[] toArray()
+    {
+      return underlying.toArray();
+    }
+
+    @SuppressWarnings("SuspiciousToArrayCall")
+    @Override
+    public synchronized <T> T[] toArray( T[] a )
+    {
+      return underlying.toArray(a);
+    }
+
+    @Override
+    public synchronized boolean add( String s )
+    {
+      return underlying.add(s);
+    }
+
+    @Override
+    public synchronized boolean remove( Object o )
+    {
+      return underlying.remove(o);
+    }
+
+    @Override
+    public synchronized boolean containsAll( Collection<?> c )
+    {
+      return underlying.containsAll(c);
+    }
+
+    @Override
+    public synchronized boolean addAll( Collection<? extends String> c )
+    {
+      return underlying.addAll(c);
+    }
+
+    @Override
+    public synchronized boolean retainAll( Collection<?> c )
+    {
+      return underlying.retainAll(c);
+    }
+
+    @Override
+    public synchronized boolean removeAll( Collection<?> c )
+    {
+      return underlying.removeAll(c);
+    }
+
+    @Override
+    public synchronized void clear()
+    {
+      underlying.clear();
+    }
+
+    @Override
+    public synchronized boolean equals( Object o )
+    {
+      return underlying.equals(
+        (o instanceof ImageSaveSet) ?
+          ((ImageSaveSet) o).underlying :
+          o);
+    }
+
+    @Override
+    public synchronized int hashCode()
+    {
+      return underlying.hashCode();
     }
   }
 }
