@@ -1,6 +1,5 @@
 package kaleidok.http.util;
 
-import kaleidok.util.StringTokenIterator;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
@@ -16,6 +15,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -38,31 +38,57 @@ public final class Parsers
   {
     StringBuilder sb = null;
     Map<String, String> qm = new HashMap<>(8);
-    for (String strParam : new StringTokenIterator(q, '&')) {
-      if (!strParam.isEmpty()) {
+    StringTokenizer tokenizer = new StringTokenizer(q, "&");
+    while (tokenizer.hasMoreTokens())
+    {
+      String strParam = tokenizer.nextToken();
+      if (!strParam.isEmpty())
+      {
         int p = strParam.indexOf('=');
         CharSequence name, value;
-        name = decode((p >= 0) ? strParam.substring(0, p) : strParam, chs, sb);
-        if (name instanceof StringBuilder) {
-          sb = (StringBuilder) name;
-          name = sb.toString();
-          sb.setLength(0);
-        }
-        if (p >= 0) {
-          value = decode(strParam.substring(p + 1), chs, sb);
-          if (value instanceof StringBuilder) {
-            sb = (StringBuilder) value;
-            value = sb.toString();
+
+        if (p != 0)
+        {
+          name = decode((p >= 0) ? strParam.substring(0, p) : strParam, chs, sb);
+          if (name instanceof StringBuilder)
+          {
+            sb = (StringBuilder) name;
+            name = sb.toString();
             sb.setLength(0);
           }
-        } else {
+        }
+        else
+        {
+          name = "";
+        }
+
+        if (p >= 0)
+        {
+          if (p != strParam.length() - 1)
+          {
+            value = decode(strParam.substring(p + 1), chs, sb);
+            if (value instanceof StringBuilder)
+            {
+              sb = (StringBuilder) value;
+              value = sb.toString();
+              sb.setLength(0);
+            }
+          }
+          else
+          {
+            value = "";
+          }
+        }
+        else
+        {
           value = null;
         }
 
         String sName = (String) name;
-        if (qm.containsKey(sName)) {
+        if (qm.containsKey(sName))
+        {
           throw new IllegalArgumentException(
-            "Query parameter appears multiple times: " + sName);
+            "Query parameter appears multiple times: \"" + sName + '\"');
         }
         qm.put(sName, (String) value);
       }
