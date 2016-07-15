@@ -48,6 +48,12 @@ public final class Strings
   }
 
 
+  private static char toDigit( int n )
+  {
+    return (char) (n + (n < 10 ? '0' : 'a' - 10));
+  }
+
+
   /**
    * Writes the hexadecimal representation of an integer to a char array. If
    * the array is too short to hold all necessary digits, it'll only contain
@@ -72,7 +78,7 @@ public final class Strings
   {
     int i;
     for (i = offset + len - 1; i >= offset && n != 0; i--, n >>>= 4)
-      dst[i] = Character.forDigit((int) n & 0xf, 16);
+      dst[i] = toDigit((int) n & 0xf);
     java.util.Arrays.fill(dst, offset, i + 1, '0');
     return dst;
   }
@@ -91,16 +97,16 @@ public final class Strings
     return toDigits(n, base, dst, 0, dst.length);
   }
 
-  public static char[] toDigits( long n, int base, char[] dst, int offset, int len )
+  public static char[] toDigits( long n, long base, char[] dst, int offset, int len )
   {
     assert base > 1 && base <= DIGITS_BASE_MAX && len > 0 :
-      String.format("%d is not in [1, %d] or %d ≤ 0",
+      String.format("base %d is not in [2, %d] or length %d ≤ 0",
         base, DIGITS_BASE_MAX, len);
 
     boolean negative = n < 0;
     if (negative) {
       if (n == Long.MIN_VALUE) {
-        dst[offset + (--len)] = Character.forDigit((int) -(n % base), base);
+        dst[offset + (--len)] = toDigit((int) -(n % base));
         n /= base;
       }
       n = -n;
@@ -108,7 +114,7 @@ public final class Strings
 
     int i;
     for (i = offset + len - 1; i >= offset && n != 0; i--, n /= base)
-      dst[i] = Character.forDigit((int)(n % base), base);
+      dst[i] = toDigit((int)(n % base));
 
     if (i >= offset) {
       if (negative)
