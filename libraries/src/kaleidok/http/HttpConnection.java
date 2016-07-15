@@ -290,7 +290,8 @@ public class HttpConnection
         }
 
         rawInputStream = c.getInputStream();
-        inputStream = Parsers.decompressStream(rawInputStream, contentEncoding);
+        inputStream =
+          Parsers.DECODERS.getDecodedStream(contentEncoding, rawInputStream);
 
       } finally {
         if (inputStream == null) {

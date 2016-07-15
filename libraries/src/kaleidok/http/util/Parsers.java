@@ -2,13 +2,10 @@ package kaleidok.http.util;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.entity.ContentType;
 
 import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -124,33 +121,11 @@ public final class Parsers
   public static final ContentType EMPTY_CONTENT_TYPE = ContentType.create(null);
 
 
-  public static InputStream decompressStream( InputStream in,
-    String contentEncoding )
-    throws IOException
-  {
-    Class<? extends FilterInputStream> dec = decoders.get(contentEncoding);
-    if (dec != null) {
-      try {
-        in = dec.getConstructor(InputStream.class).newInstance(in);
-      } catch (InvocationTargetException ex) {
-        Throwable cause = ex.getCause();
-        if (cause instanceof IOException)
-          throw (IOException) cause;
-        throw new AssertionError(cause); // FilterInputStream constructors shouldn't throw anything except IOException
-      } catch (ReflectiveOperationException ex) {
-        throw new AssertionError(ex);
-      }
-    } else if (!decoders.containsKey(contentEncoding)) {
-      throw new ClientProtocolException(
-        "Invalid or unsupported content-encoding: " + contentEncoding);
-    }
-    return in;
-  }
-
-  private static final Map<String, Class<? extends FilterInputStream>> decoders =
-    new HashMap<String, Class<? extends FilterInputStream>>() {{
-      put(null, null);
+  public static final DecoderMap DECODERS =
+    new DecoderMap(6) {{
+      put(null, (Constructor<? extends FilterInputStream>) null);
       put("deflate", InflaterInputStream.class);
       put("gzip", GZIPInputStream.class);
+      freeze();
     }};
 }
