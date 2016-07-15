@@ -54,14 +54,16 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
 
   protected void initWindowBounds()
   {
+    FullscreenRootPane rootPane = getRootPane();
+
     int screenIndex = DefaultValueParser.parseInt(this, "screen", -1);
     boolean fullscreen =
       DefaultValueParser.parseBoolean(this, "fullscreen", false);
     if (screenIndex >= 0 || fullscreen) {
-      getRootPane().moveToScreen(screenIndex, fullscreen);
+      rootPane.moveToScreen(screenIndex, fullscreen);
     }
 
-    Window w = getRootPane().getTopLevelWindow();
+    Window w = rootPane.getTopLevelWindow();
     Rectangle screenBounds = w.getGraphicsConfiguration().getBounds();
     w.setLocation(
       DefaultValueParser.parseInt(this, "left", w.getX() - screenBounds.x) +

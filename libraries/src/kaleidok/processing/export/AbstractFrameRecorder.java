@@ -9,7 +9,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class AbstractFrameRecorder extends Plugin<PApplet>
 {
 
-  private AtomicReference<State> state = new AtomicReference<>(State.OFF);
+  private final AtomicReference<State> state =
+    new AtomicReference<>(State.OFF);
 
 
   protected AbstractFrameRecorder( PApplet sketch )
@@ -21,17 +22,25 @@ public abstract class AbstractFrameRecorder extends Plugin<PApplet>
   public abstract boolean isReady();
 
 
-  public void schedule()
+  public boolean schedule()
   {
-    schedule(true);
+    return schedule(true);
   }
 
-  public void schedule( boolean enable )
+  public boolean schedule( boolean enable )
   {
-    State
-      expectedCurrentState = enable ? State.OFF : State.RECORDING,
-      targetState = enable ? State.SCHEDULED : State.OFF;
-    state.compareAndSet(expectedCurrentState, targetState);
+    State expectedCurrentState, targetState;
+    if (enable)
+    {
+      expectedCurrentState = State.OFF;
+      targetState = State.SCHEDULED;
+    }
+    else
+    {
+      expectedCurrentState = State.SCHEDULED;
+      targetState = State.OFF;
+    }
+    return state.compareAndSet(expectedCurrentState, targetState);
   }
 
 

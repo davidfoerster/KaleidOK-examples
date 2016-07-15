@@ -10,8 +10,7 @@ public class ImageMimeTypeChecker extends ResponseMimeTypeChecker
   public static final MimeTypeMap IMAGE_MIMETYPE_MAP;
   static {
     final String[] imageMimeTypes = ImageIO.getReaderMIMETypes();
-    IMAGE_MIMETYPE_MAP =
-      new MimeTypeMap(imageMimeTypes.length + (imageMimeTypes.length + 1) / 2);
+    IMAGE_MIMETYPE_MAP = new MimeTypeMap(imageMimeTypes.length * 3 / 2);
     for (String mimeType: imageMimeTypes)
       IMAGE_MIMETYPE_MAP.put(mimeType, null);
     IMAGE_MIMETYPE_MAP.freeze();

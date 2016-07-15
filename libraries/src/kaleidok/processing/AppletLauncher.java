@@ -8,10 +8,7 @@ import java.applet.Applet;
 import java.awt.Rectangle;
 import java.io.*;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -166,37 +163,46 @@ public class AppletLauncher
   private static InputStream openFilenameArgument( String arg )
     throws FileNotFoundException
   {
-    return "-".equals(arg) ? System.in : new FileInputStream(arg);
+    Objects.requireNonNull(arg);
+    return (arg.length() == 1 && arg.charAt(0) == '-') ?
+      System.in :
+      new FileInputStream(arg);
   }
 
 
+  @SuppressWarnings({ "resource", "IOResourceOpenedButNotSafelyClosed" })
   public static void loadLocalLoggerProperties( Class<?> appletClass )
   {
-    File loggingFile = new File("logging.properties");
-    InputStream is = null;
+    String loggingFile = "logging.properties";
+    InputStream is;
     try
     {
-      is = loggingFile.exists() ?
-        new FileInputStream(loggingFile) :
-        appletClass.getClassLoader().getResourceAsStream(loggingFile.getPath());
-      if (is != null)
-        LogManager.getLogManager().readConfiguration(is);
+      is = new FileInputStream(loggingFile);
+    }
+    catch (FileNotFoundException ignored)
+    {
+      is = appletClass.getClassLoader().getResourceAsStream(loggingFile);
+      if (is == null)
+        return;
+    }
+
+    try
+    {
+      LogManager.getLogManager().readConfiguration(is);
     }
     catch (IOException ex)
     {
       logThrown(Logger.getAnonymousLogger(), Level.SEVERE,
         "Couldn't load default {0} file for {1}", ex,
-        new Object[]{loggingFile.getPath(), appletClass.getName()});
+        new Object[]{loggingFile, appletClass.getName()});
     }
     finally
     {
-      if (is != null) {
-        try {
-          is.close();
-        } catch (IOException ex) {
-          Logger.getAnonymousLogger().log(Level.WARNING,
-            "Couldn't close logger configuration file", ex);
-        }
+      try {
+        is.close();
+      } catch (IOException ex) {
+        Logger.getAnonymousLogger().log(Level.WARNING,
+          "Couldn't close logger configuration file", ex);
       }
     }
   }
