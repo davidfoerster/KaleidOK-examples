@@ -1,11 +1,11 @@
 package kaleidok.http;
 
 import kaleidok.http.util.MimeTypeMap;
+import kaleidok.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 
 import static kaleidok.http.util.MimeTypeMap.WILDCARD;
 import static org.junit.Assert.*;
@@ -40,10 +40,18 @@ public class MimeTypeMapTest
   @Test
   public void testToString()
   {
-    List<String> strAccept = Arrays.asList(m.toString().split("\\s*,\\s*"));
+    Collection<String> strAccept =
+      Arrays.asImmutableList(m.toString().split("\\s*,\\s*"));
     assertEquals(m.size(), strAccept.size());
-    assertTrue(strAccept.contains(WILDCARD + ";q=0.5"));
-    assertTrue(strAccept.contains("text/*"));
-    assertTrue(strAccept.contains("text/plain;q=0"));
+    assertContains(strAccept, WILDCARD + ";q=0.5");
+    assertContains(strAccept, "text/*");
+    assertContains(strAccept, "text/plain;q=0");
+  }
+
+
+  private static void assertContains( Collection<String> haystack, String needle )
+  {
+    if (!haystack.contains(needle))
+      fail(haystack + " doesn't contain \"" + needle + '\"');
   }
 }
