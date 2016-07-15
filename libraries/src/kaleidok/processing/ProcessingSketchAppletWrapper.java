@@ -106,13 +106,12 @@ public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
 
   public T getSketch()
   {
-    if (sketch == null) try {
-      return getSketchThrows();
-    } catch (InvocationTargetException ex) {
-      ex.getCause().printStackTrace();
-    }
-    return sketch;
+    if (sketch != null)
+      return sketch;
+
+    throw new IllegalStateException(this + " hasn't been initialized");
   }
+
 
   protected T getSketchThrows() throws InvocationTargetException
   {
