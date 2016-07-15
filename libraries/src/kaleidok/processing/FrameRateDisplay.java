@@ -14,9 +14,9 @@ import static kaleidok.util.Math.clamp;
 @SuppressWarnings("unused")
 public class FrameRateDisplay extends Plugin<PApplet>
 {
-  public int offsetX = 4, offsetY = 4;
+  public float offsetX = 4, offsetY = 4, textSize = 8;
 
-  public int textSize = 8, textColor = 0xff00ff00;
+  public int textColor = 0xff00ff00;
 
 
   private int frameRateSampleFrequencyMask = 0xf;
@@ -75,6 +75,7 @@ public class FrameRateDisplay extends Plugin<PApplet>
   @Override
   public void draw()
   {
+    final PApplet p = this.p;
     p.textSize(textSize);
     p.fill(textColor);
 
