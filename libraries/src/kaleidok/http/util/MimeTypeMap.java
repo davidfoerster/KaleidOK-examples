@@ -1,9 +1,11 @@
 package kaleidok.http.util;
 
+import kaleidok.util.containers.FreezableMap;
+
+import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 
@@ -11,7 +13,8 @@ import java.util.regex.Pattern;
  * Represents a set of MIME types and their acceptance rating as used in HTTP
  * Accept headers.
  */
-public class MimeTypeMap extends HashMap<String, Float>
+public class MimeTypeMap extends FreezableMap<String, Float>
+  implements Serializable
 {
   private static final long serialVersionUID = -6412623527769040820L;
 
@@ -33,19 +36,28 @@ public class MimeTypeMap extends HashMap<String, Float>
   public static final Float ONE = 1.f;
 
 
-  private boolean frozen = false;
-
-  private String acceptString = null;
+  private transient String acceptString = null;
 
 
   /**
    * Constructs an empty MIME type set.
    */
-  public MimeTypeMap() { }
+  public MimeTypeMap()
+  {
+    super(new HashMap<>());
+  }
+
 
   public MimeTypeMap( int initialCapacity )
   {
-    super(initialCapacity);
+    super(new HashMap<>(initialCapacity));
+  }
+
+
+  public MimeTypeMap( MimeTypeMap o )
+  {
+    //noinspection unchecked,OverlyStrongTypeCast
+    super((HashMap<String, Float>) ((HashMap<String, Float>) o.underlying).clone());
   }
 
 
@@ -67,7 +79,6 @@ public class MimeTypeMap extends HashMap<String, Float>
    * @param value  A preference rating; {@code null} is the default
    * @return  The rating previously associated with this MIME type (may be
    *   {@code null})
-   * @see Map#put(Object, Object)
    * @throws UnsupportedOperationException if this map is frozen.
    * @throws IllegalArgumentException if the MIME type string is
    *   invalid or the preference rating is not between 0 and 1.
@@ -75,8 +86,19 @@ public class MimeTypeMap extends HashMap<String, Float>
   @Override
   public Float put( String key, Float value )
   {
-    checkFrozen();
+    return super.put(key, toInternal(value));
+  }
 
+
+  private static Float toInternal( Float value )
+  {
+    return (value != null) ? value : ONE;
+  }
+
+
+  @Override
+  protected boolean isValidEntry( String key, Float value )
+  {
     if (!MIME_TYPE_PATTERN.matcher(key).matches())
       throw new IllegalArgumentException("Invalid MIME type: " + key);
 
@@ -87,22 +109,9 @@ public class MimeTypeMap extends HashMap<String, Float>
           value);
     }
 
-    return super.put(key, value);
+    return true;
   }
 
-  /**
-   * Returns the currently associated preference rating for a MIME type or 1,
-   * if it has the default rating.
-   *
-   * @param key  A MIME type string
-   * @return  Associated preference rating
-   */
-  @Override
-  public Float get( Object key )
-  {
-    Float q = super.get(key);
-    return (q != null || !containsKey(key)) ? q : ONE;
-  }
 
   /**
    * Equivalent to {@link #allows(String, boolean)} with allowed wildcards.
@@ -115,6 +124,7 @@ public class MimeTypeMap extends HashMap<String, Float>
     return allows(mime, true);
   }
 
+
   /**
    * Checks whether a given MIME type string is allowed by this MIME type set.
    * That includes wildcards and excludes zero preference ratings.
@@ -126,8 +136,12 @@ public class MimeTypeMap extends HashMap<String, Float>
    */
   public String allows( String mime, boolean wildcards )
   {
-    assert mime == null || MIME_TYPE_PATTERN.matcher(mime).matches() :
-      getMismatchError(mime);
+    if (mime == null || !MIME_TYPE_PATTERN.matcher(mime).matches())
+    {
+      if (this.getClass().desiredAssertionStatus())
+        throw new AssertionError(getMismatchError(mime));
+      return null;
+    }
 
     Float q = get(mime);
     if (q != null)
@@ -135,16 +149,15 @@ public class MimeTypeMap extends HashMap<String, Float>
     if (!wildcards || WILDCARD.equals(mime))
       return null;
 
-    if (mime != null)
+    if (mime.charAt(0) != WILDCARD_CHAR)
     {
-      int p = mime.indexOf('/') + 1;
-      assert p > 0 && p < mime.length() :
-        "'/' doesn't occur before the last character of \"" + mime + '\"';
+      int p = mime.indexOf('/', 1) + 1;
       if (mime.charAt(p) != WILDCARD_CHAR)
       {
-        StringBuilder buf = new StringBuilder(p + 1);
-        buf.append(mime, 0, p).append(WILDCARD_CHAR);
-        mime = buf.toString();
+        char[] buf = new char[p + 1];
+        mime.getChars(0, p, buf, 0);
+        buf[p] = WILDCARD_CHAR;
+        mime = new String(buf);
         q = get(mime);
         if (q != null)
           return (q > 0) ? mime : null;
@@ -155,6 +168,7 @@ public class MimeTypeMap extends HashMap<String, Float>
     q = get(mime);
     return (q != null && q > 0) ? mime : null;
   }
+
 
   /**
    * Returns a string representation of this MIME type set as one would use it
@@ -168,11 +182,12 @@ public class MimeTypeMap extends HashMap<String, Float>
     if (isEmpty() || (size() == 1 && ONE.equals(get(WILDCARD))))
       return "";
 
-    if (frozen && this.acceptString != null)
+    if (isFrozen() && this.acceptString != null)
       return this.acceptString;
 
     StringBuilder sb = new StringBuilder();
-    for (Map.Entry<String, Float> e: entrySet()) {
+    for (Entry<String, Float> e: underlying.entrySet())
+    {
       assert MIME_TYPE_PATTERN.matcher(e.getKey()).matches() :
         getMismatchError(e.getKey());
 
@@ -181,7 +196,8 @@ public class MimeTypeMap extends HashMap<String, Float>
       sb.append(e.getKey());
 
       Float q = e.getValue();
-      if (q != null && q < 1) {
+      if (q != 1)
+      {
         assert q >= 0 && q <= 1 : q + " lies outside of [0, 1]";
         String qs = qFormat.format(q.doubleValue());
         assert qs.length() <= 1 || "0.,".indexOf(qs.charAt(qs.length() - 1)) < 0 :
@@ -190,44 +206,11 @@ public class MimeTypeMap extends HashMap<String, Float>
       }
     }
     String acceptString = (sb.length() != 0) ? sb.toString() : "";
-    if (frozen)
+    if (isFrozen())
       this.acceptString = acceptString;
     return acceptString;
   }
 
-  /**
-   * @return  Whether this set is froze.
-   */
-  public boolean isFrozen()
-  {
-    return frozen;
-  }
-
-  /**
-   * Freezes this set to prohibit any later modifications.
-   */
-  public void freeze()
-  {
-    frozen = true;
-  }
-
-  private void checkFrozen() {
-    if (frozen)
-      throw new UnsupportedOperationException("frozen");
-  }
-
-  /**
-   * @see Map#remove(Object)
-   * @param key  A key top remove
-   * @return  The previously associated preference rating
-   * @throws UnsupportedOperationException if this set is frozen.
-   */
-  @Override
-  public Float remove( Object key )
-  {
-    checkFrozen();
-    return super.remove(key);
-  }
 
   public static final Pattern MIME_TYPE_PATTERN = Pattern.compile(
     "^(?:\\*/\\*|[a-z.-]+/(?:\\*|[a-z.-]+))$");
