@@ -16,7 +16,6 @@ public final class Arrays
 
   public static final Class<?>[] EMPTY_CLASSES = {};
 
-  @SuppressWarnings("unused")
   public static final String[] EMPTY_STRINGS = {};
 
 

@@ -216,8 +216,9 @@ public class ExtPApplet extends PApplet
       @Override
       protected Object doInBackground() throws IOException
       {
-        if ((g.format == RGB || g.format == ARGB) && filename.endsWith(".bmp")) {
-          Path filePath = Paths.get(savePath(filename));
+        if ((g.format == RGB || g.format == ARGB) && filename.endsWith(".bmp"))
+        {
+          Path filePath = Paths.get(savePath(filename), EMPTY_STRINGS);
           try {
             ImageIO.saveBmp32(filePath, width, height, pixels, 0).force();
             return null;
