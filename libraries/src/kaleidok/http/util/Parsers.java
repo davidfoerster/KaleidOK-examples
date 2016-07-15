@@ -85,7 +85,7 @@ public final class Parsers
     throws UnsupportedCharsetException, ParseException
   {
     String s = con.getContentType();
-    return (s != null) ? ContentType.parse(s) : null;
+    return (s != null) ? ContentType.parse(s) : EMPTY_CONTENT_TYPE;
   }
 
 

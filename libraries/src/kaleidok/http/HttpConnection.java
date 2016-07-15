@@ -456,9 +456,6 @@ public class HttpConnection
           {
             throw new IOException(ex);
           }
-
-          if (responseContentType == null)
-            responseContentType = Parsers.EMPTY_CONTENT_TYPE;
         }
       }
     }
