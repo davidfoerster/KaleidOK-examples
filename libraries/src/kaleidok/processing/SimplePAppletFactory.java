@@ -32,11 +32,6 @@ public class SimplePAppletFactory<T extends ExtPApplet> implements PAppletFactor
     {
       throw new IllegalArgumentException(ex);
     }
-    if ((constructor.getModifiers() & Modifier.PUBLIC) == 0)
-    {
-      throw new IllegalArgumentException(new IllegalAccessException(
-        constructor.toString()));
-    }
   }
 
 
