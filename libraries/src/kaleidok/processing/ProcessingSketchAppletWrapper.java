@@ -21,10 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import static javax.swing.KeyStroke.getKeyStroke;
 
 
-public class ProcessingSketchAppletWrapper<T extends PApplet> extends JApplet
+public abstract class ProcessingSketchAppletWrapper<T extends PApplet> extends JApplet
 {
-  public PAppletFactory<T> sketchFactory = null;
-
   private T sketch = null;
 
 
@@ -118,14 +116,16 @@ public class ProcessingSketchAppletWrapper<T extends PApplet> extends JApplet
   protected T getSketchThrows() throws InvocationTargetException
   {
     if (sketch == null) {
-      sketch = sketchFactory.createInstance(this);
+      sketch = getSketchFactory().createInstance(this);
       sketch.init();
       sketch.addKeyListener(getRootPane().createKeyListener(
         Mode.TOGGLE, fullscreenKeystroke));
-      sketchFactory = null;
     }
     return sketch;
   }
+
+
+  protected abstract PAppletFactory<T> getSketchFactory();
 
 
   @Override
