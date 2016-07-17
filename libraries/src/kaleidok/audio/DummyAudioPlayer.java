@@ -87,7 +87,9 @@ public class DummyAudioPlayer implements AudioProcessor
    * processing chain.
    *
    * @param audioDispatcher  The audio dispatcher to wrap
-   * @return  A wrapped audio dispatcher object
+   * @param chained  If non-null, use this Runnable instead of
+   *   {@code audioDispatcher} to defer the execution to.
+   * @return  A Runnable to use in your audio dispatcher thread
    */
   public Runnable addToDispatcher( final AudioDispatcher audioDispatcher,
     Runnable chained )
