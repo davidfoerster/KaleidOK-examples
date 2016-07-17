@@ -18,27 +18,35 @@ public class DummyAudioPlayer implements AudioProcessor
   private static final Logger logger =
     Logger.getLogger(DummyAudioPlayer.class.getCanonicalName());
 
-  private long startTime = -1, startSample = -1;
+  private boolean startTimeSet = false;
+
+  private long startTime, startSample = -1;
 
   /**
    * Length of one single sample in nanoseconds
    */
   private double sampleLength = 0;
 
+
   private void reset()
   {
-    startTime = -1;
+    startTimeSet = false;
     startSample = -1;
     sampleLength = 0;
   }
 
+
   private void init( AudioEvent ev )
   {
-    if (startTime < 0)
+    if (!startTimeSet)
+    {
       startTime = System.nanoTime();
+      startTimeSet = true;
+    }
     startSample = ev.getSamplesProcessed();
     sampleLength = 1e9 / ev.getSampleRate();
   }
+
 
   @Override
   public boolean process( AudioEvent ev )
@@ -47,7 +55,7 @@ public class DummyAudioPlayer implements AudioProcessor
       // all times in nanoseconds
       final long delay =
         (long)((ev.getSamplesProcessed() - startSample) * sampleLength) +
-          startTime - System.nanoTime();
+          (startTime - System.nanoTime());
       if (delay >= 0) {
         LockSupport.parkNanos(delay);
       } else {
@@ -60,6 +68,7 @@ public class DummyAudioPlayer implements AudioProcessor
     }
     return true;
   }
+
 
   @Override
   public void processingFinished()
@@ -87,6 +96,7 @@ public class DummyAudioPlayer implements AudioProcessor
     return () -> {
         audioDispatcher.addAudioProcessor(DummyAudioPlayer.this);
         startTime = System.nanoTime();
+        startTimeSet = true;
         _chained.run();
       };
   }
