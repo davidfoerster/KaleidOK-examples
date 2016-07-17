@@ -93,34 +93,39 @@ public class OffThreadAudioPlayer implements AudioProcessor
     @Override
     public void run()
     {
-      final ReadableByteChannel in = this.in;
       final SourceDataLine line = this.line;
       final byte[] aBuf = new byte[line.getBufferSize()];
       final ByteBuffer bBuf = ByteBuffer.wrap(aBuf);
 
       line.start();
-      try {
+      try (final ReadableByteChannel in = this.in)
+      {
         int read;
-        while ((read = in.read(bBuf)) >= 0) {
+        while ((read = in.read(bBuf)) >= 0)
+        {
           int written = 0;
-          while (written < read) {
-            int n = line.write(aBuf, written, read);
-            assert n > 0;
+          while (written < read)
+          {
+            int n = line.write(aBuf, written, read - written);
+            if (n <= 0)
+            {
+              throw new AssertionError(
+                line + "#write(...) returned a non-positive value " + n);
+            }
             written += n;
           }
           bBuf.position(0);
         }
-      } catch (IOException ex) {
-        handleUncaught(ex);
-      } finally {
         line.drain();
         line.stop();
+      }
+      catch (IOException ex)
+      {
+        handleUncaught(ex);
+      }
+      finally
+      {
         line.close();
-        try {
-          in.close();
-        } catch (IOException ex) {
-          handleUncaught(ex);
-        }
       }
     }
   }
