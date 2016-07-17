@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import static javax.swing.KeyStroke.getKeyStroke;
 
 
-public class ProcessingSketchAppletWrapper<T extends ExtPApplet> extends JApplet
+public class ProcessingSketchAppletWrapper<T extends PApplet> extends JApplet
 {
   public PAppletFactory<T> sketchFactory = null;
 
