@@ -22,13 +22,19 @@ public class ContinuousAudioInputStream implements ResettableAudioStream
 
 
   public ContinuousAudioInputStream( AudioInputStream source )
+    throws IOException
   {
     if (!source.markSupported())
       throw new IllegalArgumentException("Source doesn't support marks for rewinding");
 
     format = JVMAudioInputStream.toTarsosDSPFormat(source.getFormat());
-    long sizeInBytes = format.getFrameSize() * source.getFrameLength();
-    source.mark((int) Math.min(sizeInBytes, Integer.MAX_VALUE));
+    int frameSize = format.getFrameSize();
+    long frameLength = source.getFrameLength();
+    if (frameSize <= 0 || frameLength <= 0)
+      throw new IllegalArgumentException("Non-positive audio data size");
+    if (frameLength > Integer.MAX_VALUE / frameSize)
+      throw new IOException("The audio source is too long for mark support");
+    source.mark((int) frameLength * frameSize);
 
     underlying = source;
   }
