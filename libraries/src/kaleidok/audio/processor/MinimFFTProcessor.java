@@ -8,13 +8,20 @@ import kaleidok.audio.spectrum.Spectrum;
 
 public class MinimFFTProcessor implements AudioProcessor, Spectrum
 {
+  private enum AverageType {
+    NONE, LINEAR, LOGARITHMIC
+  }
+
+
   private FFT fft = null;
 
   private float sampleRate = 0;
 
   private final float[] sampleBuffer;
 
-  private int avgType = 0, avgParam1, avgParam2;
+  private AverageType avgType = AverageType.NONE;
+
+  private int avgParam1, avgParam2;
 
 
   public MinimFFTProcessor( int bufferSize )
@@ -25,14 +32,14 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
 
   public void noAverages()
   {
-    avgType = 0;
+    avgType = AverageType.NONE;
     updateAverages();
   }
 
 
   public void linAverages( int bands )
   {
-    avgType = 1;
+    avgType = AverageType.LINEAR;
     avgParam1 = bands;
     updateAverages();
   }
@@ -40,7 +47,7 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
 
   public void logAverages( int minBandwidth, int bandsPerOctave )
   {
-    avgType = 2;
+    avgType = AverageType.LOGARITHMIC;
     avgParam1 = minBandwidth;
     avgParam2 = bandsPerOctave;
     updateAverages();
@@ -51,20 +58,17 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
   {
     if (fft != null) {
       switch (avgType) {
-      case 0:
+      case NONE:
         fft.noAverages();
         break;
 
-      case 1:
+      case LINEAR:
         fft.linAverages(avgParam1);
         break;
 
-      case 2:
+      case LOGARITHMIC:
         fft.logAverages(avgParam1, avgParam2);
         break;
-
-      default:
-        throw new AssertionError("avgType has an unexpected value");
       }
     }
   }
