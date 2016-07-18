@@ -7,9 +7,12 @@ import org.apache.http.entity.ContentType;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -75,11 +78,30 @@ public class HttpConnection
 
   protected static <T extends HttpConnection>
   T openURL( URL url, Class<T> clazz )
-    throws IOException, ReflectiveOperationException
+    throws IOException, InstantiationException, NoSuchMethodException,
+    InvocationTargetException
   {
+    if (Modifier.isAbstract(clazz.getModifiers()))
+      throw new InstantiationException(clazz.getName() + " is abstract");
+
     checkHttpProtocol(url);
     Constructor<T> ctor = clazz.getConstructor(constructorArgumentTypes);
-    return ctor.newInstance(url.openConnection());
+    URLConnection conn = url.openConnection();
+    try
+    {
+      return ctor.newInstance(conn);
+    }
+    catch (InstantiationException | IllegalAccessException | IllegalArgumentException ex)
+    {
+      throw new AssertionError(ex);
+    }
+    catch (InvocationTargetException ex)
+    {
+      Throwable cause = ex.getCause();
+      if (cause instanceof IOException)
+        throw (IOException) cause;
+      throw ex;
+    }
   }
 
 
