@@ -3,6 +3,7 @@ package kaleidok.http;
 import kaleidok.http.util.MimeTypeMap;
 import kaleidok.http.util.Parsers;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.ParseException;
 import org.apache.http.entity.ContentType;
 
 import java.io.*;
@@ -245,10 +246,7 @@ public class HttpConnection
   }
 
 
-  /**
-   * @see HttpURLConnection#getContentType()
-   */
-  public String getContentType()
+  public String getContentTypeString()
   {
     return c.getContentType();
   }
@@ -461,7 +459,7 @@ public class HttpConnection
   }
 
 
-  private void parseContentType() throws IOException
+  public ContentType getContentType() throws IOException
   {
     if (responseContentType == null)
     {
@@ -475,27 +473,26 @@ public class HttpConnection
           {
             responseContentType = Parsers.getContentType(c);
           }
-          catch (IllegalArgumentException ex)
+          catch (ParseException | IllegalArgumentException ex)
           {
             throw new IOException(ex);
           }
         }
       }
     }
+    return responseContentType;
   }
 
 
   public String getResponseMimeType() throws IOException
   {
-    parseContentType();
-    return responseContentType.getMimeType();
+    return getContentType().getMimeType();
   }
 
 
   public Charset getResponseCharset( boolean allowDefault ) throws IOException
   {
-    parseContentType();
-    Charset chs = responseContentType.getCharset();
+    Charset chs = getContentType().getCharset();
     return (chs != null || !allowDefault) ? chs : defaultCharset;
   }
 
