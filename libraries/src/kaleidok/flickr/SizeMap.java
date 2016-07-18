@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
-import kaleidok.flickr.internal.FlickrResponseDeserializer;
 
 import java.lang.reflect.Type;
 import java.util.TreeMap;

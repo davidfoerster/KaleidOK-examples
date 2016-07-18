@@ -1,4 +1,4 @@
-package kaleidok.flickr.internal;
+package kaleidok.flickr;
 
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -7,7 +7,7 @@ import com.google.gson.JsonParseException;
 import kaleidok.flickr.FlickrException;
 
 
-public abstract class FlickrResponseDeserializer<T>
+abstract class FlickrResponseDeserializer<T>
   implements JsonDeserializer<T>
 {
   protected static JsonObject unwrap( JsonElement jsonElement, String which )

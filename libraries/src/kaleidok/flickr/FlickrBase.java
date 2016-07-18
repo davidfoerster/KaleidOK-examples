@@ -1,4 +1,4 @@
-package kaleidok.flickr.internal;
+package kaleidok.flickr;
 
 import kaleidok.flickr.Size;
 import kaleidok.flickr.SizeMap;
@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 
-public class FlickrBase
+class FlickrBase
 {
   public static final URI DEFAULT_URI_BASE;
   static {
@@ -34,7 +34,7 @@ public class FlickrBase
   protected URIBuilder ub;
 
 
-  public FlickrBase()
+  protected FlickrBase()
   {
     initQueryBase(DEFAULT_URI_BASE, null, null);
   }

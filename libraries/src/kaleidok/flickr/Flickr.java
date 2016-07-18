@@ -2,7 +2,6 @@ package kaleidok.flickr;
 
 
 import com.google.gson.JsonParseException;
-import kaleidok.flickr.internal.FlickrBase;
 import kaleidok.http.JsonHttpConnection;
 
 import java.io.IOException;
@@ -11,9 +10,6 @@ import java.net.MalformedURLException;
 
 public class Flickr extends FlickrBase
 {
-  public Flickr() { }
-
-
   public SizeMap getPhotoSizes( String photoId )
     throws FlickrException, IOException
   {
