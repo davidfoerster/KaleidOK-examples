@@ -99,6 +99,21 @@ public class ChromatikQuery implements Serializable, Cloneable
   }
 
 
+  @Override
+  public boolean equals( Object o )
+  {
+    if (o == this)
+      return true;
+    if (!(o instanceof ChromatikQuery))
+      return false;
+
+    ChromatikQuery ocq = (ChromatikQuery) o;
+    return start == ocq.start && nHits == ocq.nHits &&
+      keywords.equals(ocq.keywords) && baseUri.equals(ocq.baseUri) &&
+      opts.equals(ocq.opts);
+  }
+
+
   @SuppressWarnings({ "unchecked", "CloneCallsConstructors" })
   @Override
   public ChromatikQuery clone()
