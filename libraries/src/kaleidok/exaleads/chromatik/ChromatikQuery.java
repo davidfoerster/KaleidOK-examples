@@ -4,6 +4,7 @@ import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.google.gson.TypeAdapterManager;
+import kaleidok.util.Objects;
 import kaleidok.util.Strings;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -113,11 +114,16 @@ public class ChromatikQuery implements Serializable, Cloneable
     }
     if (other.opts != null)
     {
-      other.opts =
-        (other.opts instanceof HashMap) ?
-          (Map<Serializable, Serializable>)
-            ((HashMap<Serializable, Serializable>) other.opts).clone() :
-          new HashMap<>(other.opts);
+      Map<Serializable, Serializable> optsClone = null;
+      if (other.opts instanceof Cloneable) try
+      {
+        optsClone = Objects.clone(other.opts);
+      }
+      catch (CloneNotSupportedException ignored)
+      {
+        // leave the null reference to invoke the fall-back behaviour
+      }
+      other.opts = (optsClone != null) ? optsClone : new HashMap<>(other.opts);
     }
     return other;
   }
