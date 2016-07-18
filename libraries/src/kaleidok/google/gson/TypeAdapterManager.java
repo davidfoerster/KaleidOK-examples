@@ -38,13 +38,17 @@ public final class TypeAdapterManager
 
     public Gson getGson()
     {
-      if (gson == null) {
-        synchronized (this) {
-          if (gson == null) {
+      Gson gson;
+      if ((gson = this.gson) == null)
+      {
+        synchronized (this)
+        {
+          if ((gson = this.gson) == null)
+          {
             final GsonBuilder gsonBuilder = new GsonBuilder();
             for (Map.Entry<Type, Object> e: map.entrySet())
               gsonBuilder.registerTypeAdapter(e.getKey(), e.getValue());
-            gson = gsonBuilder.create();
+            this.gson = gson = gsonBuilder.create();
           }
         }
       }
