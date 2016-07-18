@@ -13,6 +13,7 @@ public final class AssertionUtils
     for (String arg:
       ManagementFactory.getRuntimeMXBean().getInputArguments())
     {
+      //noinspection SpellCheckingInspection
       if (Strings.startsWithToken(arg, "-agentlib:jdwp", '='))
       {
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);

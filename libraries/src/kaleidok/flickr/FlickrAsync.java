@@ -93,8 +93,7 @@ public class FlickrAsync extends Flickr
   {
     FlickrFutureCallback<?> lcb = this.lastCallback;
     if (lcb == null || lcb.nested != nested) {
-      lcb = new FlickrFutureCallback<>(nested);
-      this.lastCallback = lcb;
+      this.lastCallback = lcb = new FlickrFutureCallback<>(nested);
     }
     //noinspection unchecked
     return (FlickrFutureCallback<T>) lcb;

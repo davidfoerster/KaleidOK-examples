@@ -52,7 +52,7 @@ public class ChromatikResponse implements Serializable
       JsonDeserializationContext context ) throws JsonParseException
     {
       assert type instanceof Class && ChromatikResponse.class.isAssignableFrom((Class<?>) type) :
-        type + " is not a subclass of " + ChromatikResponse.class.getCanonicalName();
+        type.getTypeName() + " is no subclass of " + ChromatikResponse.class.getCanonicalName();
 
       JsonArray a = jsonElement.getAsJsonArray();
       ChromatikResponse response = new ChromatikResponse();

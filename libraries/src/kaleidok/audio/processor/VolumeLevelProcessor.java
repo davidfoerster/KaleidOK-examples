@@ -23,7 +23,7 @@ public class VolumeLevelProcessor implements AudioProcessor
      * We could simply use AudioEvent#getRMS() here, but it relies on a
      * numerically unstable sum of squares implementation.
      */
-    level = Math.sqrt(kaleidok.util.Math.sumOfSquares(buf) / buf.length);
+    level = Math.sqrt((double) kaleidok.util.Math.sumOfSquares(buf) / buf.length);
     return true;
   }
 

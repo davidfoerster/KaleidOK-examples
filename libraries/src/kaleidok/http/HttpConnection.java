@@ -71,8 +71,8 @@ public class HttpConnection
   {
     try {
       return openURL(url, HttpConnection.class);
-    } catch (ReflectiveOperationException e) {
-      throw new Error(e);
+    } catch (ReflectiveOperationException ex) {
+      throw new AssertionError(ex);
     }
   }
 
@@ -439,7 +439,6 @@ public class HttpConnection
   {
     if (body == null)
     {
-      connect();
       try (Reader r = getReader())
       {
         body = IOUtils.toString(r);

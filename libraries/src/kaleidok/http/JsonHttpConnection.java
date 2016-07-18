@@ -30,8 +30,8 @@ public class JsonHttpConnection extends HttpConnection
   {
     try {
       return openURL(url, JsonHttpConnection.class);
-    } catch (ReflectiveOperationException e) {
-      throw new Error(e);
+    } catch (ReflectiveOperationException ex) {
+      throw new AssertionError(ex);
     }
   }
 

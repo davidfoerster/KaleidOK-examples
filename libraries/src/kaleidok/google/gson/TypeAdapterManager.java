@@ -64,13 +64,14 @@ public final class TypeAdapterManager
         throw new IllegalArgumentException(
           "Illegal type adapter class: " + value.getClass().getName());
       }
-      Object prev;
-      synchronized (this) {
-        prev = map.put(key, value);
+
+      synchronized (this)
+      {
+        Object prev = map.put(key, value);
         if (prev != value)
           gson = null;
+        return prev;
       }
-      return prev;
     }
 
 
