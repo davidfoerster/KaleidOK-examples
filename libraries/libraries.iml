@@ -8,7 +8,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Processing 3" level="application" />
+    <orderEntry type="library" name="Processing 3.0a" level="application" />
     <orderEntry type="library" name="TarsosDSP" level="application" />
     <orderEntry type="library" name="Minim" level="application" />
     <orderEntry type="library" scope="TEST" name="com.github.tomakehurst:wiremock:1.57" level="project" />
