@@ -1,7 +1,12 @@
 package kaleidok.util;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.AbstractList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.RandomAccess;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
