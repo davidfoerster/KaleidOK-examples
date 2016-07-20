@@ -8,6 +8,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.net.URL;
 
+import static javax.swing.Action.SHORT_DESCRIPTION;
+
 
 public class KaleidoscopeControls extends JFrame
 {
@@ -51,8 +53,7 @@ public class KaleidoscopeControls extends JFrame
               ((AbstractButton) ev.getSource()).isSelected(), false);
           }
         };
-      action.putValue(Action.SHORT_DESCRIPTION,
-        "Start and stop recording");
+      action.putValue(SHORT_DESCRIPTION, "Start and stop recording");
       recordingButton = new JRoundToggleButton(action);
       recordingButton.paintUI = false;
       recordingButton.setText(null);
@@ -102,7 +103,7 @@ public class KaleidoscopeControls extends JFrame
       size.width = 250;
       messageField.setPreferredSize(size);
 
-      messageField.setAction(new AbstractAction()
+      AbstractAction action = new AbstractAction("Submit")
       {
         @Override
         public void actionPerformed( ActionEvent ev )
@@ -110,7 +111,10 @@ public class KaleidoscopeControls extends JFrame
           context.getSketch().getChromasthetiationService()
             .submit(messageField.getText());
         }
-      });
+      };
+      action.putValue(SHORT_DESCRIPTION,
+        "Submit text and keywords for chromasthetiation");
+      messageField.setAction(action);
 
       messageField.setToolTipText(
         "Write something emotional to analyze and press ENTER to submit");
