@@ -2,10 +2,9 @@ package kaleidok.examples.kaleidoscope;
 
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
+import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;
-
-import javax.swing.JApplet;
 
 import java.awt.Point;
 import java.util.Optional;
@@ -40,7 +39,7 @@ public class Kaleidoscope extends ExtPApplet
   private Optional<ExportService> exportService;
 
 
-  public Kaleidoscope( JApplet parent )
+  public Kaleidoscope( ProcessingSketchApplication<Kaleidoscope> parent )
   {
     super(parent);
   }
@@ -54,6 +53,8 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void setup()
   {
+    super.setup();
+
     Point size = new Point(width, height);
     if (size.x == DEFAULT_PAPPLET_LENGTH && size.y == DEFAULT_PAPPLET_LENGTH)
     {

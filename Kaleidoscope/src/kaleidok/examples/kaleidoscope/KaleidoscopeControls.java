@@ -11,7 +11,7 @@ import java.net.URL;
 import static javax.swing.Action.SHORT_DESCRIPTION;
 
 
-public class KaleidoscopeControls extends JFrame
+public class KaleidoscopeControls extends JPanel
 {
   private static final String iconDir = "icons/";
 
@@ -26,12 +26,8 @@ public class KaleidoscopeControls extends JFrame
 
   public KaleidoscopeControls( KaleidoscopeApp context )
   {
-    super("Kaleidoscope Controls");
     this.context = context;
-
-    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     initComponents();
-    pack();
   }
 
 
@@ -97,8 +93,9 @@ public class KaleidoscopeControls extends JFrame
   private JTextField getMessageField()
   {
     if (messageField == null) {
-      messageField = new JTextField(context.getParameter(
-        this.getClass().getPackage().getName() + ".text"));
+      messageField =
+        new JTextField(context.getNamedParameters().get(
+          this.getClass().getPackage().getName() + ".text"));
       Dimension size = messageField.getPreferredSize();
       size.width = 250;
       messageField.setPreferredSize(size);
