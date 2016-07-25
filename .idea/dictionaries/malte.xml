@@ -12,6 +12,7 @@
       <w>coords</w>
       <w>ctor</w>
       <w>cumulated</w>
+      <w>decodable</w>
       <w>devs</w>
       <w>digester</w>
       <w>empathybox</w>
@@ -28,6 +29,7 @@
       <w>gson</w>
       <w>hasher</w>
       <w>ieee</w>
+      <w>iter</w>
       <w>kaleidok</w>
       <w>minmax</w>
       <w>nanos</w>
@@ -57,6 +59,7 @@
       <w>transcoding</w>
       <w>unapplied</w>
       <w>unmappable</w>
+      <w>unregister</w>
       <w>wireframe</w>
     </words>
   </dictionary>
