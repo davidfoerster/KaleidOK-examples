@@ -4,7 +4,6 @@ import kaleidok.flickr.Flickr;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import java.applet.Applet;
 
 
 public class DocumentChromasthetiator<F extends Flickr>
@@ -14,12 +13,6 @@ public class DocumentChromasthetiator<F extends Flickr>
    * A document object tha holds the currently defined search terms
    */
   public Document keywordsDoc;
-
-
-  public DocumentChromasthetiator( Applet parent )
-  {
-    super(parent);
-  }
 
 
   @Override

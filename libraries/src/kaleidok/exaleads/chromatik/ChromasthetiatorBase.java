@@ -10,7 +10,6 @@ import kaleidok.util.Strings;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
 
-import java.applet.Applet;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -46,8 +45,6 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
 
   public ChromatikQuery chromatikQuery;
 
-  protected final Applet parent;
-
   protected SynesthetiatorEmotion synesthetiator;
 
   protected SynesketchPalette palettes;
@@ -55,10 +52,8 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
   protected F flickr;
 
 
-  protected ChromasthetiatorBase( Applet parent )
+  protected ChromasthetiatorBase()
   {
-    this.parent = parent;
-
     try {
       synesthetiator = new SynesthetiatorEmotion();
     } catch (IOException ex) {
@@ -80,7 +75,6 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
    */
   protected ChromasthetiatorBase( ChromasthetiatorBase<? extends Flickr> other )
   {
-    parent = other.parent;
     maxColors = other.maxColors;
     maxKeywords = other.maxKeywords;
     chromatikQuery = other.chromatikQuery.clone();

@@ -140,7 +140,7 @@ public final class KaleidoscopeChromasthetiationService
   {
     if (chromasthetiator == null)
     {
-      chromasthetiator = new DocumentChromasthetiator<>(parent);
+      chromasthetiator = new DocumentChromasthetiator<>();
 
       String data = parent.parseStringOrFile(
         parent.getParameterMap().get("com.flickr.api.key"), '@');
