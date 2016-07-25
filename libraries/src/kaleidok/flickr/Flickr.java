@@ -13,11 +13,10 @@ public class Flickr extends FlickrBase
   public SizeMap getPhotoSizes( String photoId )
     throws FlickrException, IOException
   {
-    try {
-      return JsonHttpConnection.openURL(getPhotoSizesUri(photoId).toURL())
-        .get(SizeMap.class);
-    } catch (MalformedURLException ex) {
-      throw new AssertionError(ex);
+    try (JsonHttpConnection con =
+      JsonHttpConnection.openURL(getPhotoSizeUrl(photoId)))
+    {
+      return con.get(SizeMap.class);
     } catch (JsonParseException ex) {
       Throwable cause = ex.getCause();
       if (cause instanceof FlickrException)

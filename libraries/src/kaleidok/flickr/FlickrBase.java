@@ -5,8 +5,10 @@ import kaleidok.flickr.SizeMap;
 import kaleidok.google.gson.TypeAdapterManager;
 import org.apache.http.client.utils.URIBuilder;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 
 class FlickrBase
@@ -132,6 +134,19 @@ class FlickrBase
         .addParameter("photo_id", photoId)
         .build();
     } catch (URISyntaxException ex) {
+      throw new AssertionError(ex);
+    }
+  }
+
+
+  protected URL getPhotoSizeUrl( String photoId )
+  {
+    try
+    {
+      return getPhotoSizesUri(photoId).toURL();
+    }
+    catch (MalformedURLException ex)
+    {
       throw new AssertionError(ex);
     }
   }
