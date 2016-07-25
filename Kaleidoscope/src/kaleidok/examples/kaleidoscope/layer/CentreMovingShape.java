@@ -2,7 +2,7 @@ package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.processing.ExtPApplet;
-import kaleidok.processing.PImageFuture;
+import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.CyclingList;
 import processing.core.PApplet;
 import processing.core.PConstants;

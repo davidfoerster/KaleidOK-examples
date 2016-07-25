@@ -4,13 +4,12 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.examples.kaleidoscope.layer.*;
-import kaleidok.processing.PImageFuture;
+import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.BeanUtils;
 import kaleidok.util.PropertyLoader;
 import processing.core.PImage;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -169,16 +168,22 @@ public class LayerManager implements List<ImageLayer>, Runnable
 
   public List<PImageFuture> getImages()
   {
-    if (this.images == null) {
+    if (images == null)
+    {
       String imagesParam = parent.getParameter(
         parent.getClass().getPackage().getName() + ".images.initial");
-      if (imagesParam == null) {
-        this.images = new ArrayList<>(MIN_IMAGES);
-      } else {
-        String[] images = WHITESPACE_PATTERN.split(imagesParam);
-        this.images = new ArrayList<>(Math.max(images.length, MIN_IMAGES));
-        for (String strImage : images) {
-          if (!strImage.isEmpty()) {
+      if (imagesParam == null)
+      {
+        images = new ArrayList<>(MIN_IMAGES);
+      }
+      else
+      {
+        String[] imagePaths = WHITESPACE_PATTERN.split(imagesParam);
+        images = new ArrayList<>(Math.max(imagePaths.length, MIN_IMAGES));
+        for (String strImage : imagePaths)
+        {
+          if (!strImage.isEmpty())
+          {
             char c = strImage.charAt(0);
             if (c != '/' && c != File.separatorChar &&
               strImage.indexOf(':') < 0)
@@ -186,16 +191,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
               //noinspection StringConcatenationInLoop
               strImage = "/images/" + strImage;
             }
-            PImageFuture image = parent.getImageFuture(strImage);
-            if (image != null) {
-              this.images.add(image);
-            } else {
-              String msg = "Couldn't load image";
-              Throwable ex = new FileNotFoundException(strImage);
-              if (LayerManager.class.desiredAssertionStatus())
-                throw new AssertionError(msg, ex);
-              logger.log(Level.WARNING, msg, ex);
-            }
+            images.add(parent.getImageFuture(strImage));
           }
         }
       }
@@ -206,7 +202,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
       for (int i = images.size(); i < MIN_IMAGES; i++)
         images.add(images.get(i % imageCount));
     }
-    return this.images;
+    return images;
   }
 
 

@@ -1,13 +1,17 @@
 package kaleidok.examples.kaleidoscope.layer;
 
 import kaleidok.processing.ExtPApplet;
-import kaleidok.processing.PImageFuture;
+import kaleidok.processing.image.PImageFuture;
+import kaleidok.util.LoggingUtils;
 import kaleidok.util.SynchronizedFormat;
 import processing.core.PImage;
 
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public abstract class ImageLayer implements Runnable
@@ -46,9 +50,20 @@ public abstract class ImageLayer implements Runnable
     PImageFuture nextFuture = nextImage.getAndSet(null);
     if (nextFuture != null)
     {
-      PImage next = nextFuture.getNoThrow();
-      if (next != null && next.width > 0 && next.height > 0)
-        setCurrentImage(next);
+      if (!nextFuture.isDone())
+      {
+        nextImage.compareAndSet(null, nextFuture);
+      }
+      else if (!nextFuture.isCancelled()) try
+      {
+        PImage next = nextFuture.get();
+        if (next != null && next.width > 0 && next.height > 0)
+          setCurrentImage(next);
+      }
+      catch (InterruptedException | ExecutionException ex)
+      {
+        logFutureImageException(nextFuture, ex);
+      }
     }
     return currentImage.image;
   }
@@ -64,6 +79,18 @@ public abstract class ImageLayer implements Runnable
         saveScreenshot();
     }
     this.currentImage = CurrentImage.newInstance(image);
+  }
+
+
+  private static void logFutureImageException( PImageFuture f, Throwable t )
+  {
+    if (t instanceof ExecutionException)
+      t = t.getCause();
+
+    LoggingUtils.logThrown(
+      Logger.getLogger(f.getClass().getCanonicalName()), Level.WARNING,
+      "Couldn't construct image from: {0}", t, f);
+
   }
 
 

@@ -1,6 +1,7 @@
 package kaleidok.processing;
 
 import kaleidok.awt.ImageIO;
+import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
@@ -171,23 +172,16 @@ public class ExtPApplet extends PApplet
         } catch (URISyntaxException ex) {
           throw new AssertionError(ex);
         }
-        if (!file.isFile() || !file.canRead())
-          url = null;
+        return thread(PImageFuture.from(file));
       }
     }
-    return (url != null) ? getImageFuture(url) : null;
+    return getImageFuture(url);
   }
 
 
   public PImageFuture getImageFuture( URL url )
   {
-    return getImageFuture(url, -1, -1);
-  }
-
-
-  public PImageFuture getImageFuture( URL url, int width, int height )
-  {
-    return new PImageFuture(this, getImage(url), width, height);
+    return thread(PImageFuture.from(url));
   }
 
 
