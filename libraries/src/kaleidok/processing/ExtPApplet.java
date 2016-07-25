@@ -1,5 +1,6 @@
 package kaleidok.processing;
 
+import javafx.application.HostServices;
 import kaleidok.awt.ImageIO;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.DefaultValueParser;
@@ -8,10 +9,6 @@ import kaleidok.util.concurrent.GroupedThreadFactory;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-import javax.swing.JApplet;
-import java.awt.Image;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.File;
 import java.io.IOException;
@@ -41,13 +38,14 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
  */
 public class ExtPApplet extends PApplet
 {
-  private JApplet parent;
+  private ProcessingSketchApplication<? extends ExtPApplet> parent;
 
   public final Set<String> saveFilenames = new ImageSaveSet(this);
 
   protected ExecutorService executorService;
 
-  public ExtPApplet( JApplet parent )
+
+  public ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
   {
     this.parent = parent;
   }
@@ -100,7 +98,7 @@ public class ExtPApplet extends PApplet
   @Override
   public String getParameter( String name )
   {
-    return parent.getParameter(name);
+    return parent.getNamedParameters().get(name);
   }
 
   public <T> T getParameter( String name, T defaultValue )
@@ -114,45 +112,25 @@ public class ExtPApplet extends PApplet
   @Override
   public URL getDocumentBase()
   {
-    if (documentBase == null) {
-      URL documentBase = parent.getDocumentBase();
-      if ("file".equals(documentBase.getProtocol())) {
-        documentBase = this.getClass().getProtectionDomain().getCodeSource().getLocation();
-        try {
-          documentBase = new URL(documentBase, documentBase.getPath() + "data/");
-        } catch (MalformedURLException ex) {
-          throw new AssertionError(ex);
-        }
+    if (documentBase == null) try
+    {
+      HostServices services = parent.getHostServices();
+      if (!services.getCodeBase().isEmpty())
+      {
+        documentBase = new URL(services.getDocumentBase());
       }
-      this.documentBase = documentBase;
+      else
+      {
+        URL codeBase =
+          this.getClass().getProtectionDomain().getCodeSource().getLocation();
+        documentBase = new URL(codeBase, codeBase.getPath() + "data/");
+      }
+    }
+    catch (MalformedURLException ex)
+    {
+      throw new InternalError(ex);
     }
     return documentBase;
-  }
-
-  @Override
-  public Image getImage( URL url )
-  {
-    return parent.getImage(url);
-  }
-
-  @Override
-  public Image getImage( URL url, String name )
-  {
-    return parent.getImage(url, name);
-  }
-
-
-  @Override
-  public void keyPressed( KeyEvent e )
-  {
-    for (KeyListener listener: getKeyListeners()) {
-      if (listener != this) {
-        listener.keyPressed(e);
-        if (e.isConsumed())
-          return;
-      }
-    }
-    super.keyPressed(e);
   }
 
 

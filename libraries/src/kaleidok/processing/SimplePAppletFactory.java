@@ -1,17 +1,29 @@
 package kaleidok.processing;
 
-import javax.swing.JApplet;
+import processing.core.PApplet;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.Objects;
 
 
-public class SimplePAppletFactory<T extends ExtPApplet> implements PAppletFactory<T>
+public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T>
 {
   protected final Constructor<? extends T> constructor;
 
 
+  public static <T extends PApplet> SimplePAppletFactory<T> forClass(
+    Class<T> appletClass )
+    throws IllegalArgumentException
+  {
+    return new SimplePAppletFactory<>(appletClass);
+  }
+
+
   public SimplePAppletFactory( Class<? extends T> appletClass )
+    throws IllegalArgumentException
   {
     if (!ExtPApplet.class.isAssignableFrom(appletClass))
     {
@@ -26,7 +38,7 @@ public class SimplePAppletFactory<T extends ExtPApplet> implements PAppletFactor
     }
     try
     {
-      constructor = appletClass.getConstructor(JApplet.class);
+      constructor = appletClass.getConstructor(ProcessingSketchApplication.class);
     }
     catch (NoSuchMethodException ex)
     {
@@ -36,15 +48,25 @@ public class SimplePAppletFactory<T extends ExtPApplet> implements PAppletFactor
 
 
   @Override
-  public T createInstance( JApplet parent ) throws InvocationTargetException
+  public T createInstance( ProcessingSketchApplication<T> context,
+    List<String> args )
+    throws InvocationTargetException
   {
+    Objects.requireNonNull(args);
+
+    T sketch;
     try
     {
-      return constructor.newInstance(parent);
+      sketch = constructor.newInstance(context);
     }
     catch (InstantiationException | IllegalAccessException | IllegalArgumentException ex)
     {
       throw new AssertionError(ex);
     }
+
+    String[] extArgs = args.toArray(new String[args.size() + 1]);
+    extArgs[extArgs.length - 1] = sketch.getClass().getSimpleName();
+    PApplet.runSketch(extArgs, sketch);
+    return sketch;
   }
 }
