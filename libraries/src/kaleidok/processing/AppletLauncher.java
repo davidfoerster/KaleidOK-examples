@@ -1,5 +1,6 @@
 package kaleidok.processing;
 
+import kaleidok.util.LoggingUtils;
 import kaleidok.util.PropertyLoader;
 import sun.applet.AppletViewer;
 import sun.applet.AppletViewerFactory;
@@ -10,10 +11,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
-
-import static kaleidok.util.LoggingUtils.logThrown;
 
 
 public class AppletLauncher
@@ -47,10 +45,8 @@ public class AppletLauncher
   private AppletViewer launch0( Class<? extends Applet> appletClass,
     Hashtable<String, String> attributes, int x, int y )
   {
-    String systemLoggerConfigPath =
-      System.getProperty(Logger.class.getPackage().getName() + ".config.file");
-    if (systemLoggerConfigPath == null || systemLoggerConfigPath.isEmpty())
-      loadLocalLoggerProperties(appletClass);
+    if (!LoggingUtils.hasSystemLoggerConfiguration())
+      LoggingUtils.loadLocalLoggerProperties(appletClass);
 
     URL documentURL = appletClass.getResource(".");
     if (documentURL == null) {
@@ -167,43 +163,5 @@ public class AppletLauncher
     return (arg.length() == 1 && arg.charAt(0) == '-') ?
       System.in :
       new FileInputStream(arg);
-  }
-
-
-  @SuppressWarnings({ "resource", "IOResourceOpenedButNotSafelyClosed" })
-  public static void loadLocalLoggerProperties( Class<?> appletClass )
-  {
-    String loggingFile = "logging.properties";
-    InputStream is;
-    try
-    {
-      is = new FileInputStream(loggingFile);
-    }
-    catch (FileNotFoundException ignored)
-    {
-      is = appletClass.getClassLoader().getResourceAsStream(loggingFile);
-      if (is == null)
-        return;
-    }
-
-    try
-    {
-      LogManager.getLogManager().readConfiguration(is);
-    }
-    catch (IOException ex)
-    {
-      logThrown(Logger.getAnonymousLogger(), Level.SEVERE,
-        "Couldn't load default {0} file for {1}", ex,
-        new Object[]{loggingFile, appletClass.getName()});
-    }
-    finally
-    {
-      try {
-        is.close();
-      } catch (IOException ex) {
-        Logger.getAnonymousLogger().log(Level.WARNING,
-          "Couldn't close logger configuration file", ex);
-      }
-    }
   }
 }
