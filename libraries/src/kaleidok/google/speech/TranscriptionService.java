@@ -3,6 +3,7 @@ package kaleidok.google.speech;
 import kaleidok.util.concurrent.DaemonThreadFactory;
 import org.apache.http.concurrent.FutureCallback;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -122,11 +123,14 @@ public class TranscriptionService
     URL_SPEC_KEY_BIT = "&key=";
 
 
+  @OverridingMethodsMustInvokeSuper
   public void execute( Transcription task )
   {
     executor.execute(task);
   }
 
+
+  @OverridingMethodsMustInvokeSuper
   public void shutdownNow()
   {
     executor.shutdownNow();

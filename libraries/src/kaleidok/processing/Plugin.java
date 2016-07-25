@@ -5,6 +5,7 @@ import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 import processing.event.TouchEvent;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
@@ -76,6 +77,7 @@ public class Plugin<P extends PApplet>
   }
 
 
+  @OverridingMethodsMustInvokeSuper
   protected void registerHook( HookMethod hookMethod )
   {
     if (registeredHooks.add(hookMethod))
@@ -83,6 +85,7 @@ public class Plugin<P extends PApplet>
   }
 
 
+  @OverridingMethodsMustInvokeSuper
   protected void unregisterHook( HookMethod hookMethod )
   {
     switch (hookMethod)
@@ -99,7 +102,8 @@ public class Plugin<P extends PApplet>
   }
 
 
-  public final void dispose()
+  @OverridingMethodsMustInvokeSuper
+  public void dispose()
   {
     if (!registeredHooks.isEmpty() && !p.finished)
     {
@@ -107,12 +111,8 @@ public class Plugin<P extends PApplet>
         p.unregisterMethod(m.name(), this);
       registeredHooks.clear();
     }
-
-    onDispose();
   }
 
-
-  protected void onDispose() { }
 
   public void pre() { }
 

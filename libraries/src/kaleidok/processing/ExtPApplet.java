@@ -256,9 +256,10 @@ public class ExtPApplet extends PApplet
 
 
     @Override
-    protected void onDispose()
+    public void dispose()
     {
       clear();
+      super.dispose();
     }
 
 

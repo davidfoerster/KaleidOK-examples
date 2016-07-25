@@ -11,6 +11,7 @@ import kaleidok.util.Threads;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.http.concurrent.FutureCallback;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
@@ -117,7 +118,7 @@ public class Transcription implements Runnable
 
 
   @Override
-  public final void run()
+  public void run()
   {
     FutureCallback<SttResponse> callback = this.callback;
     SttResponse result;
@@ -186,6 +187,7 @@ public class Transcription implements Runnable
   }
 
 
+  @OverridingMethodsMustInvokeSuper
   public void dispose()
   {
     if (connection.getState() == CONNECTED) {

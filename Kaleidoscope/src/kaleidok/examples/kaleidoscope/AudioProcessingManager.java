@@ -54,10 +54,12 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
 
   @Override
-  protected void onDispose()
+  public void dispose()
   {
     if (audioDispatcher != null)
       audioDispatcher.stop();
+
+    super.dispose();
   }
 
 

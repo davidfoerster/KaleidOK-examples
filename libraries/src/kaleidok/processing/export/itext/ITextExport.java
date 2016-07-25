@@ -12,6 +12,7 @@ import kaleidok.processing.export.AbstractFrameRecorder;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.awt.Image;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -108,8 +109,10 @@ public class ITextExport extends AbstractFrameRecorder
 
 
   @Override
-  protected void onDispose()
+  @OverridingMethodsMustInvokeSuper
+  public void dispose()
   {
+    super.dispose();
     close();
   }
 }
