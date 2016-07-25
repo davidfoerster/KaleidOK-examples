@@ -26,11 +26,15 @@ public class ResponseMimeTypeChecker
   public HttpResponse handleResponse( HttpResponse httpResponse )
     throws IOException
   {
-    ContentType ct = Parsers.getContentType(httpResponse);
-    if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty()) {
+    if (acceptedMimeTypes != null && !acceptedMimeTypes.isEmpty())
+    {
+      ContentType ct = Parsers.getContentType(httpResponse);
       String mimeType = (ct != null) ? ct.getMimeType() : null;
       if (acceptedMimeTypes.allows(mimeType) == null)
-        throw new ClientProtocolException("Unsupported response MIME type: " + mimeType);
+      {
+        throw new ClientProtocolException(
+          "Unsupported response MIME type: " + mimeType);
+      }
     }
     return httpResponse;
   }
