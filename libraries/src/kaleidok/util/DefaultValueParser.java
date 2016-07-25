@@ -19,9 +19,7 @@ public final class DefaultValueParser
   public static int parseInt( String s, int defaultValue )
     throws NumberFormatException
   {
-    return (s != null && !s.isEmpty()) ?
-      Integer.parseInt(s) :
-      defaultValue;
+    return (s != null) ? Integer.parseInt(s) : defaultValue;
   }
 
   public static int parseInt( Applet a, String name, int defaultValue )
@@ -34,9 +32,7 @@ public final class DefaultValueParser
   public static long parseLong( String s, long defaultValue )
     throws NumberFormatException
   {
-    return (s != null && !s.isEmpty()) ?
-      Long.parseLong(s) :
-      defaultValue;
+    return (s != null) ? Long.parseLong(s) : defaultValue;
   }
 
   public static long parseLong( Applet a, String name, long defaultValue )
@@ -49,9 +45,7 @@ public final class DefaultValueParser
   public static double parseDouble( String s, double defaultValue )
     throws NumberFormatException
   {
-    return (s != null && !s.isEmpty()) ?
-      Double.parseDouble(s) :
-      defaultValue;
+    return (s != null) ? Double.parseDouble(s) : defaultValue;
   }
 
   public static double parseDouble( Applet a, String name, double defaultValue )
@@ -89,9 +83,7 @@ public final class DefaultValueParser
   public static boolean parseBoolean( String s, boolean defaultValue )
     throws IllegalArgumentException
   {
-    return (s != null && !s.isEmpty()) ?
-      parseBoolean(s) :
-      defaultValue;
+    return (s != null) ? parseBoolean(s) : defaultValue;
   }
 
   public static boolean parseBoolean( Applet a, String name, boolean defaultValue )
@@ -150,14 +142,11 @@ public final class DefaultValueParser
       //noinspection unchecked
       return (s != null) ? (T) s : defaultValue;
     }
-    if (s != null && !s.isEmpty()) {
-      try {
-        T value = valueOf(s, clazz);
-        if (value != null)
-          return value;
-      } catch (IllegalArgumentException ignored) {
-        // go to default
-      }
+    if (s != null) try
+    {
+      return valueOf(s, clazz);
+    } catch (IllegalArgumentException ignored) {
+      // go to default
     }
     return defaultValue;
   }
