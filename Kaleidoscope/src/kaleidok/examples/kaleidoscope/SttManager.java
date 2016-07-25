@@ -152,4 +152,14 @@ public class SttManager extends Plugin<Kaleidoscope>
       }
     }
   }
+
+
+  public void setRecorderStatus( boolean isRecording, boolean doThrow )
+  {
+    if (isRecording) {
+      begin(doThrow);
+    } else {
+      end(doThrow);
+    }
+  }
 }
