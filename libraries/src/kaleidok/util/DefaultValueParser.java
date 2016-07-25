@@ -1,7 +1,6 @@
 package kaleidok.util;
 
 
-import java.applet.Applet;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -22,12 +21,6 @@ public final class DefaultValueParser
     return (s != null) ? Integer.parseInt(s) : defaultValue;
   }
 
-  public static int parseInt( Applet a, String name, int defaultValue )
-    throws NumberFormatException
-  {
-    return parseInt(a.getParameter(name), defaultValue);
-  }
-
 
   public static long parseLong( String s, long defaultValue )
     throws NumberFormatException
@@ -35,23 +28,11 @@ public final class DefaultValueParser
     return (s != null) ? Long.parseLong(s) : defaultValue;
   }
 
-  public static long parseLong( Applet a, String name, long defaultValue )
-    throws NumberFormatException
-  {
-    return parseLong(a.getParameter(name), defaultValue);
-  }
-
 
   public static double parseDouble( String s, double defaultValue )
     throws NumberFormatException
   {
     return (s != null) ? Double.parseDouble(s) : defaultValue;
-  }
-
-  public static double parseDouble( Applet a, String name, double defaultValue )
-    throws NumberFormatException
-  {
-    return parseDouble(a.getParameter(name), defaultValue);
   }
 
 
@@ -80,16 +61,11 @@ public final class DefaultValueParser
       new IllegalArgumentException(msg);
   }
 
+
   public static boolean parseBoolean( String s, boolean defaultValue )
     throws IllegalArgumentException
   {
     return (s != null) ? parseBoolean(s) : defaultValue;
-  }
-
-  public static boolean parseBoolean( Applet a, String name, boolean defaultValue )
-    throws IllegalArgumentException
-  {
-    return parseBoolean(a.getParameter(name), defaultValue);
   }
 
 

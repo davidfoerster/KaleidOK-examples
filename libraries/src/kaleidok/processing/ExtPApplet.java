@@ -4,7 +4,6 @@ import javafx.application.HostServices;
 import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFuture;
-import kaleidok.util.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import processing.core.PApplet;
@@ -91,18 +90,6 @@ public class ExtPApplet extends PApplet
       executorService.shutdownNow();
 
     super.dispose();
-  }
-
-
-  @Override
-  public String getParameter( String name )
-  {
-    return parent.getNamedParameters().get(name);
-  }
-
-  public <T> T getParameter( String name, T defaultValue )
-  {
-    return DefaultValueParser.parse(getParameter(name), defaultValue);
   }
 
 
