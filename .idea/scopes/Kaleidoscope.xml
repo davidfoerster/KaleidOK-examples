@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Kaleidoscope" pattern="src[Kaleidoscope]:*..*||src[libraries]:*..*" />
+</component>
