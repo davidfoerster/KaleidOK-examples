@@ -5,12 +5,9 @@
       <module fileurl="file://$PROJECT_DIR$/KaleidOK Examples.iml" filepath="$PROJECT_DIR$/KaleidOK Examples.iml" />
       <module fileurl="file://$PROJECT_DIR$/Kaleidoscope/Kaleidoscope.iml" filepath="$PROJECT_DIR$/Kaleidoscope/Kaleidoscope.iml" />
       <module fileurl="file://$PROJECT_DIR$/../synesketch/Synesketch.iml" filepath="$PROJECT_DIR$/../synesketch/Synesketch.iml" />
-      <module fileurl="file://$PROJECT_DIR$/bubbles/bubbles.iml" filepath="$PROJECT_DIR$/bubbles/bubbles.iml" />
-      <module fileurl="file://$PROJECT_DIR$/chromatik_client/chromatik_client.iml" filepath="$PROJECT_DIR$/chromatik_client/chromatik_client.iml" />
       <module fileurl="file://$PROJECT_DIR$/cmusphinx_example/cmusphinx_example.iml" filepath="$PROJECT_DIR$/cmusphinx_example/cmusphinx_example.iml" />
       <module fileurl="file://$PROJECT_DIR$/../javaFlacEncoder/javaFlacEncoder.iml" filepath="$PROJECT_DIR$/../javaFlacEncoder/javaFlacEncoder.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
-      <module fileurl="file://$PROJECT_DIR$/speech_chromasthetiator/speech_chromasthetiator.iml" filepath="$PROJECT_DIR$/speech_chromasthetiator/speech_chromasthetiator.iml" />
     </modules>
   </component>
 </project>
