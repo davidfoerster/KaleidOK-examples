@@ -2,6 +2,7 @@ package kaleidok.util;
 
 import java.lang.reflect.Array;
 import java.util.AbstractList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -57,7 +58,9 @@ public final class Arrays
   @SafeVarargs
   public static <E> List<E> asImmutableList( E... a )
   {
-    return new ImmutableArrayList<>(a);
+    return (a.length != 0) ?
+      new ImmutableArrayList<>(a) :
+      Collections.emptyList();
   }
 
 
