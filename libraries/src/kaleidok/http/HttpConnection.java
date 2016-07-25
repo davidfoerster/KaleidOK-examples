@@ -106,12 +106,18 @@ public class HttpConnection
   }
 
 
-  private static void checkHttpProtocol( URL url ) throws IOException
+  public static boolean isSupported( URL url )
   {
     String p = url.getProtocol(), h = HTTP_PROTOCOL;
     int pl = p.length(), hl = h.length();
-    if (!(p.startsWith(h) && (pl == hl || (pl == hl + 1 && p.charAt(hl) == 's'))))
-      throw new IOException("Unsupported protocol: " + p);
+    return p.startsWith(h) && (pl == hl || (pl == hl + 1 && p.charAt(hl) == 's'));
+  }
+
+
+  private static void checkHttpProtocol( URL url ) throws IOException
+  {
+    if (!isSupported(url))
+      throw new IOException("Unsupported protocol: " + url.getProtocol());
   }
 
 
