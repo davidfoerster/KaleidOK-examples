@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 
@@ -82,5 +84,18 @@ public final class PropertyLoader
 
     String[] a = { resourceAndFilePath };
     return load(prop, charset, classLoaderReference, a, a);
+  }
+
+
+  public static Map<String, String> toMap( Properties src,
+    Map<String, String> dst )
+  {
+    if (dst == null)
+      dst = new HashMap<>(src.size() / 3 * 4);
+
+    for (String key: src.stringPropertyNames())
+      dst.put(key, src.getProperty(key));
+
+    return dst;
   }
 }
