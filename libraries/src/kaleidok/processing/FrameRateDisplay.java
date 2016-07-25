@@ -51,7 +51,7 @@ public class FrameRateDisplay extends Plugin<PApplet>
   {
     return
       DefaultValueParser.parseBoolean(
-        sketch.getParameter("framerate.display"), false)
+        sketch.getParameterMap().get("framerate.display"), false)
       ?
         new FrameRateDisplay(sketch) :
         null;

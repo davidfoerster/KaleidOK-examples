@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -31,10 +32,11 @@ public class ExportService extends ITextExport
 
 
   @SuppressWarnings("resource")
-  public static ExportService fromConfiguration( PApplet sketch )
+  public static ExportService fromConfiguration( PApplet sketch,
+    Map<String, String> parameters )
   {
-    if (!DefaultValueParser.parseBoolean(sketch,
-      ITextExport.class.getPackage().getName(), false))
+    if (!DefaultValueParser.parseBoolean(
+      parameters.get(ITextExport.class.getPackage().getName()), false))
     {
       return null;
     }

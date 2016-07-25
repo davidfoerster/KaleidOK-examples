@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
@@ -102,6 +103,12 @@ public class ExtPApplet extends PApplet
   public <T> T getParameter( String name, T defaultValue )
   {
     return DefaultValueParser.parse(getParameter(name), defaultValue);
+  }
+
+
+  public Map<String, String> getParameterMap()
+  {
+    return parent.getNamedParameters();
   }
 
 

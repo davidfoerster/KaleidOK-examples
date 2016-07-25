@@ -124,8 +124,8 @@ public class Kaleidoscope extends ExtPApplet
   {
     if (exportService == null)
     {
-      exportService =
-        Optional.ofNullable(ExportService.fromConfiguration(this));
+      exportService = Optional.ofNullable(
+        ExportService.fromConfiguration(this, getParameterMap()));
       if (exportService.isPresent())
       {
         getChromasthetiationService()

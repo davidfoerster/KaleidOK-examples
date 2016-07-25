@@ -32,7 +32,8 @@ public class RecorderIcon extends Plugin<PApplet>
     boolean defaultOn )
   {
     String strEnabled =
-      sketch.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
+      sketch.getParameterMap().get(
+        RecorderIcon.class.getCanonicalName() + ".enabled");
     //noinspection SpellCheckingInspection
     return
       (!"forceoff".equals(strEnabled) &&

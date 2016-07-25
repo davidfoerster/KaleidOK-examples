@@ -82,7 +82,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     if (audioDispatcher == null)
     {
       String paramBase = p.getClass().getPackage().getName() + ".audio.";
-      String audioSource = p.getParameter(paramBase + "input");
+      String audioSource = p.getParameterMap().get(paramBase + "input");
       int bufferSize = getAudioBufferSize(),
         bufferOverlap = getAudioBufferOverlap();
 
@@ -91,8 +91,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
         if (audioSource == null)
         {
           String param = paramBase + "samplerate";
-          int sampleRate = DefaultValueParser.parseInt(p,
-            param, DEFAULT_AUDIO_SAMPLERATE);
+          int sampleRate = DefaultValueParser.parseInt(
+            p.getParameterMap().get(param), DEFAULT_AUDIO_SAMPLERATE);
           if (sampleRate <= 0)
             throw new AssertionError(param + " must be positive");
 
@@ -134,8 +134,10 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     Runnable chained )
     throws LineUnavailableException, IOException
   {
-    if (DefaultValueParser.parseBoolean(p,
-      p.getClass().getPackage().getName() + ".audio.input.play", false))
+    if (DefaultValueParser.parseBoolean(
+      p.getParameterMap().get(
+        p.getClass().getPackage().getName() + ".audio.input.play"),
+      false))
     {
       OffThreadAudioPlayer player = new OffThreadAudioPlayer(
         JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
@@ -169,8 +171,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     {
       String param =
         p.getClass().getPackage().getName() + ".audio.buffersize";
-      int bufferSize = DefaultValueParser.parseInt(p, param,
-        DEFAULT_AUDIO_BUFFERSIZE);
+      int bufferSize = DefaultValueParser.parseInt(
+        p.getParameterMap().get(param), DEFAULT_AUDIO_BUFFERSIZE);
       if (bufferSize <= 0 || !isPowerOfTwo(bufferSize))
         throw new AssertionError(param + " must be a power of 2");
       audioBufferSize = bufferSize;
@@ -186,8 +188,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       int bufferSize = getAudioBufferSize();
       String param =
         p.getClass().getPackage().getName() + ".audio.overlap";
-      int bufferOverlap = DefaultValueParser.parseInt(p,
-        param, bufferSize / 2);
+      int bufferOverlap = DefaultValueParser.parseInt(
+        p.getParameterMap().get(param), bufferSize / 2);
       if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
         throw new AssertionError(param + " must be positive and less than buffersize");
       if (!isPowerOfTwo(bufferOverlap))

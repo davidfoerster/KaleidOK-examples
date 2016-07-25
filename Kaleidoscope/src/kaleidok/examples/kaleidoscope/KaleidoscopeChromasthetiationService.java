@@ -22,6 +22,7 @@ import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -75,14 +76,17 @@ public final class KaleidoscopeChromasthetiationService
 
   static KaleidoscopeChromasthetiationService newInstance( Kaleidoscope parent )
   {
-    int threadPoolSize = DefaultValueParser.parseInt(parent,
-      ChromasthetiationService.class.getCanonicalName() + ".threads",
+    Map<String, String> parameters = parent.getParameterMap();
+
+    int threadPoolSize = DefaultValueParser.parseInt(
+      parameters.get(
+        ChromasthetiationService.class.getCanonicalName() + ".threads"),
       ChromasthetiationService.DEFAULT_THREAD_POOL_SIZE);
 
     String cacheParamBase = parent.getClass().getCanonicalName() + ".cache.";
-    long httpCacheSize = DefaultValueParser.parseLong(parent,
-      cacheParamBase + "size", DEFAULT_HTTP_CACHE_SIZE);
-    File cacheDir = new File(parent.getParameter(
+    long httpCacheSize = DefaultValueParser.parseLong(
+      parameters.get(cacheParamBase + "size"), DEFAULT_HTTP_CACHE_SIZE);
+    File cacheDir = new File(parent.getParameterMap().getOrDefault(
       cacheParamBase + "path", parent.getClass().getCanonicalName()));
     if (!cacheDir.isAbsolute()) {
       cacheDir =
@@ -139,7 +143,7 @@ public final class KaleidoscopeChromasthetiationService
       chromasthetiator = new DocumentChromasthetiator<>(parent);
 
       String data = parent.parseStringOrFile(
-        parent.getParameter("com.flickr.api.key"), '@');
+        parent.getParameterMap().get("com.flickr.api.key"), '@');
       if (data != null) {
         String[] keys = KEY_SEPARATOR_PATTERN.split(data, 2);
         if (keys.length != 2) {
@@ -151,8 +155,9 @@ public final class KaleidoscopeChromasthetiationService
         chromasthetiator.setFlickrApi(flickr);
       }
 
-      chromasthetiator.maxKeywords = DefaultValueParser.parseInt(parent,
-        chromasthetiator.getClass().getPackage().getName() + ".maxKeywords",
+      chromasthetiator.maxKeywords = DefaultValueParser.parseInt(
+        parent.getParameterMap().get(
+          chromasthetiator.getClass().getPackage().getName() + ".maxKeywords"),
         chromasthetiator.maxKeywords);
 
       chromasthetiator.chromatikQuery.nHits = 10;

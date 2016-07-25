@@ -93,7 +93,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
 
   private MessageFormat getScreenshotPathPattern()
   {
-    String pattern = parent.getParameter(
+    String pattern = parent.getParameterMap().get(
       parent.getClass().getPackage().getName() + ".screenshots.pattern");
     return (pattern != null) ? new MessageFormat(pattern) : null;
   }
@@ -170,7 +170,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
   {
     if (images == null)
     {
-      String imagesParam = parent.getParameter(
+      String imagesParam = parent.getParameterMap().get(
         parent.getClass().getPackage().getName() + ".images.initial");
       if (imagesParam == null)
       {

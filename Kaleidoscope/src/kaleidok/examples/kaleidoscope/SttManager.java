@@ -4,12 +4,12 @@ import kaleidok.google.speech.RecorderIcon;
 import kaleidok.google.speech.STT;
 import kaleidok.google.speech.SttResponse;
 import kaleidok.google.speech.Transcription;
+import kaleidok.processing.ExtPApplet;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.processing.Plugin;
 import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;
 
-import java.applet.Applet;
 import java.lang.reflect.InvocationTargetException;
 import java.text.Format;
 import java.util.concurrent.TimeUnit;
@@ -28,15 +28,17 @@ public class SttManager extends Plugin<Kaleidoscope>
     super(sketch);
 
     stt = new STT(new SttResponseHandler(),
-      sketch.parseStringOrFile(sketch.getParameter("com.google.developer.api.key"), '@'));
+      sketch.parseStringOrFile(
+        sketch.getParameterMap().get("com.google.developer.api.key"), '@'));
     String paramBase = stt.getClass().getCanonicalName() + '.';
-    stt.setLanguage(sketch.getParameter(paramBase + "language", "en"));
-    stt.setMaxTranscriptionInterval(
-      DefaultValueParser.parseInt(sketch, paramBase + "interval", 8000),
+    stt.setLanguage(
+      sketch.getParameterMap().getOrDefault(paramBase + "language", "en"));
+    stt.setMaxTranscriptionInterval(DefaultValueParser.parseInt(
+      sketch.getParameterMap().get(paramBase + "interval"), 8000),
       TimeUnit.MILLISECONDS);
-    stt.intervalSequenceCountMax =
-      DefaultValueParser.parseInt(sketch, paramBase + "interval.count",
-        stt.intervalSequenceCountMax);
+    stt.intervalSequenceCountMax = DefaultValueParser.parseInt(
+      sketch.getParameterMap().get(paramBase + "interval.count"),
+      stt.intervalSequenceCountMax);
     stt.logfilePattern = getLogfilePattern();
     sketch.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
@@ -47,7 +49,7 @@ public class SttManager extends Plugin<Kaleidoscope>
 
   private Format getLogfilePattern()
   {
-    String logFilePattern = p.getParameter(
+    String logFilePattern = p.getParameterMap().get(
       stt.getClass().getCanonicalName() + ".log.pattern");
     try {
       return (logFilePattern != null) ?
@@ -97,11 +99,12 @@ public class SttManager extends Plugin<Kaleidoscope>
   }
 
 
-  static boolean getParamIgnoreTranscriptionResult( Applet parent )
+  static boolean getParamIgnoreTranscriptionResult( ExtPApplet parent )
   {
     boolean isIgnoreTranscriptionResult =
-      DefaultValueParser.parseBoolean(parent,
-        parent.getClass().getPackage().getName() + ".ignoreTranscription",
+      DefaultValueParser.parseBoolean(
+        parent.getParameterMap().get(
+          parent.getClass().getPackage().getName() + ".ignoreTranscription"),
         false);
     if (isIgnoreTranscriptionResult) {
       logger.config(
