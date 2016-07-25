@@ -49,6 +49,7 @@ public class ExtPApplet extends PApplet
   }
 
 
+  @Override
   @OverridingMethodsMustInvokeSuper
   public void settings()
   {
@@ -101,7 +102,6 @@ public class ExtPApplet extends PApplet
 
   private URL documentBase = null;
 
-  @Override
   public URL getDocumentBase()
   {
     if (documentBase == null) try
