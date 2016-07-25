@@ -9,7 +9,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 
-import static kaleidok.util.Arrays.EMPTY_CLASSES;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 
 
 @SuppressWarnings("unused")
@@ -22,12 +22,12 @@ public class Plugin<P extends PApplet>
 
   private static final Map<HookMethod, Class<?>[]> HOOK_METHODS =
     new EnumMap<HookMethod, Class<?>[]>(HookMethod.class) {{
-      put(HookMethod.pre, EMPTY_CLASSES);
-      put(HookMethod.draw, EMPTY_CLASSES);
-      put(HookMethod.post, EMPTY_CLASSES);
-      put(HookMethod.pause, EMPTY_CLASSES);
-      put(HookMethod.resume, EMPTY_CLASSES);
-      put(HookMethod.dispose, EMPTY_CLASSES);
+      put(HookMethod.pre, EMPTY_CLASS_ARRAY);
+      put(HookMethod.draw, EMPTY_CLASS_ARRAY);
+      put(HookMethod.post, EMPTY_CLASS_ARRAY);
+      put(HookMethod.pause, EMPTY_CLASS_ARRAY);
+      put(HookMethod.resume, EMPTY_CLASS_ARRAY);
+      put(HookMethod.dispose, EMPTY_CLASS_ARRAY);
       put(HookMethod.mouseEvent, new Class<?>[]{ MouseEvent.class });
       put(HookMethod.keyEvent, new Class<?>[]{ KeyEvent.class });
       put(HookMethod.touchEvent, new Class<?>[]{ TouchEvent.class });

@@ -1,5 +1,7 @@
 package kaleidok.io.platform;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,7 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 
 import static kaleidok.io.platform.PlatformPaths.NO_ATTRIBUTES;
-import static kaleidok.util.Arrays.EMPTY_STRINGS;
+import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
 
 
 @SuppressWarnings({ "unused", "MethodMayBeStatic" })
@@ -20,7 +22,7 @@ public class PlatformPathsBase
   {
     String dir = System.getenv(envName);
     return (dir != null && !dir.isEmpty()) ?
-      Paths.get(dir, EMPTY_STRINGS) :
+      Paths.get(dir, EMPTY_STRING_ARRAY) :
       defaultPath;
   }
 
@@ -36,7 +38,7 @@ public class PlatformPathsBase
 
   protected Path getHomeDirImpl()
   {
-    return Paths.get(System.getProperty("user.home"), EMPTY_STRINGS);
+    return Paths.get(System.getProperty("user.home"), EMPTY_STRING_ARRAY);
   }
 
 
@@ -51,7 +53,7 @@ public class PlatformPathsBase
 
   protected Path getTempDirImpl()
   {
-    return Paths.get(System.getProperty("java.io.tmpdir"), EMPTY_STRINGS);
+    return Paths.get(System.getProperty("java.io.tmpdir"), EMPTY_STRING_ARRAY);
   }
 
 

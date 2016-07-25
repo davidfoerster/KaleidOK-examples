@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.nio.file.attribute.PosixFilePermissions.asFileAttribute;
-import static kaleidok.util.Arrays.EMPTY_STRINGS;
+import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
 
 
 @SuppressWarnings("OctalInteger")
@@ -24,7 +24,7 @@ public class UnixPaths extends PlatformPathsBase
     if (dir == null || dir.isEmpty())
       dir = System.getenv("TMP");
     return (dir != null && !dir.isEmpty()) ?
-      Paths.get(dir, EMPTY_STRINGS) :
+      Paths.get(dir, EMPTY_STRING_ARRAY) :
       super.getTempDirImpl();
   }
 
@@ -82,7 +82,7 @@ public class UnixPaths extends PlatformPathsBase
   {
     String dir = System.getenv("XDG_" + type + "_HOME");
     return (dir != null && !dir.isEmpty()) ?
-      Paths.get(dir, EMPTY_STRINGS) :
+      Paths.get(dir, EMPTY_STRING_ARRAY) :
       getHomeDir().resolve(defaultPath);
   }
 }

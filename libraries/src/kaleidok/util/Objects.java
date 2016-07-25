@@ -2,8 +2,8 @@ package kaleidok.util;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static kaleidok.util.Arrays.EMPTY_CLASSES;
-import static kaleidok.util.Arrays.EMPTY_OBJECTS;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 
 
 public final class Objects
@@ -27,7 +27,8 @@ public final class Objects
     Object clone;
     try
     {
-      clone = clazz.getMethod("clone", EMPTY_CLASSES).invoke(o, EMPTY_OBJECTS);
+      clone = clazz
+        .getMethod("clone", EMPTY_CLASS_ARRAY).invoke(o, EMPTY_OBJECT_ARRAY);
     }
     catch (IllegalAccessException ex)
     {
