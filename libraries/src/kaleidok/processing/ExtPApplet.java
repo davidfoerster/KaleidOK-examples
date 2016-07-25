@@ -62,28 +62,6 @@ public class ExtPApplet extends PApplet
 
   @Override
   @OverridingMethodsMustInvokeSuper
-  public void setup()
-  {
-    try
-    {
-      /*
-       * Older Processing releases don't have a "settings" method that they
-       * call on initiation, so we do it for them.
-       *
-       * TODO: Remove this check once the transition to such a version is
-       * complete.
-       */
-      PApplet.class.getMethod("settings", EMPTY_CLASS_ARRAY);
-    }
-    catch (NoSuchMethodException ignored)
-    {
-      settings();
-    }
-  }
-
-
-  @Override
-  @OverridingMethodsMustInvokeSuper
   public void dispose()
   {
     saveFilenames.clear();

@@ -9,7 +9,6 @@ import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -28,7 +27,7 @@ public final class PImages
 
   static final int[] IMAGE_TYPE_PREFERENCE_ORDER = {
     TYPE_INT_ARGB, TYPE_INT_RGB,
-    // TYPE_4BYTE_ABGR, TYPE_3BYTE_BGR, // only since Processing 3.0a11 -- TODO: uncomment this after switching to supporting versions
+    TYPE_4BYTE_ABGR, TYPE_3BYTE_BGR, // only since Processing 3.0a11
   };
 
 
@@ -159,29 +158,8 @@ public final class PImages
   }
 
 
-  /**
-   * <p>This is a cheap work-around for older Processing versions that fail
-   * constructing a PImage from a BufferedImage with an inappropriate pixel
-   * format instead of falling back to a format conversion.
-   *
-   * <p>TODO: This can probably be simplified to a simple delegation to
-   * {@link PImage#PImage(Image)} once the transition to Processing ≥3.0a11 is
-   * completed.
-   *
-   * @param awtImage  An AWT image object
-   * @return  A Processing image object equivalent to the input image
-   */
   public static PImage from( Image awtImage )
   {
-    if (IMAGE_TYPE_PREFERENCE_ORDER.length <= 2 &&
-      awtImage instanceof BufferedImage)
-    {
-      if (!ArrayUtils.contains(IMAGE_TYPE_PREFERENCE_ORDER,
-        ((BufferedImage) awtImage).getType()))
-      {
-        awtImage = new ProxyImage(awtImage);
-      }
-    }
     return new PImage(awtImage);
   }
 
@@ -202,27 +180,5 @@ public final class PImages
       return readers.next();
 
     throw new IllegalArgumentException("No suitable image decoder found");
-  }
-
-
-  /**
-   * <p>Checks that an image object is compatible with the pre-3.0a11
-   * implementation of {@link PImage#PImage(Image)} or if it would trigger a
-   * bug.
-   *
-   * <p>TODO: Remove this debugging method.
-   *
-   * @param img  An image to check
-   * @throws AssertionError  if incompatible
-   */
-  public static void checkCompatible( Image img )
-  {
-    if (!(img instanceof BufferedImage))
-      return;
-
-    BufferedImage bi = (BufferedImage) img;
-    int type = bi.getType();
-    if (!ArrayUtils.contains(IMAGE_TYPE_PREFERENCE_ORDER, type))
-      throw new AssertionError("Incompatible image type: " + type);
   }
 }
