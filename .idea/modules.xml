@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/KaleidOK Examples.iml" filepath="$PROJECT_DIR$/KaleidOK Examples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/KaleidOK.iml" filepath="$PROJECT_DIR$/KaleidOK.iml" />
       <module fileurl="file://$PROJECT_DIR$/Kaleidoscope/Kaleidoscope.iml" filepath="$PROJECT_DIR$/Kaleidoscope/Kaleidoscope.iml" />
       <module fileurl="file://$PROJECT_DIR$/../synesketch/Synesketch.iml" filepath="$PROJECT_DIR$/../synesketch/Synesketch.iml" />
       <module fileurl="file://$PROJECT_DIR$/cmusphinx_example/cmusphinx_example.iml" filepath="$PROJECT_DIR$/cmusphinx_example/cmusphinx_example.iml" />
