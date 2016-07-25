@@ -51,9 +51,9 @@ public class Kaleidoscope extends ExtPApplet
 
 
   @Override
-  public void setup()
+  public void settings()
   {
-    super.setup();
+    super.settings();
 
     Point size = new Point(width, height);
     if (size.x == DEFAULT_PAPPLET_LENGTH && size.y == DEFAULT_PAPPLET_LENGTH)
@@ -66,18 +66,25 @@ public class Kaleidoscope extends ExtPApplet
       size.x = DEFAULT_KALEIDOSCOPE_LENGTH;
       size.y = DEFAULT_KALEIDOSCOPE_LENGTH;
     }
-    this.size(size.x, size.y, OPENGL); // keep size, but use the OpenGL renderer
+    this.size(size.x, size.y, P3D); // keep size, but use the OpenGL renderer
     previousSize = size;
+
+    smooth(DefaultValueParser.parseInt(
+      getParameterMap().get(P3D + ".smooth"), 4));
+  }
+
+
+  @Override
+  public void setup()
+  {
+    super.setup();
+
+    frameRate((float) DefaultValueParser.parseDouble(
+      getParameterMap().get("framerate"), this.frameRate));
 
     textureMode(NORMAL); // set texture coordinate mode to NORMALIZED (0 to 1)
     ellipseMode(RADIUS);
     noiseDetail(4, 0.6f);
-
-    frameRate((float) DefaultValueParser.parseDouble(this,
-      "framerate", this.frameRate));
-
-    smooth(DefaultValueParser.parseInt(this,
-      g.getClass().getCanonicalName() + ".smooth", 4));
 
     getLayers();
     getChromasthetiationService();
