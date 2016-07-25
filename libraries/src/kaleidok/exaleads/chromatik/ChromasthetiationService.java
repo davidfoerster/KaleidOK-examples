@@ -1,6 +1,7 @@
 package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
+import kaleidok.http.responsehandler.PImageBaseResponseHandler;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import kaleidok.flickr.*;
 import kaleidok.util.containers.BoundedCompletionQueue;
@@ -56,7 +57,8 @@ public class ChromasthetiationService
 
   public ChromasthetiationService( ExecutorService executor, Async fluentAsync )
   {
-    this(executor, new JsonAsync(fluentAsync), new ImageAsync(fluentAsync));
+    this(executor, new JsonAsync(fluentAsync),
+      new ImageAsync(fluentAsync, PImageBaseResponseHandler.INSTANCE));
   }
 
 

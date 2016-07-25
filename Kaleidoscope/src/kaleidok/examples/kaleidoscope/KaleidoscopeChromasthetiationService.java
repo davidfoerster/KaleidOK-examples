@@ -2,6 +2,7 @@ package kaleidok.examples.kaleidoscope;
 
 import kaleidok.exaleads.chromatik.ChromasthetiationService;
 import kaleidok.exaleads.chromatik.DocumentChromasthetiator;
+import kaleidok.processing.image.PImages;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import kaleidok.flickr.Flickr;
@@ -10,13 +11,12 @@ import kaleidok.flickr.Photo;
 import kaleidok.http.cache.DiskLruHttpCacheStorage;
 import kaleidok.http.cache.ExecutorSchedulingStrategy;
 import kaleidok.io.platform.PlatformPaths;
-import kaleidok.processing.PImageFuture;
+import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.DefaultValueParser;
 import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
-import processing.core.PImage;
 
 import java.awt.Image;
 import java.io.File;
@@ -185,7 +185,7 @@ public final class KaleidoscopeChromasthetiationService
     {
       assert image.getWidth(null) > 0 && image.getHeight(null) > 0 :
         image + " has width or height ≤0";
-      PImageFuture fImage = new PImageFuture(new PImage(image));
+      PImageFuture fImage = PImageFuture.from(PImages.from(image));
 
       LayerManager layers = parent.getLayers();
       int idx = imageListIndex.getAndIncrement() % layers.size();

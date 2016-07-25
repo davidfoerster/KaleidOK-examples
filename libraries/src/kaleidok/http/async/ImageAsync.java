@@ -2,6 +2,7 @@ package kaleidok.http.async;
 
 import kaleidok.http.responsehandler.ImageMimeTypeChecker;
 import kaleidok.http.responsehandler.ImageResponseHandler;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
 
@@ -11,9 +12,20 @@ import java.util.concurrent.Future;
 
 public class ImageAsync extends AsyncBase
 {
-  public ImageAsync( org.apache.http.client.fluent.Async fluentAsync )
+  protected final ResponseHandler<Image> responseHandler;
+
+
+  public ImageAsync( org.apache.http.client.fluent.Async fluentAsync,
+    ResponseHandler<Image> responseHandler )
   {
     super(fluentAsync, ImageMimeTypeChecker.IMAGE_MIMETYPE_MAP);
+    this.responseHandler = responseHandler;
+  }
+
+
+  public ImageAsync( org.apache.http.client.fluent.Async fluentAsync )
+  {
+    this(fluentAsync, ImageResponseHandler.INSTANCE);
   }
 
 
@@ -28,6 +40,6 @@ public class ImageAsync extends AsyncBase
     FutureCallback<Image> callback )
   {
     applyAcceptedMimeTypes(request);
-    return underlying.execute(request, ImageResponseHandler.INSTANCE, callback);
+    return underlying.execute(request, responseHandler, callback);
   }
 }
