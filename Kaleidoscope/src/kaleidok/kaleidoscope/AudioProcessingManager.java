@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope;
+package kaleidok.kaleidoscope;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
@@ -30,7 +30,6 @@ import java.util.NoSuchElementException;
 import java.util.logging.Level;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
-import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.Math.isPowerOfTwo;
 
 
@@ -124,7 +123,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       audioDispatcher.addAudioProcessor(getVolumeLevelProcessor());
       audioDispatcher.addAudioProcessor(getFftProcessor());
 
-      logger.config(audioDispatcher.getFormat().toString());
+      Kaleidoscope.logger.config(audioDispatcher.getFormat().toString());
       initAudioDispatcherThread(dispatcherRunnable);
     }
   }
@@ -251,7 +250,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       timer = new Timer(0, this);
       timer.setRepeats(false);
 
-      logger.log(Level.CONFIG,
+      Kaleidoscope.logger.log(Level.CONFIG,
         "Replaying recorded interaction \"{0}\"", replayList.name);
     }
 
@@ -339,7 +338,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       MultiAudioInputStream ais = audioInputStream;
       int idx = ais.getCurrentIdx() + 1;
       if (idx >= ais.streams.size()) {
-        logger.info("Last replay item has been finished");
+        Kaleidoscope.logger.info("Last replay item has been finished");
         return;
       }
 
@@ -355,7 +354,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       try {
         audioInputStream.setCurrentIdx(idx);
       } catch (IOException ex) {
-        logger.log(Level.SEVERE, "Couldn't skip to next replay item", ex);
+        Kaleidoscope.logger.log(Level.SEVERE, "Couldn't skip to next replay item", ex);
         return;
       }
       this.idx = idx;
@@ -375,7 +374,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       timer.setInitialDelay((int)(streamLength * 1e3));
       timer.start();
 
-      logger.log(Level.FINE,
+      Kaleidoscope.logger.log(Level.FINE,
         "Playing back audio file {0} of {1}",
         new Object[]{ais.getCurrentIdx() + 1, ais.streams.size()});
     }

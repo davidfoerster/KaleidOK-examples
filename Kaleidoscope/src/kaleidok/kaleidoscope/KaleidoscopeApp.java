@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope;
+package kaleidok.kaleidoscope;
 
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Scene;

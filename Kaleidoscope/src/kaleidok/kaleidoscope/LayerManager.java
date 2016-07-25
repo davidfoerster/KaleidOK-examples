@@ -1,9 +1,9 @@
-package kaleidok.examples.kaleidoscope;
+package kaleidok.kaleidoscope;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
-import kaleidok.examples.kaleidoscope.layer.*;
+import kaleidok.kaleidoscope.layer.*;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.BeanUtils;
 import kaleidok.util.PropertyLoader;
@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
+import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 

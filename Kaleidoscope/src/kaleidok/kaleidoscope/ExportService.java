@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope;
+package kaleidok.kaleidoscope;
 
 import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.export.itext.ITextExport;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
+import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 

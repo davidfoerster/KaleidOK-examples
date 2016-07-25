@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope;
+package kaleidok.kaleidoscope;
 
 import kaleidok.google.speech.RecorderIcon;
 import kaleidok.google.speech.STT;
@@ -15,7 +15,7 @@ import java.text.Format;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
+import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 
 
 public class SttManager extends Plugin<Kaleidoscope>

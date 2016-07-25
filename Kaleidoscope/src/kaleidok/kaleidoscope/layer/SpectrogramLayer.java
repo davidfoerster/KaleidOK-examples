@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope.layer;
+package kaleidok.kaleidoscope.layer;
 
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.processing.ExtPApplet;

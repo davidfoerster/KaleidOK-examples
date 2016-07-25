@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope.layer;
+package kaleidok.kaleidoscope.layer;
 
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.ExtPApplet.ImageResizeMode;

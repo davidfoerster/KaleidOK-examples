@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope;
+package kaleidok.kaleidoscope;
 
 import kaleidok.exaleads.chromatik.ChromasthetiationService;
 import kaleidok.exaleads.chromatik.DocumentChromasthetiator;
@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
-import static kaleidok.examples.kaleidoscope.Kaleidoscope.logger;
+import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.LoggingUtils.logThrown;
 
 

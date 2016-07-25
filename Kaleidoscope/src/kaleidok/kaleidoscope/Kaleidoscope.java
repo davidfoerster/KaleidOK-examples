@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope;
+package kaleidok.kaleidoscope;
 
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;

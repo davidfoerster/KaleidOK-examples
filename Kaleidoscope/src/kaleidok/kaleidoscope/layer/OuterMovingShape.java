@@ -1,4 +1,4 @@
-package kaleidok.examples.kaleidoscope.layer;
+package kaleidok.kaleidoscope.layer;
 
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
