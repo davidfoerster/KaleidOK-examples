@@ -8,7 +8,6 @@ import processing.core.PApplet;
 import processing.core.PImage;
 
 import javax.swing.JApplet;
-import javax.swing.SwingWorker;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -31,9 +30,9 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static kaleidok.util.Arrays.EMPTY_STRINGS;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
 
 
 /**
@@ -257,25 +256,24 @@ public class ExtPApplet extends PApplet
 
   protected void saveImpl( final String filename )
   {
-    (new SwingWorker<Object, Object>() {
-      @Override
-      protected Object doInBackground() throws IOException
+    thread(() ->
+    {
+      if ((g.format == RGB || g.format == ARGB) && filename.endsWith(".bmp"))
       {
-        if ((g.format == RGB || g.format == ARGB) && filename.endsWith(".bmp"))
-        {
-          Path filePath = Paths.get(savePath(filename), EMPTY_STRINGS);
-          try {
-            ImageIO.saveBmp32(filePath, width, height, pixels, 0).force();
-            return null;
-          } catch (UnsupportedOperationException ignored) {
-            // try again with default code path
-          }
+        Path filePath = Paths.get(savePath(filename), EMPTY_STRING_ARRAY);
+        try {
+          ImageIO.saveBmp32(filePath, width, height, pixels, 0).force();
+        } catch (UnsupportedOperationException ignored) {
+          // try again with default code path
         }
-
-        ExtPApplet.super.save(filename);
-        return null;
+        catch (IOException ex)
+        {
+          Threads.handleUncaught(ex);
+        }
       }
-    }).execute();
+
+      ExtPApplet.super.save(filename);
+    });
   }
 
 
