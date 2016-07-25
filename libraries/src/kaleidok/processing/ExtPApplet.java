@@ -1,7 +1,7 @@
 package kaleidok.processing;
 
 import javafx.application.HostServices;
-import kaleidok.awt.ImageIO;
+import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.DefaultValueParser;
 import kaleidok.util.Threads;

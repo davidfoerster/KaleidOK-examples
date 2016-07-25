@@ -1,4 +1,4 @@
-package kaleidok.awt;
+package kaleidok.processing.image;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
