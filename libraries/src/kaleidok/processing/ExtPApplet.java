@@ -2,10 +2,14 @@ package kaleidok.processing;
 
 import com.jogamp.nativewindow.NativeWindow;
 import com.jogamp.nativewindow.util.Point;
+import com.jogamp.newt.event.KeyEvent;
 import javafx.application.HostServices;
+import kaleidok.processing.event.KeyEventSupport;
+import kaleidok.processing.event.KeyStroke;
 import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFuture;
+import kaleidok.util.Arrays;
 import kaleidok.util.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
@@ -23,12 +27,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
@@ -45,6 +52,18 @@ public class ExtPApplet extends PApplet
   public final Set<String> saveFilenames = new ImageSaveSet(this);
 
   protected ExecutorService executorService;
+
+  protected final List<Map<KeyStroke, Consumer<? super KeyEvent>>> keyEventHandlers;
+
+  {
+    Map<KeyStroke, Consumer<? super KeyEvent>>
+      keyPressedHandlers = new HashMap<>(),
+      keyReleasedHandlers = new HashMap<>(),
+      keyTypedHandlers = new HashMap<>();
+
+    keyEventHandlers = Arrays.asImmutableList(
+      keyPressedHandlers, keyReleasedHandlers, keyTypedHandlers);
+  }
 
 
   public ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
@@ -331,5 +350,31 @@ public class ExtPApplet extends PApplet
         Threads.handleUncaught(ex);
       }
     });
+  }
+
+
+  @Override
+  protected void handleKeyEvent( processing.event.KeyEvent event )
+  {
+    Map<KeyStroke, Consumer<? super KeyEvent>> handlers =
+      keyEventHandlers.get(event.getAction() - 1);
+    if (!handlers.isEmpty())
+    {
+      KeyEvent newtEvent = KeyEventSupport.convert(event);
+      if (newtEvent != null)
+      {
+        for (Map.Entry<KeyStroke, Consumer<? super KeyEvent>> e :
+          handlers.entrySet())
+        {
+          if (e.getKey().matches(newtEvent))
+          {
+            e.getValue().accept(newtEvent);
+            if (newtEvent.isConsumed())
+              return;
+          }
+        }
+      }
+    }
+    super.handleKeyEvent(event);
   }
 }

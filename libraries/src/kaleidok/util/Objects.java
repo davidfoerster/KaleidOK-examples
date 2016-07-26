@@ -63,4 +63,25 @@ public final class Objects
             clazz.getName()) :
         new NullPointerException());
   }
+
+
+  public static int hashCode( int seed, int thing )
+  {
+    return 31 * seed + thing;
+  }
+
+  public static int hashCode( int seed, long thing )
+  {
+    return hashCode(hashCode(seed, (int) thing), (int)(thing >>> Integer.SIZE));
+  }
+
+  public static int hashCode( int seed, Object thing )
+  {
+    return hashCode(seed, (thing != null) ? thing.hashCode() : 0);
+  }
+
+  public static int hashCode( int seed, boolean thing )
+  {
+    return hashCode(seed, thing ? 1 : 0);
+  }
 }
