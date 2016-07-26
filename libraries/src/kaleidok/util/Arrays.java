@@ -17,14 +17,6 @@ public final class Arrays
   private Arrays() { }
 
 
-  @SuppressWarnings("unused")
-  public static final Object[] EMPTY_OBJECTS = {};
-
-  public static final Class<?>[] EMPTY_CLASSES = {};
-
-  public static final String[] EMPTY_STRINGS = {};
-
-
   public static int[] shuffle( int[] ar, Random rnd )
   {
     ar = ar.clone();
