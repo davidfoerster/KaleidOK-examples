@@ -6,7 +6,6 @@ import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;
 
-import java.awt.Point;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -45,32 +44,12 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private static final int
-    DEFAULT_PAPPLET_LENGTH = 100,
-    DEFAULT_KALEIDOSCOPE_LENGTH = 1000;
-
-
   @Override
   public void settings()
   {
+    size(1000, 1000, P3D);
+    smooth(4);
     super.settings();
-
-    Point size = new Point(width, height);
-    if (size.x == DEFAULT_PAPPLET_LENGTH && size.y == DEFAULT_PAPPLET_LENGTH)
-    {
-      /*
-       * Default dimensions mean, the surrounding layout manager didn't resize
-       * this sketch yet; use more sensible default dimensions instead (and set
-       * them thereafter).
-       */
-      size.x = DEFAULT_KALEIDOSCOPE_LENGTH;
-      size.y = DEFAULT_KALEIDOSCOPE_LENGTH;
-    }
-    this.size(size.x, size.y, P3D); // keep size, but use the OpenGL renderer
-    previousSize = size;
-
-    smooth(DefaultValueParser.parseInt(
-      getParameterMap().get(P3D + ".smooth"), 4));
   }
 
 
@@ -143,13 +122,10 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private Point previousSize = null;
-
   @Override
   public void draw()
   {
     layers.run();
-    previousSize.setLocation(width, height);
   }
 
 
@@ -169,19 +145,6 @@ public class Kaleidoscope extends ExtPApplet
     }
 
     super.keyTyped(ev);
-  }
-
-
-  /**
-   * Tells, whether the size of this sketch changed since the last frame.
-   *
-   * @return {@code true}, if changed; {@code false} otherwise
-   */
-  public boolean wasResized()
-  {
-    final Point previousSize = this.previousSize;
-    return previousSize != null &&
-      (width != previousSize.x || height != previousSize.y);
   }
 
 
@@ -213,16 +176,5 @@ public class Kaleidoscope extends ExtPApplet
       s = s.substring(0, sLen);
     }
     return s;
-  }
-
-
-  @Override
-  public void smooth( int level )
-  {
-    if (level > 0) {
-      super.smooth(level);
-    } else {
-      noSmooth();
-    }
   }
 }

@@ -140,4 +140,12 @@ public final class Strings
     }
     return true;
   }
+
+
+  public static boolean isConcatenation( String s, String prefix,
+    String suffix )
+  {
+    return s.length() == prefix.length() + suffix.length() &&
+      s.startsWith(prefix) && s.endsWith(suffix);
+  }
 }

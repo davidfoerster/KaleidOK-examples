@@ -25,5 +25,7 @@
     <orderEntry type="library" name="org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="com.google.code.findbugs:findbugs:3.0.1" level="project" />
     <orderEntry type="library" name="Processing 3.1" level="application" />
+    <orderEntry type="library" name="jogl2" level="application" />
+    <orderEntry type="library" name="gluegen2-rt" level="application" />
   </component>
 </module>

@@ -1,13 +1,16 @@
 package kaleidok.javafx;
 
 import javafx.application.Application;
+import kaleidok.util.DefaultValueParser;
 import kaleidok.util.LoggingUtils;
 import kaleidok.util.PropertyLoader;
+import kaleidok.util.Strings;
 import kaleidok.util.containers.ChainedMap;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.*;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -18,6 +21,8 @@ public abstract class PropertyLoaderApplication extends Application
 {
   private Map<String, String> namedParameters;
 
+  private List<String> unnamedParameters;
+
 
   public Map<String, String> getNamedParameters()
   {
@@ -25,11 +30,30 @@ public abstract class PropertyLoaderApplication extends Application
   }
 
 
+  public List<String> getUnnamedParameters()
+  {
+    return unnamedParameters;
+  }
+
+
+  public boolean getUnnamedBooleanParameter( final String name )
+  {
+    String sVal = getNamedParameters().get(name);
+    return (sVal != null) ?
+      DefaultValueParser.parseBoolean(sVal) :
+      getUnnamedParameters().stream().anyMatch(
+        (String s) -> Strings.isConcatenation(s, "--", name));
+  }
+
+
   @Override
   @OverridingMethodsMustInvokeSuper
   public void init() throws Exception
   {
-    namedParameters = getParameters().getNamed();
+    Parameters params = getParameters();
+    namedParameters = params.getNamed();
+    unnamedParameters = params.getUnnamed();
+
     Properties prop = loadProperties();
     if (!prop.isEmpty())
     {

@@ -1,13 +1,17 @@
 package kaleidok.processing;
 
+import com.jogamp.nativewindow.NativeWindow;
+import com.jogamp.nativewindow.util.Point;
 import javafx.application.HostServices;
 import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFuture;
+import kaleidok.util.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PSurface;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.File;
@@ -53,10 +57,78 @@ public class ExtPApplet extends PApplet
   @OverridingMethodsMustInvokeSuper
   public void settings()
   {
+    parseAndSetConfig();
     executorService = new ThreadPoolExecutor(
       0, 16, 60, TimeUnit.SECONDS, new SynchronousQueue<>(),
       new GroupedThreadFactory(
         getClass().getSimpleName() + " worker pool", true));
+  }
+
+
+  private void parseAndSetConfig()
+  {
+    Map<String, String> params = getParameterMap();
+
+    String sSize = params.get("size");
+    if (sSize != null)
+    {
+      String[] asSize = split(sSize, ',');
+      int x = parseInt(asSize[0]);
+      size(x, (asSize.length >= 2) ? parseInt(asSize[1]) : x,
+        sketchRenderer());
+    }
+
+    smooth(DefaultValueParser.parseInt(
+      params.get(sketchRenderer() + ".smooth"), sketchSmooth()));
+
+    if (parent.getUnnamedBooleanParameter("fullscreen"))
+      this.fullScreen();
+  }
+
+
+  private boolean inSetup = false;
+
+  @Override
+  @OverridingMethodsMustInvokeSuper
+  public void setup()
+  {
+    inSetup = true;
+    Map<String, String> params = getParameterMap();
+
+    String sResizable = params.get("resizable");
+    if (sResizable != null)
+      setResizable(DefaultValueParser.parseBoolean(sResizable));
+
+    inSetup = false;
+  }
+
+
+  public void setResizable( boolean resizable )
+  {
+    PSurface surface = getSurface();
+    if (resizable && inSetup)
+    {
+      /*
+       * Must set location before resizing to avoid weird artifacts and the
+       * window jumping around.
+       */
+      Point location;
+      switch (sketchRenderer())
+      {
+      case P3D:
+        location =
+          ((NativeWindow) surface.getNative()).getLocationOnScreen(null);
+        break;
+
+      default:
+        location = null;
+        break;
+      }
+
+      if (location != null)
+        surface.setLocation(location.getX(), location.getY());
+    }
+    surface.setResizable(resizable);
   }
 
 
@@ -130,6 +202,17 @@ public class ExtPApplet extends PApplet
   public PImageFuture getImageFuture( URL url )
   {
     return thread(PImageFuture.from(url));
+  }
+
+
+  @Override
+  public void smooth( int level )
+  {
+    if (level > 0) {
+      super.smooth(level);
+    } else {
+      noSmooth();
+    }
   }
 
 

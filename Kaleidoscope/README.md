@@ -77,9 +77,8 @@ are optional and have sensible defaults.
  * `kaleidok.examples.kaleidoscope.text` –
    Default text for the upper text input field (see point 3 under *Usage*)
 
- * `screen` and `fullscreen` –
-   Move the Kaleidoscope window to the screen with the given index (-1 means
-   default) and/or put it in fullscreen mode.
+ * `fullscreen` –
+   Set the fullscreen mode of Kaleidoscope.
 
  * `kaleidok.examples.kaleidoscope.audio.[samplerate|buffersize|overlap]` –
    Audio sample rate (for microphone input) in Hertz, sample buffer length, and
