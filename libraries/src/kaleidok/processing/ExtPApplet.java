@@ -1,7 +1,9 @@
 package kaleidok.processing;
 
 import com.jogamp.nativewindow.NativeWindow;
+import com.jogamp.nativewindow.util.InsetsImmutable;
 import com.jogamp.nativewindow.util.Point;
+import com.jogamp.nativewindow.util.PointImmutable;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
 import javafx.application.HostServices;
@@ -384,6 +386,19 @@ public class ExtPApplet extends PApplet
   }
 
 
+  private final Point windowLocation = new Point();
+
+  private PointImmutable saveWindowLocation()
+  {
+    Point l = windowLocation;
+    NativeWindow w = (NativeWindow) getSurface().getNative();
+    w.getLocationOnScreen(l);
+    InsetsImmutable insets = w.getInsets();
+    l.set(l.getX() - insets.getLeftWidth(), l.getY() - insets.getTopHeight());
+    return l;
+  }
+
+
   public boolean toggleFullscreen()
   {
     if (!P3D.equals(sketchRenderer()))
@@ -396,14 +411,31 @@ public class ExtPApplet extends PApplet
     }
 
     Window w = (Window) getSurface().getNative();
-    boolean expectedFullscreenState = !w.isFullscreen(),
-      actualFullScreenState = WindowSupport.toggleFullscreen(w);
-    if (actualFullScreenState != expectedFullscreenState)
+    boolean currentFullscreenState = w.isFullscreen();
+    PointImmutable windowLocation;
+    //noinspection IfMayBeConditional
+    if (currentFullscreenState)
+    {
+      windowLocation = this.windowLocation;
+      /*System.out.format(
+        "Restoring previous window location (%d, %d)...%n",
+        windowLocation.getX(), windowLocation.getY());*/
+    }
+    else
+    {
+      windowLocation = saveWindowLocation();
+      /*System.out.format(
+        "Stored current window location (%d, %d) for later user (screen index %d).%n",
+        windowLocation.getX(), windowLocation.getY(), w.getScreenIndex());*/
+    }
+
+    boolean newFullScreenState = WindowSupport.toggleFullscreen(w, windowLocation);
+    if (newFullScreenState == currentFullscreenState)
     {
       System.err.format(
         "Couldn't set fullscreen state to %s on %s.%n",
-        expectedFullscreenState, w);
+        !currentFullscreenState, w);
     }
-    return actualFullScreenState;
+    return newFullScreenState;
   }
 }
