@@ -138,12 +138,11 @@ public class ExtPApplet extends PApplet
        * Must set location before resizing to avoid weird artifacts and the
        * window jumping around.
        */
-      Point location;
+      PointImmutable location;
       switch (sketchRenderer())
       {
       case P3D:
-        location =
-          ((NativeWindow) surface.getNative()).getLocationOnScreen(null);
+        location = saveWindowLocation();
         break;
 
       default:
