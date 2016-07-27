@@ -2,8 +2,10 @@ package kaleidok.processing;
 
 import com.jogamp.nativewindow.NativeWindow;
 import com.jogamp.nativewindow.util.Point;
+import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
 import javafx.application.HostServices;
+import kaleidok.newt.WindowSupport;
 import kaleidok.processing.event.KeyEventSupport;
 import kaleidok.processing.event.KeyStroke;
 import kaleidok.processing.export.ImageSaveSet;
@@ -60,6 +62,9 @@ public class ExtPApplet extends PApplet
       keyPressedHandlers = new HashMap<>(),
       keyReleasedHandlers = new HashMap<>(),
       keyTypedHandlers = new HashMap<>();
+
+    keyTypedHandlers.put(
+      KeyStroke.fullscreenKeystroke, ( ev ) -> thread(this::toggleFullscreen));
 
     keyEventHandlers = Arrays.asImmutableList(
       keyPressedHandlers, keyReleasedHandlers, keyTypedHandlers);
@@ -376,5 +381,29 @@ public class ExtPApplet extends PApplet
       }
     }
     super.handleKeyEvent(event);
+  }
+
+
+  public boolean toggleFullscreen()
+  {
+    if (!P3D.equals(sketchRenderer()))
+    {
+      System.err.format(
+        "Toggling the fullscreen state is currently not supported for the " +
+          "%s renderer.%n",
+        sketchRenderer());
+      return sketchFullScreen();
+    }
+
+    Window w = (Window) getSurface().getNative();
+    boolean expectedFullscreenState = !w.isFullscreen(),
+      actualFullScreenState = WindowSupport.toggleFullscreen(w);
+    if (actualFullScreenState != expectedFullscreenState)
+    {
+      System.err.format(
+        "Couldn't set fullscreen state to %s on %s.%n",
+        expectedFullscreenState, w);
+    }
+    return actualFullScreenState;
   }
 }

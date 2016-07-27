@@ -4,28 +4,15 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import kaleidok.javafx.PropertyLoaderApplication;
 import processing.core.PApplet;
-import processing.core.PConstants;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import javax.swing.KeyStroke;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
-
-import static javax.swing.KeyStroke.getKeyStroke;
 
 
 public abstract class ProcessingSketchApplication<T extends PApplet>
   extends PropertyLoaderApplication
 {
   private T sketch = null;
-
-
-  // TODO: Move to wherever it's needed, or remove it entirely
-  private static final KeyStroke fullscreenKeystroke =
-    (PApplet.platform == PConstants.MACOSX) ?
-      getKeyStroke(KeyEvent.VK_F, InputEvent.META_DOWN_MASK) :
-      getKeyStroke(KeyEvent.VK_F11, 0);
 
 
   @Override
