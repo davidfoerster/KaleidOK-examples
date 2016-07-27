@@ -26,6 +26,7 @@ public class KaleidoscopeControls extends JPanel
 
   public KaleidoscopeControls( KaleidoscopeApp context )
   {
+    super(new BorderLayout());
     this.context = context;
     initComponents();
   }

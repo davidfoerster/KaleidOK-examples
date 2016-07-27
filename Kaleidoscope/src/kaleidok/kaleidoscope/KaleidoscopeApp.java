@@ -9,7 +9,7 @@ import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.processing.SimplePAppletFactory;
 import kaleidok.util.AssertionUtils;
 
-import javax.swing.SwingUtilities;
+import java.awt.Dimension;
 
 
 public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
@@ -31,11 +31,14 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     if (scene == null)
     {
-      final SwingNode swingNode = new SwingNode();
-      SwingUtilities.invokeLater(() -> swingNode.setContent(getControls()));
+      KaleidoscopeControls controls = getControls();
+      Dimension size = controls.getPreferredSize();
+
+      SwingNode swingNode = new SwingNode();
+      swingNode.setContent(controls);
 
       StackPane pane = new StackPane(swingNode);
-      scene = new Scene(pane, 250, 300);
+      scene = new Scene(pane, size.getWidth(), size.getHeight());
     }
     return scene;
   }
