@@ -112,48 +112,27 @@ public class ExtPApplet extends PApplet
   }
 
 
-  private boolean inSetup = false;
-
   @Override
-  @OverridingMethodsMustInvokeSuper
-  public void setup()
+  protected PSurface initSurface()
   {
-    inSetup = true;
+    PSurface surface = super.initSurface();
     Map<String, String> params = getParameterMap();
 
     String sResizable = params.get("resizable");
     if (sResizable != null)
-      setResizable(DefaultValueParser.parseBoolean(sResizable));
+      surface.setResizable(DefaultValueParser.parseBoolean(sResizable));
 
-    inSetup = false;
+    return surface;
   }
 
 
-  public void setResizable( boolean resizable )
+  @Override
+  public void setup()
   {
-    PSurface surface = getSurface();
-    if (resizable && inSetup)
-    {
-      /*
-       * Must set location before resizing to avoid weird artifacts and the
-       * window jumping around.
-       */
-      PointImmutable location;
-      switch (sketchRenderer())
-      {
-      case P3D:
-        location = saveWindowLocation();
-        break;
+    Map<String, String> params = getParameterMap();
 
-      default:
-        location = null;
-        break;
-      }
-
-      if (location != null)
-        surface.setLocation(location.getX(), location.getY());
-    }
-    surface.setResizable(resizable);
+    frameRate((float) DefaultValueParser.parseDouble(
+      params.get("framerate"), this.frameRate));
   }
 
 
