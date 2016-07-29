@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -70,6 +71,8 @@ public class ExtPApplet extends PApplet
   public final Set<String> saveFilenames = new ImageSaveSet(this);
 
   protected ExecutorService executorService;
+
+  private CountDownLatch showSurfaceLatch = new CountDownLatch(1);
 
   protected final List<Map<KeyStroke, Consumer<? super KeyEvent>>> keyEventHandlers;
 
@@ -164,6 +167,8 @@ public class ExtPApplet extends PApplet
   protected void showSurface()
   {
     parseAndSetSurfaceLocation();
+    showSurfaceLatch.countDown();
+    showSurfaceLatch = null;
     super.showSurface();
   }
 
@@ -211,6 +216,14 @@ public class ExtPApplet extends PApplet
     String sFrameRate = params.get("framerate");
     if (sFrameRate != null)
       frameRate(Float.parseFloat(sFrameRate));
+  }
+
+
+  public void awaitShowSurface() throws InterruptedException
+  {
+    CountDownLatch showSurfaceLatch = this.showSurfaceLatch;
+    if (showSurfaceLatch != null)
+      showSurfaceLatch.await();
   }
 
 
