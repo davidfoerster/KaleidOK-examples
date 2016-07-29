@@ -27,7 +27,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
 
   @Override
-  protected Scene getScene()
+  protected synchronized Scene getScene()
   {
     if (scene == null)
     {
@@ -59,7 +59,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   }
 
 
-  public KaleidoscopeControls getControls()
+  public synchronized KaleidoscopeControls getControls()
   {
     if (controls == null) {
       controls = new KaleidoscopeControls(this);
