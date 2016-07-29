@@ -48,6 +48,7 @@ import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import static kaleidok.util.Math.constrainInt;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
@@ -58,6 +59,9 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
  */
 public class ExtPApplet extends PApplet
 {
+  public static final int MIN_DIMENSION = 50;
+
+
   private ProcessingSketchApplication<? extends ExtPApplet> parent;
 
   protected final Preferences preferences =
@@ -107,22 +111,37 @@ public class ExtPApplet extends PApplet
 
   private void parseAndSetConfig()
   {
-    Map<String, String> params = getParameterMap();
-
-    String sSize = params.get("size");
-    if (sSize != null)
+    if (parent.getUnnamedBooleanParameter("fullscreen"))
     {
-      String[] asSize = split(sSize, ',');
-      int x = parseInt(asSize[0]);
-      size(x, (asSize.length >= 2) ? parseInt(asSize[1]) : x,
-        sketchRenderer());
+      fullScreen(sketchDisplay());
+    }
+    else
+    {
+      parseAndSetConfigSize();
     }
 
+    Map<String, String> params = getParameterMap();
     smooth(DefaultValueParser.parseInt(
       params.get(sketchRenderer() + ".smooth"), sketchSmooth()));
+  }
 
-    if (parent.getUnnamedBooleanParameter("fullscreen"))
-      this.fullScreen();
+
+  private void parseAndSetConfigSize()
+  {
+    int width = preferences.getInt(PREF_GEOMETRY + "width", 0),
+      height = preferences.getInt(PREF_GEOMETRY + "height", 0);
+    if (width <= 0 && height <= 0)
+    {
+      String sSize = getParameterMap().get("size");
+      if (sSize != null)
+      {
+        String[] asSize = split(sSize, ',');
+        width = parseInt(asSize[0]);
+        height = (asSize.length >= 2) ? parseInt(asSize[1]) : width;
+      }
+    }
+    if (width > 0 || height > 0)
+      size(Math.max(width, MIN_DIMENSION), Math.max(height, MIN_DIMENSION));
   }
 
 
@@ -137,6 +156,51 @@ public class ExtPApplet extends PApplet
       surface.setResizable(DefaultValueParser.parseBoolean(sResizable));
 
     return surface;
+  }
+
+
+  @Override
+  @OverridingMethodsMustInvokeSuper
+  protected void showSurface()
+  {
+    parseAndSetSurfaceLocation();
+    super.showSurface();
+  }
+
+
+  private void parseAndSetSurfaceLocation()
+  {
+    if (!P3D.equals(sketchRenderer()))
+      return;
+
+    int iLeft, iTop;
+    final Window window = (Window) getSurface().getNative();
+    String sLocation = getParameterMap().get("location");
+    if (sLocation != null)
+    {
+      String[] asLocation = split(sLocation, ',');
+      iLeft = parseInt(asLocation[0]);
+      iTop = (asLocation.length >= 2) ? parseInt(asLocation[1]) : 0;
+    }
+    else
+    {
+      double dLeft = preferences.getDouble(PREF_GEOMETRY + "left", Double.NaN),
+        dTop = preferences.getDouble(PREF_GEOMETRY + "top", Double.NaN);
+      if (!Double.isFinite(dLeft) || !Double.isFinite(dTop))
+        return;
+      iLeft = constrainInt(dLeft);
+      //noinspection SuspiciousNameCombination
+      iTop = constrainInt(dTop);
+      RectangleImmutable intersection =
+        window.getScreen().getViewport().intersection(
+          iLeft, iTop, iLeft + this.width, iTop + this.height);
+      if (intersection.getWidth() < MIN_DIMENSION ||
+        intersection.getHeight() < MIN_DIMENSION)
+      {
+        return;
+      }
+    }
+    window.setPosition(iLeft, iTop);
   }
 
 

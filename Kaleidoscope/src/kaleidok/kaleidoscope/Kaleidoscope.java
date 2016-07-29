@@ -3,7 +3,6 @@ package kaleidok.kaleidoscope;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.processing.ProcessingSketchApplication;
-import kaleidok.util.DefaultValueParser;
 import processing.event.KeyEvent;
 
 import java.util.Optional;

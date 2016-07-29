@@ -19,6 +19,8 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 {
   private T sketch = null;
 
+  private Stage stage = null;
+
   protected final Preferences preferences =
     Preferences.userNodeForPackage(this.getClass());
 
@@ -97,10 +99,23 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   @OverridingMethodsMustInvokeSuper
   public void start( Stage stage )
   {
+    getSketch().start();
+    parseAndSetConfig(stage);
     stage.setScene(getScene());
     stage.show();
+    this.stage = stage;
+  }
 
-    sketch.start();
+
+  private void parseAndSetConfig( Stage stage )
+  {
+    double left = preferences.getDouble(PREF_GEOMETRY + "left", Double.NaN),
+      top = preferences.getDouble(PREF_GEOMETRY + "top", Double.NaN);
+    if (Double.isFinite(left) && Double.isFinite(top))
+    {
+      stage.setX(left);
+      stage.setY(top);
+    }
   }
 
 

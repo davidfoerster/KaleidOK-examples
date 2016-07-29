@@ -124,4 +124,16 @@ public final class Math
     assert min <= max : min + " > " + max;
     return min(max(x, min), max);
   }
+
+  public static double clamp( double x, double min, double max )
+  {
+    assert min <= max : min + " > " + max;
+    return min(max(x, min), max);
+  }
+
+
+  public static int constrainInt( double x )
+  {
+    return (int) clamp(x, Integer.MIN_VALUE, Integer.MAX_VALUE);
+  }
 }
