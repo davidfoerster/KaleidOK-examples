@@ -17,6 +17,7 @@ import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.Arrays;
 import kaleidok.util.DefaultValueParser;
+import kaleidok.util.LoggingUtils;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import processing.core.PApplet;
@@ -42,6 +43,10 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
@@ -54,6 +59,9 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
 public class ExtPApplet extends PApplet
 {
   private ProcessingSketchApplication<? extends ExtPApplet> parent;
+
+  protected final Preferences preferences =
+    Preferences.userNodeForPackage(this.getClass());
 
   public final Set<String> saveFilenames = new ImageSaveSet(this);
 
@@ -73,6 +81,10 @@ public class ExtPApplet extends PApplet
     keyEventHandlers = Arrays.asImmutableList(
       keyPressedHandlers, keyReleasedHandlers, keyTypedHandlers);
   }
+
+
+  protected final String PREF_GEOMETRY =
+    getClass().getSimpleName() + ".geometry.";
 
 
   public ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
@@ -145,8 +157,42 @@ public class ExtPApplet extends PApplet
     saveFilenames.clear();
     if (executorService != null)
       executorService.shutdownNow();
-
+    savePreferences();
     super.dispose();
+  }
+
+
+  protected final void savePreferences()
+  {
+    doSavePreferences();
+    try
+    {
+      preferences.flush();
+    }
+    catch (BackingStoreException ex)
+    {
+      LoggingUtils.logThrown(Logger.getLogger(getClass().getName()),
+        Level.SEVERE, "Couldn't flush preference store: {0}", ex,
+        preferences);
+    }
+  }
+
+
+  protected void doSavePreferences()
+  {
+    if (!sketchFullScreen())
+    {
+      Preferences preferences = this.preferences;
+      preferences.putInt(PREF_GEOMETRY + "width", width);
+      preferences.putInt(PREF_GEOMETRY + "height", height);
+
+      if (P3D.equals(sketchRenderer()))
+      {
+        PointImmutable l = getSurfaceLocation(savedSurfaceLocation);
+        preferences.putDouble(PREF_GEOMETRY + "left", l.getX());
+        preferences.putDouble(PREF_GEOMETRY + "top", l.getY());
+      }
+    }
   }
 
 

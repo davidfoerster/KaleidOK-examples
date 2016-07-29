@@ -3,16 +3,27 @@ package kaleidok.processing;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import kaleidok.javafx.PropertyLoaderApplication;
+import kaleidok.util.LoggingUtils;
 import processing.core.PApplet;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 
 public abstract class ProcessingSketchApplication<T extends PApplet>
   extends PropertyLoaderApplication
 {
   private T sketch = null;
+
+  protected final Preferences preferences =
+    Preferences.userNodeForPackage(this.getClass());
+
+  protected final String PREF_GEOMETRY =
+    getClass().getSimpleName() + ".geometry.";
 
 
   @Override
@@ -97,6 +108,38 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   @OverridingMethodsMustInvokeSuper
   public void stop()
   {
+    savePreferences();
     sketch.exit();
+  }
+
+
+  protected final void savePreferences()
+  {
+    doSavePreferences();
+    try
+    {
+      preferences.flush();
+    }
+    catch (BackingStoreException ex)
+    {
+      LoggingUtils.logThrown(Logger.getLogger(getClass().getName()),
+        Level.SEVERE, "Couldn't flush preference store: {0}", ex,
+        preferences);
+    }
+  }
+
+
+  protected void doSavePreferences()
+  {
+    Stage stage = this.stage;
+    if (stage != null && !stage.isFullScreen())
+    {
+      String prefPrefix = PREF_GEOMETRY;
+      Preferences preferences = this.preferences;
+      preferences.putDouble(prefPrefix + "left", stage.getX());
+      preferences.putDouble(prefPrefix + "top", stage.getY());
+      preferences.putDouble(prefPrefix + "width", stage.getWidth());
+      preferences.putDouble(prefPrefix + "height", stage.getHeight());
+    }
   }
 }
