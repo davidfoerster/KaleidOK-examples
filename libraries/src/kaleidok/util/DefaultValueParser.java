@@ -4,6 +4,7 @@ package kaleidok.util;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static java.lang.Boolean.FALSE;
@@ -39,9 +40,10 @@ public final class DefaultValueParser
   public static boolean parseBoolean( String s )
     throws IllegalArgumentException
   {
+    java.util.Objects.requireNonNull(s);
     Throwable cause = null;
 
-    if (s != null && !s.isEmpty()) {
+    if (!s.isEmpty()) {
       if (Character.isDigit(s.charAt(0))) {
         try {
           return Integer.parseInt(s) != 0;
@@ -49,16 +51,13 @@ public final class DefaultValueParser
           cause = ex;
         }
       } else {
-        Boolean result = BOOLEAN_WORDS.get(s.toLowerCase());
+        Boolean result = BOOLEAN_WORDS.get(s.toLowerCase(Locale.ROOT));
         if (result != null)
           return result;
       }
     }
 
-    String msg = "Not a boolean: " + s;
-    throw (cause != null) ?
-      new IllegalArgumentException(msg, cause) :
-      new IllegalArgumentException(msg);
+    throw new IllegalArgumentException("Not a boolean: " + s, cause);
   }
 
 
