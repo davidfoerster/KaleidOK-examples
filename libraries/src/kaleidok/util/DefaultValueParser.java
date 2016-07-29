@@ -70,60 +70,61 @@ public final class DefaultValueParser
 
   private static final Class<?>[] valueOfParameterTypes = { String.class };
 
+
+  @SuppressWarnings("unchecked")
   public static <T> T valueOf( String s, Class<T> targetClass )
     throws IllegalArgumentException
   {
     Class<?> wrapperClass = Reflection.getWrapperType(targetClass);
-    if (wrapperClass == Character.class) {
-      if (s.length() != 1) {
+    try
+    {
+      if (wrapperClass == Character.class)
+      {
+        if (s.length() == 1)
+          return (T) Character.valueOf(s.charAt(0));
+
+        //noinspection ThrowCaughtLocally
         throw new IllegalArgumentException(
           "Cannot cast string of length " + s.length() + " to " +
             targetClass.getName());
       }
-      //noinspection unchecked
-      return (T) Character.valueOf(s.charAt(0));
-    }
-    try {
+
       Method m = wrapperClass.getMethod("valueOf", valueOfParameterTypes);
-      if (!wrapperClass.isAssignableFrom(m.getReturnType())) {
-        //noinspection ThrowCaughtLocally
-        throw new ClassCastException(String.format(
-          "Cannot assign return type %s of %s#%s(%s) to %s",
-          m.getReturnType().getName(),
-          m.getDeclaringClass().getCanonicalName(), m.getName(),
-          valueOfParameterTypes[0].getCanonicalName(), wrapperClass.getName()));
+      if (wrapperClass.isAssignableFrom(
+        Reflection.getWrapperType(m.getReturnType())))
+      {
+        return (T) m.invoke(null, s);
       }
-      //noinspection unchecked
-      return (T) m.invoke(null, s);
-    } catch (NoSuchMethodException | IllegalAccessException | ClassCastException | IllegalArgumentException ex) {
-      throw new IllegalArgumentException("Cannot parse to " + targetClass.getName(), ex);
-    } catch (InvocationTargetException ex) {
-      throw new IllegalArgumentException(ex.getCause());
+      //noinspection ThrowCaughtLocally
+      throw new ClassCastException(
+        "Cannot assign the return type of " + m + " to " +
+          targetClass.getName());
+    }
+    catch (ReflectiveOperationException | ClassCastException | IllegalArgumentException ex)
+    {
+      throw new IllegalArgumentException(
+        "Cannot parse to " + targetClass.getName(),
+        (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
     }
   }
 
 
+  @SuppressWarnings("unchecked")
   public static <T> T parse( String s, T defaultValue )
     throws IllegalArgumentException
   {
-    //noinspection unchecked
     return parse(s, defaultValue, (Class<T>) defaultValue.getClass());
   }
 
+
+  @SuppressWarnings("unchecked")
   public static <T> T parse( String s, T defaultValue, Class<T> clazz )
     throws IllegalArgumentException
   {
-    if (clazz.isAssignableFrom(String.class)) {
-      //noinspection unchecked
-      return (s != null) ? (T) s : defaultValue;
-    }
-    if (s != null) try
-    {
-      return valueOf(s, clazz);
-    } catch (IllegalArgumentException ignored) {
-      // go to default
-    }
-    return defaultValue;
+    return
+      (s == null) ? defaultValue :
+      (clazz.isInstance(s)) ? (T) s :
+      valueOf(s, clazz);
   }
 
 
