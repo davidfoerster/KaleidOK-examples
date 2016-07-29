@@ -1,13 +1,20 @@
 package kaleidok.processing;
 
+import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import kaleidok.javafx.PropertyLoaderApplication;
+import kaleidok.javafx.geometry.Rectangles;
+import kaleidok.javafx.stage.Screens;
 import kaleidok.util.LoggingUtils;
 import processing.core.PApplet;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
@@ -35,29 +42,6 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     super.init();
     initSketch();
   }
-
-
-  /*
-  protected void initWindowBounds()
-  {
-    FullscreenRootPane rootPane = getRootPane();
-
-    int screenIndex = DefaultValueParser.parseInt(this, "screen", -1);
-    boolean fullscreen =
-      DefaultValueParser.parseBoolean(this, "fullscreen", false);
-    if (screenIndex >= 0 || fullscreen) {
-      rootPane.moveToScreen(screenIndex, fullscreen);
-    }
-
-    Window w = rootPane.getTopLevelWindow();
-    Rectangle screenBounds = w.getGraphicsConfiguration().getBounds();
-    w.setLocation(
-      DefaultValueParser.parseInt(this, "left", w.getX() - screenBounds.x) +
-        screenBounds.x,
-      DefaultValueParser.parseInt(this, "top", w.getY() - screenBounds.y) +
-        screenBounds.y);
-  }
-  */
 
 
   protected abstract Scene getScene();
@@ -97,7 +81,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 
   @Override
   @OverridingMethodsMustInvokeSuper
-  public void start( Stage stage )
+  public void start( Stage stage ) throws Exception
   {
     getSketch().start();
     parseAndSetConfig(stage);
@@ -155,6 +139,50 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
       preferences.putDouble(prefPrefix + "top", stage.getY());
       preferences.putDouble(prefPrefix + "width", stage.getWidth());
       preferences.putDouble(prefPrefix + "height", stage.getHeight());
+    }
+  }
+
+
+  @SuppressWarnings("ConfusingElseBranch")
+  public Side placeAroundSketch( Stage stage, double padding,
+    Side... preferredSides )
+    throws InterruptedException
+  {
+    PApplet sketch = getSketch();
+
+    if (sketch.sketchFullScreen())
+    {
+      Map.Entry<Side, Screen> neighborScreenSide =
+        Screens.getNeighborScreen(sketch.sketchDisplay() - 1, preferredSides);
+      if (neighborScreenSide == null)
+        return null;
+      Rectangle2D neighborScreen = neighborScreenSide.getValue().getBounds();
+      stage.setX(
+        neighborScreen.getMinX() + (neighborScreen.getWidth() - stage.getWidth()) * 0.5);
+      stage.setY(
+        neighborScreen.getMinY() + (neighborScreen.getHeight() - stage.getHeight()) * 0.5);
+      return neighborScreenSide.getKey();
+    }
+    else if (sketch instanceof ExtPApplet)
+    {
+      ExtPApplet extSketch = (ExtPApplet) sketch;
+
+      extSketch.awaitShowSurface();
+      Map.Entry<Side, Point2D> stageLocation =
+        Screens.placeAround(stage.getWidth(), stage.getHeight(),
+          Rectangles.from(extSketch.getWindowBounds(null)), padding,
+          preferredSides);
+      if (stageLocation == null)
+        return null;
+      stage.setX(stageLocation.getValue().getX());
+      stage.setY(stageLocation.getValue().getY());
+      return stageLocation.getKey();
+    }
+    else
+    {
+      throw new UnsupportedOperationException(
+        "The sketch class " + sketch.getClass().getName() +
+          " isn't derived from " + ExtPApplet.class.getName());
     }
   }
 }

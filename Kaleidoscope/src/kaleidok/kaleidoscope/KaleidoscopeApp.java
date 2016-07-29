@@ -1,6 +1,7 @@
 package kaleidok.kaleidoscope;
 
 import javafx.embed.swing.SwingNode;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -45,10 +46,13 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
 
   @Override
-  public void start( Stage stage )
+  public void start( Stage stage ) throws Exception
   {
     stage.setTitle("Kaleidoscope Controls");
     super.start(stage);
+
+    if (Double.isNaN(stage.getX()) || Double.isNaN(stage.getY()))
+      placeAroundSketch(stage, 2, (Side[]) null);
   }
 
 
@@ -61,21 +65,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   public synchronized KaleidoscopeControls getControls()
   {
-    if (controls == null) {
+    if (controls == null)
       controls = new KaleidoscopeControls(this);
-
-      /*
-      Window w = getRootPane().getTopLevelWindow();
-      Rectangle screen = w.getGraphicsConfiguration().getBounds();
-      int x = w.getX() + w.getWidth() + 5,
-        y = w.getY() + w.getHeight() + 5;
-      if (screen.x + screen.width >= x + controls.getWidth()) {
-        controls.setLocation(x, w.getY());
-      } else if (screen.y + screen.height >= y + controls.getHeight()) {
-        controls.setLocation(w.getX(), y);
-      }
-      */
-    }
     return controls;
   }
 
