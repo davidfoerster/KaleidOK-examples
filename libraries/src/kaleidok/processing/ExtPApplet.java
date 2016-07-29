@@ -4,6 +4,8 @@ import com.jogamp.nativewindow.NativeWindow;
 import com.jogamp.nativewindow.util.InsetsImmutable;
 import com.jogamp.nativewindow.util.Point;
 import com.jogamp.nativewindow.util.PointImmutable;
+import com.jogamp.nativewindow.util.Rectangle;
+import com.jogamp.nativewindow.util.RectangleImmutable;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
 import javafx.application.HostServices;
@@ -364,29 +366,40 @@ public class ExtPApplet extends PApplet
   }
 
 
-  private final Point windowLocation = new Point();
-
-  private PointImmutable saveWindowLocation()
+  public Point getSurfaceLocation( Point l )
   {
-    Point l = windowLocation;
+    if (!checkRendererSupported("get window bounds", true))
+      return null;
+
     NativeWindow w = (NativeWindow) getSurface().getNative();
-    w.getLocationOnScreen(l);
-    InsetsImmutable insets = w.getInsets();
-    l.set(l.getX() - insets.getLeftWidth(), l.getY() - insets.getTopHeight());
-    return l;
+    return w.getLocationOnScreen(l);
   }
+
+
+  public Rectangle getWindowBounds( Rectangle r )
+  {
+    if (!checkRendererSupported("get window bounds", true))
+      return null;
+    NativeWindow w = (NativeWindow) getSurface().getNative();
+    InsetsImmutable insets = w.getInsets();
+    Point location = w.getLocationOnScreen(null);
+    if (r == null)
+      r = new Rectangle();
+    r.set(location.getX() - insets.getLeftWidth(),
+      location.getY() - insets.getTopHeight(),
+      w.getWidth() + insets.getTotalWidth(),
+      w.getHeight() + insets.getTotalHeight());
+    return r;
+  }
+
+
+  private final Point savedSurfaceLocation = new Point();
 
 
   public boolean toggleFullscreen()
   {
-    if (!P3D.equals(sketchRenderer()))
-    {
-      System.err.format(
-        "Toggling the fullscreen state is currently not supported for the " +
-          "%s renderer.%n",
-        sketchRenderer());
+    if (!checkRendererSupported("toggle fullscreen"))
       return sketchFullScreen();
-    }
 
     Window w = (Window) getSurface().getNative();
     boolean currentFullscreenState = w.isFullscreen();
@@ -394,17 +407,21 @@ public class ExtPApplet extends PApplet
     //noinspection IfMayBeConditional
     if (currentFullscreenState)
     {
-      windowLocation = this.windowLocation;
-      /*System.out.format(
+      windowLocation = savedSurfaceLocation;
+      /*
+      System.out.format(
         "Restoring previous window location (%d, %d)...%n",
-        windowLocation.getX(), windowLocation.getY());*/
+        windowLocation.getX(), windowLocation.getY());
+        */
     }
     else
     {
-      windowLocation = saveWindowLocation();
-      /*System.out.format(
+      windowLocation = getSurfaceLocation(savedSurfaceLocation);
+      /*
+      System.out.format(
         "Stored current window location (%d, %d) for later user (screen index %d).%n",
-        windowLocation.getX(), windowLocation.getY(), w.getScreenIndex());*/
+        windowLocation.getX(), windowLocation.getY(), w.getScreenIndex());
+      */
     }
 
     boolean newFullScreenState = WindowSupport.toggleFullscreen(w, windowLocation);
@@ -415,5 +432,34 @@ public class ExtPApplet extends PApplet
         !currentFullscreenState, w);
     }
     return newFullScreenState;
+  }
+
+
+  protected final boolean checkRendererSupported( String operationDescription )
+  {
+    return checkRendererSupported(operationDescription, false);
+  }
+
+  protected boolean checkRendererSupported( String operationDescription,
+    boolean doThrow )
+  {
+    String renderer = sketchRenderer();
+    boolean supported = P3D.equals(renderer);
+
+    if (!supported)
+    {
+      String msgFormat =
+        "The following operation is currently not supported for the %s " +
+          "renderer: %s.%n";
+      Object[] msgParams = { renderer, operationDescription };
+      if (doThrow)
+      {
+        throw new UnsupportedOperationException(
+          String.format(msgFormat, msgParams));
+      }
+      System.err.format(msgFormat, msgParams);
+    }
+
+    return supported;
   }
 }

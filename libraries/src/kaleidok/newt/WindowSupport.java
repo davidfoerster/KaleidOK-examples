@@ -20,7 +20,7 @@ public final class WindowSupport
     if (w.isFullscreen())
     {
       newFullscreenState = w.setFullscreen(false);
-      w.setTopLevelPosition(desiredWindowLocation.getX(), desiredWindowLocation.getY());
+      w.setPosition(desiredWindowLocation.getX(), desiredWindowLocation.getY());
     }
     else
     {
