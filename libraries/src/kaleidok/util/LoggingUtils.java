@@ -47,25 +47,14 @@ public final class LoggingUtils
   }
 
 
-  @SuppressWarnings({ "resource", "IOResourceOpenedButNotSafelyClosed" })
   public static void loadLocalLoggerProperties( Class<?> contextClass )
   {
     String loggingFile = "logging.properties";
-    InputStream is;
-    try
+    try (InputStream is =
+      newInputStreamNoThrow(loggingFile, contextClass.getClassLoader()))
     {
-      is = new FileInputStream(loggingFile);
-    }
-    catch (FileNotFoundException ignored)
-    {
-      is = contextClass.getClassLoader().getResourceAsStream(loggingFile);
-      if (is == null)
-        return;
-    }
-
-    try
-    {
-      LogManager.getLogManager().readConfiguration(is);
+      if (is != null)
+        LogManager.getLogManager().readConfiguration(is);
     }
     catch (IOException ex)
     {
@@ -73,14 +62,19 @@ public final class LoggingUtils
         "Couldn't load default {0} file for {1}", ex,
         new Object[]{loggingFile, contextClass.getName()});
     }
-    finally
+  }
+
+
+  private static InputStream newInputStreamNoThrow( String filename,
+    ClassLoader cl )
+  {
+    try
     {
-      try {
-        is.close();
-      } catch (IOException ex) {
-        Logger.getAnonymousLogger().log(Level.WARNING,
-          "Couldn't close logger configuration file", ex);
-      }
+      return new FileInputStream(filename);
+    }
+    catch (FileNotFoundException ignored)
+    {
+      return (cl != null) ? cl.getResourceAsStream(filename) : null;
     }
   }
 }
