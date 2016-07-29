@@ -130,9 +130,9 @@ public class ExtPApplet extends PApplet
   public void setup()
   {
     Map<String, String> params = getParameterMap();
-
-    frameRate((float) DefaultValueParser.parseDouble(
-      params.get("framerate"), this.frameRate));
+    String sFrameRate = params.get("framerate");
+    if (sFrameRate != null)
+      frameRate(Float.parseFloat(sFrameRate));
   }
 
 
