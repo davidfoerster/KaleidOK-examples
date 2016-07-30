@@ -13,9 +13,6 @@ import static kaleidok.util.Math.clamp;
 
 /**
  * Displays the frame rate and frame rendering duration in a Processing sketch.
- *
- * TODO: The JOGL-based renderer has a more efficient internal method to
- * display frame rates that we should use instead.
  */
 @SuppressWarnings("unused")
 public class FrameRateDisplay extends Plugin<PApplet>
