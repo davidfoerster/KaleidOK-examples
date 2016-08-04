@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 
@@ -87,16 +88,14 @@ public final class Screens
 
     for (Side side : preferredSides)
     {
-      ToDoubleFunction<Screen> distanceFunction =
+      SideBoundsDistanceFunction distanceFunction =
         SideBoundsDistanceFunction.forSide(side, referenceScreen);
       Optional<Screen> closestScreen =
-        screens.stream().filter((s) -> s != referenceScreen)
+        screens.stream()
+          .filter(distanceFunction)
           .min(Comparator.comparingDouble(distanceFunction));
-      if (closestScreen.isPresent() &&
-        Double.isFinite(distanceFunction.applyAsDouble(closestScreen.get())))
-      {
+      if (closestScreen.isPresent())
         return new AbstractMap.SimpleEntry<>(side, closestScreen.get());
-      }
     }
 
     return null;
@@ -104,14 +103,24 @@ public final class Screens
 
 
   private abstract static class SideBoundsDistanceFunction
-    implements ToDoubleFunction<Screen>
+    implements Predicate<Screen>, ToDoubleFunction<Screen>
   {
+    protected final Screen referenceScreen;
+
     protected final Rectangle2D referenceBounds;
 
 
     protected SideBoundsDistanceFunction( Screen referenceScreen )
     {
+      this.referenceScreen = referenceScreen;
       this.referenceBounds = referenceScreen.getBounds();
+    }
+
+
+    @Override
+    public boolean test( Screen screen )
+    {
+      return screen != referenceScreen && distanceTo(screen) >= 0;
     }
 
 
@@ -126,7 +135,7 @@ public final class Screens
     public abstract double distanceTo( Screen screen );
 
 
-    public static ToDoubleFunction<Screen> forSide( Side side,
+    public static SideBoundsDistanceFunction forSide( Side side,
       Screen referenceScreen )
     {
       switch (side)
