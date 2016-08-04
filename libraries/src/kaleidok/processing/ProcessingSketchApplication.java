@@ -14,6 +14,7 @@ import processing.core.PApplet;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.InvocationTargetException;
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -143,40 +144,20 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   }
 
 
-  @SuppressWarnings("ConfusingElseBranch")
   public Side placeAroundSketch( Stage stage, double padding,
     Side... preferredSides )
     throws InterruptedException
   {
     PApplet sketch = getSketch();
+    Map.Entry<Side, Point2D> placement;
 
     if (sketch.sketchFullScreen())
     {
-      Map.Entry<Side, Screen> neighborScreenSide =
-        Screens.getNeighborScreen(sketch.sketchDisplay() - 1, preferredSides);
-      if (neighborScreenSide == null)
-        return null;
-      Rectangle2D neighborScreen = neighborScreenSide.getValue().getBounds();
-      stage.setX(
-        neighborScreen.getMinX() + (neighborScreen.getWidth() - stage.getWidth()) * 0.5);
-      stage.setY(
-        neighborScreen.getMinY() + (neighborScreen.getHeight() - stage.getHeight()) * 0.5);
-      return neighborScreenSide.getKey();
+      placement = placeAroundFullscreenSketch(padding, preferredSides);
     }
     else if (sketch instanceof ExtPApplet)
     {
-      ExtPApplet extSketch = (ExtPApplet) sketch;
-
-      extSketch.awaitShowSurface();
-      Map.Entry<Side, Point2D> stageLocation =
-        Screens.placeAround(stage.getWidth(), stage.getHeight(),
-          Rectangles.from(extSketch.getWindowBounds(null)), padding,
-          preferredSides);
-      if (stageLocation == null)
-        return null;
-      stage.setX(stageLocation.getValue().getX());
-      stage.setY(stageLocation.getValue().getY());
-      return stageLocation.getKey();
+      placement = placeAroundWindowedSketch(padding, preferredSides);
     }
     else
     {
@@ -184,5 +165,47 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
         "The sketch class " + sketch.getClass().getName() +
           " isn't derived from " + ExtPApplet.class.getName());
     }
+
+    if (placement == null)
+      return null;
+
+    Point2D l = placement.getValue();
+    stage.setX(l.getX());
+    stage.setY(l.getY());
+    return placement.getKey();
+  }
+
+
+  private Map.Entry<Side, Point2D> placeAroundWindowedSketch( double padding,
+    Side... preferredSides ) throws InterruptedException
+  {
+    ExtPApplet extSketch = (ExtPApplet) getSketch();
+    Scene scene = getScene();
+    extSketch.awaitShowSurface();
+    return
+      Screens.placeAround(scene.getWidth(), scene.getHeight(),
+        Rectangles.from(extSketch.getWindowBounds(null)), padding,
+        preferredSides);
+  }
+
+
+  private Map.Entry<Side, Point2D> placeAroundFullscreenSketch(
+    @SuppressWarnings("UnusedParameters") double padding,
+    Side... preferredSides )
+  {
+    Map.Entry<Side, Screen> neighborScreenSide =
+      Screens.getNeighborScreen(getSketch().sketchDisplay() - 1, preferredSides);
+    if (neighborScreenSide == null)
+      return null;
+
+    Scene scene = getScene();
+    Rectangle2D neighborScreen = neighborScreenSide.getValue().getBounds();
+    return new AbstractMap.SimpleEntry<>(
+      neighborScreenSide.getKey(),
+      new Point2D(
+        neighborScreen.getMinX() +
+          (neighborScreen.getWidth() - scene.getWidth()) * 0.5,
+        neighborScreen.getMinY() +
+          (neighborScreen.getHeight() - scene.getHeight()) * 0.5));
   }
 }
