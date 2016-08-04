@@ -64,7 +64,9 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
       throw new AssertionError(ex);
     }
 
-    String[] extArgs = args.toArray(new String[args.size() + 1]);
+    String[] extArgs = args.stream()
+      .filter((s) -> !"--fullscreen".equals(s))
+      .toArray((l) -> new String[l + 1]);
     extArgs[extArgs.length - 1] = sketch.getClass().getSimpleName();
     PApplet.runSketch(extArgs, sketch);
     return sketch;
