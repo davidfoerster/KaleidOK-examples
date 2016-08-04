@@ -87,7 +87,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     getSketch().start();
     parseAndSetConfig(stage);
     stage.setScene(getScene());
-    stage.show();
+    show(stage);
     this.stage = stage;
   }
 
@@ -104,9 +104,16 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   }
 
 
+  @SuppressWarnings("ProhibitedExceptionDeclared")
+  protected void show( Stage stage ) throws Exception
+  {
+    stage.show();
+  }
+
+
   @Override
   @OverridingMethodsMustInvokeSuper
-  public void stop()
+  public void stop() throws Exception
   {
     savePreferences();
     sketch.exit();
