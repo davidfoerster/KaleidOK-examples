@@ -5,8 +5,8 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.kaleidoscope.layer.*;
 import kaleidok.processing.image.PImageFuture;
-import kaleidok.util.BeanUtils;
-import kaleidok.util.PropertyLoader;
+import kaleidok.util.prefs.BeanUtils;
+import kaleidok.util.prefs.PropertyLoader;
 import processing.core.PImage;
 
 import java.io.File;
@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
-import static kaleidok.util.LoggingUtils.logThrown;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 public class LayerManager implements List<ImageLayer>, Runnable

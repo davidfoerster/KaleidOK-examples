@@ -1,6 +1,6 @@
 package kaleidok.processing.image;
 
-import kaleidok.util.LoggingUtils;
+import kaleidok.util.logging.LoggingUtils;
 import processing.core.PImage;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;

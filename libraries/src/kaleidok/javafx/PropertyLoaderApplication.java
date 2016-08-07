@@ -1,9 +1,9 @@
 package kaleidok.javafx;
 
 import javafx.application.Application;
-import kaleidok.util.DefaultValueParser;
-import kaleidok.util.LoggingUtils;
-import kaleidok.util.PropertyLoader;
+import kaleidok.util.prefs.DefaultValueParser;
+import kaleidok.util.logging.LoggingUtils;
+import kaleidok.util.prefs.PropertyLoader;
 import kaleidok.util.Strings;
 import kaleidok.util.containers.ChainedMap;
 

@@ -7,7 +7,7 @@ import kaleidok.google.speech.Transcription;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.processing.Plugin;
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import processing.event.KeyEvent;
 
 import java.lang.reflect.InvocationTargetException;

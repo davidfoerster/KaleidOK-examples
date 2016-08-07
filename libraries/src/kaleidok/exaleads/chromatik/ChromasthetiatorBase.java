@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 import static kaleidok.util.Arrays.shuffle;
-import static kaleidok.util.LoggingUtils.logThrown;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 public abstract class ChromasthetiatorBase<F extends Flickr>

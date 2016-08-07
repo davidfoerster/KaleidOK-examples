@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 import java.util.regex.*;
 
 import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
-import static kaleidok.util.LoggingUtils.logThrown;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 @SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")

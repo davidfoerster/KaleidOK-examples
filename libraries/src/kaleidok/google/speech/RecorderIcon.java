@@ -2,7 +2,7 @@ package kaleidok.google.speech;
 
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import processing.core.PApplet;
 import processing.core.PConstants;
 

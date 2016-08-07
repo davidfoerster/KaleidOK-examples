@@ -2,7 +2,7 @@ package kaleidok.kaleidoscope.layer;
 
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.image.PImageFuture;
-import kaleidok.util.LoggingUtils;
+import kaleidok.util.logging.LoggingUtils;
 import kaleidok.util.SynchronizedFormat;
 import processing.core.PImage;
 

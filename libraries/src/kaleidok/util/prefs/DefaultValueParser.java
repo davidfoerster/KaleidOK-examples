@@ -1,5 +1,7 @@
-package kaleidok.util;
+package kaleidok.util.prefs;
 
+
+import kaleidok.util.Reflection;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

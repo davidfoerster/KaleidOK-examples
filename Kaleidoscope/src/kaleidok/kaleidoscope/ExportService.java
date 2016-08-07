@@ -3,7 +3,7 @@ package kaleidok.kaleidoscope;
 import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.export.itext.ITextExport;
 import kaleidok.processing.export.itext.ParagraphHook;
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import processing.core.PApplet;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
-import static kaleidok.util.LoggingUtils.logThrown;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 public class ExportService extends ITextExport

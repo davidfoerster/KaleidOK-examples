@@ -1,4 +1,4 @@
-package kaleidok.util;
+package kaleidok.util.logging;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

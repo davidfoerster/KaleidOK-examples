@@ -1,6 +1,6 @@
 package kaleidok.processing;
 
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Strings;
 import processing.core.PApplet;
 

@@ -13,7 +13,7 @@ import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.google.gson.TypeAdapterManager;
 import kaleidok.processing.Plugin;
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import processing.event.KeyEvent;
 
 import javax.sound.sampled.LineUnavailableException;

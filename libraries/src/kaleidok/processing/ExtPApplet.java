@@ -20,7 +20,7 @@ import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.Arrays;
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import kaleidok.util.prefs.PreferenceUtils;

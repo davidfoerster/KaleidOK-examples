@@ -22,7 +22,7 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import static kaleidok.util.LoggingUtils.logThrown;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 public class ChromasthetiationService

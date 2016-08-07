@@ -1,4 +1,7 @@
-package kaleidok.util;
+package kaleidok.util.prefs;
+
+import kaleidok.util.Reflection;
+import kaleidok.util.Strings;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;

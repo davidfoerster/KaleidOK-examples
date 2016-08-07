@@ -12,7 +12,7 @@ import kaleidok.http.cache.DiskLruHttpCacheStorage;
 import kaleidok.http.cache.ExecutorSchedulingStrategy;
 import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.image.PImageFuture;
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.impl.client.cache.CacheConfig;
@@ -33,7 +33,7 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
-import static kaleidok.util.LoggingUtils.logThrown;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 public final class KaleidoscopeChromasthetiationService
