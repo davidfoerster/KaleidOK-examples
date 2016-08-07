@@ -1,5 +1,6 @@
 package kaleidok.processing;
 
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.geometry.Side;
@@ -214,5 +215,12 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
           (neighborScreen.getWidth() - scene.getWidth()) * 0.5,
         neighborScreen.getMinY() +
           (neighborScreen.getHeight() - scene.getHeight()) * 0.5));
+  }
+
+
+  @SuppressWarnings("MethodMayBeStatic")
+  public void exit()
+  {
+    Platform.exit();
   }
 }

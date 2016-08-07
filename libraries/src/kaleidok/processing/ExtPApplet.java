@@ -8,6 +8,10 @@ import com.jogamp.nativewindow.util.Rectangle;
 import com.jogamp.nativewindow.util.RectangleImmutable;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.newt.event.WindowListener;
+import com.jogamp.newt.event.WindowUpdateEvent;
+import com.jogamp.opengl.GLAutoDrawable;
 import javafx.application.HostServices;
 import kaleidok.newt.WindowSupport;
 import kaleidok.processing.event.KeyEventSupport;
@@ -21,6 +25,7 @@ import kaleidok.util.LoggingUtils;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PImage;
 import processing.core.PSurface;
 
@@ -152,8 +157,17 @@ public class ExtPApplet extends PApplet
   protected PSurface initSurface()
   {
     PSurface surface = super.initSurface();
-    Map<String, String> params = getParameterMap();
+    if (parent != null && P3D.equals(sketchRenderer()))
+    {
+      /*
+       * Invoke parent#exit() instead of PApplet#exit() when closing the sketch
+       * window.
+       */
+      ((Window) surface.getNative()).addWindowListener(
+        0, new ParentApplicationWindowDestructionListener());
+    }
 
+    Map<String, String> params = getParameterMap();
     String sResizable = params.get("resizable");
     if (sResizable != null)
       surface.setResizable(DefaultValueParser.parseBoolean(sResizable));
@@ -224,6 +238,27 @@ public class ExtPApplet extends PApplet
     CountDownLatch showSurfaceLatch = this.showSurfaceLatch;
     if (showSurfaceLatch != null)
       showSurfaceLatch.await();
+  }
+
+
+  @Override
+  public void exitActual()
+  {
+    if (PConstants.P3D.equals(sketchRenderer()))
+    {
+      /*
+       * PSurfaceJOGL starts a thread watching for exceptions thrown by the
+       * animator thread. Unfortunately that thread isn't flagged as a daemon,
+       * so it'll keep running beyond the termination of the animator thread.
+       * However, with the follow trick we can send a fake null exception as
+       * signal to that thread which leads to voluntary its termination.
+       */
+        ((GLAutoDrawable) getSurface().getNative()).getAnimator()
+          .getUncaughtExceptionHandler().uncaughtException(null, null, null);
+    }
+
+    if (parent == null)
+      super.exitActual();
   }
 
 
@@ -502,6 +537,17 @@ public class ExtPApplet extends PApplet
   }
 
 
+  @Override
+  public void keyPressed()
+  {
+    if (parent != null && key == ESC)
+    {
+      key = 0;
+      parent.exit();
+    }
+  }
+
+
   public Point getSurfaceLocation( Point l )
   {
     if (!checkRendererSupported("get window bounds", true))
@@ -597,5 +643,35 @@ public class ExtPApplet extends PApplet
     }
 
     return supported;
+  }
+
+
+  private class ParentApplicationWindowDestructionListener
+    implements WindowListener
+  {
+    @Override
+    public void windowResized( WindowEvent e ) { }
+
+    @Override
+    public void windowMoved( WindowEvent e ) { }
+
+    @Override
+    public void windowDestroyNotify( WindowEvent ev )
+    {
+      parent.exit();
+      ev.setConsumed(true);
+    }
+
+    @Override
+    public void windowDestroyed( WindowEvent e ) { }
+
+    @Override
+    public void windowGainedFocus( WindowEvent e ) { }
+
+    @Override
+    public void windowLostFocus( WindowEvent e ) { }
+
+    @Override
+    public void windowRepaint( WindowUpdateEvent e ) { }
   }
 }
