@@ -32,15 +32,13 @@ public class RecorderIcon extends Plugin<PApplet>
     boolean defaultOn )
   {
     String strEnabled =
-      sketch.getParameterMap().get(
-        RecorderIcon.class.getCanonicalName() + ".enabled");
-    //noinspection SpellCheckingInspection
-    return
-      (!"forceoff".equals(strEnabled) &&
-        (defaultOn || DefaultValueParser.parseBoolean(strEnabled, true)))
-      ?
-        new RecorderIcon(sketch, stt) :
-        null;
+      sketch.getParameterMap().getOrDefault(
+        RecorderIcon.class.getCanonicalName() + ".enabled", "default");
+    boolean enabled =
+      "default".equals(strEnabled) ?
+        defaultOn :
+        DefaultValueParser.parseBoolean(strEnabled);
+    return enabled ? new RecorderIcon(sketch, stt) : null;
   }
 
 
