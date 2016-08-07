@@ -11,8 +11,6 @@ public final class PlatformPaths
   private PlatformPaths() { }
 
 
-  public static final FileAttribute<?>[] NO_ATTRIBUTES = new FileAttribute[0];
-
   static final PlatformPathsBase platform;
   static {
     @SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")

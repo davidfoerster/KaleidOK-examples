@@ -1,16 +1,12 @@
 package kaleidok.io.platform;
 
-import kaleidok.util.Arrays;
+import kaleidok.io.FilePermissionAttributes;
+import kaleidok.io.Files;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
 
-import static java.nio.file.attribute.PosixFilePermissions.asFileAttribute;
 import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
 
 
@@ -29,27 +25,13 @@ public class UnixPaths extends PlatformPathsBase
   }
 
 
-  public static final List<PosixFilePermission> posixFilePermissions =
-    Arrays.asImmutableList(PosixFilePermission.values());
-
-  public static Set<PosixFilePermission> permissionsFromMask( int mask )
-  {
-    final EnumSet<PosixFilePermission> dst =
-      EnumSet.noneOf(PosixFilePermission.class);
-    if ((mask & 0777) != 0) {
-      for (PosixFilePermission p: posixFilePermissions) {
-        final int pMask = 1 << (posixFilePermissions.size() - p.ordinal() - 1);
-        if ((mask & pMask) != 0)
-          dst.add(p);
-      }
-    }
-    return dst;
-  }
-
-
   private static final FileAttribute<?>[]
-    DEFAULT_TEMPFILE_ATTRIBUTES = { asFileAttribute(permissionsFromMask(0600)) },
-    DEFAULT_TEMPDIR_ATTRIBUTES = { asFileAttribute(permissionsFromMask(0700)) };
+    DEFAULT_TEMPFILE_ATTRIBUTES = {
+        new FilePermissionAttributes(Files.permissionsFromMask(0600))
+      },
+    DEFAULT_TEMPDIR_ATTRIBUTES = {
+        new FilePermissionAttributes(Files.permissionsFromMask(0700))
+      };
 
   @Override
   protected FileAttribute<?>[] getTempDirectoryDefaultAttributes()

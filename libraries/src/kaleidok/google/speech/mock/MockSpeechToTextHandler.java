@@ -258,7 +258,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     return Files.createTempFile(tempDir,
       (p >= 0) ? fn.substring(0, p) : fn,
       (p >= 0) ? fn.substring(p) : ".flac",
-      PlatformPaths.NO_ATTRIBUTES);
+      kaleidok.io.Files.NO_ATTRIBUTES);
   }
 
 

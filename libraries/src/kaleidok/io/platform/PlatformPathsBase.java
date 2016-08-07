@@ -1,14 +1,12 @@
 package kaleidok.io.platform;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 
-import static kaleidok.io.platform.PlatformPaths.NO_ATTRIBUTES;
+import static kaleidok.io.Files.NO_ATTRIBUTES;
 import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
 
 
