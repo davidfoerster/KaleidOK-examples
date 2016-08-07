@@ -401,26 +401,39 @@ public class ExtPApplet extends PApplet
 
 
   @Override
-  public void save( String filename )
+  public void save( final String filename )
   {
     loadPixels();
     thread(() ->
     {
-      if ((g.format == RGB || g.format == ARGB) && filename.endsWith(".bmp"))
+      switch (g.format)
       {
-        Path filePath = Paths.get(savePath(filename), EMPTY_STRING_ARRAY);
-        try {
-          ImageIO.saveBmp32(filePath, width, height, pixels, 0).force();
-        } catch (UnsupportedOperationException ignored) {
-          // try again with default code path
-        }
-        catch (IOException ex)
+      case RGB:
+      case ARGB:
+        if (filename.endsWith(".bmp"))
         {
-          Threads.handleUncaught(ex);
+          Path filePath = Paths.get(savePath(filename), EMPTY_STRING_ARRAY);
+          try
+          {
+            ImageIO.saveBmp32(filePath, width, height, pixels, 0).force();
+            break;
+          }
+          catch (UnsupportedOperationException ignored)
+          {
+            // try again with default code path
+          }
+          catch (IOException ex)
+          {
+            Threads.handleUncaught(ex);
+            break;
+          }
         }
-      }
+        // fall through
 
-      ExtPApplet.super.save(filename);
+      default:
+        ExtPApplet.super.save(filename);
+        break;
+      }
     });
   }
 
