@@ -61,8 +61,8 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   {
     if (sketch != null)
     {
-      throw new AssertionError(new IllegalStateException(
-        sketch.getClass().getCanonicalName() + " is already initialized"));
+      throw new IllegalStateException(
+        sketch.getClass().getCanonicalName() + " is already initialized");
     }
 
     try

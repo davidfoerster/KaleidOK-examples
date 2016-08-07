@@ -455,7 +455,7 @@ public class ExtPApplet extends PApplet
     }
     catch (NoSuchMethodException ex)
     {
-      throw new AssertionError(ex);
+      throw new IllegalArgumentException(ex);
     }
 
     thread(() ->
