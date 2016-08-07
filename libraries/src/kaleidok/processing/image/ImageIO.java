@@ -21,21 +21,39 @@ public final class ImageIO
     BMP_INFOHEADER_SIZE = 40,
     BMP_OVERALLHEADER_SIZE = BMP_FILEHEADER_SIZE + BMP_INFOHEADER_SIZE;
 
-  public static void saveBmp32( ByteBuffer buf,
-    int width, int height, int[] pixels, int offset )
+
+  private static void checkBounds( int width, int height, int[] pixels,
+    int offset )
   {
     if (width <= 0 || height <= 0)
       throw new ArrayIndexOutOfBoundsException(Math.min(width, height));
     if (offset < 0)
       throw new ArrayIndexOutOfBoundsException(offset);
 
+    long len = (long) width * height;
+    if (len > pixels.length - offset) // conveniently also checks for int overflow
+    {
+      throw new ArrayIndexOutOfBoundsException(
+        "Array index out of range: " + (len + offset));
+    }
+  }
+
+
+  public static void saveBmp32( ByteBuffer buf,
+    int width, int height, int[] pixels, int offset )
+  {
+    checkBounds(width, height, pixels, offset);
+    saveBmp32_unchecked(buf, width, height, pixels, offset);
+  }
+
+
+  private static void saveBmp32_unchecked( ByteBuffer buf,
+    int width, int height, int[] pixels, int offset )
+  {
     long
       len = (long) width * height,
       imageSize = len * Integer.BYTES,
       fileSize = imageSize + BMP_OVERALLHEADER_SIZE;
-
-    if (len + offset > pixels.length)
-      throw new ArrayIndexOutOfBoundsException((int) Math.min(len + offset, Integer.MAX_VALUE));
     if (fileSize > buf.remaining())
       throw new BufferOverflowException();
 
@@ -62,15 +80,20 @@ public final class ImageIO
   public static MappedByteBuffer saveBmp32( FileChannel fc, boolean close,
     int width, int height, int[] pixels, int offset ) throws IOException
   {
-    long fileSize = (long) width * height * Integer.BYTES + BMP_OVERALLHEADER_SIZE;
+    if (fc == null)
+      throw new NullPointerException(FileChannel.class.getSimpleName());
+    checkBounds(width, height, pixels, offset);
+
+    long fileSize =
+      (long) width * height * Integer.BYTES + BMP_OVERALLHEADER_SIZE;
     MappedByteBuffer map;
     try {
       map = fc.map(FileChannel.MapMode.READ_WRITE, fc.position(), fileSize);
     } finally {
-      if (fc != null && close)
+      if (close)
         fc.close();
     }
-    saveBmp32(map, width, height, pixels, offset);
+    saveBmp32_unchecked(map, width, height, pixels, offset);
     return map;
   }
 
