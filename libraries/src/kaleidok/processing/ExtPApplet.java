@@ -21,9 +21,9 @@ import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.Arrays;
 import kaleidok.util.DefaultValueParser;
-import kaleidok.util.LoggingUtils;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
+import kaleidok.util.prefs.PreferenceUtils;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
@@ -49,9 +49,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import static kaleidok.util.Math.constrainInt;
@@ -277,16 +274,7 @@ public class ExtPApplet extends PApplet
   protected final void savePreferences()
   {
     doSavePreferences();
-    try
-    {
-      preferences.flush();
-    }
-    catch (BackingStoreException ex)
-    {
-      LoggingUtils.logThrown(Logger.getLogger(getClass().getName()),
-        Level.SEVERE, "Couldn't flush preference store: {0}", ex,
-        preferences);
-    }
+    PreferenceUtils.flush(preferences);
   }
 
 

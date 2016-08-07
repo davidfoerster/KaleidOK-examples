@@ -10,16 +10,13 @@ import javafx.stage.Stage;
 import kaleidok.javafx.PropertyLoaderApplication;
 import kaleidok.javafx.geometry.Rectangles;
 import kaleidok.javafx.stage.Screens;
-import kaleidok.util.LoggingUtils;
+import kaleidok.util.prefs.PreferenceUtils;
 import processing.core.PApplet;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 
@@ -124,16 +121,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   protected final void savePreferences()
   {
     doSavePreferences();
-    try
-    {
-      preferences.flush();
-    }
-    catch (BackingStoreException ex)
-    {
-      LoggingUtils.logThrown(Logger.getLogger(getClass().getName()),
-        Level.SEVERE, "Couldn't flush preference store: {0}", ex,
-        preferences);
-    }
+    PreferenceUtils.flush(preferences);
   }
 
 
