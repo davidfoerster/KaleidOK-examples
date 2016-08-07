@@ -9,12 +9,11 @@ import java.awt.event.ActionEvent;
 import java.net.URL;
 
 import static javax.swing.Action.SHORT_DESCRIPTION;
+import static kaleidok.kaleidoscope.KaleidoscopeApp.iconDir;
 
 
 public class KaleidoscopeControls extends JPanel
 {
-  private static final String iconDir = "icons/";
-
   private final KaleidoscopeApp context;
 
   private JRoundToggleButton recordingButton = null;

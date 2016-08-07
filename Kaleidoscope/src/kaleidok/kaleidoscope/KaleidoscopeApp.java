@@ -3,18 +3,31 @@ package kaleidok.kaleidoscope;
 import javafx.embed.swing.SwingNode;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import kaleidok.javafx.stage.Icons;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.processing.SimplePAppletFactory;
 import kaleidok.util.AssertionUtils;
 
 import java.awt.Dimension;
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 {
+  static final Logger logger =
+    Logger.getLogger(KaleidoscopeApp.class.getName());
+
+  static final String iconDir = "icons/";
+
   private Scene scene;
 
   private KaleidoscopeControls controls = null;
@@ -45,10 +58,32 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   }
 
 
+  private List<Image> makeIcons()
+  {
+    String iconPathname = iconDir + "start.png";
+    URL iconUrl = getClass().getClassLoader().getResource(iconPathname);
+    try
+    {
+      if (iconUrl == null)
+      {
+        //noinspection ThrowCaughtLocally
+        throw new FileNotFoundException(iconPathname);
+      }
+      return Icons.makeIcons(iconUrl);
+    }
+    catch (Exception ex)
+    {
+      logger.log(Level.WARNING, "Couldn't load application icon", ex);
+      return Collections.emptyList();
+    }
+  }
+
+
   @Override
   public void start( Stage stage ) throws Exception
   {
     stage.setTitle("Kaleidoscope Controls");
+    stage.getIcons().addAll(makeIcons());
     super.start(stage);
   }
 
