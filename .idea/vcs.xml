@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../TarsosDSP" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../javaFlacEncoder" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../synesketch" vcs="Git" />
   </component>

@@ -8,7 +8,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="TarsosDSP" level="application" />
     <orderEntry type="library" scope="RUNTIME" name="gluegen2-rt" level="application" />
     <orderEntry type="library" scope="RUNTIME" name="jogl2" level="application" />
     <orderEntry type="module" module-name="libraries" />
@@ -17,5 +16,6 @@
     <orderEntry type="library" name="org.apache.httpcomponents:httpclient-cache:4.5" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.4" level="project" />
     <orderEntry type="library" name="Processing 3.1" level="application" />
+    <orderEntry type="module" module-name="TarsosDSP" />
   </component>
 </module>

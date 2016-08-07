@@ -8,7 +8,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="TarsosDSP" level="application" />
     <orderEntry type="library" name="Minim" level="application" />
     <orderEntry type="library" scope="TEST" name="com.github.tomakehurst:wiremock:1.57" level="project" />
     <orderEntry type="library" scope="TEST" name="junit4" level="application" />
@@ -27,5 +26,6 @@
     <orderEntry type="library" name="Processing 3.1" level="application" />
     <orderEntry type="library" name="jogl2" level="application" />
     <orderEntry type="library" name="gluegen2-rt" level="application" />
+    <orderEntry type="module" module-name="TarsosDSP" />
   </component>
 </module>

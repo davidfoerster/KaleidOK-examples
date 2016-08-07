@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/KaleidOK.iml" filepath="$PROJECT_DIR$/KaleidOK.iml" />
       <module fileurl="file://$PROJECT_DIR$/Kaleidoscope/Kaleidoscope.iml" filepath="$PROJECT_DIR$/Kaleidoscope/Kaleidoscope.iml" />
       <module fileurl="file://$PROJECT_DIR$/../synesketch/Synesketch.iml" filepath="$PROJECT_DIR$/../synesketch/Synesketch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../TarsosDSP/TarsosDSP.iml" filepath="$PROJECT_DIR$/../TarsosDSP/TarsosDSP.iml" />
       <module fileurl="file://$PROJECT_DIR$/cmusphinx_example/cmusphinx_example.iml" filepath="$PROJECT_DIR$/cmusphinx_example/cmusphinx_example.iml" />
       <module fileurl="file://$PROJECT_DIR$/../javaFlacEncoder/javaFlacEncoder.iml" filepath="$PROJECT_DIR$/../javaFlacEncoder/javaFlacEncoder.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
