@@ -125,15 +125,22 @@ public final class Arrays
       if (ol.size() != a.length)
         return false;
 
-      if (ol instanceof RandomAccess) {
-        for (int i = 0; i < a.length; i++) {
+      if (ol instanceof ImmutableArrayList)
+        return java.util.Arrays.equals(a, ((ImmutableArrayList<?>) ol).a);
+      if (ol instanceof RandomAccess)
+      {
+        for (int i = 0; i < a.length; i++)
+        {
           if (!Objects.equals(a[i], ol.get(i)))
             return false;
         }
-      } else {
+      }
+      else
+      {
         int i = 0;
         final Iterator<?> it = ol.iterator();
-        while (i < a.length) {
+        while (i < a.length)
+        {
           if (!Objects.equals(a[i++], it.next()))
             return false;
         }
@@ -146,10 +153,7 @@ public final class Arrays
     @Override
     public int hashCode()
     {
-      int hashCode = 1;
-      for (E e: a)
-        hashCode = 31 * hashCode + ((e != null) ? e.hashCode() : 0);
-      return hashCode;
+      return java.util.Arrays.hashCode(a);
     }
 
 

@@ -42,7 +42,7 @@ public abstract class PropertyLoaderApplication extends Application
     return (sVal != null) ?
       DefaultValueParser.parseBoolean(sVal) :
       getUnnamedParameters().stream().anyMatch(
-        (String s) -> Strings.isConcatenation(s, "--", name));
+        (s) -> Strings.isConcatenation(s, "--", name));
   }
 
 
@@ -93,7 +93,9 @@ public abstract class PropertyLoaderApplication extends Application
   private static InputStream openFilenameArgument( String arg )
     throws FileNotFoundException
   {
-    return "-".equals(arg) ? System.in : new FileInputStream(arg);
+    return (arg.length() == 1 && arg.charAt(0) == '-') ?
+      System.in :
+      new FileInputStream(arg);
   }
 
 

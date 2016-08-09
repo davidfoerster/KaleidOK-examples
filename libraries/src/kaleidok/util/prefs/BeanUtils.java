@@ -64,7 +64,7 @@ public final class BeanUtils
     {
       throw new IllegalArgumentException(
         String.format(
-          "Cannot set value of property \"%s.%s\" (%s) to \"%s\"",
+          "Cannot set value of property \"%s.%s\" of type %s to \"%s\"",
           bean.getClass().getName(), ps.getName(), ps.getType().getName(),
           ps.getEntry().getValue()),
         (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
@@ -147,10 +147,9 @@ public final class BeanUtils
           val = prop.getProperty(key);
         }
         //noinspection unchecked
-        entry = (val != null) ?
+        this.entry = entry = (val != null) ?
           new AbstractMap.SimpleImmutableEntry<>(key, val) :
           (Map.Entry<String, String>) EMPTY_ENTRY;
-        this.entry = entry;
       }
       return (entry != EMPTY_ENTRY) ? entry : null;
     }

@@ -41,7 +41,7 @@ public final class Objects
       if (cause instanceof CloneNotSupportedException)
         throw (CloneNotSupportedException) cause;
       throw new InternalError(
-        "#clone() should only ever throw " +
+        "Object#clone() should only ever throw " +
           CloneNotSupportedException.class.getCanonicalName(),
         cause);
     }

@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -42,7 +43,7 @@ public final class DefaultValueParser
   public static boolean parseBoolean( String s )
     throws IllegalArgumentException
   {
-    java.util.Objects.requireNonNull(s);
+    Objects.requireNonNull(s);
     Throwable cause = null;
 
     if (!s.isEmpty()) {

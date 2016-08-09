@@ -48,14 +48,17 @@ public final class LoggingUtils
   }
 
 
-  public static void loadLocalLoggerProperties( Class<?> contextClass )
+  public static boolean loadLocalLoggerProperties( Class<?> contextClass )
   {
     String loggingFile = "logging.properties";
     try (InputStream is =
       newInputStreamNoThrow(loggingFile, contextClass.getClassLoader()))
     {
       if (is != null)
+      {
         LogManager.getLogManager().readConfiguration(is);
+        return true;
+      }
     }
     catch (IOException ex)
     {
@@ -63,6 +66,7 @@ public final class LoggingUtils
         "Couldn't load default {0} file for {1}", ex,
         new Object[]{loggingFile, contextClass.getName()});
     }
+    return false;
   }
 
 

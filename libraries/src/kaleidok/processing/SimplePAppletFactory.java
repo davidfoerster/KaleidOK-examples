@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.Objects;
 
 
 public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T>
@@ -25,13 +24,13 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
   public SimplePAppletFactory( Class<? extends T> appletClass )
     throws IllegalArgumentException
   {
-    if (!ExtPApplet.class.isAssignableFrom(appletClass))
+    if (!PApplet.class.isAssignableFrom(appletClass))
     {
       throw new IllegalArgumentException(new ClassCastException(
-        appletClass.getName() + " is no sub-class of " +
-          ExtPApplet.class.getCanonicalName()));
+        appletClass.getName() + " is no child class of " +
+          PApplet.class.getName()));
     }
-    if ((appletClass.getModifiers() & Modifier.ABSTRACT) != 0)
+    if (Modifier.isAbstract(appletClass.getModifiers()))
     {
       throw new IllegalArgumentException(new InstantiationException(
         appletClass.getCanonicalName() + " is abstract"));
@@ -52,8 +51,6 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
     List<String> args )
     throws InvocationTargetException
   {
-    Objects.requireNonNull(args);
-
     T sketch;
     try
     {
@@ -64,9 +61,12 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
       throw new AssertionError(ex);
     }
 
-    String[] extArgs = args.stream()
-      .filter((s) -> !"--fullscreen".equals(s))
-      .toArray((l) -> new String[l + 1]);
+    String[] extArgs =
+      (args != null && !args.isEmpty()) ?
+        args.stream()
+          .filter((s) -> !"--fullscreen".equals(s))
+          .toArray((l) -> new String[l + 1]) :
+        new String[1];
     extArgs[extArgs.length - 1] = sketch.getClass().getSimpleName();
     PApplet.runSketch(extArgs, sketch);
     return sketch;
