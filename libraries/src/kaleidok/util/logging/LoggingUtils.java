@@ -1,5 +1,7 @@
 package kaleidok.util.logging;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,9 +43,8 @@ public final class LoggingUtils
 
   public static boolean hasSystemLoggerConfiguration()
   {
-    String systemLoggerConfigPath =
-      System.getProperty("java.util.logging.config.file");
-    return systemLoggerConfigPath != null && !systemLoggerConfigPath.isEmpty();
+    return !StringUtils.isEmpty(
+      System.getProperty("java.util.logging.config.file"));
   }
 
 

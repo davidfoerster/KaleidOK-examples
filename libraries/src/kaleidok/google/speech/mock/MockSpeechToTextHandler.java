@@ -6,9 +6,9 @@ import kaleidok.http.requesthandler.MockRequestHandlerBase;
 import kaleidok.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
 import kaleidok.util.AssertionUtils;
-import kaleidok.util.Strings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
 
 import java.io.*;
@@ -79,8 +79,8 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     assert q != null && !q.isEmpty() : "No request parameters";
     assert "json".equals(q.get("output")) :
       "Invalid request parameter value: output=" + q.get("output");
-    assert !Strings.isEmpty(q.get("key")) : "Empty request parameter: key";
-    assert !Strings.isEmpty(q.get("lang")) : "Empty request parameter: lang";
+    assert !StringUtils.isEmpty(q.get("key")) : "Empty request parameter: key";
+    assert !StringUtils.isEmpty(q.get("lang")) : "Empty request parameter: lang";
     assert q.size() == 3 : "Superfluous request parameters";
 
     ContentType contentType =
