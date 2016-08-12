@@ -62,20 +62,16 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     String iconPathname = iconDir + "start.png";
     URL iconUrl = getClass().getClassLoader().getResource(iconPathname);
-    try
-    {
-      if (iconUrl == null)
-      {
-        //noinspection ThrowCaughtLocally
-        throw new FileNotFoundException(iconPathname);
-      }
+    Exception ex;
+    if (iconUrl != null) try {
       return Icons.makeIcons(iconUrl);
+    } catch (Exception ex1) {
+      ex = ex1;
+    } else {
+      ex = new FileNotFoundException(iconPathname);
     }
-    catch (Exception ex)
-    {
-      logger.log(Level.WARNING, "Couldn't load application icon", ex);
-      return Collections.emptyList();
-    }
+    logger.log(Level.WARNING, "Couldn't load application icon", ex);
+    return Collections.emptyList();
   }
 
 

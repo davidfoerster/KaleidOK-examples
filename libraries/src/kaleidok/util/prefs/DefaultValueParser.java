@@ -79,36 +79,36 @@ public final class DefaultValueParser
     throws IllegalArgumentException
   {
     Class<?> wrapperClass = Reflection.getWrapperType(targetClass);
-    try
+    Exception ex;
+    if (wrapperClass == Character.class)
     {
-      if (wrapperClass == Character.class)
-      {
-        if (s.length() == 1)
-          return (T) Character.valueOf(s.charAt(0));
+      if (s.length() == 1)
+        return (T) Character.valueOf(s.charAt(0));
 
-        //noinspection ThrowCaughtLocally
-        throw new IllegalArgumentException(
-          "Cannot cast string of length " + s.length() + " to " +
-            targetClass.getName());
-      }
-
+      ex = new IllegalArgumentException(
+        "Cannot cast string of length " + s.length() + " to " +
+          targetClass.getName());
+    }
+    else try
+    {
       Method m = wrapperClass.getMethod("valueOf", valueOfParameterTypes);
       if (wrapperClass.isAssignableFrom(
         Reflection.getWrapperType(m.getReturnType())))
       {
         return (T) m.invoke(null, s);
       }
-      //noinspection ThrowCaughtLocally
-      throw new ClassCastException(
+
+      ex = new ClassCastException(
         "Cannot assign the return type of " + m + " to " +
           targetClass.getName());
     }
-    catch (ReflectiveOperationException | ClassCastException | IllegalArgumentException ex)
+    catch (ReflectiveOperationException | ClassCastException | IllegalArgumentException ex1)
     {
-      throw new IllegalArgumentException(
-        "Cannot parse to " + targetClass.getName(),
-        (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
+      ex = ex1;
     }
+    throw new IllegalArgumentException(
+      "Cannot parse to " + targetClass.getName(),
+      (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
   }
 
 
