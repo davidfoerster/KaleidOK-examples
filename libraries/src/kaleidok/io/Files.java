@@ -31,10 +31,10 @@ public final class Files
       EnumSet.noneOf(PosixFilePermission.class);
     if ((mask & 0777) != 0)
     {
+      int maxOrdinal = posixFilePermissions.size() - 1;
       for (PosixFilePermission p: posixFilePermissions)
       {
-        final int pMask = 1 << (posixFilePermissions.size() - p.ordinal() - 1);
-        if ((mask & pMask) != 0)
+        if ((mask & (1 << (maxOrdinal - p.ordinal()))) != 0)
           dst.add(p);
       }
     }

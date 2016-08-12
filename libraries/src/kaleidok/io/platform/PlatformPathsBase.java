@@ -68,7 +68,6 @@ public class PlatformPathsBase
 
   public Path createTempDirectory( String prefix ) throws IOException
   {
-    //noinspection ConfusingArgumentToVarargsMethod
     return createTempDirectory( prefix, (FileAttribute<?>[]) null );
   }
 
@@ -84,7 +83,6 @@ public class PlatformPathsBase
 
   public Path createTempFile( String prefix, String suffix ) throws IOException
   {
-    //noinspection ConfusingArgumentToVarargsMethod
     return createTempFile(prefix, suffix, (FileAttribute<?>[]) null);
   }
 
@@ -115,7 +113,6 @@ public class PlatformPathsBase
 
   public Path getCacheDir( String name ) throws IOException
   {
-    //noinspection ConfusingArgumentToVarargsMethod
     return getCacheDir(name, (FileAttribute<?>[]) null);
   }
 
