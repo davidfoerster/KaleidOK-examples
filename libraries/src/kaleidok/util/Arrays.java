@@ -1,5 +1,7 @@
 package kaleidok.util;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.Collections;
@@ -87,28 +89,14 @@ public final class Arrays
     @Override
     public int indexOf( final Object o )
     {
-      final E[] a = this.a;
-
-      for (int i = 0; i < a.length; i++) {
-        if (Objects.equals(o, a[i]))
-          return i;
-      }
-
-      return -1;
+      return ArrayUtils.indexOf(a, o);
     }
 
 
     @Override
     public int lastIndexOf( final Object o )
     {
-      final E[] a = this.a;
-
-      for (int i = a.length - 1; i >= 0; i--) {
-        if (Objects.equals(o, a[i]))
-          return i;
-      }
-
-      return -1;
+      return ArrayUtils.lastIndexOf(a, o);
     }
 
 
@@ -160,7 +148,7 @@ public final class Arrays
     @Override
     public boolean contains( Object o )
     {
-      return indexOf(o) >= 0;
+      return ArrayUtils.contains(a, o);
     }
 
 
