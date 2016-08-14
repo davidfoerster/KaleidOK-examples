@@ -33,7 +33,7 @@ public final class WindowSupport
 
   /**
    * Re-implement {@link Window#getMainMonitor()} because it's broken on multi-
-   * monitor setups. More importantly {@link Window#getBounds()} returns the
+   * monitor setups. More specifically {@link Window#getBounds()} returns the
    * position on the current monitor and not on the entire screen space.
    *
    * @param w  A window
