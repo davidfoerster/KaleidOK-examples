@@ -77,7 +77,7 @@ public final class PImages
   public static Image getSuitableImage( ImageReader r, ImageInputStream iis )
     throws IOException
   {
-    r.setInput(iis, true, false);
+    r.setInput(iis, true, true);
     int imageIndex = Math.max(r.getNumImages(false) - 1, 0);
 
     ImageTypeSpecifier type = getPreferredType(r.getImageTypes(imageIndex));
