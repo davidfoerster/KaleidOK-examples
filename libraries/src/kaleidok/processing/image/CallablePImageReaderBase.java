@@ -10,7 +10,6 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,7 +52,7 @@ public class CallablePImageReaderBase implements Callable<PImage>
   public CallablePImageReaderBase( ImageInputStream sourceStream )
   {
     this(sourceStream,
-      getFirstImageReader(ImageIO.getImageReaders(sourceStream)));
+      PImages.getFirstImageReader(ImageIO.getImageReaders(sourceStream)));
   }
 
 
@@ -69,25 +68,6 @@ public class CallablePImageReaderBase implements Callable<PImage>
 
     if (sourceStream == null || imageReader == null)
       throw new NullPointerException();
-  }
-
-
-  protected static ImageReader getFirstImageReader(
-    Iterator<ImageReader> readers )
-    throws IllegalArgumentException
-  {
-    if (readers.hasNext())
-      return readers.next();
-
-    throw new IllegalArgumentException("No suitable image decoder found");
-  }
-
-
-  protected static ImageReader getFirstImageReader(
-    Iterator<ImageReader> readers, ImageReader defaultReader )
-    throws IllegalArgumentException
-  {
-    return readers.hasNext() ? readers.next() : defaultReader;
   }
 
 

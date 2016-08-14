@@ -24,7 +24,7 @@ public class CallablePImageFileReader
     throws IOException, IllegalArgumentException
   {
     ImageReader imageReader =
-      getFirstImageReader(ImageIO.getImageReadersBySuffix(
+      PImages.getFirstImageReader(ImageIO.getImageReadersBySuffix(
         FilenameUtils.getExtension(source.getPath())));
     ImageInputStream iis = null;
     try

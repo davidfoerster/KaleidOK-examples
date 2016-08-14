@@ -164,7 +164,7 @@ public final class PImages
   }
 
 
-  private static ImageReader getFirstImageReader(
+  static ImageReader getFirstImageReader(
     Iterator<ImageReader> readers, ImageReader defaultReader )
     throws IllegalArgumentException
   {
@@ -172,7 +172,7 @@ public final class PImages
   }
 
 
-  private static ImageReader getFirstImageReader(
+  static ImageReader getFirstImageReader(
     Iterator<ImageReader> readers )
     throws IllegalArgumentException
   {
