@@ -1,6 +1,5 @@
-package kaleidok.http;
+package kaleidok.http.util;
 
-import kaleidok.http.util.MimeTypeMap;
 import kaleidok.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;

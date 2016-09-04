@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import kaleidok.http.responsehandler.JsonElementResponseHandler;
 import kaleidok.http.responsehandler.JsonMimeTypeChecker;
 import kaleidok.google.gson.TypeAdapterManager;
+import kaleidok.http.util.URLEncoding;
 
 import java.io.*;
 import java.net.HttpURLConnection;

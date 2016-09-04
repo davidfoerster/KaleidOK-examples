@@ -1,7 +1,7 @@
 package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.data.ChromatikColor;
-import kaleidok.http.URLEncoding;
+import kaleidok.http.util.URLEncoding;
 import kaleidok.http.util.Parsers;
 import org.junit.Test;
 

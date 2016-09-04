@@ -1,4 +1,4 @@
-package kaleidok.http;
+package kaleidok.http.util;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;

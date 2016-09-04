@@ -1,4 +1,4 @@
-package kaleidok.http;
+package kaleidok.http.util;
 
 import kaleidok.util.Strings;
 import org.junit.Test;
@@ -15,8 +15,8 @@ import java.util.Random;
 
 import static java.lang.Character.*;
 import static java.nio.charset.StandardCharsets.*;
-import static kaleidok.http.URLEncoding.decode;
-import static kaleidok.http.URLEncoding.encode;
+import static kaleidok.http.util.URLEncoding.decode;
+import static kaleidok.http.util.URLEncoding.encode;
 import static org.junit.Assert.*;
 
 

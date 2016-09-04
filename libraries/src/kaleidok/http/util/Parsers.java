@@ -16,7 +16,7 @@ import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
-import static kaleidok.http.URLEncoding.decode;
+import static kaleidok.http.util.URLEncoding.decode;
 
 
 public final class Parsers

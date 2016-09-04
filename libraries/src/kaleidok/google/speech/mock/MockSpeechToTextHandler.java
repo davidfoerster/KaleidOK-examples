@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.*;
 
-import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.http.util.URLEncoding.DEFAULT_CHARSET;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
