@@ -77,7 +77,6 @@ public class CallablePImageReaderBase implements Callable<PImage>
   }
 
 
-  @OverridingMethodsMustInvokeSuper
   protected void prepare() throws IOException { }
 
 
