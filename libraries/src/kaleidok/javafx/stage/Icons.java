@@ -5,7 +5,6 @@ import javafx.scene.image.Image;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,13 +29,7 @@ public final class Icons
     int markSize = ICON_FILE_SIZE_MAX;
     if ("file".equals(iconUrl.getProtocol()))
     {
-      Path iconPath;
-      try {
-        iconPath = Paths.get(iconUrl.toURI());
-      } catch (URISyntaxException ex) {
-        throw new AssertionError(ex);
-      }
-
+      Path iconPath = Paths.get(iconUrl.toURI());
       if (Files.isRegularFile(iconPath, FOLLOW_LINKS))
       {
         long iconFileSize = Files.size(iconPath);
