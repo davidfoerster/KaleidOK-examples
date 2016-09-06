@@ -30,12 +30,10 @@ import processing.core.PImage;
 import processing.core.PSurface;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -336,15 +334,6 @@ public class ExtPApplet extends PApplet
         url = new URL(getDocumentBase(), path);
       } catch (MalformedURLException ex) {
         throw new IllegalArgumentException(ex);
-      }
-      if ("file".equals(url.getProtocol())) {
-        File file;
-        try {
-          file = new File(url.toURI());
-        } catch (URISyntaxException ex) {
-          throw new AssertionError(ex);
-        }
-        return thread(PImageFuture.from(file));
       }
     }
     return getImageFuture(url);
