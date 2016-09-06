@@ -9,6 +9,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -74,7 +75,8 @@ public final class PImages
    * @throws IOException on I/O or decoder error
    * @see #getPreferredType(Iterator)
    */
-  public static Image getSuitableImage( ImageReader r, ImageInputStream iis )
+  public static BufferedImage getSuitableImage( ImageReader r,
+    ImageInputStream iis )
     throws IOException
   {
     r.setInput(iis, true, true);
