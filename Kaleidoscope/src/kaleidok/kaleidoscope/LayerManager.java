@@ -5,11 +5,12 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.kaleidoscope.layer.*;
 import kaleidok.processing.image.PImageFuture;
+import kaleidok.util.Strings;
 import kaleidok.util.prefs.BeanUtils;
 import kaleidok.util.prefs.PropertyLoader;
+import org.apache.commons.io.FilenameUtils;
 import processing.core.PImage;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -19,6 +20,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
@@ -172,30 +174,13 @@ public class LayerManager implements List<ImageLayer>, Runnable
     {
       String imagesParam = parent.getParameterMap().get(
         parent.getClass().getPackage().getName() + ".images.initial");
-      if (imagesParam == null)
-      {
-        images = new ArrayList<>(MIN_IMAGES);
-      }
-      else
-      {
-        String[] imagePaths = WHITESPACE_PATTERN.split(imagesParam);
-        images = new ArrayList<>(Math.max(imagePaths.length, MIN_IMAGES));
-        for (String strImage : imagePaths)
-        {
-          if (!strImage.isEmpty())
-          {
-            char c = strImage.charAt(0);
-            if (c != '/' && c != File.separatorChar &&
-              strImage.indexOf(':') < 0)
-            {
-              //noinspection StringConcatenationInLoop
-              strImage = "/images/" + strImage;
-            }
-            images.add(parent.getImageFuture(strImage));
-          }
-        }
-      }
-
+      images = (imagesParam == null || imagesParam.isEmpty()) ?
+        new ArrayList<>(MIN_IMAGES) :
+        WHITESPACE_PATTERN.splitAsStream(imagesParam)
+          .filter(( s ) -> !s.isEmpty())
+          .map(( s ) -> parent.getImageFuture(
+            (FilenameUtils.getPrefixLength(s) == 0 && !Strings.looksLikeUrl(s)) ? "/images/" + s : s))
+          .collect(Collectors.toList());
       if (images.isEmpty())
         images.add(PImageFuture.EMPTY);
       int imageCount = images.size();

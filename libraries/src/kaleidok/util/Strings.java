@@ -1,6 +1,6 @@
 package kaleidok.util;
 
-import java.util.*;
+import java.util.regex.Pattern;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
@@ -118,5 +118,14 @@ public final class Strings
   {
     return s.length() == prefix.length() + suffix.length() &&
       s.startsWith(prefix) && s.endsWith(suffix);
+  }
+
+
+  public static final Pattern SIMPLE_URL_PREFIX_PATTERN =
+    Pattern.compile("^[a-z](?:[a-z0-9+.-])*:");
+
+  public static boolean looksLikeUrl( String s )
+  {
+    return SIMPLE_URL_PREFIX_PATTERN.matcher(s).matches();
   }
 }
