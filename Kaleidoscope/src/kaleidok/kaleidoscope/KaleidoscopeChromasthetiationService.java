@@ -2,6 +2,7 @@ package kaleidok.kaleidoscope;
 
 import kaleidok.exaleads.chromatik.ChromasthetiationService;
 import kaleidok.exaleads.chromatik.DocumentChromasthetiator;
+import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.processing.image.PImages;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.util.concurrent.GroupedThreadFactory;
@@ -13,10 +14,13 @@ import kaleidok.http.cache.ExecutorSchedulingStrategy;
 import kaleidok.io.platform.PlatformPaths;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.prefs.DefaultValueParser;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
+import synesketch.emotion.Emotion;
+import synesketch.emotion.EmotionalState;
 
 import java.awt.Image;
 import java.io.File;
@@ -180,14 +184,15 @@ public final class KaleidoscopeChromasthetiationService
 
 
   private class ChromasthetiationCallback
-    extends AbstractFutureCallback<Image>
+    extends AbstractFutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>>
   {
     private final AtomicInteger imageListIndex = new AtomicInteger(0);
 
 
     @Override
-    public void completed( Image image )
+    public void completed( Pair<Image, Pair<ChromatikResponse, EmotionalState>> response )
     {
+      Image image = response.getLeft();
       assert image.getWidth(null) > 0 && image.getHeight(null) > 0 :
         image + " has width or height ≤0";
       PImageFuture fImage = PImageFuture.from(PImages.from(image));
