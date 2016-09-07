@@ -3,6 +3,7 @@ package kaleidok.kaleidoscope;
 import kaleidok.exaleads.chromatik.ChromasthetiationService;
 import kaleidok.exaleads.chromatik.DocumentChromasthetiator;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
+import kaleidok.image.filter.Parser;
 import kaleidok.processing.image.PImages;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.util.concurrent.GroupedThreadFactory;
@@ -19,14 +20,17 @@ import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Executor;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
+import processing.core.PImage;
 import synesketch.emotion.Emotion;
 import synesketch.emotion.EmotionalState;
 
 import java.awt.Image;
+import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -188,6 +192,8 @@ public final class KaleidoscopeChromasthetiationService
   {
     private final AtomicInteger imageListIndex = new AtomicInteger(0);
 
+    private Optional<RGBImageFilter> neutralFilter = null;
+
 
     @Override
     public void completed( Pair<Image, Pair<ChromatikResponse, EmotionalState>> response )
@@ -195,7 +201,16 @@ public final class KaleidoscopeChromasthetiationService
       Image image = response.getLeft();
       assert image.getWidth(null) > 0 && image.getHeight(null) > 0 :
         image + " has width or height ≤0";
-      PImageFuture fImage = PImageFuture.from(PImages.from(image));
+      PImage pImage = PImages.from(image);
+
+      EmotionalState emoState = response.getRight().getRight();
+      if (emoState.getStrongestEmotion().getType() == Emotion.NEUTRAL)
+      {
+        RGBImageFilter filter = getNeutralFilter();
+        if (filter != null)
+          pImage = PImages.filter(pImage, pImage, filter);
+      }
+      PImageFuture fImage = PImageFuture.from(pImage);
 
       LayerManager layers = parent.getLayers();
       int idx = imageListIndex.getAndIncrement() % layers.size();
@@ -221,6 +236,32 @@ public final class KaleidoscopeChromasthetiationService
         }
       }
       super.failed(ex);
+    }
+
+
+    private RGBImageFilter getNeutralFilter()
+    {
+      if (neutralFilter == null)
+      {
+        @SuppressWarnings("TooBroadScope")
+        String
+          paramName =
+            parent.getClass().getPackage().getName() +
+              ".images.filter.neutral",
+          filterStr = parent.getParameterMap().get(paramName);
+        try
+        {
+          neutralFilter = Optional.ofNullable(
+            (filterStr != null) ? Parser.parseFilter(filterStr) : null);
+        }
+        catch (IllegalArgumentException | UnsupportedOperationException ex)
+        {
+          logThrown(logger, Level.WARNING,
+            "{0} ignored: illegal image filter value", ex, paramName);
+          neutralFilter = Optional.empty();
+        }
+      }
+      return neutralFilter.orElse(null);
     }
   }
 
