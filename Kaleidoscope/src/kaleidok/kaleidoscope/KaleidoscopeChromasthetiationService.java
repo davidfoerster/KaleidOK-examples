@@ -208,7 +208,7 @@ public final class KaleidoscopeChromasthetiationService
       {
         RGBImageFilter filter = getNeutralFilter();
         if (filter != null)
-          pImage = PImages.filter(pImage, pImage, filter);
+          pImage = PImages.filter(pImage, pImage, (RGBImageFilter) filter.clone());
       }
       PImageFuture fImage = PImageFuture.from(pImage);
 
