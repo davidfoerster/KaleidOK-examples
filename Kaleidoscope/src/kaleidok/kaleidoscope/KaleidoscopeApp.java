@@ -88,8 +88,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   @Override
   protected void show( Stage stage ) throws Exception
   {
-    if (Double.isNaN(stage.getX()) || Double.isNaN(stage.getY()))
-      placeAroundSketch(stage, 2, (Side[]) null);
+    /*if (Double.isNaN(stage.getX()) || Double.isNaN(stage.getY()))
+      placeAroundSketch(stage, 2, (Side[]) null);*/
 
     super.show(stage);
   }
