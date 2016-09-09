@@ -49,8 +49,8 @@ public final class Math
 
   private static float sum_noBoundsCheck( FloatList a, int offset, int len )
   {
-    assert len != 0 && checkBounds(offset, len, a.size()) :
-      getBoundsExceededMessage(offset, len, a.size());
+    /*assert len != 0 && checkBounds(offset, len, a.size()) :
+      getBoundsExceededMessage(offset, len, a.size());*/
 
     if (len == 1)
       return a.get(offset);
