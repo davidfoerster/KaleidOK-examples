@@ -63,7 +63,7 @@ public final class KaleidoscopeChromasthetiationService
   private final ChromasthetiationCallback chromasthetiationCallback =
     new ChromasthetiationCallback();
 
-  private ImageQueueCompletionCallback imageQueueCompletionCallback = null;
+  private Consumer<Pair<String, Collection<? super Photo>>> imageQueueCompletionCallback = null;
 
 
   private KaleidoscopeChromasthetiationService( Kaleidoscope parent,
@@ -179,7 +179,7 @@ public final class KaleidoscopeChromasthetiationService
   {
     Consumer<Collection<? super Photo>> imageQueueCompletionCallback =
       (this.imageQueueCompletionCallback != null) ?
-        (photos) -> this.imageQueueCompletionCallback.accept(text, photos) :
+        (photos) -> this.imageQueueCompletionCallback.accept(Pair.of(text, photos)) :
         null;
 
     submit(text, getChromasthetiator(),
@@ -267,25 +267,9 @@ public final class KaleidoscopeChromasthetiationService
   }
 
 
-  public interface ImageQueueCompletionCallback
-  {
-    void accept( String text, Collection<? super Photo> photos );
-  }
-
-
   public void setImageQueueCompletionCallback(
-    ImageQueueCompletionCallback imageQueueCompletionCallback )
+    Consumer<Pair<String, Collection<? super Photo>>> imageQueueCompletionCallback )
   {
     this.imageQueueCompletionCallback = imageQueueCompletionCallback;
-  }
-
-
-  public void setImageQueueCompletionCallback(
-    final Consumer<String> imageQueueCompletionCallback )
-  {
-    setImageQueueCompletionCallback(
-      (imageQueueCompletionCallback != null) ?
-        ( text, photos ) -> imageQueueCompletionCallback.accept(text) :
-        null);
   }
 }

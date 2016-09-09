@@ -135,7 +135,7 @@ public class ChromasthetiationService
       ChromasthetiatorBase<? extends Flickr> queryParams,
       String text, FutureCallback<Future<Image>> futureImageCallback,
       FutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>> imageCallback,
-      Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
+      final Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
       int maxCount )
     {
       super(queryParams);
@@ -151,9 +151,12 @@ public class ChromasthetiationService
       this.futureImageCallback = futureImageCallback;
       this.imageCallback = imageCallback;
       photoQueue = new BoundedCompletionQueue<>(maxCount, chromatikQuery.nHits);
-      photoQueue.completionCallback =
-        ( objects ) -> imageQueueCompletionCallback.accept(
-          objects.stream().map(Pair::getLeft).collect(Collectors.toList()));
+      if (imageQueueCompletionCallback != null)
+      {
+        photoQueue.completionCallback =
+          ( objects ) -> imageQueueCompletionCallback.accept(
+            objects.stream().map(Pair::getLeft).collect(Collectors.toList()));
+      }
     }
 
 
@@ -289,7 +292,7 @@ public class ChromasthetiationService
         photo.setSizes(sizes);
         Future<Image> fImage = imageAsync.execute(
           Request.Get(photo.getLargestImageSize().source),
-          new ImageCallback(previousResults));
+          new ImageCallbackWrapper(previousResults));
 
         if (futureImageCallback != null)
           futureImageCallback.completed(fImage);
@@ -321,12 +324,12 @@ public class ChromasthetiationService
     }
 
 
-    private final class ImageCallback implements FutureCallback<Image>
+    private final class ImageCallbackWrapper implements FutureCallback<Image>
     {
       private final Pair<Photo, Pair<ChromatikResponse, EmotionalState>> previousResults;
 
 
-      private ImageCallback(
+      private ImageCallbackWrapper(
         Pair<Photo, Pair<ChromatikResponse, EmotionalState>> previousResults )
       {
         this.previousResults = previousResults;

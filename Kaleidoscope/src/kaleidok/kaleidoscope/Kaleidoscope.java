@@ -6,6 +6,7 @@ import kaleidok.processing.ProcessingSketchApplication;
 import processing.event.KeyEvent;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 
@@ -110,8 +111,9 @@ public class Kaleidoscope extends ExtPApplet
         ExportService.fromConfiguration(this, getParameterMap()));
       if (exportService.isPresent())
       {
+        final Consumer<String> callback = exportService.get().getCallback();
         getChromasthetiationService()
-          .setImageQueueCompletionCallback(exportService.get().getCallback());
+          .setImageQueueCompletionCallback((o) -> callback.accept(o.getLeft()));
       }
     }
     return exportService;
