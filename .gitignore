@@ -1,5 +1,4 @@
 /out/
-*.class
 
 # Demo screencasts
 *.m4v
@@ -39,6 +38,3 @@ Thumbs.db
 ### IDE files
 .idea/workspace.xml
 .idea/tasks.xml
-
-### Private files
-api-key*.txt
