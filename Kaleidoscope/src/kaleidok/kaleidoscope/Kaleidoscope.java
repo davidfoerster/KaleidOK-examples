@@ -112,8 +112,8 @@ public class Kaleidoscope extends ExtPApplet
       if (exportService.isPresent())
       {
         final Consumer<String> callback = exportService.get().getCallback();
-        getChromasthetiationService()
-          .setImageQueueCompletionCallback((o) -> callback.accept(o.getLeft()));
+        getChromasthetiationService().imageQueueCompletionCallback =
+          (o) -> callback.accept(o.getLeft());
       }
     }
     return exportService;

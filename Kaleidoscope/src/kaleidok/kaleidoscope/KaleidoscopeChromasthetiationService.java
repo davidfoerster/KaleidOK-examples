@@ -63,7 +63,7 @@ public final class KaleidoscopeChromasthetiationService
   private final ChromasthetiationCallback chromasthetiationCallback =
     new ChromasthetiationCallback();
 
-  private Consumer<Pair<String, Collection<? super Photo>>> imageQueueCompletionCallback = null;
+  public Consumer<Pair<String, Collection<? super Photo>>> imageQueueCompletionCallback = null;
 
 
   private KaleidoscopeChromasthetiationService( Kaleidoscope parent,
@@ -266,12 +266,5 @@ public final class KaleidoscopeChromasthetiationService
       }
       return neutralFilter.orElse(null);
     }
-  }
-
-
-  public void setImageQueueCompletionCallback(
-    Consumer<Pair<String, Collection<? super Photo>>> imageQueueCompletionCallback )
-  {
-    this.imageQueueCompletionCallback = imageQueueCompletionCallback;
   }
 }
