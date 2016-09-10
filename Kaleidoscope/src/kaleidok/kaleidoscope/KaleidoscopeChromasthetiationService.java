@@ -232,7 +232,9 @@ public final class KaleidoscopeChromasthetiationService
         {
         case 1: // Photo not found
         case 2: // Permission denied
-          logger.log(Level.FINE, "Flickr says: {0}", ex.getLocalizedMessage());
+          logger.log(Level.FINE,
+            "Chromasthetiation failed (Flickr says: {0})",
+            ex.getLocalizedMessage());
           return;
         }
       }

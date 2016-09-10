@@ -167,11 +167,14 @@ public class Kaleidoscope extends ExtPApplet
       s = new String((s.length() == 2 && s.charAt(1) == '-') ?
         loadBytes(System.in) : loadBytes(s.substring(1)));
       String ls = System.getProperty("line.separator");
-      assert !ls.isEmpty();
-      int sLen = s.length(), lsLen = ls.length();
-      while (sLen >= lsLen && s.startsWith(ls, sLen - lsLen))
-        sLen -= lsLen;
-      s = s.substring(0, sLen);
+      int lsLen = ls.length();
+      if (lsLen > 0)
+      {
+        int sLen = s.length();
+        while (s.startsWith(ls, sLen - lsLen))
+          sLen -= lsLen;
+        s = s.substring(0, sLen);
+      }
     }
     return s;
   }

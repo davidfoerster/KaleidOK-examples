@@ -144,13 +144,12 @@ public abstract class ImageLayer implements Runnable
       String pathName;
       synchronized (screenshotPathPattern)
       {
-        pathName = screenshotPathPattern.hasUnderlying() ?
-          screenshotPathPattern.format(
-            new Object[]{ new Date(), parent.frameCount }, null) :
-          null;
+        if (!screenshotPathPattern.hasUnderlying())
+          return;
+        pathName = screenshotPathPattern.format(
+          new Object[]{ new Date(), parent.frameCount }, null);
       }
-      if (pathName != null)
-        parent.save(pathName, true);
+      parent.save(pathName, true);
     }
   }
 

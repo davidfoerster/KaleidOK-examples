@@ -53,6 +53,7 @@ import static kaleidok.util.Math.constrainInt;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
+import static processing.event.KeyEvent.TYPE;
 
 
 /**
@@ -77,16 +78,16 @@ public class ExtPApplet extends PApplet
   protected final List<Map<KeyStroke, Consumer<? super KeyEvent>>> keyEventHandlers;
 
   {
-    Map<KeyStroke, Consumer<? super KeyEvent>>
-      keyPressedHandlers = new HashMap<>(),
-      keyReleasedHandlers = new HashMap<>(),
-      keyTypedHandlers = new HashMap<>();
+    @SuppressWarnings("unchecked")
+    Map<KeyStroke, Consumer<? super KeyEvent>>[] keyEventHandlers = new Map[3];
+    for (int i = keyEventHandlers.length - 1; i >= 0; i--)
+      keyEventHandlers[i] = new HashMap<>();
 
-    keyTypedHandlers.put(
-      KeyStroke.fullscreenKeystroke, ( ev ) -> thread(this::toggleFullscreen));
+    final Runnable toggleFullScreenAction = this::toggleFullscreen;
+    keyEventHandlers[TYPE-1].put(
+      KeyStroke.fullscreenKeystroke, ( ev ) -> thread(toggleFullScreenAction));
 
-    keyEventHandlers = Arrays.asImmutableList(
-      keyPressedHandlers, keyReleasedHandlers, keyTypedHandlers);
+    this.keyEventHandlers = Arrays.asImmutableList(keyEventHandlers);
   }
 
 
@@ -384,15 +385,13 @@ public class ExtPApplet extends PApplet
       break;
 
     case PAN:
-      double dstRatio = (double) dstWidth / dstHeight,
-        srcRatio = (double) srcWidth / srcHeight;
+      float dstRatio = dstWidth / dstHeight,
+        srcRatio = (float) srcWidth / srcHeight;
       if (srcRatio > dstRatio) {
-        srcWidth = (int)(srcHeight * dstRatio + 0.5);
-        assert srcWidth <= img.width : srcWidth + " > " + img.width;
+        srcWidth = (int)(srcHeight * dstRatio + 0.5f);
         srcLeft = (img.width - srcWidth) / 2;
       } else if (srcRatio < dstRatio) {
-        srcHeight = (int)(srcWidth / dstRatio + 0.5);
-        assert srcHeight <= img.height : srcHeight + " > " + img.height;
+        srcHeight = (int)(srcWidth / dstRatio + 0.5f);
         srcTop = (img.height - srcHeight) / 2;
       }
       break;
