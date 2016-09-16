@@ -1,6 +1,7 @@
 package kaleidok.javafx;
 
 import javafx.application.Application;
+import kaleidok.util.containers.LowercaseStringMap;
 import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.logging.LoggingUtils;
 import kaleidok.util.prefs.PropertyLoader;
@@ -11,6 +12,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -60,6 +62,7 @@ public abstract class PropertyLoaderApplication extends Application
       namedParameters = Collections.unmodifiableMap(
         new ChainedMap<>(namedParameters, PropertyLoader.toMap(prop, null)));
     }
+    namedParameters = new LowercaseStringMap<>(namedParameters, Locale.ROOT);
   }
 
 
