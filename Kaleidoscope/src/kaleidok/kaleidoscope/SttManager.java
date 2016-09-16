@@ -12,6 +12,7 @@ import processing.event.KeyEvent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.Format;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -27,17 +28,18 @@ public class SttManager extends Plugin<Kaleidoscope>
   {
     super(sketch);
 
+    Map<String, String> params = sketch.getParameterMap();
     stt = new STT(new SttResponseHandler(),
       sketch.parseStringOrFile(
-        sketch.getParameterMap().get("com.google.developer.api.key"), '@'));
+        params.get("com.google.developer.api.key"), '@'));
     String paramBase = stt.getClass().getCanonicalName() + '.';
     stt.setLanguage(
-      sketch.getParameterMap().getOrDefault(paramBase + "language", "en"));
+      params.getOrDefault(paramBase + "language", "en"));
     stt.setMaxTranscriptionInterval(DefaultValueParser.parseInt(
-      sketch.getParameterMap().get(paramBase + "interval"), 8000),
+      params.get(paramBase + "interval"), 8000),
       TimeUnit.MILLISECONDS);
     stt.intervalSequenceCountMax = DefaultValueParser.parseInt(
-      sketch.getParameterMap().get(paramBase + "interval.count"),
+      params.get(paramBase + "interval.count"),
       stt.intervalSequenceCountMax);
     stt.logfilePattern = getLogfilePattern();
     sketch.getAudioProcessingManager().getAudioDispatcher()
@@ -101,10 +103,11 @@ public class SttManager extends Plugin<Kaleidoscope>
 
   static boolean getParamIgnoreTranscriptionResult( ExtPApplet parent )
   {
+    @SuppressWarnings("SpellCheckingInspection")
     boolean isIgnoreTranscriptionResult =
       DefaultValueParser.parseBoolean(
         parent.getParameterMap().get(
-          parent.getClass().getPackage().getName() + ".ignoreTranscription"),
+          parent.getClass().getPackage().getName() + ".ignoretranscription"),
         false);
     if (isIgnoreTranscriptionResult) {
       logger.config(

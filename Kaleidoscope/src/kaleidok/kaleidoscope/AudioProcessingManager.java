@@ -89,6 +89,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       try {
         if (audioSource == null)
         {
+          @SuppressWarnings("SpellCheckingInspection")
           String param = paramBase + "samplerate";
           int sampleRate = DefaultValueParser.parseInt(
             p.getParameterMap().get(param), DEFAULT_AUDIO_SAMPLERATE);
@@ -168,6 +169,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   {
     if (audioBufferSize <= 0)
     {
+      @SuppressWarnings("SpellCheckingInspection")
       String param =
         p.getClass().getPackage().getName() + ".audio.buffersize";
       int bufferSize = DefaultValueParser.parseInt(

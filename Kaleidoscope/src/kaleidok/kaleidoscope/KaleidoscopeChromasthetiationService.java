@@ -86,7 +86,7 @@ public final class KaleidoscopeChromasthetiationService
     String cacheParamBase = parent.getClass().getCanonicalName() + ".cache.";
     long httpCacheSize = DefaultValueParser.parseLong(
       parameters.get(cacheParamBase + "size"), DEFAULT_HTTP_CACHE_SIZE);
-    File cacheDir = new File(parent.getParameterMap().getOrDefault(
+    File cacheDir = new File(parameters.getOrDefault(
       cacheParamBase + "path", parent.getClass().getCanonicalName()));
     if (!cacheDir.isAbsolute()) {
       cacheDir =
@@ -155,9 +155,10 @@ public final class KaleidoscopeChromasthetiationService
         chromasthetiator.setFlickrApi(flickr);
       }
 
+      //noinspection SpellCheckingInspection
       chromasthetiator.maxKeywords = DefaultValueParser.parseInt(
         parent.getParameterMap().get(
-          chromasthetiator.getClass().getPackage().getName() + ".maxKeywords"),
+          chromasthetiator.getClass().getPackage().getName() + ".maxkeywords"),
         chromasthetiator.maxKeywords);
 
       chromasthetiator.chromatikQuery.nHits = 10;
