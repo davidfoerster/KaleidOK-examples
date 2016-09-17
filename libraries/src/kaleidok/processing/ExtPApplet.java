@@ -1,28 +1,58 @@
 package kaleidok.processing;
 
-import kaleidok.awt.ImageIO;
-import kaleidok.util.DefaultValueParser;
+import com.jogamp.nativewindow.NativeWindow;
+import com.jogamp.nativewindow.util.InsetsImmutable;
+import com.jogamp.nativewindow.util.Point;
+import com.jogamp.nativewindow.util.PointImmutable;
+import com.jogamp.nativewindow.util.Rectangle;
+import com.jogamp.nativewindow.util.RectangleImmutable;
+import com.jogamp.newt.Window;
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.newt.event.WindowListener;
+import com.jogamp.newt.event.WindowUpdateEvent;
+import com.jogamp.opengl.GLAutoDrawable;
+import javafx.application.HostServices;
+import kaleidok.newt.WindowSupport;
+import kaleidok.processing.event.KeyEventSupport;
+import kaleidok.processing.event.KeyStroke;
+import kaleidok.processing.export.ImageSaveSet;
+import kaleidok.processing.image.ImageIO;
+import kaleidok.processing.image.PImageFuture;
+import kaleidok.util.Arrays;
+import kaleidok.util.prefs.DefaultValueParser;
+import kaleidok.util.Threads;
+import kaleidok.util.concurrent.GroupedThreadFactory;
+import kaleidok.util.prefs.PreferenceUtils;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PImage;
+import processing.core.PSurface;
 
-import javax.swing.JApplet;
-import javax.swing.SwingWorker;
-import java.awt.Image;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.File;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.prefs.Preferences;
 
-import static kaleidok.util.Arrays.EMPTY_STRINGS;
+import static kaleidok.util.Math.constrainInt;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
 
 
 /**
@@ -30,73 +60,269 @@ import static kaleidok.util.Arrays.EMPTY_STRINGS;
  */
 public class ExtPApplet extends PApplet
 {
-  private JApplet parent;
+  public static final int MIN_DIMENSION = 50;
+
+
+  private ProcessingSketchApplication<? extends ExtPApplet> parent;
+
+  protected final Preferences preferences =
+    Preferences.userNodeForPackage(this.getClass());
 
   public final Set<String> saveFilenames = new ImageSaveSet(this);
 
+  protected ExecutorService executorService;
 
-  public ExtPApplet( JApplet parent )
+  private CountDownLatch showSurfaceLatch = new CountDownLatch(1);
+
+  protected final List<Map<KeyStroke, Consumer<? super KeyEvent>>> keyEventHandlers;
+
+  {
+    Map<KeyStroke, Consumer<? super KeyEvent>>
+      keyPressedHandlers = new HashMap<>(),
+      keyReleasedHandlers = new HashMap<>(),
+      keyTypedHandlers = new HashMap<>();
+
+    keyTypedHandlers.put(
+      KeyStroke.fullscreenKeystroke, ( ev ) -> thread(this::toggleFullscreen));
+
+    keyEventHandlers = Arrays.asImmutableList(
+      keyPressedHandlers, keyReleasedHandlers, keyTypedHandlers);
+  }
+
+
+  protected final String PREF_GEOMETRY =
+    getClass().getSimpleName() + ".geometry.";
+
+
+  public ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
   {
     this.parent = parent;
   }
 
 
   @Override
-  public String getParameter( String name )
+  @OverridingMethodsMustInvokeSuper
+  public void settings()
   {
-    return parent.getParameter(name);
+    parseAndSetConfig();
+    executorService = new ThreadPoolExecutor(
+      0, 16, 60, TimeUnit.SECONDS, new SynchronousQueue<>(),
+      new GroupedThreadFactory(
+        getClass().getSimpleName() + " worker pool", true));
   }
 
-  public <T> T getParameter( String name, T defaultValue )
+
+  private void parseAndSetConfig()
   {
-    return DefaultValueParser.parse(getParameter(name), defaultValue);
+    if (parent.getUnnamedBooleanParameter("fullscreen"))
+    {
+      fullScreen(sketchDisplay());
+    }
+    else
+    {
+      parseAndSetConfigSize();
+    }
+
+    Map<String, String> params = getParameterMap();
+    smooth(DefaultValueParser.parseInt(
+      params.get(sketchRenderer() + ".smooth"), sketchSmooth()));
+  }
+
+
+  private void parseAndSetConfigSize()
+  {
+    int width = preferences.getInt(PREF_GEOMETRY + "width", 0),
+      height = preferences.getInt(PREF_GEOMETRY + "height", 0);
+    if (width <= 0 && height <= 0)
+    {
+      String sSize = getParameterMap().get("size");
+      if (sSize != null)
+      {
+        String[] asSize = split(sSize, ',');
+        width = parseInt(asSize[0]);
+        height = (asSize.length >= 2) ? parseInt(asSize[1]) : width;
+      }
+    }
+    if (width > 0 || height > 0)
+      size(Math.max(width, MIN_DIMENSION), Math.max(height, MIN_DIMENSION));
+  }
+
+
+  @Override
+  protected PSurface initSurface()
+  {
+    PSurface surface = super.initSurface();
+    if (parent != null && P3D.equals(sketchRenderer()))
+    {
+      /*
+       * Invoke parent#exit() instead of PApplet#exit() when closing the sketch
+       * window.
+       */
+      ((Window) surface.getNative()).addWindowListener(
+        0, new ParentApplicationWindowDestructionListener());
+    }
+
+    Map<String, String> params = getParameterMap();
+    String sResizable = params.get("resizable");
+    if (sResizable != null)
+      surface.setResizable(DefaultValueParser.parseBoolean(sResizable));
+
+    return surface;
+  }
+
+
+  @Override
+  @OverridingMethodsMustInvokeSuper
+  protected void showSurface()
+  {
+    parseAndSetSurfaceLocation();
+    showSurfaceLatch.countDown();
+    showSurfaceLatch = null;
+    super.showSurface();
+  }
+
+
+  private void parseAndSetSurfaceLocation()
+  {
+    if (!P3D.equals(sketchRenderer()))
+      return;
+
+    int iLeft, iTop;
+    final Window window = (Window) getSurface().getNative();
+    String sLocation = getParameterMap().get("location");
+    if (sLocation != null)
+    {
+      String[] asLocation = split(sLocation, ',');
+      iLeft = parseInt(asLocation[0]);
+      iTop = (asLocation.length >= 2) ? parseInt(asLocation[1]) : 0;
+    }
+    else
+    {
+      double dLeft = preferences.getDouble(PREF_GEOMETRY + "left", Double.NaN),
+        dTop = preferences.getDouble(PREF_GEOMETRY + "top", Double.NaN);
+      if (!Double.isFinite(dLeft) || !Double.isFinite(dTop))
+        return;
+      iLeft = constrainInt(dLeft);
+      //noinspection SuspiciousNameCombination
+      iTop = constrainInt(dTop);
+      RectangleImmutable intersection =
+        window.getScreen().getViewport().intersection(
+          iLeft, iTop, iLeft + this.width, iTop + this.height);
+      if (intersection.getWidth() < MIN_DIMENSION ||
+        intersection.getHeight() < MIN_DIMENSION)
+      {
+        return;
+      }
+    }
+    window.setPosition(iLeft, iTop);
+  }
+
+
+  @Override
+  public void setup()
+  {
+    Map<String, String> params = getParameterMap();
+    String sFrameRate = params.get("framerate");
+    if (sFrameRate != null)
+      frameRate(Float.parseFloat(sFrameRate));
+  }
+
+
+  public void awaitShowSurface() throws InterruptedException
+  {
+    CountDownLatch showSurfaceLatch = this.showSurfaceLatch;
+    if (showSurfaceLatch != null)
+      showSurfaceLatch.await();
+  }
+
+
+  @Override
+  public void exitActual()
+  {
+    if (PConstants.P3D.equals(sketchRenderer()))
+    {
+      /*
+       * PSurfaceJOGL starts a thread watching for exceptions thrown by the
+       * animator thread. Unfortunately that thread isn't flagged as a daemon,
+       * so it'll keep running beyond the termination of the animator thread.
+       * However, with the follow trick we can send a fake null exception as
+       * signal to that thread which leads to voluntary its termination.
+       */
+        ((GLAutoDrawable) getSurface().getNative()).getAnimator()
+          .getUncaughtExceptionHandler().uncaughtException(null, null, null);
+    }
+
+    if (parent == null)
+      super.exitActual();
+  }
+
+
+  @Override
+  @OverridingMethodsMustInvokeSuper
+  public void dispose()
+  {
+    saveFilenames.clear();
+    if (executorService != null)
+      executorService.shutdownNow();
+    savePreferences();
+    super.dispose();
+  }
+
+
+  protected final void savePreferences()
+  {
+    doSavePreferences();
+    PreferenceUtils.flush(preferences);
+  }
+
+
+  protected void doSavePreferences()
+  {
+    if (!sketchFullScreen())
+    {
+      Preferences preferences = this.preferences;
+      preferences.putInt(PREF_GEOMETRY + "width", width);
+      preferences.putInt(PREF_GEOMETRY + "height", height);
+
+      if (P3D.equals(sketchRenderer()))
+      {
+        PointImmutable l = getSurfaceLocation(savedSurfaceLocation);
+        preferences.putDouble(PREF_GEOMETRY + "left", l.getX());
+        preferences.putDouble(PREF_GEOMETRY + "top", l.getY());
+      }
+    }
+  }
+
+
+  public Map<String, String> getParameterMap()
+  {
+    return parent.getNamedParameters();
   }
 
 
   private URL documentBase = null;
 
-  @Override
   public URL getDocumentBase()
   {
-    if (documentBase == null) {
-      URL documentBase = parent.getDocumentBase();
-      if ("file".equals(documentBase.getProtocol())) {
-        documentBase = this.getClass().getProtectionDomain().getCodeSource().getLocation();
-        try {
-          documentBase = new URL(documentBase, documentBase.getPath() + "data/");
-        } catch (MalformedURLException ex) {
-          throw new AssertionError(ex);
-        }
+    if (documentBase == null) try
+    {
+      HostServices services = parent.getHostServices();
+      if (!services.getCodeBase().isEmpty())
+      {
+        documentBase = new URL(services.getDocumentBase());
       }
-      this.documentBase = documentBase;
+      else
+      {
+        URL codeBase =
+          this.getClass().getProtectionDomain().getCodeSource().getLocation();
+        documentBase = new URL(codeBase, codeBase.getPath() + "data/");
+      }
+    }
+    catch (MalformedURLException ex)
+    {
+      throw new InternalError(ex);
     }
     return documentBase;
-  }
-
-  @Override
-  public Image getImage( URL url )
-  {
-    return parent.getImage(url);
-  }
-
-  @Override
-  public Image getImage( URL url, String name )
-  {
-    return parent.getImage(url, name);
-  }
-
-
-  @Override
-  public void keyPressed( KeyEvent e )
-  {
-    for (KeyListener listener: getKeyListeners()) {
-      if (listener != this) {
-        listener.keyPressed(e);
-        if (e.isConsumed())
-          return;
-      }
-    }
-    super.keyPressed(e);
   }
 
 
@@ -109,30 +335,25 @@ public class ExtPApplet extends PApplet
       } catch (MalformedURLException ex) {
         throw new IllegalArgumentException(ex);
       }
-      if ("file".equals(url.getProtocol())) {
-        File file;
-        try {
-          file = new File(url.toURI());
-        } catch (URISyntaxException ex) {
-          throw new AssertionError(ex);
-        }
-        if (!file.isFile() || !file.canRead())
-          url = null;
-      }
     }
-    return (url != null) ? getImageFuture(url) : null;
+    return getImageFuture(url);
   }
 
 
   public PImageFuture getImageFuture( URL url )
   {
-    return getImageFuture(url, -1, -1);
+    return thread(PImageFuture.from(url));
   }
 
 
-  public PImageFuture getImageFuture( URL url, int width, int height )
+  @Override
+  public void smooth( int level )
   {
-    return new PImageFuture(this, getImage(url), width, height);
+    if (level > 0) {
+      super.smooth(level);
+    } else {
+      noSmooth();
+    }
   }
 
 
@@ -192,169 +413,242 @@ public class ExtPApplet extends PApplet
 
 
   @Override
-  public void save( String filename )
+  public void save( final String filename )
   {
     loadPixels();
-    saveImpl(filename);
-  }
-
-
-  protected void saveImpl( final String filename )
-  {
-    (new SwingWorker<Object, Object>() {
-      @Override
-      protected Object doInBackground() throws IOException
+    thread(() ->
+    {
+      switch (g.format)
       {
-        if ((g.format == RGB || g.format == ARGB) && filename.endsWith(".bmp"))
+      case RGB:
+      case ARGB:
+        if (filename.endsWith(".bmp"))
         {
-          Path filePath = Paths.get(savePath(filename), EMPTY_STRINGS);
-          try {
+          Path filePath = Paths.get(savePath(filename), EMPTY_STRING_ARRAY);
+          try
+          {
             ImageIO.saveBmp32(filePath, width, height, pixels, 0).force();
-            return null;
-          } catch (UnsupportedOperationException ignored) {
+            break;
+          }
+          catch (UnsupportedOperationException ignored)
+          {
             // try again with default code path
           }
+          catch (IOException ex)
+          {
+            Threads.handleUncaught(ex);
+            break;
+          }
         }
+        // fall through
 
+      default:
         ExtPApplet.super.save(filename);
-        return null;
+        break;
       }
-    }).execute();
+    });
   }
 
 
-  public static class ImageSaveSet
-    extends Plugin<ExtPApplet> implements Set<String>
+  public <R extends Runnable> R thread( R action )
   {
-    private final HashSet<String> underlying = new HashSet<>();
+    executorService.execute(action);
+    return action;
+  }
 
 
-    private ImageSaveSet( ExtPApplet parent )
+  @Override
+  public void thread( String methodName )
+  {
+    final Method method;
+    try
     {
-      super(parent);
+      method = getClass().getMethod(methodName, EMPTY_CLASS_ARRAY);
+    }
+    catch (NoSuchMethodException ex)
+    {
+      throw new IllegalArgumentException(ex);
     }
 
-
-    @Override
-    public void post()
+    thread(() ->
     {
-      if (!isEmpty())
+      try
       {
-        synchronized (this)
+        method.invoke(ExtPApplet.this, EMPTY_OBJECT_ARRAY);
+      }
+      catch (IllegalAccessException | IllegalArgumentException ex)
+      {
+        throw new AssertionError(ex);
+      }
+      catch (InvocationTargetException ex)
+      {
+        Threads.handleUncaught(ex);
+      }
+    });
+  }
+
+
+  @Override
+  protected void handleKeyEvent( processing.event.KeyEvent event )
+  {
+    Map<KeyStroke, Consumer<? super KeyEvent>> handlers =
+      keyEventHandlers.get(event.getAction() - 1);
+    if (!handlers.isEmpty())
+    {
+      KeyEvent newtEvent = KeyEventSupport.convert(event);
+      if (newtEvent != null)
+      {
+        for (Map.Entry<KeyStroke, Consumer<? super KeyEvent>> e :
+          handlers.entrySet())
         {
-          if (!isEmpty())
+          if (e.getKey().matches(newtEvent))
           {
-            final ExtPApplet p = this.p;
-            p.loadPixels();
-            for (String fn : this)
-              p.saveImpl(fn);
-            clear();
+            e.getValue().accept(newtEvent);
+            if (newtEvent.isConsumed())
+              return;
           }
         }
       }
     }
+    super.handleKeyEvent(event);
+  }
 
 
-    @Override
-    public void dispose()
+  @Override
+  public void keyPressed()
+  {
+    if (parent != null && key == ESC)
     {
-      clear();
-      super.dispose();
+      key = 0;
+      parent.exit();
+    }
+  }
+
+
+  public Point getSurfaceLocation( Point l )
+  {
+    if (!checkRendererSupported("get window bounds", true))
+      return null;
+
+    NativeWindow w = (NativeWindow) getSurface().getNative();
+    return w.getLocationOnScreen(l);
+  }
+
+
+  public Rectangle getWindowBounds( Rectangle r )
+  {
+    if (!checkRendererSupported("get window bounds", true))
+      return null;
+    NativeWindow w = (NativeWindow) getSurface().getNative();
+    InsetsImmutable insets = w.getInsets();
+    Point location = w.getLocationOnScreen(null);
+    if (r == null)
+      r = new Rectangle();
+    r.set(location.getX() - insets.getLeftWidth(),
+      location.getY() - insets.getTopHeight(),
+      w.getWidth() + insets.getTotalWidth(),
+      w.getHeight() + insets.getTotalHeight());
+    return r;
+  }
+
+
+  private final Point savedSurfaceLocation = new Point();
+
+
+  public boolean toggleFullscreen()
+  {
+    if (!checkRendererSupported("toggle fullscreen"))
+      return sketchFullScreen();
+
+    Window w = (Window) getSurface().getNative();
+    boolean currentFullscreenState = w.isFullscreen();
+    PointImmutable windowLocation;
+    //noinspection IfMayBeConditional
+    if (currentFullscreenState)
+    {
+      windowLocation = savedSurfaceLocation;
+      /*
+      System.out.format(
+        "Restoring previous window location (%d, %d)...%n",
+        windowLocation.getX(), windowLocation.getY());
+        */
+    }
+    else
+    {
+      windowLocation = getSurfaceLocation(savedSurfaceLocation);
+      /*
+      System.out.format(
+        "Stored current window location (%d, %d) for later user (screen index %d).%n",
+        windowLocation.getX(), windowLocation.getY(), w.getScreenIndex());
+      */
     }
 
+    boolean newFullScreenState = WindowSupport.toggleFullscreen(w, windowLocation);
+    if (newFullScreenState == currentFullscreenState)
+    {
+      System.err.format(
+        "Couldn't set fullscreen state to %s on %s.%n",
+        !currentFullscreenState, w);
+    }
+    return newFullScreenState;
+  }
+
+
+  protected final boolean checkRendererSupported( String operationDescription )
+  {
+    return checkRendererSupported(operationDescription, false);
+  }
+
+  protected boolean checkRendererSupported( String operationDescription,
+    boolean doThrow )
+  {
+    String renderer = sketchRenderer();
+    boolean supported = P3D.equals(renderer);
+
+    if (!supported)
+    {
+      String msgFormat =
+        "The following operation is currently not supported for the %s " +
+          "renderer: %s.%n";
+      Object[] msgParams = { renderer, operationDescription };
+      if (doThrow)
+      {
+        throw new UnsupportedOperationException(
+          String.format(msgFormat, msgParams));
+      }
+      System.err.format(msgFormat, msgParams);
+    }
+
+    return supported;
+  }
+
+
+  private class ParentApplicationWindowDestructionListener
+    implements WindowListener
+  {
+    @Override
+    public void windowResized( WindowEvent e ) { }
 
     @Override
-    public int size()
+    public void windowMoved( WindowEvent e ) { }
+
+    @Override
+    public void windowDestroyNotify( WindowEvent ev )
     {
-      return underlying.size();
+      parent.exit();
+      ev.setConsumed(true);
     }
 
     @Override
-    public boolean isEmpty()
-    {
-      return underlying.isEmpty();
-    }
+    public void windowDestroyed( WindowEvent e ) { }
 
     @Override
-    public synchronized boolean contains( Object o )
-    {
-      return underlying.contains(o);
-    }
+    public void windowGainedFocus( WindowEvent e ) { }
 
     @Override
-    public Iterator<String> iterator()
-    {
-      return underlying.iterator();
-    }
+    public void windowLostFocus( WindowEvent e ) { }
 
     @Override
-    public synchronized Object[] toArray()
-    {
-      return underlying.toArray();
-    }
-
-    @SuppressWarnings("SuspiciousToArrayCall")
-    @Override
-    public synchronized <T> T[] toArray( T[] a )
-    {
-      return underlying.toArray(a);
-    }
-
-    @Override
-    public synchronized boolean add( String s )
-    {
-      return underlying.add(s);
-    }
-
-    @Override
-    public synchronized boolean remove( Object o )
-    {
-      return underlying.remove(o);
-    }
-
-    @Override
-    public synchronized boolean containsAll( Collection<?> c )
-    {
-      return underlying.containsAll(c);
-    }
-
-    @Override
-    public synchronized boolean addAll( Collection<? extends String> c )
-    {
-      return underlying.addAll(c);
-    }
-
-    @Override
-    public synchronized boolean retainAll( Collection<?> c )
-    {
-      return underlying.retainAll(c);
-    }
-
-    @Override
-    public synchronized boolean removeAll( Collection<?> c )
-    {
-      return underlying.removeAll(c);
-    }
-
-    @Override
-    public synchronized void clear()
-    {
-      underlying.clear();
-    }
-
-    @Override
-    public synchronized boolean equals( Object o )
-    {
-      return underlying.equals(
-        (o instanceof ImageSaveSet) ?
-          ((ImageSaveSet) o).underlying :
-          o);
-    }
-
-    @Override
-    public synchronized int hashCode()
-    {
-      return underlying.hashCode();
-    }
+    public void windowRepaint( WindowUpdateEvent e ) { }
   }
 }

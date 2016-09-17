@@ -12,10 +12,11 @@ public final class Threads
   {
     Thread[] threads = new Thread[8];
     int threadCount;
-    while ((threadCount = threadGroup.enumerate(threads, recurse)) >= threads.length) {
-      assert threads.length <= Integer.MAX_VALUE / 2 && threadCount < Integer.MAX_VALUE;
-      threads = new Thread[
-        Math.max(threads.length * 2, threadCount + 1)];
+    while ((threadCount = threadGroup.enumerate(threads, recurse)) >= threads.length)
+    {
+      threads = new Thread[Math.max(
+        Math.multiplyExact(threads.length, 2),
+        Math.incrementExact(threadCount))];
     }
     return threads;
   }

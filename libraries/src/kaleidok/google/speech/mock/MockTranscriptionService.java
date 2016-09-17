@@ -22,6 +22,9 @@ public class MockTranscriptionService extends TranscriptionService
     Logger.getLogger(MockTranscriptionService.class.getPackage().getName());
 
 
+  private final HttpServer server;
+
+
   public MockTranscriptionService( String accessKey,
     FutureCallback<SttResponse> resultHandler, STT stt )
   {
@@ -60,5 +63,14 @@ public class MockTranscriptionService extends TranscriptionService
       new Object[]{accessKey, this.getClass().getCanonicalName()});
 
     server.start();
+    this.server = server;
+  }
+
+
+  @Override
+  public void shutdownNow()
+  {
+    super.shutdownNow();
+    server.stop(0);
   }
 }

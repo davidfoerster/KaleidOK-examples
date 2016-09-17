@@ -12,6 +12,7 @@
       <w>coords</w>
       <w>ctor</w>
       <w>cumulated</w>
+      <w>daemonize</w>
       <w>decodable</w>
       <w>devs</w>
       <w>digester</w>

@@ -1,6 +1,6 @@
 package kaleidok.util;
 
-import java.util.*;
+import java.util.regex.Pattern;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
@@ -10,35 +10,6 @@ import static java.lang.Math.log;
 public final class Strings
 {
   private Strings() { }
-
-
-  public static boolean isEmpty( CharSequence s )
-  {
-    return s == null || s.length() == 0;
-  }
-
-
-  public static String join( Collection<? extends CharSequence> ar, char separator )
-  {
-    if (ar.isEmpty())
-      return "";
-
-    Iterator<? extends CharSequence> it = ar.iterator();
-    if (ar.size() == 1)
-      return it.next().toString();
-
-    int len = ar.size() - 1;
-    while (it.hasNext())
-      len += it.next().length();
-    StringBuilder sb = new StringBuilder(len);
-
-    it = ar.iterator();
-    sb.append(it.next());
-    while (it.hasNext())
-      sb.append(separator).append(it.next());
-
-    return sb.toString();
-  }
 
 
   public static boolean startsWithToken( String s, String prefix, char delimiter )
@@ -139,5 +110,22 @@ public final class Strings
         return false;
     }
     return true;
+  }
+
+
+  public static boolean isConcatenation( String s, String prefix,
+    String suffix )
+  {
+    return s.length() == prefix.length() + suffix.length() &&
+      s.startsWith(prefix) && s.endsWith(suffix);
+  }
+
+
+  public static final Pattern SIMPLE_URL_PREFIX_PATTERN =
+    Pattern.compile("^[a-z](?:[a-z0-9+.-])*:");
+
+  public static boolean looksLikeUrl( String s )
+  {
+    return SIMPLE_URL_PREFIX_PATTERN.matcher(s).matches();
   }
 }

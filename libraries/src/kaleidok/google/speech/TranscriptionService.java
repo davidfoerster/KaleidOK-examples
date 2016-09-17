@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static kaleidok.http.URLEncoding.appendEncoded;
+import static kaleidok.http.util.URLEncoding.appendEncoded;
 
 
 public class TranscriptionService

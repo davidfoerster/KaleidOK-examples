@@ -1,6 +1,6 @@
 package kaleidok.processing;
 
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Strings;
 import processing.core.PApplet;
 
@@ -13,9 +13,6 @@ import static kaleidok.util.Math.clamp;
 
 /**
  * Displays the frame rate and frame rendering duration in a Processing sketch.
- *
- * TODO: The JOGL-based renderer has a more efficient internal method to
- * display frame rates that we should use instead.
  */
 @SuppressWarnings("unused")
 public class FrameRateDisplay extends Plugin<PApplet>
@@ -51,7 +48,7 @@ public class FrameRateDisplay extends Plugin<PApplet>
   {
     return
       DefaultValueParser.parseBoolean(
-        sketch.getParameter("framerate.display"), false)
+        sketch.getParameterMap().get("framerate.display"), false)
       ?
         new FrameRateDisplay(sketch) :
         null;

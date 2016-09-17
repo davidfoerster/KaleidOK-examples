@@ -6,11 +6,10 @@ import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.flickr.SizeMap;
-import kaleidok.util.Strings;
+import org.apache.commons.lang.StringUtils;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
 
-import java.applet.Applet;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -20,7 +19,7 @@ import java.util.logging.Logger;
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
 import static kaleidok.util.Arrays.shuffle;
-import static kaleidok.util.LoggingUtils.logThrown;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 public abstract class ChromasthetiatorBase<F extends Flickr>
@@ -46,8 +45,6 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
 
   public ChromatikQuery chromatikQuery;
 
-  protected final Applet parent;
-
   protected SynesthetiatorEmotion synesthetiator;
 
   protected SynesketchPalette palettes;
@@ -55,10 +52,8 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
   protected F flickr;
 
 
-  protected ChromasthetiatorBase( Applet parent )
+  protected ChromasthetiatorBase()
   {
-    this.parent = parent;
-
     try {
       synesthetiator = new SynesthetiatorEmotion();
     } catch (IOException ex) {
@@ -80,7 +75,6 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
    */
   protected ChromasthetiatorBase( ChromasthetiatorBase<? extends Flickr> other )
   {
-    parent = other.parent;
     maxColors = other.maxColors;
     maxKeywords = other.maxKeywords;
     chromatikQuery = other.chromatikQuery.clone();
@@ -132,7 +126,7 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
 
     Emotion emo = synState.getStrongestEmotion();
     if (emo.getType() != Emotion.NEUTRAL) {
-      keywords = Strings.join(findStrongestAffectWords(
+      keywords = StringUtils.join(findStrongestAffectWords(
         synState.getAffectWords(), maxKeywords), ' ');
       logger.log(Level.FINE, "Selected keywords: {0}", keywords);
     } else {

@@ -6,9 +6,9 @@ import kaleidok.http.requesthandler.MockRequestHandlerBase;
 import kaleidok.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
 import kaleidok.util.AssertionUtils;
-import kaleidok.util.Strings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
 
 import java.io.*;
@@ -23,8 +23,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.*;
 
-import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
-import static kaleidok.util.LoggingUtils.logThrown;
+import static kaleidok.http.util.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 @SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")
@@ -79,8 +79,8 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     assert q != null && !q.isEmpty() : "No request parameters";
     assert "json".equals(q.get("output")) :
       "Invalid request parameter value: output=" + q.get("output");
-    assert !Strings.isEmpty(q.get("key")) : "Empty request parameter: key";
-    assert !Strings.isEmpty(q.get("lang")) : "Empty request parameter: lang";
+    assert !StringUtils.isEmpty(q.get("key")) : "Empty request parameter: key";
+    assert !StringUtils.isEmpty(q.get("lang")) : "Empty request parameter: lang";
     assert q.size() == 3 : "Superfluous request parameters";
 
     ContentType contentType =
@@ -258,7 +258,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     return Files.createTempFile(tempDir,
       (p >= 0) ? fn.substring(0, p) : fn,
       (p >= 0) ? fn.substring(p) : ".flac",
-      PlatformPaths.NO_ATTRIBUTES);
+      kaleidok.io.Files.NO_ATTRIBUTES);
   }
 
 

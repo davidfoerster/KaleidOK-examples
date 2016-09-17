@@ -14,7 +14,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import static kaleidok.http.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.http.util.URLEncoding.DEFAULT_CHARSET;
 import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
 
 

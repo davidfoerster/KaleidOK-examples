@@ -115,13 +115,31 @@ public final class Math
 
   public static long clamp( long x, long min, long max )
   {
-    assert min <= max : min + " > " + max;
+    //assert min <= max : min + " > " + max;
     return min(max(x, min), max);
   }
 
   public static int clamp( int x, int min, int max )
   {
-    assert min <= max : min + " > " + max;
+    //assert min <= max : min + " > " + max;
     return min(max(x, min), max);
+  }
+
+  public static double clamp( double x, double min, double max )
+  {
+    //assert min <= max : min + " > " + max;
+    return min(max(x, min), max);
+  }
+
+  public static float clamp( float x, float min, float max )
+  {
+    //assert min <= max : min + " > " + max;
+    return min(max(x, min), max);
+  }
+
+
+  public static int constrainInt( double x )
+  {
+    return (int) clamp(x, Integer.MIN_VALUE, Integer.MAX_VALUE);
   }
 }

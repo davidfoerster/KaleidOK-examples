@@ -2,7 +2,7 @@ package kaleidok.processing.export.itext;
 
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-import kaleidok.util.Strings;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -28,7 +28,7 @@ public class ParagraphHook implements Consumer<Document>
   public void accept( Document doc )
   {
     String text = (textSource != null) ? textSource.get() : null;
-    if (!Strings.isEmpty(text))
+    if (!StringUtils.isEmpty(text))
     {
       doc.add(new Paragraph(text));
     }

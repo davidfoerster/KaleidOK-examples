@@ -41,7 +41,7 @@ public final class Objects
       if (cause instanceof CloneNotSupportedException)
         throw (CloneNotSupportedException) cause;
       throw new InternalError(
-        "#clone() should only ever throw " +
+        "Object#clone() should only ever throw " +
           CloneNotSupportedException.class.getCanonicalName(),
         cause);
     }
@@ -62,5 +62,26 @@ public final class Objects
           "Cannot cast " + clone.getClass().getName() + " to " +
             clazz.getName()) :
         new NullPointerException());
+  }
+
+
+  public static int hashCode( int seed, int thing )
+  {
+    return 31 * seed + thing;
+  }
+
+  public static int hashCode( int seed, long thing )
+  {
+    return hashCode(hashCode(seed, (int) thing), (int)(thing >>> Integer.SIZE));
+  }
+
+  public static int hashCode( int seed, Object thing )
+  {
+    return hashCode(seed, (thing != null) ? thing.hashCode() : 0);
+  }
+
+  public static int hashCode( int seed, boolean thing )
+  {
+    return hashCode(seed, thing ? 1 : 0);
   }
 }

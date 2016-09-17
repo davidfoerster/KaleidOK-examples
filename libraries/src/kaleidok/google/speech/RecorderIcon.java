@@ -2,7 +2,7 @@ package kaleidok.google.speech;
 
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
-import kaleidok.util.DefaultValueParser;
+import kaleidok.util.prefs.DefaultValueParser;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
@@ -32,14 +32,13 @@ public class RecorderIcon extends Plugin<PApplet>
     boolean defaultOn )
   {
     String strEnabled =
-      sketch.getParameter(RecorderIcon.class.getCanonicalName() + ".enabled");
-    //noinspection SpellCheckingInspection
-    return
-      (!"forceoff".equals(strEnabled) &&
-        (defaultOn || DefaultValueParser.parseBoolean(strEnabled, true)))
-      ?
-        new RecorderIcon(sketch, stt) :
-        null;
+      sketch.getParameterMap().getOrDefault(
+        RecorderIcon.class.getCanonicalName() + ".enabled", "default");
+    boolean enabled =
+      "default".equals(strEnabled) ?
+        defaultOn :
+        DefaultValueParser.parseBoolean(strEnabled);
+    return enabled ? new RecorderIcon(sketch, stt) : null;
   }
 
 

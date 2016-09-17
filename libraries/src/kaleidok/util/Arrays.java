@@ -1,5 +1,7 @@
 package kaleidok.util;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.Collections;
@@ -15,14 +17,6 @@ import java.util.stream.IntStream;
 public final class Arrays
 {
   private Arrays() { }
-
-
-  @SuppressWarnings("unused")
-  public static final Object[] EMPTY_OBJECTS = {};
-
-  public static final Class<?>[] EMPTY_CLASSES = {};
-
-  public static final String[] EMPTY_STRINGS = {};
 
 
   public static int[] shuffle( int[] ar, Random rnd )
@@ -95,28 +89,14 @@ public final class Arrays
     @Override
     public int indexOf( final Object o )
     {
-      final E[] a = this.a;
-
-      for (int i = 0; i < a.length; i++) {
-        if (Objects.equals(o, a[i]))
-          return i;
-      }
-
-      return -1;
+      return ArrayUtils.indexOf(a, o);
     }
 
 
     @Override
     public int lastIndexOf( final Object o )
     {
-      final E[] a = this.a;
-
-      for (int i = a.length - 1; i >= 0; i--) {
-        if (Objects.equals(o, a[i]))
-          return i;
-      }
-
-      return -1;
+      return ArrayUtils.lastIndexOf(a, o);
     }
 
 
@@ -133,15 +113,22 @@ public final class Arrays
       if (ol.size() != a.length)
         return false;
 
-      if (ol instanceof RandomAccess) {
-        for (int i = 0; i < a.length; i++) {
+      if (ol instanceof ImmutableArrayList)
+        return java.util.Arrays.equals(a, ((ImmutableArrayList<?>) ol).a);
+      if (ol instanceof RandomAccess)
+      {
+        for (int i = 0; i < a.length; i++)
+        {
           if (!Objects.equals(a[i], ol.get(i)))
             return false;
         }
-      } else {
+      }
+      else
+      {
         int i = 0;
         final Iterator<?> it = ol.iterator();
-        while (i < a.length) {
+        while (i < a.length)
+        {
           if (!Objects.equals(a[i++], it.next()))
             return false;
         }
@@ -154,17 +141,14 @@ public final class Arrays
     @Override
     public int hashCode()
     {
-      int hashCode = 1;
-      for (E e: a)
-        hashCode = 31 * hashCode + ((e != null) ? e.hashCode() : 0);
-      return hashCode;
+      return java.util.Arrays.hashCode(a);
     }
 
 
     @Override
     public boolean contains( Object o )
     {
-      return indexOf(o) >= 0;
+      return ArrayUtils.contains(a, o);
     }
 
 
