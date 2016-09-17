@@ -4,9 +4,11 @@ import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.http.responsehandler.PImageBaseResponseHandler;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import kaleidok.flickr.*;
+import kaleidok.util.concurrent.NestedFutureCallback;
 import kaleidok.util.containers.BoundedCompletionQueue;
 import kaleidok.http.async.ImageAsync;
 import kaleidok.http.async.JsonAsync;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
@@ -21,6 +23,7 @@ import java.util.Random;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
@@ -77,7 +80,7 @@ public class ChromasthetiationService
   public void submit( String text,
     ChromasthetiatorBase<? extends Flickr> queryParams,
     FutureCallback<Future<Image>> futureImageCallback,
-    FutureCallback<Image> imageCallback,
+    FutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>> imageCallback,
     Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
     int maxCount )
   {
@@ -98,15 +101,15 @@ public class ChromasthetiationService
 
   private class RunnableChromasthetiator
     extends KeywordChromasthetiator<FlickrAsync>
-    implements Runnable, FutureCallback<ChromatikResponse>
+    implements Runnable, FutureCallback<Pair<ChromatikResponse, EmotionalState>>
   {
     private final String text;
 
     private final FutureCallback<Future<Image>> futureImageCallback;
 
-    private final FutureCallback<Image> imageCallback;
+    private final FutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>> imageCallback;
 
-    private final BoundedCompletionQueue<Photo> photoQueue;
+    private final BoundedCompletionQueue<Pair<Photo, Pair<ChromatikResponse, EmotionalState>>> photoQueue;
 
 
     /**
@@ -131,7 +134,7 @@ public class ChromasthetiationService
     public RunnableChromasthetiator(
       ChromasthetiatorBase<? extends Flickr> queryParams,
       String text, FutureCallback<Future<Image>> futureImageCallback,
-      FutureCallback<Image> imageCallback,
+      FutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>> imageCallback,
       Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
       int maxCount )
     {
@@ -148,7 +151,9 @@ public class ChromasthetiationService
       this.futureImageCallback = futureImageCallback;
       this.imageCallback = imageCallback;
       photoQueue = new BoundedCompletionQueue<>(maxCount, chromatikQuery.nHits);
-      photoQueue.completionCallback = imageQueueCompletionCallback;
+      photoQueue.completionCallback =
+        ( objects ) -> imageQueueCompletionCallback.accept(
+          objects.stream().map(Pair::getLeft).collect(Collectors.toList()));
     }
 
 
@@ -185,30 +190,38 @@ public class ChromasthetiationService
         chromatikQuery.randomizeRequestedSubset(
           EXPECTED_NEUTRAL_RESULT_COUNT, textRandom);
       }
-      runChromatikQuery();
+      runChromatikQuery(emoState);
       chromatikQuery.start = queryStart;
     }
 
 
-    private void runChromatikQuery()
+    private void runChromatikQuery( final EmotionalState emoState )
     {
       URI chromatikUri = chromatikQuery.getUri();
       logger.log(Level.FINER,
         "Requesting search results from: {0}", chromatikUri);
 
-      jsonAsync.execute(Request.Get(chromatikUri),
-        ChromatikResponse.class, this);
+      jsonAsync.execute(Request.Get(chromatikUri), ChromatikResponse.class,
+        new NestedFutureCallback<ChromatikResponse, Pair<ChromatikResponse, EmotionalState>>(this)
+        {
+          @Override
+          public void completed( ChromatikResponse response )
+          {
+            nested.completed(Pair.of(response, emoState));
+          }
+        });
     }
 
 
     @Override
-    public void completed( ChromatikResponse response )
+    public void completed( Pair<ChromatikResponse, EmotionalState> o )
     {
+      ChromatikResponse response = o.getLeft();
       logger.log(Level.FINE, "Chromatik found {0} results", response.hits);
 
       if (response.results.length == 0 && !chromatikQuery.keywords.isEmpty()) {
         removeLastKeyword();
-        runChromatikQuery();
+        runChromatikQuery(o.getRight());
         return;
       }
 
@@ -218,7 +231,7 @@ public class ChromasthetiationService
           final FlickrPhoto flickrPhoto =
             FlickrPhoto.fromChromatikResponseResult(flickr, imgInfo);
           imgInfo.flickrPhoto = flickrPhoto;
-          photoQueue.add(flickrPhoto);
+          photoQueue.add(Pair.of(flickrPhoto, o));
         }
 
         dispatchQueue();
@@ -229,13 +242,16 @@ public class ChromasthetiationService
     private void dispatchQueue()
     {
       FlickrAsync flickr = this.flickr;
-      synchronized (photoQueue) {
-        Photo photo;
-        while ((photo = photoQueue.poll()) != null) {
+      synchronized (photoQueue)
+      {
+        Pair<Photo, Pair<ChromatikResponse, EmotionalState>> o;
+        while ((o = photoQueue.poll()) != null)
+        {
+          Photo photo = o.getLeft();
           logger.log(Level.FINEST,
             "Received a download ticket for {0}", photo);
           flickr.getPhotoSizes(
-            photo.id, new PhotoSizesCallback(photo));
+            photo.id, new PhotoSizesCallback(o));
         }
       }
     }
@@ -256,22 +272,24 @@ public class ChromasthetiationService
 
     private final class PhotoSizesCallback implements FutureCallback<SizeMap>
     {
-      private final Photo photo;
+      private final Pair<Photo, Pair<ChromatikResponse, EmotionalState>> previousResults;
 
 
-      private PhotoSizesCallback( Photo photo )
+      private PhotoSizesCallback(
+        Pair<Photo, Pair<ChromatikResponse, EmotionalState>> previousResults )
       {
-        this.photo = photo;
+        this.previousResults = previousResults;
       }
 
 
       @Override
       public void completed( SizeMap sizes )
       {
+        Photo photo = previousResults.getLeft();
         photo.setSizes(sizes);
         Future<Image> fImage = imageAsync.execute(
           Request.Get(photo.getLargestImageSize().source),
-          new ImageCallback(photo));
+          new ImageCallback(previousResults));
 
         if (futureImageCallback != null)
           futureImageCallback.completed(fImage);
@@ -283,9 +301,10 @@ public class ChromasthetiationService
       {
         if (ex instanceof FlickrException) {
           ((FlickrException) ex).setPertainingObject(
-            photo.getMediumUrl());
+            previousResults.getLeft().getMediumUrl());
         } else if (ex instanceof IOException) {
-          ex = new IOException("Couldn't load sizes of " + photo, ex);
+          ex = new IOException(
+            "Couldn't load sizes of " + previousResults.getLeft(), ex);
         }
 
         RunnableChromasthetiator.this.failed(ex);
@@ -304,12 +323,19 @@ public class ChromasthetiationService
 
     private final class ImageCallback implements FutureCallback<Image>
     {
-      private final Photo photo;
+      private final Pair<Photo, Pair<ChromatikResponse, EmotionalState>> previousResults;
 
 
-      private ImageCallback( Photo photo )
+      private ImageCallback(
+        Pair<Photo, Pair<ChromatikResponse, EmotionalState>> previousResults )
       {
-        this.photo = photo;
+        this.previousResults = previousResults;
+      }
+
+
+      private Photo getPhoto()
+      {
+        return previousResults.getLeft();
       }
 
 
@@ -317,9 +343,9 @@ public class ChromasthetiationService
       public void completed( Image image )
       {
         logger.log(Level.FINE, "Downloaded image {0}",
-          photo.getLargestImageSize().source);
+          getPhoto().getLargestImageSize().source);
         photoQueue.completeItem();
-        imageCallback.completed(image);
+        imageCallback.completed(Pair.of(image, previousResults.getRight()));
       }
 
       @Override
@@ -328,7 +354,7 @@ public class ChromasthetiationService
         logThrown(logger,
           (ex instanceof IOException) ? Level.SEVERE : Level.FINER,
           "Couldn't download {0}",
-          ex, photo.getLargestImageSize().source);
+          ex, getPhoto().getLargestImageSize().source);
 
         imageCallback.failed(ex);
         releaseQueuePermit();

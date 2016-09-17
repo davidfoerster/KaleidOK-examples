@@ -21,7 +21,7 @@ public class BoundedCompletionQueue<E> implements Queue<E>
 
   private Collection<E> removedItems;
 
-  public Consumer<Collection<? super E>> completionCallback = null;
+  public Consumer<Collection<E>> completionCallback = null;
 
 
   private BoundedCompletionQueue( Queue<E> underlying, int permits, int capacityHint )
@@ -113,7 +113,7 @@ public class BoundedCompletionQueue<E> implements Queue<E>
 
   protected void doCompletionCallback()
   {
-    Consumer<Collection<? super E>> completionCallback =
+    Consumer<Collection<E>> completionCallback =
       this.completionCallback;
     if (completionCallback != null)
       completionCallback.accept(removedItems);

@@ -10,6 +10,7 @@ import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -182,5 +183,36 @@ public final class PImages
       return readers.next();
 
     throw new IllegalArgumentException("No suitable image decoder found");
+  }
+
+
+  @SuppressWarnings("AssignmentToForLoopParameter")
+  public static PImage filter( PImage src, PImage dst, RGBImageFilter filter )
+  {
+    if (filter ==  null)
+      throw new NullPointerException("filter");
+
+    src.loadPixels();
+    int width = src.width, height = src.height;
+    int[] spx = src.pixels;
+
+    if (dst == null)
+      dst = new PImage();
+    if (src != dst)
+      dst.init(width, height, src.format, src.pixelDensity);
+    dst.loadPixels();
+    int[] dpx = dst.pixels;
+
+    for (int i = 0, y = 0; y < height; y++)
+    {
+      for (int x = 0; x < width; x++, i++)
+      {
+        int px = spx[i];
+        dpx[i] = filter.filterRGB(x, y, px & 0x00ffffff) | (px & 0xff000000);
+      }
+    }
+
+    dst.updatePixels();
+    return dst;
   }
 }
