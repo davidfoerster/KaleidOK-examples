@@ -1,94 +1,92 @@
 package kaleidok.kaleidoscope.layer;
 
+import javafx.beans.property.FloatProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleFloatProperty;
+import javafx.beans.value.ObservableObjectValue;
+import kaleidok.javafx.beans.property.SimpleBoundedIntegerProperty;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
+import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.DIMENSIONS;
+import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.MAX_SEGMENTS;
+import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.MIN_SEGMENTS;
+
 
 public abstract class CircularImageLayer extends ImageLayer
 {
+  public static final int MAX_SEGMENT_MULTIPLIER = MAX_SEGMENTS / MIN_SEGMENTS;
 
-  private float innerRadius, outerRadius;
+  protected final FloatProperty
+    innerRadius = new SimpleFloatProperty(this, "inner radius"),
+    outerRadius = new SimpleFloatProperty(this, "outer radius"),
+    scaleFactor = new SimpleFloatProperty(this, "scale factor", 1);
 
-  private float scaleFactor = 1;
+  public final SimpleBoundedIntegerProperty segmentCount;
 
-  private float[] segmentCoords = null;
+  private final ObservableObjectValue<float[]> segmentCoords;
 
 
-  protected CircularImageLayer( ExtPApplet parent )
+  protected CircularImageLayer( ExtPApplet parent, int segmentCount )
+  {
+    this(parent, segmentCount, 1);
+  }
+
+
+  protected CircularImageLayer( ExtPApplet parent, int segmentCount,
+    int segmentMultiplier )
   {
     super(parent);
-  }
 
-
-  protected void init( int segmentCount, float innerRadius, float outerRadius )
-  {
-    setSegmentCount(segmentCount);
-    setInnerRadius(innerRadius);
-    setOuterRadius(outerRadius);
-  }
-
-
-  public int getSegmentCount()
-  {
-    return segmentCoords.length / 2;
-  }
-
-  public void setSegmentCount( int segmentCount )
-  {
-    if (segmentCoords == null || segmentCoords.length != segmentCount * 2)
-      segmentCoords = new float[segmentCount * 2];
-
-    final float[] segmentCoords = this.segmentCoords;
-    double step = Math.PI * 2 / segmentCount; // generate the step size based on the number of segments
-    // pre-calculate x and y based on angle and store values in two arrays
-    for (int i = segmentCount - 1; i >= 0; i--) {
-      double theta = step * i; // angle for this segment
-      segmentCoords[i * 2] = (float) Math.sin(theta);
-      segmentCoords[i * 2 + 1] = (float) Math.cos(theta);
+    if (segmentMultiplier < 1 ||
+      segmentMultiplier > MAX_SEGMENT_MULTIPLIER )
+    {
+      throw new IllegalArgumentException(
+        "segment multiplier outside of [1, " + MAX_SEGMENT_MULTIPLIER +
+          "]: " + segmentMultiplier);
     }
+
+    this.segmentCount =
+      new SimpleBoundedIntegerProperty(this, "segment count", segmentCount,
+        MIN_SEGMENTS, MAX_SEGMENTS / segmentMultiplier);
+    this.segmentCoords = new CircularTriangleStripSegmentCoordinates(
+      (segmentMultiplier != 1) ?
+        this.segmentCount.multiply(segmentMultiplier) :
+        this.segmentCount);
   }
 
 
-  public float getInnerRadius()
+  public IntegerProperty segmentCountProperty()
+  {
+    return segmentCount;
+  }
+
+
+  public FloatProperty innerRadiusProperty()
   {
     return innerRadius;
   }
 
-  public void setInnerRadius( float innerRadius )
-  {
-    this.innerRadius = innerRadius;
-  }
 
-
-  public float getOuterRadius()
+  public FloatProperty outerRadiusProperty()
   {
     return outerRadius;
   }
 
 
-  public void setOuterRadius( float outerRadius )
-  {
-    this.outerRadius = outerRadius;
-  }
-
-
-  public float getScaleFactor()
+  public FloatProperty scaleFactorProperty()
   {
     return scaleFactor;
-  }
-
-  public void setScaleFactor( float scaleFactor )
-  {
-    this.scaleFactor = scaleFactor;
   }
 
 
   protected void drawCircleVertex( int index, float radius )
   {
+    final float[] segmentCoords = this.segmentCoords.get();
     drawVertex(
-      segmentCoords[index * 2] * radius,
-      segmentCoords[index * 2 + 1] * radius);
+      segmentCoords[index * DIMENSIONS] * radius,
+      segmentCoords[index * DIMENSIONS + 1] * radius);
   }
 
 

@@ -143,4 +143,10 @@ public final class Math
       (x <= Integer.MIN_VALUE) ? Integer.MIN_VALUE :
         (int) x;
   }
+
+
+  public static float mapNormalized( float x, float left, float right )
+  {
+    return (x * (right - left) + left) / right;
+  }
 }

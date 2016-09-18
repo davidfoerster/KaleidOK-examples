@@ -127,7 +127,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
         PitchEstimationAlgorithm.FFT_YIN,
         audioDispatcher.getFormat().getSampleRate(),
         apm.getAudioBufferSize(),
-        outerMovingShape.getPitchDetectionHandler()));
+        outerMovingShape.pitchDetectionHandler));
     }
     return outerMovingShape;
   }

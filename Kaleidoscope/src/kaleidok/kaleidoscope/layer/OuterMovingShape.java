@@ -10,6 +10,10 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
 
+import static java.lang.Math.log;
+import static java.lang.Math.toRadians;
+import static processing.core.PApplet.map;
+
 
 /**
  * Draws a shape that is rotated with a speed depending on the logarithm of the
@@ -29,8 +33,8 @@ public class OuterMovingShape extends CircularImageLayer
 
   public OuterMovingShape( ExtPApplet parent, int segmentCount, float radius )
   {
-    super(parent);
-    init(segmentCount, 0, radius);
+    super(parent, segmentCount);
+    this.outerRadius.set(radius);
   }
 
 
@@ -38,14 +42,16 @@ public class OuterMovingShape extends CircularImageLayer
   public void run()
   {
     final PApplet parent = this.parent;
+    final int wireframe = this.wireframe.get();
+    final float outerRadius = this.outerRadius.get();
 
     if (wireframe >= 2) {
       parent.stroke(192, 0, 0);
-      drawDebugCircle(getOuterRadius());
+      drawDebugCircle(outerRadius);
     }
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-    parent.scale(getOuterRadius());
+    parent.scale(outerRadius);
 
     if (step != 0) {
       /*
@@ -65,10 +71,10 @@ public class OuterMovingShape extends CircularImageLayer
     } else {
       parent.noFill();
       parent.stroke(128);
-      parent.strokeWeight(parent.g.strokeWeight * 0.5f / getOuterRadius());
+      parent.strokeWeight(parent.g.strokeWeight * 0.5f / outerRadius);
     }
 
-    final int segmentCount = getSegmentCount();
+    final int segmentCount = this.segmentCount.get();
     parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
     for (int i = 0; i <= segmentCount; i++) {
       drawCircleVertex(i % segmentCount, 1);
@@ -78,50 +84,22 @@ public class OuterMovingShape extends CircularImageLayer
   }
 
 
-  private PitchDetectionHandler pitchDetectionHandler = null;
-
   /**
-   * @return The pitch detection handler of this shape
+   * The pitch detection handler of this shape
    * @see PitchProcessor#PitchProcessor(PitchEstimationAlgorithm, float, int, PitchDetectionHandler)
    */
-  public PitchDetectionHandler getPitchDetectionHandler()
-  {
-    if (pitchDetectionHandler == null)
-      pitchDetectionHandler = new MyPitchDetectionHandler();
-    return pitchDetectionHandler;
-  }
-
-
-  private class MyPitchDetectionHandler implements PitchDetectionHandler
-  {
-    private long lastPitchDetectionTime = -1;
-
-    @Override
-    public void handlePitch( PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent )
+  @SuppressWarnings("Convert2Lambda")
+  public final PitchDetectionHandler pitchDetectionHandler =
+    new PitchDetectionHandler()
     {
-      if (lastPitchDetectionTime >= 0 || pitchDetectionResult.isPitched())
+      @Override
+      public void handlePitch( PitchDetectionResult pitchDetectionResult,
+        AudioEvent audioEvent )
       {
-        long now = System.nanoTime();
-
-        //if (lastPitchDetectionTime >= 0) {
-          //System.out.format("Pitch lasted for %d ms.\n", (int)(now - lastPitchDetectionTime) / 1000000);
-        //}
-
-        if (pitchDetectionResult.isPitched())
-        {
-          float pitch = pitchDetectionResult.getPitch();
-          float stepDeg = PApplet.map((float) Math.log(pitch), 3f, 7f, -3f, 3f);
-          /*System.out.format("Pitch: %.0f Hz, %.0f %%, %s; step = %.2f°\n",
-            pitch, pitchDetectionResult.getProbability() * 100f, pitchDetectionResult.isPitched(), stepDeg);*/
-          step = Math.toRadians(stepDeg);
-          lastPitchDetectionTime = now;
-        }
-        else
-        {
-          step = 0;
-          lastPitchDetectionTime = -1;
-        }
+        step = pitchDetectionResult.isPitched() ?
+          toRadians(map(
+            (float) log(pitchDetectionResult.getPitch()), 3f, 7f, -3f, 3f)) :
+          0;
       }
-    }
-  }
+    };
 }

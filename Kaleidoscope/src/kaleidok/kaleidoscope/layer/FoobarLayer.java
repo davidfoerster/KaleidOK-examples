@@ -1,11 +1,16 @@
 package kaleidok.kaleidoscope.layer;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.FloatBinding;
+import javafx.beans.property.FloatProperty;
+import javafx.beans.value.ObservableFloatValue;
+import javafx.beans.value.ObservableNumberValue;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
 
-import static processing.core.PApplet.map;
+import static kaleidok.util.Math.mapNormalized;
 
 
 /**
@@ -19,23 +24,24 @@ public class FoobarLayer extends CircularImageLayer
   public FoobarLayer( ExtPApplet parent, int segmentCount,
     float innerRadius, float outerRadius )
   {
-    super(parent);
-    super.setScaleFactor(0.5f);
-    init(segmentCount, innerRadius, outerRadius);
+    super(parent, segmentCount);
+    this.innerRadius.set(innerRadius);
+    this.outerRadius.set(outerRadius);
+    this.scaleFactor.set(0.5f);
   }
 
 
   /**
-   * Sets the distance of the innermost vertices from the centre (after the
+   * Manages the distance of the innermost vertices from the centre (after the
    * application of the noise function).
    *
-   * @param innerRadius  A radius
+   * @return  A property object with the above purpose
    */
+  @SuppressWarnings("RedundantMethodOverride")
   @Override
-  public void setInnerRadius( float innerRadius )
+  public FloatProperty innerRadiusProperty()
   {
-    super.setInnerRadius(innerRadius);
-    updateIntermediates();
+    return super.innerRadiusProperty();
   }
 
 
@@ -43,53 +49,80 @@ public class FoobarLayer extends CircularImageLayer
    * Sets the distance of the outermost vertices from the centre (after the
    * application of the noise function).
    *
-   * @param outerRadius  A radius
+   * @return  A property object with the above purpose
    */
+  @SuppressWarnings("RedundantMethodOverride")
   @Override
-  public void setOuterRadius( float outerRadius )
+  public FloatProperty outerRadiusProperty()
   {
-    super.setOuterRadius(outerRadius);
-    updateIntermediates();
+    return super.outerRadiusProperty();
   }
 
 
   /**
-   * Sets, how far into the ring both the outer and inner vertices will
-   * oscillate.
-   * <p>
-   * 0 mean no oscillation; 1 means until the other inner or outer
-   * border of the ring respectively. Values outside of that range are possible
-   * and result in vertices outside of the ring as defined by the outer and
-   * inner radii.
-   *
-   * @param scaleFactor  An oscillation strength factor (normally between 0 and 1)
-   */
+ * Manager how far into the ring both the outer and inner vertices will
+ * oscillate.
+ * <p>
+ * 0 mean no oscillation; 1 means until the other inner or outer
+ * border of the ring respectively. Values outside of that range are possible
+ * and result in vertices outside of the ring as defined by the outer and
+ * inner radii.
+ *
+ * @return  A property object with the above purpose
+ */
+  @SuppressWarnings("RedundantMethodOverride")
   @Override
-  public void setScaleFactor( float scaleFactor )
+  public FloatProperty scaleFactorProperty()
   {
-    super.setScaleFactor(scaleFactor);
-    updateIntermediates();
+    return super.scaleFactorProperty();
   }
 
+  private final ObservableNumberValue innerOffset =
+    Bindings.divide(innerRadius, outerRadius);
 
-  private float innerOffset, outerOffset, innerScale;
 
-  private void updateIntermediates()
-  {
-    innerOffset = getInnerRadius() / getOuterRadius();
-    outerOffset = innerOffset + (1 - innerOffset) * (1 - getScaleFactor());
-    innerScale = (1 - innerOffset) * getScaleFactor();
-  }
+  private final ObservableFloatValue outerOffset =
+    new FloatBinding()
+    {
+      {
+        bind(innerOffset, scaleFactor);
+      }
+
+      @Override
+      protected float computeValue()
+      {
+        float innerOffset = FoobarLayer.this.innerOffset.floatValue();
+        return innerOffset + (1 - innerOffset) * (1 - scaleFactor.get());
+      }
+    };
+
+
+  private final ObservableFloatValue innerScale =
+    new FloatBinding()
+    {
+      {
+        bind(innerOffset, scaleFactor);
+      }
+
+      @Override
+      protected float computeValue()
+      {
+        return (1 - innerOffset.floatValue()) * scaleFactor.get();
+      }
+    };
 
 
   @Override
   public void run()
   {
     final PApplet parent = this.parent;
+    final int wireframe = this.wireframe.get();
     final float
-      innerOffset = this.innerOffset,
-      outerOffset = this.outerOffset,
-      innerScale = this.innerScale,
+      innerRadius = this.innerRadius.get(),
+      outerRadius = this.outerRadius.get(),
+      innerOffset = this.innerOffset.floatValue(),
+      outerOffset = this.outerOffset.get(),
+      innerScale = this.innerScale.get(),
       outerScale = 1 - outerOffset,
       fc1 = parent.frameCount * 0.01f,
       fc2 = parent.frameCount * 0.02f;
@@ -98,17 +131,20 @@ public class FoobarLayer extends CircularImageLayer
     {
       // draw the ring borders
       parent.stroke(0, 255, 255);
-      drawDebugCircle(getInnerRadius());
+      drawDebugCircle(innerRadius);
       parent.stroke(255, 255, 0);
-      drawDebugCircle(getOuterRadius());
+      drawDebugCircle(outerRadius);
 
       float
-        innerScaled = map(getScaleFactor(), 0, 1, getInnerRadius(), getOuterRadius()),
-        outerScaled = map(getScaleFactor(), 1, 0, getInnerRadius(), getOuterRadius()),
+        scaleFactor = this.scaleFactor.get(),
+        innerScaled = mapNormalized(scaleFactor, innerRadius, outerRadius),
+        //innerScaled = map(scaleFactor, 0, 1, innerRadius, outerRadius),
+        outerScaled = mapNormalized(scaleFactor, outerRadius, innerRadius),
+        //outerScaled = map(scaleFactor, 1, 0, innerRadius, outerRadius),
         scaleDiff = outerScaled - innerScaled;
       // make sure, that the inner circles don't lie on top of each other
       if (Math.abs(scaleDiff) < 2f) {
-        float avgScaled = (outerScaled + innerScaled) / 2,
+        float avgScaled = (outerScaled + innerScaled) * 0.5f,
           offset = Math.copySign(1f, scaleDiff);
         innerScaled = avgScaled - offset;
         outerScaled = avgScaled + offset;
@@ -121,10 +157,10 @@ public class FoobarLayer extends CircularImageLayer
     }
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
-    parent.scale(getOuterRadius());
+    parent.scale(outerRadius);
 
     parent.stroke(255); // set stroke to white
-    parent.strokeWeight(parent.g.strokeWeight / getOuterRadius());
+    parent.strokeWeight(parent.g.strokeWeight / outerRadius);
     parent.beginShape(PConstants.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     PImage img;
     if (wireframe <= 0 && (img = getCurrentImage()) != null) {
@@ -133,7 +169,7 @@ public class FoobarLayer extends CircularImageLayer
       parent.noFill();
     }
 
-    final int segmentCount = getSegmentCount();
+    final int segmentCount = this.segmentCount.get();
     for (int i = 0; i <= segmentCount; i++) {
       int im = i % segmentCount; // make sure the end equals the start
 
