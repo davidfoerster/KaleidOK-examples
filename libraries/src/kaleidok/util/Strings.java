@@ -124,7 +124,7 @@ public final class Strings
   public static final Pattern SIMPLE_URL_PREFIX_PATTERN =
     Pattern.compile("^[a-z](?:[a-z0-9+.-])*:");
 
-  public static boolean looksLikeUrl( String s )
+  public static boolean looksLikeUrl( CharSequence s )
   {
     return SIMPLE_URL_PREFIX_PATTERN.matcher(s).matches();
   }

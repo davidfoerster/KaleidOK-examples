@@ -25,10 +25,8 @@ public final class Math
     assert len != 0 && checkBounds(offset, len, a.length) :
       getBoundsExceededMessage(offset, len, a.length);
 
-    if (len == 1) {
-      float x = a[offset];
-      return x * x;
-    }
+    if (len == 1)
+      return square(a[offset]);
 
     int halfLen = len / 2;
     return sumOfSquares_noBoundsCheck(a, offset, halfLen) +
@@ -140,6 +138,9 @@ public final class Math
 
   public static int constrainInt( double x )
   {
-    return (int) clamp(x, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    return
+      (x >= Integer.MAX_VALUE) ? Integer.MAX_VALUE :
+      (x <= Integer.MIN_VALUE) ? Integer.MIN_VALUE :
+        (int) x;
   }
 }
