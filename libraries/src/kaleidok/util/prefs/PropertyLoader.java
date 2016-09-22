@@ -1,5 +1,7 @@
 package kaleidok.util.prefs;
 
+import kaleidok.util.function.InstanceSupplier;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +11,8 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 public final class PropertyLoader
@@ -93,9 +97,10 @@ public final class PropertyLoader
     if (dst == null)
       dst = new HashMap<>(src.size() / 3 * 4);
 
-    for (String key: src.stringPropertyNames())
-      dst.put(key, src.getProperty(key));
-
-    return dst;
+    return src.stringPropertyNames().stream()
+      .collect(Collectors.toMap(
+        Function.identity(), src::getProperty,
+        (a, b) -> (b != null) ? b : a,
+        new InstanceSupplier<>(dst)));
   }
 }
