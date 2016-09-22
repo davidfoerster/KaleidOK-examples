@@ -1,5 +1,7 @@
 package kaleidok.util;
 
+import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Math.abs;
@@ -127,5 +129,80 @@ public final class Strings
   public static boolean looksLikeUrl( CharSequence s )
   {
     return SIMPLE_URL_PREFIX_PATTERN.matcher(s).matches();
+  }
+
+
+  public static CharSequence replaceAll( Pattern pattern, CharSequence input,
+    Function<? super Matcher, ?> replacer )
+  {
+    Matcher matcher = pattern.matcher(input);
+    if (!matcher.find())
+      return input;
+
+    StringBuilder buf = new StringBuilder();
+    int lastMatchEnd = 0;
+    do
+    {
+      Object replacement = replacer.apply(matcher);
+      if (replacement == null)
+        break;
+
+      buf.append(input, lastMatchEnd, matcher.start());
+
+      if (replacement instanceof CharSequence)
+      {
+        buf.append((CharSequence) replacement);
+      }
+      else if (replacement instanceof char[])
+      {
+        buf.append((char[]) replacement);
+      }
+      else if (replacement instanceof Character)
+      {
+        buf.append(((Character) replacement).charValue());
+      }
+      else
+      {
+        buf.append(replacement);
+      }
+
+      lastMatchEnd = matcher.end();
+    }
+    while (matcher.find());
+
+    return buf.append(input, lastMatchEnd, input.length());
+  }
+
+
+  private static final Pattern CAMEL_CASE_CONVERSION_PATTERN =
+    Pattern.compile("[\\s-]+(\\p{javaLowerCase})?");
+
+
+  public static CharSequence toCamelCase( CharSequence name )
+  {
+    return replaceAll(CAMEL_CASE_CONVERSION_PATTERN, name,
+      ( matcher ) -> {
+        String group1 = matcher.group(1);
+        return
+          (group1 == null) ? "" :
+          (matcher.start() == 0) ? group1 :
+            Character.toUpperCase(group1.charAt(0));
+      });
+  }
+
+
+  public static boolean isInteger( CharSequence s )
+  {
+    if (s.length() == 0)
+      return false;
+
+    char c0 = s.charAt(0);
+    final int start = (c0 == '+' || c0 == '-') ? 1 : 0;
+    for (int i = s.length() - 1; i >= start; i--)
+    {
+      if (!Character.isDigit(s.charAt(i)))
+        return false;
+    }
+    return true;
   }
 }
