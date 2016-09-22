@@ -3,10 +3,11 @@ package kaleidok.kaleidoscope;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+import javafx.beans.property.Property;
+import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.kaleidoscope.layer.*;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.Strings;
-import kaleidok.util.prefs.BeanUtils;
 import kaleidok.util.prefs.PropertyLoader;
 import org.apache.commons.io.FilenameUtils;
 import processing.core.PImage;
@@ -62,33 +63,41 @@ public class LayerManager implements List<ImageLayer>, Runnable
 
   private void applyLayerProperties()
   {
-    Properties prop = loadLayerProperties();
-    Package pack = ImageLayer.class.getPackage();
-    MessageFormat screenshotPathPattern = getScreenshotPathPattern();
-    Set<String> appliedProperties =
-      logger.isLoggable(Level.FINEST) ? new HashSet<>(prop.size() * 2) : null;
+    final Map<String, String> propertyEntries = loadLayerProperties();
+    final Set<String> appliedEntries =
+      logger.isLoggable(Level.FINEST) ?
+        new HashSet<>(propertyEntries.size() * 2) :
+        null;
 
-    for (ImageLayer l: this)
     {
-      BeanUtils.applyBeanProperties(prop, pack, l, appliedProperties);
-      l.setScreenshotPathPattern(screenshotPathPattern);
+      String propertyRoot = ImageLayer.class.getPackage().getName();
+      MessageFormat screenshotPathPattern = getScreenshotPathPattern();
+      Set<Property<?>> foundPropertiesBuffer = new HashSet<>(16);
+
+      for (ImageLayer l : this)
+      {
+        foundPropertiesBuffer.clear();
+        PropertyUtils.applyProperties(
+          propertyEntries, propertyRoot,
+          PropertyUtils.getProperties(l, foundPropertiesBuffer),
+          appliedEntries);
+
+        l.setScreenshotPathPattern(screenshotPathPattern);
+      }
     }
 
-    if (appliedProperties != null && appliedProperties.size() < prop.size())
+    if (appliedEntries != null && appliedEntries.size() < propertyEntries.size())
     {
-      Map<String, String> unappliedProperties =
-        new HashMap<>(Math.max(prop.size() - appliedProperties.size(), 0) * 2);
-      for (Map.Entry<Object, Object> entry: prop.entrySet())
-      {
-        String key = (String) entry.getKey();
-        if (!appliedProperties.contains(key))
-          unappliedProperties.put(key, (String) entry.getValue());
-      }
+      Collection<Map.Entry<String, String>> unappliedEntries =
+        propertyEntries.entrySet().stream()
+          .filter((e) -> !appliedEntries.contains(e.getKey()))
+          .collect(Collectors.toList());
+
       logger.log(Level.FINEST,
-        "The following {0} of your {1} layer property settings were not " +
+        "The following {0} of your {1} layer property entries were not " +
           "used: {2}",
-        new Object[]{
-          unappliedProperties.size(), prop.size(), unappliedProperties});
+        new Object[]{ unappliedEntries.size(), propertyEntries.size(),
+          unappliedEntries });
     }
   }
 
@@ -239,7 +248,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
   }
 
 
-  private static Properties loadLayerProperties()
+  private static Map<String, String> loadLayerProperties()
   {
     String propFn = "layer.properties";
     Properties layerProperties = new Properties();
@@ -259,7 +268,9 @@ public class LayerManager implements List<ImageLayer>, Runnable
         "Couldn't load layer properties file \"{0}\"; using defaults", ex,
         propFn);
     }
-    return layerProperties;
+    return !layerProperties.isEmpty() ?
+      PropertyLoader.toMap(layerProperties, null) :
+      Collections.emptyMap();
   }
 
 

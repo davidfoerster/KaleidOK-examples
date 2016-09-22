@@ -50,25 +50,25 @@ public final class PropertyUtils
   private static final String PROPERTY_METHOD_SUFFIX = "Property";
 
 
-  public static Set<Property<Object>> getProperties( final Object bean,
-    Set<Property<Object>> resultSet )
+  public static Set<Property<?>> getProperties( final Object bean,
+    Set<Property<?>> resultSet )
   {
     @SuppressWarnings("unchecked")
-    Stream<Property<Object>> fieldProps =
+    Stream<Property<?>> fieldProps =
       Stream.of(bean.getClass().getFields())
         .filter(( f ) ->
           !Modifier.isStatic(f.getModifiers()) &&
             Property.class.isAssignableFrom(f.getType()))
         .map(( f ) -> {
             try {
-              return (Property<Object>) f.get(bean);
+              return (Property<?>) f.get(bean);
             } catch (IllegalAccessException ex) {
               throw new AssertionError(ex);
             }
           });
 
     @SuppressWarnings("unchecked")
-    Stream<Property<Object>> methodProps =
+    Stream<Property<?>> methodProps =
       Stream.of(bean.getClass().getMethods())
         .filter(( m ) ->
           !Modifier.isStatic(m.getModifiers()) &&
@@ -77,7 +77,7 @@ public final class PropertyUtils
             m.getName().endsWith(PROPERTY_METHOD_SUFFIX))
         .map(( m ) -> {
             try {
-              return (Property<Object>) m.invoke(bean, EMPTY_OBJECT_ARRAY);
+              return (Property<?>) m.invoke(bean, EMPTY_OBJECT_ARRAY);
             } catch (ReflectiveOperationException ex) {
               throw new AssertionError(ex);
             }
