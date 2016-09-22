@@ -79,7 +79,7 @@ public final class DefaultValueParser
     throws IllegalArgumentException
   {
     Class<?> wrapperClass = Reflection.getWrapperType(targetClass);
-    Exception ex;
+    Throwable ex;
     if (wrapperClass == Character.class)
     {
       if (s.length() == 1)
@@ -102,13 +102,16 @@ public final class DefaultValueParser
         "Cannot assign the return type of " + m + " to " +
           targetClass.getName());
     }
-    catch (ReflectiveOperationException | ClassCastException | IllegalArgumentException ex1)
+    catch (InvocationTargetException ex1)
+    {
+      ex = ex1.getCause();
+    }
+    catch (ReflectiveOperationException | IllegalArgumentException ex1)
     {
       ex = ex1;
     }
     throw new IllegalArgumentException(
-      "Cannot parse to " + targetClass.getName(),
-      (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
+      "Cannot parse to " + targetClass.getName(), ex);
   }
 
 
