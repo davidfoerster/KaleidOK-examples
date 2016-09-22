@@ -6,7 +6,6 @@ import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.flickr.SizeMap;
-import org.apache.commons.lang.StringUtils;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
 
@@ -126,8 +125,8 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
 
     Emotion emo = synState.getStrongestEmotion();
     if (emo.getType() != Emotion.NEUTRAL) {
-      keywords = StringUtils.join(findStrongestAffectWords(
-        synState.getAffectWords(), maxKeywords), ' ');
+      keywords = String.join(" ", findStrongestAffectWords(
+        synState.getAffectWords(), maxKeywords));
       logger.log(Level.FINE, "Selected keywords: {0}", keywords);
     } else {
       keywords = "";
