@@ -46,7 +46,7 @@ public class KeyTransformingMapTest
     m.put("b", "bar");
 
     underlying = m;
-    map = new LowercaseStringMap<>(m, Locale.ROOT);
+    map = new LowercaseStringMap<>(m, Locale.ENGLISH);
     assertTrue(map.checkUnderlyingMapIntegrity(m));
   }
 

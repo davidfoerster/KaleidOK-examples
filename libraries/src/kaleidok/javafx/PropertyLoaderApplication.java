@@ -62,7 +62,8 @@ public abstract class PropertyLoaderApplication extends Application
       namedParameters = Collections.unmodifiableMap(
         new ChainedMap<>(namedParameters, PropertyLoader.toMap(prop, null)));
     }
-    namedParameters = new LowercaseStringMap<>(namedParameters, Locale.ROOT);
+    namedParameters =
+      new LowercaseStringMap<>(namedParameters, Locale.ENGLISH);
   }
 
 
