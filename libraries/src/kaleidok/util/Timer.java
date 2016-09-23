@@ -6,13 +6,16 @@ import java.util.concurrent.TimeUnit;
 
 public class Timer
 {
-  private long savedTime = -1, totalTime;
+  private long savedTime, totalTime;
+
+  private boolean started = false;
 
 
   public Timer()
   {
-    this(-1, TimeUnit.NANOSECONDS);
+    this.totalTime = -1;
   }
+
 
   public Timer( long totalTime, TimeUnit unit )
   {
@@ -26,15 +29,17 @@ public class Timer
     reset();
   }
 
+
   public void reset()
   {
-    savedTime = -1;
+    started = false;
   }
 
 
   public void start()
   {
     savedTime = System.nanoTime();
+    started = true;
   }
 
 
@@ -46,18 +51,25 @@ public class Timer
 
   public long getRuntime()
   {
-    return isStarted() ? System.nanoTime() - savedTime : -1;
+    if (started)
+      return System.nanoTime() - savedTime;
+
+    throw new IllegalStateException("Not running");
   }
 
 
   public boolean isStarted()
   {
-    return savedTime >= 0;
+    return started;
   }
 
 
   public boolean isFinished()
   {
-    return getRuntime() > totalTime;
+    long totalTime = this.totalTime;
+    if (totalTime > 0)
+      return getRuntime() > totalTime;
+
+    throw new IllegalStateException("No total time set");
   }
 }
