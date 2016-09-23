@@ -1,5 +1,6 @@
-package kaleidok.kaleidoscope;
+package kaleidok.kaleidoscope.controls;
 
+import kaleidok.kaleidoscope.KaleidoscopeApp;
 import kaleidok.swing.JRoundToggleButton;
 
 import javax.swing.*;

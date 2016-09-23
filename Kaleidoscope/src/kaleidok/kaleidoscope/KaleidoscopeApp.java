@@ -1,12 +1,12 @@
 package kaleidok.kaleidoscope;
 
 import javafx.embed.swing.SwingNode;
-import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import kaleidok.javafx.stage.Icons;
+import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.processing.SimplePAppletFactory;
@@ -26,7 +26,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   static final Logger logger =
     Logger.getLogger(KaleidoscopeApp.class.getName());
 
-  static final String iconDir = "icons/";
+  public static final String iconDir = "icons/";
 
   private Scene scene;
 
