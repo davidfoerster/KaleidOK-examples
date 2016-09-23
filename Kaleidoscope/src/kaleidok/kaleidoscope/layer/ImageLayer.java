@@ -2,6 +2,8 @@ package kaleidok.kaleidoscope.layer;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.logging.LoggingUtils;
@@ -20,6 +22,8 @@ public abstract class ImageLayer implements Runnable
 {
   protected final ExtPApplet parent;
 
+  public final StringProperty name;
+
   public final IntegerProperty wireframe =
     new SimpleIntegerProperty(this, "wireframe", 0);
 
@@ -34,6 +38,19 @@ public abstract class ImageLayer implements Runnable
   protected ImageLayer( ExtPApplet parent )
   {
     this.parent = parent;
+    this.name = new SimpleStringProperty(
+      this, "name", getDefaultName(getClass()));
+  }
+
+
+  private static String getDefaultName( Class<? extends ImageLayer> clazz )
+  {
+    String layerSuffix = "Layer",
+      className = clazz.getSimpleName();
+    return className.endsWith(layerSuffix) ?
+      className.substring(
+        0, className.length() - layerSuffix.length()) :
+      className;
   }
 
 

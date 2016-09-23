@@ -6,6 +6,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import kaleidok.javafx.stage.Icons;
+import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
 import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchApplication;
@@ -30,13 +31,40 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   private Scene scene;
 
-  private KaleidoscopeControls controls = null;
+  private KaleidoscopeControls controls;
+
+  private Stage configurationWindow;
+
+  private KaleidoscopeConfigurationEditor configurationEditor;
 
 
   @Override
   public void init() throws Exception
   {
     super.init();
+  }
+
+
+  private Stage getConfigurationWindow()
+  {
+    if (configurationWindow == null)
+    {
+      configurationWindow = new Stage();
+      configurationWindow.setTitle("Kaleidoscope configuration");
+      configurationWindow.setScene(new Scene(getConfigurationEditor()));
+    }
+    return configurationWindow;
+  }
+
+
+  private KaleidoscopeConfigurationEditor getConfigurationEditor()
+  {
+    if (configurationEditor == null)
+    {
+      configurationEditor = new KaleidoscopeConfigurationEditor(getSketch());
+      configurationEditor.init();
+    }
+    return configurationEditor;
   }
 
 
@@ -92,6 +120,17 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       placeAroundSketch(stage, 2, (Side[]) null);*/
 
     super.show(stage);
+    getConfigurationWindow().show();
+  }
+
+
+  @Override
+  public void stop() throws Exception
+  {
+    if (configurationWindow != null)
+      configurationWindow.close();
+
+    super.stop();
   }
 
 
