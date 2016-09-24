@@ -108,6 +108,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     stage.setTitle("Kaleidoscope Controls");
     stage.getIcons().addAll(makeIcons());
+    stage.setOnCloseRequest((e) -> myStop());
     super.start(stage);
   }
 
@@ -127,10 +128,15 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   @Override
   public void stop() throws Exception
   {
+    myStop();
+    super.stop();
+  }
+
+
+  private void myStop()
+  {
     if (configurationWindow != null)
       configurationWindow.close();
-
-    super.stop();
   }
 
 
