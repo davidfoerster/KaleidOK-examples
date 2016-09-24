@@ -78,11 +78,13 @@ public class KaleidoscopeConfigurationEditor
   {
     TreeItem<ReadOnlyProperty<?>> root = new TreeItem<>(
       new ReadOnlyStringWrapper(null, "name", "Kaleidoscope"));
+    root.setExpanded(true);
     Set<Property<?>> propertySet = new HashSet<>();
 
     for (final ImageLayer layer: parent.getLayers())
     {
       TreeItem<ReadOnlyProperty<?>> layerRoot = new TreeItem<>(layer.name);
+      layerRoot.setExpanded(true);
 
       propertySet.clear();
       propertySet = PropertyUtils.getProperties(layer, propertySet);
