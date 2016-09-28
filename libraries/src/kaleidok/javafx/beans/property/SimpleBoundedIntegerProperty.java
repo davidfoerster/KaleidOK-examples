@@ -1,12 +1,18 @@
 package kaleidok.javafx.beans.property;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.util.StringConverter;
+import kaleidok.javafx.util.converter.ConverterUtil;
+import kaleidok.javafx.util.converter.StringConvertible;
 
 
 public class SimpleBoundedIntegerProperty extends SimpleIntegerProperty
-  implements BoundedIntegerValue
+  implements BoundedValue<Integer, IntegerSpinnerValueFactory>,
+  StringConvertible<Integer>
 {
-  public final int min, max;
+  private final IntegerSpinnerValueFactory svf;
 
 
   public SimpleBoundedIntegerProperty( int initialValue, int min,
@@ -16,29 +22,55 @@ public class SimpleBoundedIntegerProperty extends SimpleIntegerProperty
   }
 
 
+  public SimpleBoundedIntegerProperty( Object bean, String name )
+  {
+    this(bean, name, 0);
+  }
+
+
+  public SimpleBoundedIntegerProperty( Object bean, String name,
+    int initialValue )
+  {
+    this(bean, name, initialValue, Integer.MAX_VALUE, Integer.MIN_VALUE );
+  }
+
+
   public SimpleBoundedIntegerProperty( Object bean, String name,
     int initialValue, int min, int max )
   {
+    this(bean, name, initialValue, min, max, 1);
+  }
+
+
+  public SimpleBoundedIntegerProperty( Object bean, String name,
+    int initialValue, int min, int max, int step )
+  {
     super(bean, name, initialValue);
-    this.min = min;
-    this.max = max;
-    checkValue(initialValue);
+    svf = new IntegerSpinnerValueFactory(
+      min, max, checkValue(initialValue, min, max), step);
+
+    //noinspection unchecked
+    ((Property<Number>)(Property<?>) svf.valueProperty())
+      .bindBidirectional(this);
   }
 
 
   @Override
-  public void set( int segmentCount )
+  public void set( int value )
   {
-    super.set(checkValue(segmentCount));
+    super.set(checkValue(value));
   }
 
 
-  private int checkValue( int segmentCount )
+  private int checkValue( int value )
   {
-    if (segmentCount >= min && segmentCount <= max)
-    {
-      return segmentCount;
-    }
+    return checkValue(value, svf.getMin(), svf.getMax());
+  }
+
+  private int checkValue( int value, int min, int max )
+  {
+    if (value >= min && value <= max)
+      return value;
 
     throw new IllegalArgumentException(String.format(
       "%s value must be between %d and %d",
@@ -47,15 +79,15 @@ public class SimpleBoundedIntegerProperty extends SimpleIntegerProperty
 
 
   @Override
-  public int getMin()
+  public IntegerSpinnerValueFactory getBounds()
   {
-    return min;
+    return svf;
   }
 
 
   @Override
-  public int getMax()
+  public StringConverter<Integer> getStringConverter()
   {
-    return max;
+    return ConverterUtil.INTEGER_STRING_CONVERTER;
   }
 }
