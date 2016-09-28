@@ -2,6 +2,9 @@ package kaleidok.util;
 
 import kaleidok.util.containers.FloatList;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import static java.lang.Math.*;
 
 
@@ -148,5 +151,39 @@ public final class Math
   public static float mapNormalized( float x, float left, float right )
   {
     return (x * (right - left) + left) / right;
+  }
+
+
+  public static boolean isBasicIntegral( Number n )
+  {
+    return
+      n instanceof Integer || n instanceof Long || n instanceof Short ||
+      n instanceof Byte;
+  }
+
+
+  public static BigInteger toBigInteger( Number v )
+  {
+    return
+      (v instanceof BigInteger) ?
+        (BigInteger) v :
+      (v instanceof BigDecimal) ?
+        ((BigDecimal) v).toBigInteger() :
+        BigInteger.valueOf(v.longValue());
+  }
+
+
+  public static BigDecimal toBigDecimal( Number v )
+  {
+    return
+      (v instanceof BigDecimal) ?
+        (BigDecimal) v :
+      (v instanceof BigInteger) ?
+        (((BigInteger) v).bitLength() < Long.SIZE) ?
+          BigDecimal.valueOf(v.longValue()) :
+          new BigDecimal((BigInteger) v) :
+      isBasicIntegral(v) ?
+        BigDecimal.valueOf(v.longValue()) :
+        BigDecimal.valueOf(v.doubleValue());
   }
 }
