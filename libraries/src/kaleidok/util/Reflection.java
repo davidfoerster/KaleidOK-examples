@@ -21,9 +21,14 @@ public final class Reflection
       for (Class<?> clazz: WRAPPER_TYPES)
       {
         Class<?> primitive;
-        try {
+        try
+        {
           primitive = (Class<?>) clazz.getDeclaredField("TYPE").get(null);
-        } catch (NoSuchFieldException | IllegalAccessException ex) {
+          assert primitive.isPrimitive();
+        }
+        catch (@SuppressWarnings("ProhibitedExceptionCaught")
+          NoSuchFieldException | IllegalAccessException | ClassCastException | NullPointerException ex)
+        {
           throw new AssertionError(ex);
         }
         put(primitive, clazz);
