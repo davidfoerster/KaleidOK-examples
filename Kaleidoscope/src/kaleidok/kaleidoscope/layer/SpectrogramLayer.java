@@ -6,6 +6,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import kaleidok.audio.processor.MinimFFTProcessor;
+import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -32,8 +33,8 @@ public class SpectrogramLayer extends CircularImageLayer
    * Manages the exponent to adjust the dynamic range of the spectral
    * intensities.
    */
-  public final DoubleProperty exponent =
-    new SimpleDoubleProperty(this, "exponent", 1.125);
+  protected final SimpleBoundedDoubleProperty exponent =
+    new SimpleBoundedDoubleProperty(this, "exponent", 1.125, 0, 4, 0.05);
 
   private static final int MIN_FREQUENCY = 86;
 
@@ -64,6 +65,12 @@ public class SpectrogramLayer extends CircularImageLayer
   public FloatProperty scaleFactorProperty()
   {
     return super.scaleFactorProperty();
+  }
+
+
+  public DoubleProperty exponentProperty()
+  {
+    return exponent;
   }
 
 

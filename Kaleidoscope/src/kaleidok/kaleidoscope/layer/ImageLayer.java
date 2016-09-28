@@ -1,9 +1,8 @@
 package kaleidok.kaleidoscope.layer;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import kaleidok.javafx.beans.property.SimpleBoundedIntegerProperty;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.logging.LoggingUtils;
@@ -24,8 +23,8 @@ public abstract class ImageLayer implements Runnable
 
   public final StringProperty name;
 
-  public final IntegerProperty wireframe =
-    new SimpleIntegerProperty(this, "wireframe", 0);
+  public final SimpleBoundedIntegerProperty wireframe =
+    new SimpleBoundedIntegerProperty(this, "wireframe", 0, 0, 5);
 
   private final AtomicReference<PImageFuture> nextImage =
     new AtomicReference<>();

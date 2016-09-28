@@ -2,8 +2,8 @@ package kaleidok.kaleidoscope.layer;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.value.ObservableObjectValue;
+import kaleidok.javafx.beans.property.SimpleBoundedFloatProperty;
 import kaleidok.javafx.beans.property.SimpleBoundedIntegerProperty;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
@@ -18,10 +18,10 @@ public abstract class CircularImageLayer extends ImageLayer
 {
   public static final int MAX_SEGMENT_MULTIPLIER = MAX_SEGMENTS / MIN_SEGMENTS;
 
-  protected final FloatProperty
-    innerRadius = new SimpleFloatProperty(this, "inner radius"),
-    outerRadius = new SimpleFloatProperty(this, "outer radius"),
-    scaleFactor = new SimpleFloatProperty(this, "scale factor", 1);
+  protected final SimpleBoundedFloatProperty
+    innerRadius = new SimpleBoundedFloatProperty(this, "inner radius", 0.25f, 0, 1, 0.025f),
+    outerRadius = new SimpleBoundedFloatProperty(this, "outer radius", 0.50f, 0, 1, 0.025f),
+    scaleFactor = new SimpleBoundedFloatProperty(this, "scale factor", 1);
 
   public final SimpleBoundedIntegerProperty segmentCount;
 
@@ -38,6 +38,7 @@ public abstract class CircularImageLayer extends ImageLayer
     int segmentMultiplier )
   {
     super(parent);
+    scaleFactor.getBounds().setAmountToStepBy(0.01f);
 
     if (segmentMultiplier < 1 ||
       segmentMultiplier > MAX_SEGMENT_MULTIPLIER )
