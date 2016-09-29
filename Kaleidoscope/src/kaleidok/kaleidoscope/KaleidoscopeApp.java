@@ -1,9 +1,11 @@
 package kaleidok.kaleidoscope;
 
 import javafx.embed.swing.SwingNode;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import kaleidok.javafx.stage.Icons;
 import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
@@ -52,6 +54,11 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       configurationWindow = new Stage();
       configurationWindow.setTitle("Kaleidoscope configuration");
       configurationWindow.setScene(new Scene(getConfigurationEditor()));
+
+      // TODO: Find a more suitable default position
+      Rectangle2D screenBounds = Screen.getScreens().get(1).getBounds();
+      configurationWindow.setX(screenBounds.getMinX());
+      configurationWindow.setY(screenBounds.getMinY());
     }
     return configurationWindow;
   }
