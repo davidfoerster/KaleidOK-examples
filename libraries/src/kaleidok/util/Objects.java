@@ -72,16 +72,26 @@ public final class Objects
 
   public static int hashCode( int seed, long thing )
   {
-    return hashCode(hashCode(seed, (int) thing), (int)(thing >>> Integer.SIZE));
+    return hashCode(seed, Long.hashCode(thing));
   }
 
   public static int hashCode( int seed, Object thing )
   {
-    return hashCode(seed, (thing != null) ? thing.hashCode() : 0);
+    return hashCode(seed, java.util.Objects.hashCode(thing));
   }
 
   public static int hashCode( int seed, boolean thing )
   {
-    return hashCode(seed, thing ? 1 : 0);
+    return hashCode(seed, Boolean.hashCode(thing));
+  }
+
+  public static int hashCode( int seed, float thing )
+  {
+    return hashCode(seed, Float.hashCode(thing));
+  }
+
+  public static int hashCode( int seed, double thing )
+  {
+    return hashCode(seed, Double.hashCode(thing));
   }
 }
