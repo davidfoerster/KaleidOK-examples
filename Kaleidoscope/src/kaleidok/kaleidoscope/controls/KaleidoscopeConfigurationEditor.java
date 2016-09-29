@@ -35,6 +35,7 @@ public class KaleidoscopeConfigurationEditor
 
   public void init()
   {
+    setEditable(true);
     initColumns();
     initItems();
   }
@@ -46,12 +47,13 @@ public class KaleidoscopeConfigurationEditor
 
     TreeTableColumn<ReadOnlyProperty<?>, String> propertyNameColumn =
       new TreeTableColumn<>("Property");
+    propertyNameColumn.setEditable(false);
     propertyNameColumn.setCellValueFactory((cdf) -> {
         TreeItem<ReadOnlyProperty<?>> item = cdf.getValue();
         ReadOnlyProperty<?> p = item.getValue();
         //noinspection OverlyStrongTypeCast
         return
-          (!item.getChildren().isEmpty() &&
+          (!item.isLeaf() &&
             p instanceof ObservableStringValue &&
             "name".equals(p.getName()))
           ?
@@ -63,10 +65,11 @@ public class KaleidoscopeConfigurationEditor
 
     TreeTableColumn<ReadOnlyProperty<?>, Object> propertyValueColumn =
       new TreeTableColumn<>("Value");
+    propertyValueColumn.setEditable(true);
     propertyValueColumn.setCellValueFactory((cdf) -> {
         TreeItem<ReadOnlyProperty<?>> item = cdf.getValue();
         //noinspection unchecked
-        return item.getChildren().isEmpty() ?
+        return item.isLeaf() ?
           (ObservableValue<Object>) item.getValue() :
           null;
       });
@@ -98,6 +101,7 @@ public class KaleidoscopeConfigurationEditor
       root.getChildren().add(layerRoot);
     }
 
+    setShowRoot(false);
     setRoot(root);
   }
 }
