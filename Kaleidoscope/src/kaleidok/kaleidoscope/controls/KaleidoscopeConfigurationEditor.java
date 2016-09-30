@@ -5,14 +5,18 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-import javafx.scene.control.cell.TextFieldTreeTableCell;
 import kaleidok.javafx.beans.property.PropertyUtils;
-import kaleidok.javafx.util.converter.StringConvertible;
+import kaleidok.javafx.scene.control.cell.factory.CellSpinnerFactory;
+import kaleidok.javafx.scene.control.cell.DynamicEditableTreeCell;
+import kaleidok.javafx.scene.control.cell.DynamicEditableTreeCell.CellNodeFactory;
+import kaleidok.javafx.scene.control.cell.factory.MultiTreeTableCellFactory;
 import kaleidok.kaleidoscope.Kaleidoscope;
 import kaleidok.kaleidoscope.layer.ImageLayer;
+import kaleidok.util.Arrays;
 import kaleidok.util.function.InstanceSupplier;
 
 import java.util.HashSet;
@@ -76,7 +80,7 @@ public class KaleidoscopeConfigurationEditor
           null;
       });
     propertyValueColumn.setCellFactory(
-      (col) -> new TextFieldTreeTableCell<ReadOnlyProperty<?>, Object>()
+      (col) -> new DynamicEditableTreeCell<ReadOnlyProperty<?>, Object, Node>(cellFactories)
       {
         @Override
         public void startEdit()
@@ -95,10 +99,13 @@ public class KaleidoscopeConfigurationEditor
         @Override
         public void updateItem( Object item, boolean empty )
         {
-          //logMethodCall("updateItem");
-          //System.out.format("empty: %s, item: %s%n", empty, item);
+          logMethodCall("updateItem");
+          System.out.format("empty: %s, item (%s): %s%n",
+            empty, (item != null) ? item.getClass().getName() : null, item);
+
           super.updateItem(item, empty);
 
+          /*
           if (getConverter() == null)
           {
             ReadOnlyProperty<?> property = getTreeTableRow().getItem();
@@ -109,6 +116,7 @@ public class KaleidoscopeConfigurationEditor
                 ((StringConvertible<Object>) property).getStringConverter());
             }
           }
+          */
         }
 
         private void logMethodCall( String methodName )
@@ -135,7 +143,6 @@ public class KaleidoscopeConfigurationEditor
   }
 
 
-  /*
   private static final MultiTreeTableCellFactory<ReadOnlyProperty<?>, Object, Node> cellFactories;
 
   static
@@ -149,7 +156,6 @@ public class KaleidoscopeConfigurationEditor
     cellFactories = new MultiTreeTableCellFactory<>(
       (List<? extends CellNodeFactory<ReadOnlyProperty<?>, Object, Node>>) cfList);
   }
-  */
 
 
   private void initItems()
