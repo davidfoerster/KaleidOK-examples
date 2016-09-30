@@ -1,9 +1,9 @@
 package kaleidok.kaleidoscope.layer;
 
-import javafx.beans.property.FloatProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ObservableObjectValue;
-import kaleidok.javafx.beans.property.SimpleBoundedFloatProperty;
+import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
 import kaleidok.javafx.beans.property.SimpleBoundedIntegerProperty;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
@@ -18,10 +18,13 @@ public abstract class CircularImageLayer extends ImageLayer
 {
   public static final int MAX_SEGMENT_MULTIPLIER = MAX_SEGMENTS / MIN_SEGMENTS;
 
-  protected final SimpleBoundedFloatProperty
-    innerRadius = new SimpleBoundedFloatProperty(this, "inner radius", 0.25f, 0, 1, 0.025f),
-    outerRadius = new SimpleBoundedFloatProperty(this, "outer radius", 0.50f, 0, 1, 0.025f),
-    scaleFactor = new SimpleBoundedFloatProperty(this, "scale factor", 1);
+  protected final SimpleBoundedDoubleProperty
+    innerRadius = new SimpleBoundedDoubleProperty(
+      this, "inner radius", 0.25, 0, 1, 0.025),
+    outerRadius = new SimpleBoundedDoubleProperty(
+      this, "outer radius", 0.50, 0, 1, 0.025),
+    scaleFactor = SimpleBoundedDoubleProperty.forFloat(
+      this, "scale factor", 1);
 
   public final SimpleBoundedIntegerProperty segmentCount;
 
@@ -64,19 +67,19 @@ public abstract class CircularImageLayer extends ImageLayer
   }
 
 
-  public FloatProperty innerRadiusProperty()
+  public DoubleProperty innerRadiusProperty()
   {
     return innerRadius;
   }
 
 
-  public FloatProperty outerRadiusProperty()
+  public DoubleProperty outerRadiusProperty()
   {
     return outerRadius;
   }
 
 
-  public FloatProperty scaleFactorProperty()
+  public DoubleProperty scaleFactorProperty()
   {
     return scaleFactor;
   }

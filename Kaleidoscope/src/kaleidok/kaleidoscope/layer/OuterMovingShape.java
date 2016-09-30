@@ -31,7 +31,7 @@ public class OuterMovingShape extends CircularImageLayer
   private double angle = 0, step = 0;
 
 
-  public OuterMovingShape( ExtPApplet parent, int segmentCount, float radius )
+  public OuterMovingShape( ExtPApplet parent, int segmentCount, double radius )
   {
     super(parent, segmentCount);
     this.outerRadius.set(radius);
@@ -43,7 +43,7 @@ public class OuterMovingShape extends CircularImageLayer
   {
     final PApplet parent = this.parent;
     final int wireframe = this.wireframe.get();
-    final float outerRadius = this.outerRadius.get();
+    final float outerRadius = (float) this.outerRadius.get();
 
     if (wireframe >= 2) {
       parent.stroke(192, 0, 0);

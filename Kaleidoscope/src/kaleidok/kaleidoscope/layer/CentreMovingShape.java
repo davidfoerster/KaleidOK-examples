@@ -1,7 +1,6 @@
 package kaleidok.kaleidoscope.layer;
 
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.FloatProperty;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
 import kaleidok.processing.ExtPApplet;
@@ -38,7 +37,7 @@ public class CentreMovingShape extends CircularImageLayer
 
 
   public CentreMovingShape( ExtPApplet parent, List<PImageFuture> images,
-    int segmentCount, float innerRadius, float outerRadius,
+    int segmentCount, double innerRadius, double outerRadius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
     this(parent, new CyclingList<>(images, (int) parent.random(images.size())),
@@ -47,8 +46,8 @@ public class CentreMovingShape extends CircularImageLayer
 
 
   private CentreMovingShape( ExtPApplet parent,
-    CyclingList<PImageFuture> images, int segmentCount, float innerRadius,
-    float outerRadius, VolumeLevelProcessor volumeLevelProcessor )
+    CyclingList<PImageFuture> images, int segmentCount, double innerRadius,
+    double outerRadius, VolumeLevelProcessor volumeLevelProcessor )
   {
     super(parent, segmentCount);
     this.innerRadius.set(innerRadius);
@@ -73,7 +72,7 @@ public class CentreMovingShape extends CircularImageLayer
    */
   @SuppressWarnings("RedundantMethodOverride")
   @Override
-  public FloatProperty scaleFactorProperty()
+  public DoubleProperty scaleFactorProperty()
   {
     return super.scaleFactorProperty();
   }
@@ -111,9 +110,9 @@ public class CentreMovingShape extends CircularImageLayer
     // Adjust the dynamic range of the volume level:
     level = pow(level * scaleFactor.get(), exponent.get());
     final float
-      outerRadius = this.outerRadius.get(),
+      outerRadius = (float) this.outerRadius.get(),
       radius = mapNormalized(
-        (float) level, this.innerRadius.get(), outerRadius);
+        (float) level, (float) this.innerRadius.get(), outerRadius);
 
     final PApplet parent = this.parent;
     final int wireframe = this.wireframe.get();

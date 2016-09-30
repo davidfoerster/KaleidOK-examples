@@ -28,10 +28,24 @@ public class SimpleBoundedDoubleProperty extends SimpleDoubleProperty
   }
 
 
+  public static SimpleBoundedDoubleProperty forFloat( Object bean, String name )
+  {
+    return forFloat(bean, name, 0);
+  }
+
+
   public SimpleBoundedDoubleProperty( Object bean, String name,
-    double initialValue )
+    float initialValue )
   {
     this(bean, name, initialValue, -Double.MAX_VALUE, Double.MAX_VALUE);
+  }
+
+
+  public static SimpleBoundedDoubleProperty forFloat( Object bean, String name,
+    double initialValue )
+  {
+    return new SimpleBoundedDoubleProperty(
+      bean, name, initialValue, -Float.MAX_VALUE, Float.MAX_VALUE);
   }
 
 

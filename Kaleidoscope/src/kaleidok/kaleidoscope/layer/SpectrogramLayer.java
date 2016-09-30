@@ -40,7 +40,7 @@ public class SpectrogramLayer extends CircularImageLayer
 
 
   public SpectrogramLayer( ExtPApplet parent, int segmentCount,
-    float innerRadius, float outerRadius, MinimFFTProcessor spectrum,
+    double innerRadius, double outerRadius, MinimFFTProcessor spectrum,
     float sampleRate )
   {
     super(parent, segmentCount, SEGMENT_MULTIPLIER);
@@ -62,7 +62,7 @@ public class SpectrogramLayer extends CircularImageLayer
    */
   @SuppressWarnings("RedundantMethodOverride")
   @Override
-  public FloatProperty scaleFactorProperty()
+  public DoubleProperty scaleFactorProperty()
   {
     return super.scaleFactorProperty();
   }
@@ -98,12 +98,12 @@ public class SpectrogramLayer extends CircularImageLayer
   {
     final PApplet parent = this.parent;
     final int wireframe = this.wireframe.get();
-    final float outerRadius = this.outerRadius.get();
+    final float outerRadius = (float) this.outerRadius.get();
 
     if (wireframe >= 2)
     {
       parent.stroke(0, 192, 0);
-      drawDebugCircle(innerRadius.get());
+      drawDebugCircle((float) innerRadius.get());
       parent.stroke(128, 255, 128);
       drawDebugCircle(outerRadius);
     }
@@ -112,9 +112,10 @@ public class SpectrogramLayer extends CircularImageLayer
       return;
 
     final MinimFFTProcessor avgSpectrum = this.avgSpectrum;
-    final float scaledInnerRadius = this.scaledInnerRadius.floatValue(),
+    final float
+      scaledInnerRadius = this.scaledInnerRadius.floatValue(),
       outerScale = 1 - scaledInnerRadius,
-      scaleFactor = this.scaleFactor.get();
+      scaleFactor = (float) this.scaleFactor.get();
     final double exponent = this.exponent.get();
     final int segmentCount = this.segmentCount.get();
     assert segmentCount <= avgSpectrum.size() :

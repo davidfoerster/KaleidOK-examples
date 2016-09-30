@@ -2,7 +2,7 @@ package kaleidok.kaleidoscope.layer;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.FloatBinding;
-import javafx.beans.property.FloatProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.ObservableFloatValue;
 import javafx.beans.value.ObservableNumberValue;
 import kaleidok.processing.ExtPApplet;
@@ -22,12 +22,12 @@ import static kaleidok.util.Math.mapNormalized;
 public class FoobarLayer extends CircularImageLayer
 {
   public FoobarLayer( ExtPApplet parent, int segmentCount,
-    float innerRadius, float outerRadius )
+    double innerRadius, double outerRadius )
   {
     super(parent, segmentCount);
     this.innerRadius.set(innerRadius);
     this.outerRadius.set(outerRadius);
-    this.scaleFactor.set(0.5f);
+    this.scaleFactor.set(0.5);
   }
 
 
@@ -39,7 +39,7 @@ public class FoobarLayer extends CircularImageLayer
    */
   @SuppressWarnings("RedundantMethodOverride")
   @Override
-  public FloatProperty innerRadiusProperty()
+  public DoubleProperty innerRadiusProperty()
   {
     return super.innerRadiusProperty();
   }
@@ -53,7 +53,7 @@ public class FoobarLayer extends CircularImageLayer
    */
   @SuppressWarnings("RedundantMethodOverride")
   @Override
-  public FloatProperty outerRadiusProperty()
+  public DoubleProperty outerRadiusProperty()
   {
     return super.outerRadiusProperty();
   }
@@ -72,7 +72,7 @@ public class FoobarLayer extends CircularImageLayer
  */
   @SuppressWarnings("RedundantMethodOverride")
   @Override
-  public FloatProperty scaleFactorProperty()
+  public DoubleProperty scaleFactorProperty()
   {
     return super.scaleFactorProperty();
   }
@@ -92,7 +92,8 @@ public class FoobarLayer extends CircularImageLayer
       protected float computeValue()
       {
         float innerOffset = FoobarLayer.this.innerOffset.floatValue();
-        return innerOffset + (1 - innerOffset) * (1 - scaleFactor.get());
+        return innerOffset +
+          (1 - innerOffset) * (1 - (float) scaleFactor.get());
       }
     };
 
@@ -107,7 +108,7 @@ public class FoobarLayer extends CircularImageLayer
       @Override
       protected float computeValue()
       {
-        return (1 - innerOffset.floatValue()) * scaleFactor.get();
+        return (1 - innerOffset.floatValue()) * (float) scaleFactor.get();
       }
     };
 
@@ -118,8 +119,8 @@ public class FoobarLayer extends CircularImageLayer
     final PApplet parent = this.parent;
     final int wireframe = this.wireframe.get();
     final float
-      innerRadius = this.innerRadius.get(),
-      outerRadius = this.outerRadius.get(),
+      innerRadius = (float) this.innerRadius.get(),
+      outerRadius = (float) this.outerRadius.get(),
       innerOffset = this.innerOffset.floatValue(),
       outerOffset = this.outerOffset.get(),
       innerScale = this.innerScale.get(),
@@ -136,7 +137,7 @@ public class FoobarLayer extends CircularImageLayer
       drawDebugCircle(outerRadius);
 
       float
-        scaleFactor = this.scaleFactor.get(),
+        scaleFactor = (float) this.scaleFactor.get(),
         innerScaled = mapNormalized(scaleFactor, innerRadius, outerRadius),
         //innerScaled = map(scaleFactor, 0, 1, innerRadius, outerRadius),
         outerScaled = mapNormalized(scaleFactor, outerRadius, innerRadius),
