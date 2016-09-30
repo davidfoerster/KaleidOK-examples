@@ -4,7 +4,6 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.util.StringConverter;
-import kaleidok.javafx.util.converter.ConverterUtil;
 import kaleidok.javafx.util.converter.StringConvertible;
 
 
@@ -102,6 +101,6 @@ public class SimpleBoundedDoubleProperty extends SimpleDoubleProperty
   @Override
   public StringConverter<Double> getStringConverter()
   {
-    return ConverterUtil.DOUBLE_STRING_CONVERTER;
+    return svf.getConverter();
   }
 }

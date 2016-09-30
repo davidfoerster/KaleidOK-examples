@@ -4,7 +4,6 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.util.StringConverter;
-import kaleidok.javafx.util.converter.ConverterUtil;
 import kaleidok.javafx.util.converter.StringConvertible;
 
 
@@ -88,6 +87,6 @@ public class SimpleBoundedIntegerProperty extends SimpleIntegerProperty
   @Override
   public StringConverter<Integer> getStringConverter()
   {
-    return ConverterUtil.INTEGER_STRING_CONVERTER;
+    return svf.getConverter();
   }
 }
