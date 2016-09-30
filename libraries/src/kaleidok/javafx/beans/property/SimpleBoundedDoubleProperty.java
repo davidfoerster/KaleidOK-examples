@@ -3,13 +3,10 @@ package kaleidok.javafx.beans.property;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.util.StringConverter;
-import kaleidok.javafx.util.converter.StringConvertible;
 
 
 public class SimpleBoundedDoubleProperty extends SimpleDoubleProperty
-  implements BoundedValue<Double, DoubleSpinnerValueFactory>,
-  StringConvertible<Double>
+  implements BoundedValue<Double, DoubleSpinnerValueFactory>
 {
   private final DoubleSpinnerValueFactory svf;
 
@@ -95,12 +92,5 @@ public class SimpleBoundedDoubleProperty extends SimpleDoubleProperty
   public DoubleSpinnerValueFactory getBounds()
   {
     return svf;
-  }
-
-
-  @Override
-  public StringConverter<Double> getStringConverter()
-  {
-    return svf.getConverter();
   }
 }
