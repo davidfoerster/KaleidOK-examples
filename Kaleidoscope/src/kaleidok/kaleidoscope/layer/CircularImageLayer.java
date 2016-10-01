@@ -12,6 +12,7 @@ import processing.core.PConstants;
 import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.DIMENSIONS;
 import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.MAX_SEGMENTS;
 import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.MIN_SEGMENTS;
+import static kaleidok.kaleidoscope.layer.LayerUtils.adjustPercentFormat;
 
 
 public abstract class CircularImageLayer extends ImageLayer
@@ -41,7 +42,11 @@ public abstract class CircularImageLayer extends ImageLayer
     int segmentMultiplier )
   {
     super(parent);
-    scaleFactor.getBounds().setAmountToStepBy(0.01f);
+
+    adjustPercentFormat(innerRadius);
+    adjustPercentFormat(outerRadius);
+    scaleFactor.getBounds().setAmountToStepBy(0.01);
+    adjustPercentFormat(scaleFactor);
 
     if (segmentMultiplier < 1 ||
       segmentMultiplier > MAX_SEGMENT_MULTIPLIER )

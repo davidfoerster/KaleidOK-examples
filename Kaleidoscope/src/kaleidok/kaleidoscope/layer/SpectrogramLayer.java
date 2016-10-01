@@ -3,8 +3,6 @@ package kaleidok.kaleidoscope.layer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.FloatProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
 import kaleidok.processing.ExtPApplet;
