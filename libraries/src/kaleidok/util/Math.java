@@ -4,6 +4,8 @@ import kaleidok.util.containers.FloatList;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.Math.*;
 
@@ -158,7 +160,8 @@ public final class Math
   {
     return
       n instanceof Integer || n instanceof Long || n instanceof Short ||
-      n instanceof Byte;
+      n instanceof Byte || n instanceof AtomicInteger || n instanceof AtomicLong ||
+      (n instanceof BigInteger && ((BigInteger) n).bitLength() < Long.SIZE);
   }
 
 
@@ -178,12 +181,10 @@ public final class Math
     return
       (v instanceof BigDecimal) ?
         (BigDecimal) v :
-      (v instanceof BigInteger) ?
-        (((BigInteger) v).bitLength() < Long.SIZE) ?
-          BigDecimal.valueOf(v.longValue()) :
-          new BigDecimal((BigInteger) v) :
       isBasicIntegral(v) ?
         BigDecimal.valueOf(v.longValue()) :
+      (v instanceof BigInteger) ?
+        new BigDecimal((BigInteger) v) :
         BigDecimal.valueOf(v.doubleValue());
   }
 }
