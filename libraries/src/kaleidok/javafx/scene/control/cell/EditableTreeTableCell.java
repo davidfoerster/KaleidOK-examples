@@ -127,7 +127,9 @@ public abstract class EditableTreeTableCell<S, T, N extends Node>
     public void handle( MouseEvent ev )
     {
       if (ev.getEventType() == MouseEvent.MOUSE_PRESSED &&
-        ev.getButton() == MouseButton.PRIMARY && ev.getClickCount() == 2)
+        ev.getButton() == MouseButton.PRIMARY && ev.getClickCount() == 2 &&
+        !ev.isAltDown() && !ev.isControlDown() && !ev.isShiftDown() &&
+        !ev.isMetaDown())
       {
         if (((EditableTreeTableCell<?,?,?>) ev.getTarget()).startEdit2())
           ev.consume();
@@ -143,7 +145,8 @@ public abstract class EditableTreeTableCell<S, T, N extends Node>
     @Override
     public void handle( KeyEvent ev )
     {
-      if (ev.getEventType() == KeyEvent.KEY_TYPED)
+      if (ev.getEventType() == KeyEvent.KEY_TYPED && !ev.isAltDown() &&
+        !ev.isControlDown() && !ev.isShiftDown() && !ev.isMetaDown())
       {
         switch (ev.getCode())
         {
