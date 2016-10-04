@@ -2,6 +2,7 @@ package kaleidok.javafx.util.converter;
 
 import javafx.util.StringConverter;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
@@ -20,23 +21,44 @@ public abstract class NumberStringConverterBase<T extends Number>
   }
 
 
+  private String toStringCachedString;
+
+  private Number toStringCachedNumber;
+
   @Override
   public String toString( Number value )
   {
-    return getFormat()
-      .format(value, getStringBufferInstance(), getFieldPositionInstance())
-      .toString();
+    if (value.equals(toStringCachedNumber))
+      return toStringCachedString;
+
+    String result = toStringCachedString =
+      getFormat()
+        .format(value, getStringBufferInstance(), getFieldPositionInstance())
+        .toString();
+    toStringCachedNumber = value;
+    return result;
   }
 
+
+  private String fromStringCachedString;
+
+  private T fromStringCachedNumber;
 
   @Override
   public T fromString( String string )
     throws NumberFormatException
   {
+    if (string.equals(fromStringCachedString))
+      return fromStringCachedNumber;
+
     ParsePosition parsePosition = getParsePositionInstance();
     Number result = getFormat().parse(string, parsePosition);
     if (parsePosition.getIndex() != 0)
-      return convertNumber(result);
+    {
+      T typedResult = fromStringCachedNumber = convertNumber(result);
+      fromStringCachedString = string;
+      return typedResult;
+    }
 
     throw new NumberFormatException(string);
   }
@@ -52,7 +74,21 @@ public abstract class NumberStringConverterBase<T extends Number>
 
   public void setFormat( NumberFormat format )
   {
-    this.format = Objects.requireNonNull(format);
+    if (format != this.format)
+    {
+      this.format = Objects.requireNonNull(format);
+      resetCaches();
+    }
+  }
+
+
+  @OverridingMethodsMustInvokeSuper
+  public void resetCaches()
+  {
+    fromStringCachedNumber = null;
+    fromStringCachedString = null;
+    toStringCachedNumber = null;
+    toStringCachedString = null;
   }
 
 
