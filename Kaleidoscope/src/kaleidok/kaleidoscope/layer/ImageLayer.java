@@ -39,6 +39,7 @@ public abstract class ImageLayer implements Runnable
     this.parent = parent;
     this.name = new SimpleStringProperty(
       this, "name", getDefaultName(getClass()));
+    wireframe.levelOfDetail = 100;
   }
 
 

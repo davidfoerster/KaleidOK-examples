@@ -6,7 +6,8 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 
 
 public class SimpleBoundedDoubleProperty extends SimpleDoubleProperty
-  implements BoundedValue<Double, DoubleSpinnerValueFactory>
+  implements BoundedValue<Double, DoubleSpinnerValueFactory>,
+    LevelOfDetail
 {
   private final DoubleSpinnerValueFactory svf;
 
@@ -92,5 +93,14 @@ public class SimpleBoundedDoubleProperty extends SimpleDoubleProperty
   public DoubleSpinnerValueFactory getBounds()
   {
     return svf;
+  }
+
+
+  public int levelOfDetail;
+
+  @Override
+  public int getLevelOfDetail()
+  {
+    return levelOfDetail;
   }
 }

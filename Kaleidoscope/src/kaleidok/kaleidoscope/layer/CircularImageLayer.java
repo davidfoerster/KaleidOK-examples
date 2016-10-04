@@ -43,6 +43,8 @@ public abstract class CircularImageLayer extends ImageLayer
     int segmentMultiplier )
   {
     super(parent);
+    innerRadius.levelOfDetail = 5;
+    outerRadius.levelOfDetail = 5;
     scaleFactor.getBounds().setAmountToStepBy(0.01);
 
     if (segmentMultiplier < 1 ||
@@ -56,6 +58,7 @@ public abstract class CircularImageLayer extends ImageLayer
     this.segmentCount =
       new SimpleBoundedIntegerProperty(this, "segment count", segmentCount,
         MIN_SEGMENTS, MAX_SEGMENTS / segmentMultiplier);
+    this.segmentCount.levelOfDetail = 10;
     this.segmentCoords = new CircularTriangleStripSegmentCoordinates(
       (segmentMultiplier != 1) ?
         this.segmentCount.multiply(segmentMultiplier) :

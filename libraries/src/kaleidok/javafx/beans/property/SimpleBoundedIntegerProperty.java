@@ -6,7 +6,8 @@ import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 
 
 public class SimpleBoundedIntegerProperty extends SimpleIntegerProperty
-  implements BoundedValue<Integer, IntegerSpinnerValueFactory>
+  implements BoundedValue<Integer, IntegerSpinnerValueFactory>,
+    LevelOfDetail
 {
   private final IntegerSpinnerValueFactory svf;
 
@@ -78,5 +79,14 @@ public class SimpleBoundedIntegerProperty extends SimpleIntegerProperty
   public IntegerSpinnerValueFactory getBounds()
   {
     return svf;
+  }
+
+
+  public int levelOfDetail;
+
+  @Override
+  public int getLevelOfDetail()
+  {
+    return levelOfDetail;
   }
 }
