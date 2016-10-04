@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import kaleidok.javafx.beans.property.LevelOfDetail.DefaultLevelOfDetailComparator;
 import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider;
@@ -17,12 +18,11 @@ import kaleidok.javafx.scene.control.cell.factory.MultiTreeItemProvider;
 import kaleidok.kaleidoscope.Kaleidoscope;
 import kaleidok.kaleidoscope.layer.ImageLayer;
 import kaleidok.util.Arrays;
-import kaleidok.util.function.InstanceSupplier;
 
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -153,43 +153,63 @@ public class KaleidoscopeConfigurationEditor
     TreeItem<ReadOnlyProperty<?>> root = new TreeItem<>(
       new ReadOnlyStringWrapper(null, "name", "Kaleidoscope")
         .getReadOnlyProperty());
+
+    root.getChildren().addAll(
+      parent.getLayers().stream()
+        .map(KaleidoscopeConfigurationEditor::makeLayerItem)
+        .collect(Collectors.toList()));
+
     root.setExpanded(true);
-    Set<Property<?>> propertySet = new HashSet<>();
-
-    for (final ImageLayer layer: parent.getLayers())
-    {
-      TreeItem<ReadOnlyProperty<?>> layerRoot = new TreeItem<>(layer.name);
-      layerRoot.setExpanded(true);
-
-      propertySet.clear();
-      propertySet = PropertyUtils.getProperties(layer, propertySet);
-      propertySet.remove(layer.name);
-      //noinspection ResultOfMethodCallIgnored,unchecked
-      propertySet.stream()
-        .map((p) -> (TreeItem<ReadOnlyProperty<?>>) (TreeItem<?>)
-          new DynamicEditableTreeItem<>((ReadOnlyProperty<Object>) p, cellFactories))
-        .sequential().collect(Collectors.toCollection(
-          new InstanceSupplier<>(layerRoot.getChildren())));
-
-      root.getChildren().add(layerRoot);
-    }
-
     setShowRoot(false);
     //noinspection unchecked
     setRoot((TreeItem<ReadOnlyProperty<Object>>) (TreeItem<?>) root);
   }
 
 
-  private static final MultiTreeItemProvider<Object, Node> cellFactories;
-
-  static
+  private static TreeItem<ReadOnlyProperty<?>> makeLayerItem(
+    final ImageLayer layer )
   {
-    List<TreeItemProvider<?, ?>> treeItemFactories =
-      Arrays.asImmutableList(
-        new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>());
+    TreeItem<ReadOnlyProperty<?>> layerRoot = new TreeItem<>(layer.name);
 
-    //noinspection unchecked
-    cellFactories = new MultiTreeItemProvider<>(
-      (List<TreeItemProvider<Object, Node>>) (List<?>) treeItemFactories);
+    //noinspection unchecked,OverlyStrongTypeCast,RedundantCast
+    layerRoot.getChildren().addAll(
+      (List<? extends TreeItem<ReadOnlyProperty<?>>>) (List<? extends TreeItem<?>>)
+        PropertyUtils.getProperties(layer, null).stream()
+          .filter((p) -> p != layer.name && !p.getName().isEmpty())
+          .sorted(
+            new DefaultLevelOfDetailComparator<Property<?>>(0)
+              .thenComparing(Comparator.comparing(Property::getName)))
+          .map(MyTreeItemProvider.INSTANCE)
+          .collect(Collectors.toList()));
+
+    layerRoot.setExpanded(true);
+    return layerRoot;
+  }
+
+
+  private static final class MyTreeItemProvider
+    extends MultiTreeItemProvider<Object, Node>
+    implements Function<Property<?>, TreeItem<ReadOnlyProperty<Object>>>
+  {
+    public static final MyTreeItemProvider INSTANCE = new MyTreeItemProvider();
+
+
+    private MyTreeItemProvider()
+    {
+      //noinspection unchecked,RedundantCast
+      super(
+        (List<? extends TreeItemProvider<Object, Node>>) (List<? extends TreeItemProvider<?,?>>)
+        Arrays.asImmutableList(
+          new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>()));
+    }
+
+
+    @Override
+    public TreeItem<ReadOnlyProperty<Object>> apply( Property<?> property )
+    {
+      //noinspection unchecked
+      return new DynamicEditableTreeItem<>(
+        (ReadOnlyProperty<Object>) property, this);
+    }
   }
 }
