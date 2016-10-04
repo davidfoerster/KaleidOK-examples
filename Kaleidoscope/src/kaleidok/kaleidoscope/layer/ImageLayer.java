@@ -42,6 +42,9 @@ public abstract class ImageLayer implements Runnable
   }
 
 
+  public void init() { }
+
+
   private static String getDefaultName( Class<? extends ImageLayer> clazz )
   {
     String layerSuffix = "Layer",

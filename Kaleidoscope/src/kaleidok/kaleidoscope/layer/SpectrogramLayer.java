@@ -44,11 +44,21 @@ public class SpectrogramLayer extends CircularImageLayer
     super(parent, segmentCount, SEGMENT_MULTIPLIER);
     this.innerRadius.set(innerRadius);
     this.outerRadius.set(outerRadius);
+    this.scaleFactor.getBounds().setAmountToStepBy(0.0025);
+
     avgSpectrum = spectrum;
 
     float nyquistFreq = sampleRate / 2;
     avgSpectrum.logAverages(MIN_FREQUENCY,
       (int) ceil(segmentCount / log2(nyquistFreq / MIN_FREQUENCY)));
+  }
+
+
+  @Override
+  public void init()
+  {
+    super.init();
+    LayerUtils.adjustFormat(exponent);
   }
 
 

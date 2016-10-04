@@ -58,6 +58,8 @@ public class LayerManager implements List<ImageLayer>, Runnable
     layers.add(getCentreLayer());
 
     applyLayerProperties();
+
+    layers.forEach(ImageLayer::init);
   }
 
 

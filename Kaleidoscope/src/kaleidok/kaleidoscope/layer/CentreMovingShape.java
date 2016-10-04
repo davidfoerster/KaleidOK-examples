@@ -13,7 +13,6 @@ import processing.core.PImage;
 import java.util.List;
 
 import static java.lang.Math.pow;
-import static kaleidok.kaleidoscope.layer.LayerUtils.adjustFormat;
 import static kaleidok.util.Math.mapNormalized;
 
 
@@ -57,6 +56,14 @@ public class CentreMovingShape extends CircularImageLayer
     setNextImage(images.getNext());
     this.images = images;
     this.volumeLevelProcessor = volumeLevelProcessor;
+  }
+
+
+  @Override
+  public void init()
+  {
+    super.init();
+    LayerUtils.adjustFormat(exponent);
   }
 
 
