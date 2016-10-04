@@ -1,24 +1,19 @@
 package kaleidok.javafx.scene.control.cell;
 
-import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 
-import java.util.Objects;
 
-
-public abstract class EditableTreeTableCell<S, T, N extends Node>
-  extends TreeTableCell<S, T>
+public abstract class EditableTreeTableCell<T, N extends Node>
+  extends TreeTableCell<ReadOnlyProperty<T>, T>
 {
-  protected N editorNode = null;
-
-  private Property<T> editorValue = null;
-
-
   protected EditableTreeTableCell()
   {
     setOnMouseClicked(DefaultMouseHandler.INSTANCE);
@@ -26,7 +21,57 @@ public abstract class EditableTreeTableCell<S, T, N extends Node>
   }
 
 
-  protected abstract EditorNodeInfo<N, T> makeEditorNode();
+  private EditorNodeInfo<N, T> getEditorNodeInfo()
+  {
+    if (isEditableInherited())
+    {
+      TreeItem<ReadOnlyProperty<T>> item = getTreeTableRow().getTreeItem();
+      if (item instanceof EditableTreeItem)
+      {
+        EditorNodeInfo<N, T> editorNodeInfo =
+          ((EditableTreeItem<T, N>) item).getEditorNodeInfo();
+        if (editorNodeInfo != null)
+        {
+          if (!editorNodeInfo.isEmpty())
+            return editorNodeInfo;
+
+          setEditable(false);
+        }
+      }
+    }
+    return null;
+  }
+
+
+  public N getEditorNode()
+  {
+    EditorNodeInfo<N, ?> nodeInfo = getEditorNodeInfo();
+    return (nodeInfo != null) ? nodeInfo.node : null;
+  }
+
+
+  private ReadOnlyProperty<T> getEditorValue()
+  {
+    EditorNodeInfo<N, T> nodeInfo = getEditorNodeInfo();
+    return (nodeInfo != null) ? nodeInfo.editorValue : null;
+  }
+
+
+  private String getEditorText()
+  {
+    return getEditorText(getItem(), isEmpty());
+  }
+
+  private String getEditorText( T item, boolean empty )
+  {
+    if (item == null || empty)
+      return null;
+
+    EditorNodeInfo<N, T> nodeInfo = getEditorNodeInfo();
+    return (nodeInfo != null && nodeInfo.editorStringValue != null) ?
+      nodeInfo.editorStringValue.get() :
+      item.toString();
+  }
 
 
   @Override
@@ -35,30 +80,8 @@ public abstract class EditableTreeTableCell<S, T, N extends Node>
     super.updateItem(item, empty);
 
     boolean editing = isEditing();
-    setText((!empty && !editing && item != null) ? item.toString() : null);
-    setGraphic((!empty && editing) ? editorNode : null);
-  }
-
-
-  public N getEditorNode()
-  {
-    if (editorNode == null && isEditable())
-    {
-      EditorNodeInfo<N, T> nodeInfo = makeEditorNode();
-      if (nodeInfo != null)
-      {
-        if (nodeInfo.node != null)
-        {
-          editorNode = nodeInfo.node;
-          editorValue = nodeInfo.editorValue;
-        }
-        else
-        {
-          setEditable(false);
-        }
-      }
-    }
-    return editorNode;
+    setText(!editing ? getEditorText(item, empty) : null);
+    setGraphic((editing && !empty) ? getEditorNode() : null);
   }
 
 
@@ -80,8 +103,12 @@ public abstract class EditableTreeTableCell<S, T, N extends Node>
         if (isEditing())
         {
           setText(null);
-          if (editorValue != null)
-            editorValue.setValue(!isEmpty() ? getItem() : null);
+
+          // TODO: Is this part necessary?
+          //Property<S> editorValue = getEditorValue();
+          //if (editorValue != null)
+            //editorValue.setValue(!isEmpty() ? getItem() : null);
+
           setGraphic(node);
           node.requestFocus();
           return true;
@@ -112,8 +139,7 @@ public abstract class EditableTreeTableCell<S, T, N extends Node>
     //if (editorValue != null)
       //setItem(editorValue.getValue());
 
-    T item = getItem();
-    setText((item != null && !isEmpty()) ? item.toString() : null);
+    setText(getEditorText());
     setGraphic(null);
   }
 
@@ -131,7 +157,7 @@ public abstract class EditableTreeTableCell<S, T, N extends Node>
         !ev.isAltDown() && !ev.isControlDown() && !ev.isShiftDown() &&
         !ev.isMetaDown())
       {
-        if (((EditableTreeTableCell<?,?,?>) ev.getTarget()).startEdit2())
+        if (((EditableTreeTableCell<?,?>) ev.getTarget()).startEdit2())
           ev.consume();
       }
     }
@@ -152,71 +178,11 @@ public abstract class EditableTreeTableCell<S, T, N extends Node>
         {
         case ENTER:
         case F2:
-          if (((EditableTreeTableCell<?, ?, ?>) ev.getTarget()).startEdit2())
+          if (((EditableTreeTableCell<?, ?>) ev.getTarget()).startEdit2())
             ev.consume();
           break;
         }
       }
-    }
-  }
-
-
-  public static class EditorNodeInfo<N extends Node, T>
-  {
-    private static EditorNodeInfo<?, ?> EMPTY =
-      new EditorNodeInfo<>(null, null);
-
-    public final N node;
-
-    public final Property<T> editorValue;
-
-
-    protected EditorNodeInfo( N node, Property<T> editorValue )
-    {
-      this.node = node;
-      this.editorValue = editorValue;
-    }
-
-
-    public static <N extends Node, T> EditorNodeInfo<N, T> of( N node,
-      Property<T> editorValue )
-    {
-      return (node != null) ?
-        new EditorNodeInfo<>(node, editorValue) :
-        empty();
-    }
-
-
-    @SuppressWarnings("unchecked")
-    public static <N extends Node, T> EditorNodeInfo<N, T> empty()
-    {
-      return (EditorNodeInfo<N, T>) EMPTY;
-    }
-
-
-    @Override
-    public int hashCode()
-    {
-      return kaleidok.util.Objects.hashCode(Objects.hashCode(node), editorValue);
-    }
-
-
-    @Override
-    public boolean equals( Object other )
-    {
-      if (other == this)
-        return true;
-      if (!(other instanceof EditorNodeInfo))
-        return false;
-
-      EditorNodeInfo<?,?> otherENI = (EditorNodeInfo<?, ?>) other;
-      return node == otherENI.node && editorValue == otherENI.editorValue;
-    }
-
-
-    public boolean isEmpty()
-    {
-      return node == null;
     }
   }
 }

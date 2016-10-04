@@ -1,9 +1,9 @@
 package kaleidok.javafx.scene.control.cell.factory;
 
 import javafx.scene.Node;
-import kaleidok.javafx.scene.control.cell.DynamicEditableTreeCell;
-import kaleidok.javafx.scene.control.cell.DynamicEditableTreeCell.CellNodeFactory;
-import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
+import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
+import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider;
+import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -12,33 +12,32 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 
-public class MultiTreeTableCellFactory<S, T, N extends Node>
-  implements CellNodeFactory<S, T, N>, List<CellNodeFactory<S, T, N>>
+public class MultiTreeItemProvider<T, N extends Node>
+  implements TreeItemProvider<T, N>, List<TreeItemProvider<T, N>>
 {
-  private final List<CellNodeFactory<S, T, N>> underlying;
+  private final List<TreeItemProvider<T, N>> underlying;
 
 
   @SuppressWarnings("unchecked")
-  public MultiTreeTableCellFactory(
-    List<? extends CellNodeFactory<S, T, N>> underlying )
+  public MultiTreeItemProvider(
+    List<? extends TreeItemProvider<T, N>> underlying )
   {
     this.underlying =
-      (List<CellNodeFactory<S, T, N>>) underlying;
+      (List<TreeItemProvider<T, N>>) underlying;
   }
 
 
-  public MultiTreeTableCellFactory()
+  public MultiTreeItemProvider()
   {
     underlying = new ArrayList<>();
   }
 
 
   @Override
-  public EditableTreeTableCell.EditorNodeInfo<N, T> call(
-    final DynamicEditableTreeCell<S, T, N> cell )
+  public EditorNodeInfo<N, T> call( final DynamicEditableTreeItem<T, N> item )
   {
     return this.stream()
-      .map((cnf) -> cnf.call(cell))
+      .map((cnf) -> cnf.call(item))
       .filter(Objects::nonNull)
       .findFirst().orElse(null);
   }
@@ -63,7 +62,7 @@ public class MultiTreeTableCellFactory<S, T, N extends Node>
   }
 
   @Override
-  public Iterator<CellNodeFactory<S, T, N>> iterator()
+  public Iterator<TreeItemProvider<T, N>> iterator()
   {
     return underlying.iterator();
   }
@@ -82,8 +81,7 @@ public class MultiTreeTableCellFactory<S, T, N extends Node>
   }
 
   @Override
-  public boolean add(
-    CellNodeFactory<S, T, N> callback )
+  public boolean add( TreeItemProvider<T, N> callback )
   {
     return underlying.add(callback);
   }
@@ -102,14 +100,14 @@ public class MultiTreeTableCellFactory<S, T, N extends Node>
 
   @Override
   public boolean addAll(
-    Collection<? extends CellNodeFactory<S, T, N>> c )
+    Collection<? extends TreeItemProvider<T, N>> c )
   {
     return underlying.addAll(c);
   }
 
   @Override
   public boolean addAll( int index,
-    Collection<? extends CellNodeFactory<S, T, N>> c )
+    Collection<? extends TreeItemProvider<T, N>> c )
   {
     return underlying.addAll(index, c);
   }
@@ -127,13 +125,13 @@ public class MultiTreeTableCellFactory<S, T, N extends Node>
   }
 
   @Override
-  public void replaceAll( UnaryOperator<CellNodeFactory<S, T, N>> operator )
+  public void replaceAll( UnaryOperator<TreeItemProvider<T, N>> operator )
   {
     underlying.replaceAll(operator);
   }
 
   @Override
-  public void sort( Comparator<? super CellNodeFactory<S, T, N>> c )
+  public void sort( Comparator<? super TreeItemProvider<T, N>> c )
   {
     underlying.sort(c);
   }
@@ -147,8 +145,8 @@ public class MultiTreeTableCellFactory<S, T, N extends Node>
   @Override
   public boolean equals( Object o )
   {
-    return (o instanceof MultiTreeTableCellFactory) &&
-      underlying.equals(((MultiTreeTableCellFactory<?,?,?>) o).underlying);
+    return (o instanceof MultiTreeItemProvider) &&
+      underlying.equals(((MultiTreeItemProvider<?,?>) o).underlying);
   }
 
   @Override
@@ -158,27 +156,27 @@ public class MultiTreeTableCellFactory<S, T, N extends Node>
   }
 
   @Override
-  public CellNodeFactory<S, T, N> get( int index )
+  public TreeItemProvider<T, N> get( int index )
   {
     return underlying.get(index);
   }
 
   @Override
-  public CellNodeFactory<S, T, N> set( int index,
-    CellNodeFactory<S, T, N> element )
+  public TreeItemProvider<T, N> set( int index,
+    TreeItemProvider<T, N> element )
   {
     return underlying.set(index, element);
   }
 
   @Override
   public void add( int index,
-    CellNodeFactory<S, T, N> element )
+    TreeItemProvider<T, N> element )
   {
     underlying.add(index, element);
   }
 
   @Override
-  public CellNodeFactory<S, T, N> remove( int index )
+  public TreeItemProvider<T, N> remove( int index )
   {
     return underlying.remove(index);
   }
@@ -196,51 +194,51 @@ public class MultiTreeTableCellFactory<S, T, N extends Node>
   }
 
   @Override
-  public ListIterator<CellNodeFactory<S, T, N>> listIterator()
+  public ListIterator<TreeItemProvider<T, N>> listIterator()
   {
     return underlying.listIterator();
   }
 
   @Override
-  public ListIterator<CellNodeFactory<S, T, N>> listIterator( int index )
+  public ListIterator<TreeItemProvider<T, N>> listIterator( int index )
   {
     return underlying.listIterator(index);
   }
 
   @Override
-  public List<CellNodeFactory<S, T, N>> subList( int fromIndex, int toIndex )
+  public List<TreeItemProvider<T, N>> subList( int fromIndex, int toIndex )
   {
     return underlying.subList(fromIndex, toIndex);
   }
 
   @Override
-  public Spliterator<CellNodeFactory<S, T, N>> spliterator()
+  public Spliterator<TreeItemProvider<T, N>> spliterator()
   {
     return underlying.spliterator();
   }
 
   @Override
   public boolean removeIf(
-    Predicate<? super CellNodeFactory<S, T, N>> filter )
+    Predicate<? super TreeItemProvider<T, N>> filter )
   {
     return underlying.removeIf(filter);
   }
 
   @Override
-  public Stream<CellNodeFactory<S, T, N>> stream()
+  public Stream<TreeItemProvider<T, N>> stream()
   {
     return underlying.stream();
   }
 
   @Override
-  public Stream<CellNodeFactory<S, T, N>> parallelStream()
+  public Stream<TreeItemProvider<T, N>> parallelStream()
   {
     return underlying.parallelStream();
   }
 
   @Override
   public void forEach(
-    Consumer<? super CellNodeFactory<S, T, N>> action )
+    Consumer<? super TreeItemProvider<T, N>> action )
   {
     underlying.forEach(action);
   }
