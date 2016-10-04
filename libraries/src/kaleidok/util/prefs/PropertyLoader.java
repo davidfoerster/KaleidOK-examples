@@ -97,7 +97,7 @@ public final class PropertyLoader
     if (dst == null)
       dst = new HashMap<>(src.size() / 3 * 4);
 
-    return src.stringPropertyNames().stream()
+    return src.stringPropertyNames().stream().sequential()
       .collect(Collectors.toMap(
         Function.identity(), src::getProperty,
         (a, b) -> (b != null) ? b : a,

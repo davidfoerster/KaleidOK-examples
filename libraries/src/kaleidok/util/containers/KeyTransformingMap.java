@@ -13,7 +13,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -111,20 +110,20 @@ public abstract class KeyTransformingMap<K, V> implements Map<K, V>
     Function<Entry<? extends K, ? extends V>, V> valueMapper =
       Entry::getValue;
     BinaryOperator<V> duplicateMerger = (a, b) -> b;
-    Supplier<? extends Map<K, V>> mapSupplier =
-      new InstanceSupplier<>(underlying);
 
     if (underlying instanceof ConcurrentMap)
     {
       //noinspection unchecked
-      m.entrySet().parallelStream().collect(Collectors.toConcurrentMap(
-        keyMapper, valueMapper, duplicateMerger,
-        (Supplier<ConcurrentMap<K, V>>) mapSupplier));
+      underlying.putAll(
+        m.entrySet().parallelStream().collect(
+          Collectors.toConcurrentMap(
+            keyMapper, valueMapper, duplicateMerger)));
     }
     else
     {
-      m.entrySet().stream().collect(Collectors.toMap(
-        keyMapper, valueMapper, duplicateMerger, mapSupplier));
+      m.entrySet().stream().sequential().collect(
+        Collectors.toMap(keyMapper, valueMapper, duplicateMerger,
+          new InstanceSupplier<>(underlying)));
     }
   }
 
