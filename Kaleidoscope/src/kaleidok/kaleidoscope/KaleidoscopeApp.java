@@ -2,6 +2,8 @@ package kaleidok.kaleidoscope;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.TextInputControl;
+import javafx.scene.control.Toggle;
 import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -148,7 +150,19 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   public synchronized KaleidoscopeControls getControls()
   {
     if (controls == null)
+    {
       controls = new KaleidoscopeControls(this);
+      controls.getMessageField().setOnAction((ev) -> {
+          getSketch().getChromasthetiationService()
+            .submit(((TextInputControl) ev.getSource()).getText());
+          ev.consume();
+        });
+      controls.getRecordingButton().setOnAction((ev) -> {
+          getSketch().getSTT().setRecorderStatus(
+            ((Toggle) ev.getSource()).isSelected(), false);
+          ev.consume();
+        });
+    }
     return controls;
   }
 

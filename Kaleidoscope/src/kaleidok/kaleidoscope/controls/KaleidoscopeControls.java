@@ -43,7 +43,7 @@ public class KaleidoscopeControls extends BorderPane
   }
 
 
-  private ToggleButton getRecordingButton()
+  public ToggleButton getRecordingButton()
   {
     if (recordingButton == null)
     {
@@ -60,12 +60,9 @@ public class KaleidoscopeControls extends BorderPane
           ContentDisplay.GRAPHIC_ONLY);
       //recordingButton.paintUI = false;
       //recordingButton.setBorderPainted(false);
-      recordingButton.setOnAction((ev) -> {
-          boolean selected = ((Toggle) ev.getSource()).isSelected();
-          context.getSketch().getSTT().setRecorderStatus(selected, false);
-          buttonGraphics.setImage(selected ? stopIcon : startIcon);
-          ev.consume();
-        });
+      recordingButton.selectedProperty().addListener(
+        (obs, oldValue, newValue) ->
+          buttonGraphics.setImage(newValue ? stopIcon : startIcon));
     }
     return recordingButton;
   }
@@ -101,7 +98,7 @@ public class KaleidoscopeControls extends BorderPane
   }
 
 
-  private TextField getKeywordField()
+  public TextField getKeywordField()
   {
     if (keywordField == null)
     {
@@ -112,7 +109,7 @@ public class KaleidoscopeControls extends BorderPane
   }
 
 
-  private TextField getMessageField()
+  public TextField getMessageField()
   {
     if (messageField == null)
     {
@@ -120,11 +117,6 @@ public class KaleidoscopeControls extends BorderPane
         new TextField(context.getNamedParameters().get(
           this.getClass().getPackage().getName() + ".text"));
       messageField.setPrefWidth(250);
-      messageField.setOnAction((ev) -> {
-          context.getSketch().getChromasthetiationService()
-            .submit(((TextInputControl) ev.getSource()).getText());
-          ev.consume();
-        });
       messageField.setPromptText(
         "Write something emotional to analyze and press ENTER to submit");
     }
