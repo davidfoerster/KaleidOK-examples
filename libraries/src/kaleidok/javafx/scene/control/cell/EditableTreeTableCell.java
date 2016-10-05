@@ -11,10 +11,10 @@ import javafx.scene.input.MouseEvent;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 
 
-public abstract class EditableTreeTableCell<T, N extends Node>
+public class EditableTreeTableCell<T, N extends Node>
   extends TreeTableCell<ReadOnlyProperty<T>, T>
 {
-  protected EditableTreeTableCell()
+  public EditableTreeTableCell()
   {
     setOnMouseClicked(DefaultMouseHandler.INSTANCE);
     setOnKeyTyped(DefaultKeyHandler.INSTANCE);
