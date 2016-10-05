@@ -76,75 +76,8 @@ public class KaleidoscopeConfigurationEditor
         return item.isLeaf() ? item.getValue() : null;
       });
     propertyValueColumn.setCellFactory(
-      (col) -> new DebugDynamicEditableTreeCell());
+      (col) -> new EditableTreeTableCell<>());
     columns.add(propertyValueColumn);
-  }
-
-
-  // TODO: remove debugging code
-  private static class DebugDynamicEditableTreeCell
-    extends EditableTreeTableCell<Object, Node>
-  {
-    @Override
-    public void startEdit()
-    {
-      logMethodCall("startEdit");
-      super.startEdit();
-    }
-
-
-    @Override
-    public void cancelEdit()
-    {
-      logMethodCall("cancelEdit");
-      super.cancelEdit();
-    }
-
-
-    @Override
-    public void updateItem( Object item, boolean empty )
-    {
-      logMethodCall("updateItem");
-      System.out.format("empty: %s, item (%s): %s%n",
-        empty, (item != null) ? item.getClass().getName() : null, item);
-
-      super.updateItem(item, empty);
-
-      /*
-      if (getConverter() == null)
-      {
-        ReadOnlyProperty<?> property = getTreeTableRow().getItem();
-        if (property instanceof StringConvertible)
-        {
-          //noinspection unchecked
-          setConverter(
-            ((StringConvertible<Object>) property).getStringConverter());
-        }
-      }
-      */
-    }
-
-
-    private void logMethodCall( String methodName )
-    {
-      ReadOnlyProperty<?> property = getTreeTableRow().getItem();
-      String beanClassName = "<null>", propertyName = "<null>";
-      Object propertyValue = "N/A";
-      if (property != null)
-      {
-        propertyName = property.getName();
-        propertyValue = property.getValue();
-        Object bean = property.getBean();
-        if (bean != null)
-          beanClassName = bean.getClass().getSimpleName();
-      }
-
-      System.out.format(
-        "%s#%s() called on \"%s.%s\" - value: %s%n",
-        this.getClass().getSimpleName(), methodName,
-        beanClassName, propertyName,
-        propertyValue);
-    }
   }
 
 
