@@ -1,5 +1,6 @@
 package kaleidok.kaleidoscope.controls;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -143,7 +144,16 @@ public class KaleidoscopeControls extends BorderPane
   {
     if (configurationWindowButton == null)
     {
-      configurationWindowButton = new ToggleButton("Configuration window");
+      Image icon = loadIcon(iconDir + "preferences.png");
+      configurationWindowButton = new ToggleButton(
+        "Configuration window", (icon != null) ? new ImageView(icon) : null);
+      if (icon != null)
+      {
+        configurationWindowButton.setContentDisplay(
+          ContentDisplay.GRAPHIC_ONLY);
+        configurationWindowButton.setPadding(Insets.EMPTY);
+      }
+
       configurationWindowButton.setOnAction((ev) -> {
           context.setShowConfigurationEditor(
             ((Toggle) ev.getSource()).isSelected());
