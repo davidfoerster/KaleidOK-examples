@@ -46,7 +46,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   }
 
 
-  private Stage getConfigurationWindow()
+  private synchronized Stage getConfigurationWindow()
   {
     if (configurationWindow == null)
     {
@@ -59,6 +59,10 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       Rectangle2D screenBounds = Screen.getScreens().get(1).getBounds();
       configurationWindow.setX(screenBounds.getMinX());
       configurationWindow.setY(screenBounds.getMinY());
+
+      configurationWindow.showingProperty().addListener(
+        ( obs, oldValue, newValue ) ->
+          getControls().getConfigurationWindowButton().setSelected(newValue));
     }
     return configurationWindow;
   }
@@ -72,6 +76,19 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       configurationEditor.init();
     }
     return configurationEditor;
+  }
+
+
+  public synchronized void setShowConfigurationEditor( boolean show )
+  {
+    if (show)
+    {
+      getConfigurationWindow().show();
+    }
+    else if (configurationWindow != null)
+    {
+      configurationWindow.hide();
+    }
   }
 
 
@@ -133,7 +150,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   }
 
 
-  private void myStop()
+  private synchronized void myStop()
   {
     if (configurationWindow != null)
       configurationWindow.close();
@@ -152,14 +169,22 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     if (controls == null)
     {
       controls = new KaleidoscopeControls(this);
+
       controls.getMessageField().setOnAction((ev) -> {
           getSketch().getChromasthetiationService()
             .submit(((TextInputControl) ev.getSource()).getText());
           ev.consume();
         });
+
       controls.getRecordingButton().setOnAction((ev) -> {
           getSketch().getSTT().setRecorderStatus(
             ((Toggle) ev.getSource()).isSelected(), false);
+          ev.consume();
+        });
+
+      controls.getConfigurationWindowButton().setOnAction((ev) -> {
+          setShowConfigurationEditor(
+            ((Toggle) ev.getSource()).isSelected());
           ev.consume();
         });
     }

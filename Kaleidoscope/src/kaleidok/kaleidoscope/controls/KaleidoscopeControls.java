@@ -22,11 +22,13 @@ public class KaleidoscopeControls extends BorderPane
 
   private final KaleidoscopeApp context;
 
-  private ToggleButton recordingButton;
+  private ToggleButton recordingButton, configurationWindowButton;
 
   private VBox bottomPanel;
 
   private TextField keywordField, messageField;
+
+  private ToolBar toolBar;
 
 
   public KaleidoscopeControls( KaleidoscopeApp context )
@@ -92,7 +94,10 @@ public class KaleidoscopeControls extends BorderPane
   {
     if (bottomPanel == null)
     {
-      bottomPanel = new VBox(getMessageField(), getKeywordField());
+      bottomPanel = new VBox(
+        getMessageField(),
+        getKeywordField(),
+        getToolBar());
     }
     return bottomPanel;
   }
@@ -121,5 +126,30 @@ public class KaleidoscopeControls extends BorderPane
         "Write something emotional to analyze and press ENTER to submit");
     }
     return messageField;
+  }
+
+
+  public ToolBar getToolBar()
+  {
+    if (toolBar == null)
+    {
+      toolBar = new ToolBar(getConfigurationWindowButton());
+    }
+    return toolBar;
+  }
+
+
+  public ToggleButton getConfigurationWindowButton()
+  {
+    if (configurationWindowButton == null)
+    {
+      configurationWindowButton = new ToggleButton("Configuration window");
+      configurationWindowButton.setOnAction((ev) -> {
+          context.setShowConfigurationEditor(
+            ((Toggle) ev.getSource()).isSelected());
+          ev.consume();
+        });
+    }
+    return configurationWindowButton;
   }
 }
