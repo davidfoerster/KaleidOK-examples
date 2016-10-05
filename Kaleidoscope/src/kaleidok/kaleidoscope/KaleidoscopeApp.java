@@ -1,11 +1,10 @@
 package kaleidok.kaleidoscope;
 
-import javafx.geometry.Rectangle2D;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Toggle;
 import javafx.scene.image.Image;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import kaleidok.javafx.stage.Icons;
 import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
@@ -14,6 +13,7 @@ import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.processing.SimplePAppletFactory;
 import kaleidok.util.AssertionUtils;
+import kaleidok.util.prefs.PreferenceUtils;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
 
 public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
@@ -34,6 +35,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   private KaleidoscopeControls controls;
 
+  @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
   private Stage configurationWindow;
 
   private KaleidoscopeConfigurationEditor configurationEditor;
@@ -55,10 +57,17 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       configurationWindow.setWidth(300);
       configurationWindow.setScene(new Scene(getConfigurationEditor()));
 
-      // TODO: Find a more suitable default position
-      Rectangle2D screenBounds = Screen.getScreens().get(1).getBounds();
-      configurationWindow.setX(screenBounds.getMinX());
-      configurationWindow.setY(screenBounds.getMinY());
+      Preferences pref = getConfigurationEditorPreferences();
+      double
+        x = pref.getDouble(
+          getConfigurationEditorGeometryPreference("left"), Double.NaN),
+        y = pref.getDouble(
+          getConfigurationEditorGeometryPreference("right"), Double.NaN);
+      if (Double.isFinite(x) && Double.isFinite(y))
+      {
+        configurationWindow.setX(x);
+        configurationWindow.setY(y);
+      }
 
       configurationWindow.showingProperty().addListener(
         ( obs, oldValue, newValue ) ->
@@ -76,6 +85,26 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       configurationEditor.init();
     }
     return configurationEditor;
+  }
+
+
+  private Preferences configurationEditorPreferences;
+
+  private Preferences getConfigurationEditorPreferences()
+  {
+    if (configurationEditorPreferences == null)
+    {
+      configurationEditorPreferences =
+        Preferences.userNodeForPackage(KaleidoscopeConfigurationEditor.class);
+    }
+    return configurationEditorPreferences;
+  }
+
+
+  private static String getConfigurationEditorGeometryPreference( String name )
+  {
+    return KaleidoscopeConfigurationEditor.class.getSimpleName() +
+      ".geometry." + name;
   }
 
 
@@ -125,7 +154,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     stage.setTitle("Kaleidoscope Controls");
     stage.getIcons().addAll(makeIcons());
-    stage.setOnCloseRequest((e) -> myStop());
+    stage.setOnCloseRequest((e) -> Platform.runLater(this::stopChildStages));
     super.start(stage);
   }
 
@@ -138,20 +167,36 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       placeAroundSketch(stage, 2, (Side[]) null);*/
 
     super.show(stage);
-    getConfigurationWindow().show();
+
+    if (getConfigurationEditorPreferences().getBoolean(
+      KaleidoscopeConfigurationEditor.class.getSimpleName() + ".show", false))
+    {
+      getConfigurationWindow().show();
+    }
   }
 
 
   @Override
   public void stop() throws Exception
   {
-    myStop();
+    stopChildStages();
     super.stop();
   }
 
 
-  private synchronized void myStop()
+  private boolean childStagesStopped = false;
+
+  private synchronized void stopChildStages()
   {
+    if (childStagesStopped)
+      return;
+    childStagesStopped = true;
+
+    Stage configurationWindow = this.configurationWindow;
+    getConfigurationEditorPreferences().putBoolean(
+      KaleidoscopeConfigurationEditor.class.getSimpleName() + ".show",
+      configurationWindow != null && configurationWindow.isShowing());
+
     if (configurationWindow != null)
       configurationWindow.close();
   }
@@ -189,6 +234,25 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
         });
     }
     return controls;
+  }
+
+
+  @Override
+  protected void doSavePreferences()
+  {
+    Stage configurationWindow = this.configurationWindow;
+    if (configurationWindow != null)
+    {
+      Preferences pref = getConfigurationEditorPreferences();
+      pref.putDouble(
+        getConfigurationEditorGeometryPreference("left"),
+        configurationWindow.getX());
+      pref.putDouble(
+        getConfigurationEditorGeometryPreference("right"),
+        configurationWindow.getY());
+      PreferenceUtils.flush(pref);
+    }
+    super.doSavePreferences();
   }
 
 
