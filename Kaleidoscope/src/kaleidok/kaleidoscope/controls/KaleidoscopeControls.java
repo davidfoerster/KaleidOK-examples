@@ -1,5 +1,6 @@
 package kaleidok.kaleidoscope.controls;
 
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -58,23 +59,34 @@ public class KaleidoscopeControls extends BorderPane
       final Image
         startIcon = loadIcon(iconDir + "start.png"),
         stopIcon = loadIcon(iconDir + "stop.png");
-      final ImageView buttonGraphics = new ImageView(startIcon);
+      ImageView buttonGraphics =
+        (startIcon != null && stopIcon != null) ?
+          new ImageView(startIcon) :
+          null;
 
       // TODO: Make button "round" again
       recordingButton = new ToggleButton("Record", buttonGraphics);
       recordingButton.setTooltip(new Tooltip(START_RECORDING));
-      recordingButton.setContentDisplay(
-        (startIcon.isError() || stopIcon.isError()) ?
-          ContentDisplay.TEXT_ONLY :
-          ContentDisplay.GRAPHIC_ONLY);
+      if (buttonGraphics != null)
+      {
+        recordingButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        recordingButton.selectedProperty().addListener(
+          (obs, oldValue, newValue) ->
+            ((ImageView) ((Labeled) ((ReadOnlyProperty<?>) obs).getBean())
+              .getGraphic()).setImage(newValue ? stopIcon : startIcon));
+      }
+      else
+      {
+        recordingButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
+      }
+
       //recordingButton.paintUI = false;
       //recordingButton.setBorderPainted(false);
+
       recordingButton.selectedProperty().addListener(
-        (obs, oldValue, newValue) -> {
-          buttonGraphics.setImage(newValue ? stopIcon : startIcon);
-          recordingButton.getTooltip().setText(
-            newValue ? STOP_RECORDING : START_RECORDING);
-        });
+        (obs, oldValue, newValue) ->
+          ((Control) ((ReadOnlyProperty<?>) obs).getBean()).getTooltip()
+            .setText(newValue ? STOP_RECORDING : START_RECORDING));
     }
     return recordingButton;
   }
