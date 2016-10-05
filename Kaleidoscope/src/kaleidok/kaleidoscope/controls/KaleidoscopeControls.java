@@ -5,12 +5,15 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import kaleidok.kaleidoscope.KaleidoscopeApp;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.DoubleStream;
 
 import static kaleidok.kaleidoscope.KaleidoscopeApp.iconDir;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
@@ -19,7 +22,7 @@ import static kaleidok.util.logging.LoggingUtils.logThrown;
 public class KaleidoscopeControls extends BorderPane
 {
   static final Logger logger =
-    Logger.getLogger(KaleidoscopeApp.class.getName());
+    Logger.getLogger(KaleidoscopeControls.class.getName());
 
 
   private final KaleidoscopeApp context;
@@ -56,33 +59,10 @@ public class KaleidoscopeControls extends BorderPane
   {
     if (recordingButton == null)
     {
-      final Image
-        startIcon = loadIcon(iconDir + "start.png"),
-        stopIcon = loadIcon(iconDir + "stop.png");
-      ImageView buttonGraphics =
-        (startIcon != null && stopIcon != null) ?
-          new ImageView(startIcon) :
-          null;
-
-      // TODO: Make button "round" again
-      recordingButton = new ToggleButton("Record", buttonGraphics);
+      recordingButton = makeRoundToggleButton(
+        "Record", loadIcon(iconDir + "start.png"),
+        loadIcon(iconDir + "stop.png"));
       recordingButton.setTooltip(new Tooltip(START_RECORDING));
-      if (buttonGraphics != null)
-      {
-        recordingButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        recordingButton.selectedProperty().addListener(
-          (obs, oldValue, newValue) ->
-            ((ImageView) ((Labeled) ((ReadOnlyProperty<?>) obs).getBean())
-              .getGraphic()).setImage(newValue ? stopIcon : startIcon));
-      }
-      else
-      {
-        recordingButton.setContentDisplay(ContentDisplay.TEXT_ONLY);
-      }
-
-      //recordingButton.paintUI = false;
-      //recordingButton.setBorderPainted(false);
-
       recordingButton.selectedProperty().addListener(
         (obs, oldValue, newValue) ->
           ((Control) ((ReadOnlyProperty<?>) obs).getBean()).getTooltip()
@@ -92,12 +72,12 @@ public class KaleidoscopeControls extends BorderPane
   }
 
 
-  private Image loadIcon( String url )
+  private static Image loadIcon( String url )
   {
     Image img = new Image(url, false);
     if (img.isError())
     {
-      if (this.getClass().desiredAssertionStatus())
+      if (KaleidoscopeControls.class.desiredAssertionStatus())
       {
         throw new AssertionError(
           "Couldn't load icon: " + url, img.getException());
@@ -106,9 +86,47 @@ public class KaleidoscopeControls extends BorderPane
       logThrown(logger, Level.WARNING,
         "Couldn't load icon: {0}",
         img.getException(), url);
-      img = null;
     }
     return img;
+  }
+
+
+  private static ToggleButton makeRoundToggleButton( String text,
+    Image unselectedImage, Image selectedImage )
+  {
+    ImageView buttonGraphics =
+      (!unselectedImage.isError() && !selectedImage.isError()) ?
+        new ImageView(unselectedImage) :
+        null;
+    ToggleButton button = new ToggleButton(text, buttonGraphics);
+    if (buttonGraphics != null)
+    {
+      button.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+      button.setBorder(Border.EMPTY);
+      button.setPadding(Insets.EMPTY);
+      BorderPane.setMargin(button, new Insets(10));
+
+      @SuppressWarnings("OptionalGetWithoutIsPresent")
+      double diameter =
+        DoubleStream.of(
+          unselectedImage.getWidth(), unselectedImage.getHeight(),
+          selectedImage.getWidth(), selectedImage.getHeight())
+          .max().getAsDouble();
+      button.setShape(new Circle(diameter * 0.5));
+      button.setPickOnBounds(false);
+
+      button.selectedProperty().addListener(
+        (obs, oldValue, newValue) ->
+          ((ImageView) ((Labeled) ((ReadOnlyProperty<?>) obs).getBean())
+            .getGraphic()).setImage(
+              newValue ? selectedImage : unselectedImage));
+    }
+    else
+    {
+      button.setContentDisplay(ContentDisplay.TEXT_ONLY);
+    }
+
+    return button;
   }
 
 
@@ -167,8 +185,8 @@ public class KaleidoscopeControls extends BorderPane
     {
       Image icon = loadIcon(iconDir + "preferences.png");
       configurationWindowButton = new ToggleButton(
-        "Configuration window", (icon != null) ? new ImageView(icon) : null);
-      if (icon != null)
+        "Configuration window", !icon.isError() ? new ImageView(icon) : null);
+      if (!icon.isError())
       {
         configurationWindowButton.setContentDisplay(
           ContentDisplay.GRAPHIC_ONLY);
