@@ -1,10 +1,8 @@
 package kaleidok.kaleidoscope;
 
-import javafx.embed.swing.SwingNode;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import kaleidok.javafx.stage.Icons;
@@ -15,7 +13,6 @@ import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.processing.SimplePAppletFactory;
 import kaleidok.util.AssertionUtils;
 
-import java.awt.Dimension;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.Collections;
@@ -81,14 +78,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     if (scene == null)
     {
-      KaleidoscopeControls controls = getControls();
-      Dimension size = controls.getPreferredSize();
-
-      SwingNode swingNode = new SwingNode();
-      swingNode.setContent(controls);
-
-      StackPane pane = new StackPane(swingNode);
-      scene = new Scene(pane, size.getWidth(), size.getHeight());
+      scene = new Scene(getControls());
     }
     return scene;
   }

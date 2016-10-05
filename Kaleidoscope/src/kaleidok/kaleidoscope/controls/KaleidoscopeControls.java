@@ -1,32 +1,36 @@
 package kaleidok.kaleidoscope.controls;
 
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import kaleidok.kaleidoscope.KaleidoscopeApp;
-import kaleidok.swing.JRoundToggleButton;
 
-import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import static javax.swing.Action.SHORT_DESCRIPTION;
 import static kaleidok.kaleidoscope.KaleidoscopeApp.iconDir;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
-public class KaleidoscopeControls extends JPanel
+public class KaleidoscopeControls extends BorderPane
 {
+  static final Logger logger =
+    Logger.getLogger(KaleidoscopeApp.class.getName());
+
+
   private final KaleidoscopeApp context;
 
-  private JRoundToggleButton recordingButton = null;
+  private ToggleButton recordingButton;
 
-  private JPanel textFieldPanel = null;
+  private VBox bottomPanel;
 
-  private JTextField keywordField = null, messageField = null;
+  private TextField keywordField, messageField;
 
 
   public KaleidoscopeControls( KaleidoscopeApp context )
   {
-    super(new BorderLayout());
     this.context = context;
     initComponents();
   }
@@ -34,87 +38,94 @@ public class KaleidoscopeControls extends JPanel
 
   private void initComponents()
   {
-    add(getRecordingButton(), BorderLayout.NORTH);
-    add(getTextFieldPanel(), BorderLayout.SOUTH);
+    setCenter(getRecordingButton());
+    setBottom(getBottomPanel());
   }
 
 
-  private JToggleButton getRecordingButton()
+  private ToggleButton getRecordingButton()
   {
-    if (recordingButton == null) {
-      AbstractAction action = new AbstractAction("Record") {
-          @Override
-          public void actionPerformed( ActionEvent ev )
-          {
-            context.getSketch().getSTT().setRecorderStatus(
-              ((AbstractButton) ev.getSource()).isSelected(), false);
-          }
-        };
-      action.putValue(SHORT_DESCRIPTION, "Start and stop recording");
-      recordingButton = new JRoundToggleButton(action);
-      recordingButton.paintUI = false;
-      recordingButton.setText(null);
-      recordingButton.setBorderPainted(false);
+    if (recordingButton == null)
+    {
+      final Image
+        startIcon = loadIcon(iconDir + "start.png"),
+        stopIcon = loadIcon(iconDir + "stop.png");
+      final ImageView buttonGraphics = new ImageView(startIcon);
 
-      ClassLoader cl = this.getClass().getClassLoader();
-      URL startIconUrl = cl.getResource(iconDir + "start.png"),
-        stopIconUrl = cl.getResource(iconDir + "stop.png");
-      assert startIconUrl != null && stopIconUrl != null;
-      recordingButton.setIcon(
-        new ImageIcon(startIconUrl, "Start recording"));
-      recordingButton.setSelectedIcon(
-        new ImageIcon(stopIconUrl, "Stop recording"));
+      // TODO: Make button "round" again
+      recordingButton = new ToggleButton("Record", buttonGraphics);
+      recordingButton.setContentDisplay(
+        (startIcon.isError() || stopIcon.isError()) ?
+          ContentDisplay.TEXT_ONLY :
+          ContentDisplay.GRAPHIC_ONLY);
+      //recordingButton.paintUI = false;
+      //recordingButton.setBorderPainted(false);
+      recordingButton.setOnAction((ev) -> {
+          boolean selected = ((Toggle) ev.getSource()).isSelected();
+          context.getSketch().getSTT().setRecorderStatus(selected, false);
+          buttonGraphics.setImage(selected ? stopIcon : startIcon);
+          ev.consume();
+        });
     }
     return recordingButton;
   }
 
 
-  private JPanel getTextFieldPanel()
+  private Image loadIcon( String url )
   {
-    if (textFieldPanel == null) {
-      textFieldPanel = new JPanel();
-      textFieldPanel.setLayout(new BoxLayout(textFieldPanel, BoxLayout.PAGE_AXIS));
-      textFieldPanel.add(getMessageField());
-      textFieldPanel.add(getKeywordField());
+    Image img = new Image(url, false);
+    if (img.isError())
+    {
+      if (this.getClass().desiredAssertionStatus())
+      {
+        throw new AssertionError(
+          "Couldn't load icon: " + url, img.getException());
+      }
+
+      logThrown(logger, Level.WARNING,
+        "Couldn't load icon: {0}",
+        img.getException(), url);
+      img = null;
     }
-    return textFieldPanel;
+    return img;
   }
 
 
-  private JTextField getKeywordField()
+  private VBox getBottomPanel()
   {
-    if (keywordField == null) {
-      keywordField = new JTextField();
-      keywordField.setToolTipText("Keywords for image search");
+    if (bottomPanel == null)
+    {
+      bottomPanel = new VBox(getMessageField(), getKeywordField());
+    }
+    return bottomPanel;
+  }
+
+
+  private TextField getKeywordField()
+  {
+    if (keywordField == null)
+    {
+      keywordField = new TextField();
+      keywordField.setPromptText("Keywords for image search");
     }
     return keywordField;
   }
 
 
-  private JTextField getMessageField()
+  private TextField getMessageField()
   {
-    if (messageField == null) {
+    if (messageField == null)
+    {
       messageField =
-        new JTextField(context.getNamedParameters().get(
+        new TextField(context.getNamedParameters().get(
           this.getClass().getPackage().getName() + ".text"));
-      Dimension size = messageField.getPreferredSize();
-      size.width = 250;
-      messageField.setPreferredSize(size);
-
-      AbstractAction action = new AbstractAction("Submit")
-      {
-        @Override
-        public void actionPerformed( ActionEvent ev )
-        {
+      messageField.setPrefWidth(250);
+      messageField.setOnAction((ev) -> {
           context.getSketch().getChromasthetiationService()
-            .submit(messageField.getText());
-        }
-      };
-      action.putValue(SHORT_DESCRIPTION,
-        "Submit text and keywords for chromasthetiation");
-      messageField.setAction(action);
-
-      messageField.setToolTipText(
+            .submit(((TextInputControl) ev.getSource()).getText());
+          ev.consume();
+        });
+      messageField.setPromptText(
         "Write something emotional to analyze and press ENTER to submit");
     }
     return messageField;
