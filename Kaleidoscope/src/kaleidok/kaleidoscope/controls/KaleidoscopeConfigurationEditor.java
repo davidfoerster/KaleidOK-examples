@@ -71,6 +71,7 @@ public class KaleidoscopeConfigurationEditor
     TreeTableColumn<ReadOnlyProperty<Object>, Object> propertyValueColumn =
       new TreeTableColumn<>("Value");
     propertyValueColumn.setEditable(true);
+    propertyValueColumn.setPrefWidth(125);
     propertyValueColumn.setCellValueFactory((cdf) -> {
         TreeItem<ReadOnlyProperty<Object>> item = cdf.getValue();
         return item.isLeaf() ? item.getValue() : null;

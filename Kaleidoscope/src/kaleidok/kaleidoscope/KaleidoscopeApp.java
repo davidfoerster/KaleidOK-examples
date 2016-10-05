@@ -53,6 +53,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     {
       configurationWindow = new Stage();
       configurationWindow.setTitle("Kaleidoscope configuration");
+      configurationWindow.setWidth(300);
       configurationWindow.setScene(new Scene(getConfigurationEditor()));
 
       // TODO: Find a more suitable default position
