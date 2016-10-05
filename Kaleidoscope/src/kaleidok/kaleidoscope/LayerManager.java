@@ -3,7 +3,6 @@ package kaleidok.kaleidoscope;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
-import javafx.beans.property.Property;
 import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.kaleidoscope.layer.*;
 import kaleidok.processing.image.PImageFuture;
@@ -63,37 +62,39 @@ public class LayerManager implements List<ImageLayer>, Runnable
   }
 
 
-  private void applyLayerProperties()
+  private int applyLayerProperties()
   {
+    final MessageFormat screenshotPathPattern = getScreenshotPathPattern();
+    this.stream().forEach((l) ->
+      l.setScreenshotPathPattern(screenshotPathPattern));
+
     final Map<String, String> propertyEntries = loadLayerProperties();
-    final Set<String> appliedEntries =
-      logger.isLoggable(Level.FINEST) ?
-        new HashSet<>(propertyEntries.size() * 2) :
-        null;
-
-    {
-      String propertyRoot = ImageLayer.class.getPackage().getName();
-      MessageFormat screenshotPathPattern = getScreenshotPathPattern();
-      Set<Property<?>> foundPropertiesBuffer = new HashSet<>(16);
-
-      for (ImageLayer l : this)
-      {
-        foundPropertiesBuffer.clear();
+    Optional<Stream<String>> appliedEntriesStream = this.stream()
+      .map((l) ->
         PropertyUtils.applyProperties(
-          propertyEntries, propertyRoot,
-          PropertyUtils.getProperties(l, foundPropertiesBuffer),
-          appliedEntries);
+          propertyEntries, l.getClass().getPackage().getName(),
+          PropertyUtils.getProperties(l)))
+      .reduce(Stream::concat);
 
-        l.setScreenshotPathPattern(screenshotPathPattern);
-      }
+    if (!logger.isLoggable(Level.FINEST))
+    {
+      return appliedEntriesStream.isPresent() ?
+        (int) appliedEntriesStream.get().count() :
+        0;
     }
 
-    if (appliedEntries != null && appliedEntries.size() < propertyEntries.size())
+    final Set<String> appliedEntriesSet =
+      appliedEntriesStream.isPresent() ?
+        appliedEntriesStream.get().collect(Collectors.toSet()) :
+      Collections.emptySet();
+    if (appliedEntriesSet.size() < propertyEntries.size())
     {
       Collection<Map.Entry<String, String>> unappliedEntries =
-        propertyEntries.entrySet().stream()
-          .filter((e) -> !appliedEntries.contains(e.getKey()))
-          .collect(Collectors.toList());
+        appliedEntriesSet.isEmpty() ?
+          propertyEntries.entrySet() :
+          propertyEntries.entrySet().stream()
+            .filter((e) -> !appliedEntriesSet.contains(e.getKey()))
+            .collect(Collectors.toList());
 
       logger.log(Level.FINEST,
         "The following {0} of your {1} layer property entries were not " +
@@ -101,6 +102,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
         new Object[]{ unappliedEntries.size(), propertyEntries.size(),
           unappliedEntries });
     }
+    return appliedEntriesSet.size();
   }
 
 

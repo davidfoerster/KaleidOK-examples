@@ -108,7 +108,7 @@ public class KaleidoscopeConfigurationEditor
     //noinspection unchecked,OverlyStrongTypeCast,RedundantCast
     layerRoot.getChildren().addAll(
       (List<? extends TreeItem<ReadOnlyProperty<?>>>) (List<? extends TreeItem<?>>)
-        PropertyUtils.getProperties(layer, null).stream()
+        PropertyUtils.getProperties(layer)
           .filter((p) -> p != layer.name && !p.getName().isEmpty())
           .sorted(
             new DefaultLevelOfDetailComparator<Property<?>>(0)

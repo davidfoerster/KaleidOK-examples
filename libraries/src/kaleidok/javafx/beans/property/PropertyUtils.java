@@ -7,15 +7,11 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import kaleidok.util.Strings;
-import kaleidok.util.function.InstanceSupplier;
 import kaleidok.util.prefs.DefaultValueParser;
 
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
@@ -50,8 +46,7 @@ public final class PropertyUtils
   private static final String PROPERTY_METHOD_SUFFIX = "Property";
 
 
-  public static Set<Property<?>> getProperties( final Object bean,
-    Set<Property<?>> resultSet )
+  public static Stream<Property<?>> getProperties( final Object bean )
   {
     @SuppressWarnings("unchecked")
     Stream<Property<?>> fieldProps =
@@ -83,34 +78,20 @@ public final class PropertyUtils
             }
           });
 
-    Stream<Property<?>> allProps =
-      Stream.concat(fieldProps, methodProps).filter(Objects::nonNull);
-
-    return (resultSet != null) ?
-      allProps.sequential().collect(
-        Collectors.toCollection(new InstanceSupplier<>((resultSet)))) :
-      allProps.collect(Collectors.toSet());
+    return
+      Stream.concat(fieldProps, methodProps)
+        .filter(Objects::nonNull)
+        .distinct();
   }
 
 
-  public static int applyProperties( final Map<String, String> src,
-    final String root, Set<? extends Property<?>> dst,
-    Collection<String> appliedProperties )
+  public static Stream<String> applyProperties( final Map<String, String> src,
+    final String root, Stream<? extends Property<?>> dst )
     throws IllegalArgumentException
   {
-    int appliedCount = 0;
-    for (Property<?> prop: dst)
-    {
-      String srcKey = applyProperty(src, root, prop);
-
-      if (srcKey != null)
-      {
-        appliedCount++;
-        if (appliedProperties != null)
-          appliedProperties.add(srcKey);
-      }
-    }
-    return appliedCount;
+    return dst
+      .map((prop) -> applyProperty(src, root, prop))
+      .filter(Objects::nonNull);
   }
 
 
