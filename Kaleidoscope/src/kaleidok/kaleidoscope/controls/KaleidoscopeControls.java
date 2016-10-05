@@ -46,6 +46,11 @@ public class KaleidoscopeControls extends BorderPane
   }
 
 
+  private static final String
+    START_RECORDING = "Start recording",
+    STOP_RECORDING = "Stop recording";
+
+
   public ToggleButton getRecordingButton()
   {
     if (recordingButton == null)
@@ -57,6 +62,7 @@ public class KaleidoscopeControls extends BorderPane
 
       // TODO: Make button "round" again
       recordingButton = new ToggleButton("Record", buttonGraphics);
+      recordingButton.setTooltip(new Tooltip(START_RECORDING));
       recordingButton.setContentDisplay(
         (startIcon.isError() || stopIcon.isError()) ?
           ContentDisplay.TEXT_ONLY :
@@ -64,8 +70,11 @@ public class KaleidoscopeControls extends BorderPane
       //recordingButton.paintUI = false;
       //recordingButton.setBorderPainted(false);
       recordingButton.selectedProperty().addListener(
-        (obs, oldValue, newValue) ->
-          buttonGraphics.setImage(newValue ? stopIcon : startIcon));
+        (obs, oldValue, newValue) -> {
+          buttonGraphics.setImage(newValue ? stopIcon : startIcon);
+          recordingButton.getTooltip().setText(
+            newValue ? STOP_RECORDING : START_RECORDING);
+        });
     }
     return recordingButton;
   }
@@ -153,6 +162,8 @@ public class KaleidoscopeControls extends BorderPane
           ContentDisplay.GRAPHIC_ONLY);
         configurationWindowButton.setPadding(Insets.EMPTY);
       }
+      configurationWindowButton.setTooltip(
+        new Tooltip("Toggle configuration window"));
 
       configurationWindowButton.setOnAction((ev) -> {
           context.setShowConfigurationEditor(
