@@ -1,8 +1,10 @@
 package kaleidok.javafx.scene.control.cell.provider;
 
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.event.EventHandler;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.input.ScrollEvent;
 import kaleidok.javafx.beans.property.BoundedValue;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
@@ -28,8 +30,18 @@ public abstract class SpinnerItemProvider<T extends Number>
   {
     Spinner<T> spinner = new Spinner<>(valueFactory);
     spinner.setEditable(true);
+    spinner.setOnScroll(scrollEventEventHandler);
     return spinner;
   }
+
+
+  private final EventHandler<ScrollEvent> scrollEventEventHandler =
+    (ev) -> {
+      int exponent = (ev.isShiftDown() ? 1 : 0) | (ev.isControlDown() ? 2 : 0);
+      ((Spinner<?>) ev.getSource()).increment(
+        (int) (ev.getDeltaY() / ev.getMultiplierY() * Math.pow(10, exponent)));
+      ev.consume();
+    };
 
 
   protected abstract SpinnerValueFactory<T> getValueFactory( ReadOnlyProperty<Number> property );
