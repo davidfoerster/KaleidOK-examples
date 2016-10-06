@@ -1,4 +1,4 @@
-package kaleidok.kaleidoscope.layer;
+package kaleidok.kaleidoscope.layer.util;
 
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.util.StringConverter;

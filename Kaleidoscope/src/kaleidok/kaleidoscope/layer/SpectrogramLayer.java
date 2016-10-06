@@ -5,6 +5,7 @@ import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.DoubleProperty;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
+import kaleidok.kaleidoscope.layer.util.LayerUtils;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;

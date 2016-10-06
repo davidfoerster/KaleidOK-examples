@@ -3,6 +3,7 @@ package kaleidok.kaleidoscope.layer;
 import javafx.beans.property.DoubleProperty;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
+import kaleidok.kaleidoscope.layer.util.LayerUtils;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.CyclingList;

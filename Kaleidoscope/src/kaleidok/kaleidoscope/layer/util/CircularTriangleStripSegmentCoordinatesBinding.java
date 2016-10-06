@@ -1,10 +1,11 @@
-package kaleidok.kaleidoscope.layer;
+package kaleidok.kaleidoscope.layer.util;
 
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableIntegerValue;
 
 
-class CircularTriangleStripSegmentCoordinates extends ObjectBinding<float[]>
+public class CircularTriangleStripSegmentCoordinatesBinding
+  extends ObjectBinding<float[]>
 {
   public static final int DIMENSIONS = 2;
 
@@ -16,7 +17,7 @@ class CircularTriangleStripSegmentCoordinates extends ObjectBinding<float[]>
   public final ObservableIntegerValue segmentCount;
 
 
-  public CircularTriangleStripSegmentCoordinates(
+  public CircularTriangleStripSegmentCoordinatesBinding(
     ObservableIntegerValue segmentCount )
   {
     bind(segmentCount);

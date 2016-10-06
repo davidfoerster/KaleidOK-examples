@@ -5,15 +5,17 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ObservableObjectValue;
 import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
 import kaleidok.javafx.beans.property.SimpleBoundedIntegerProperty;
+import kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding;
+import kaleidok.kaleidoscope.layer.util.LayerUtils;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
-import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.DIMENSIONS;
-import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.MAX_SEGMENTS;
-import static kaleidok.kaleidoscope.layer.CircularTriangleStripSegmentCoordinates.MIN_SEGMENTS;
+import static kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding.DIMENSIONS;
+import static kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding.MAX_SEGMENTS;
+import static kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding.MIN_SEGMENTS;
 
 
 public abstract class CircularImageLayer extends ImageLayer
@@ -59,7 +61,7 @@ public abstract class CircularImageLayer extends ImageLayer
       new SimpleBoundedIntegerProperty(this, "segment count", segmentCount,
         MIN_SEGMENTS, MAX_SEGMENTS / segmentMultiplier);
     this.segmentCount.levelOfDetail = 10;
-    this.segmentCoords = new CircularTriangleStripSegmentCoordinates(
+    this.segmentCoords = new CircularTriangleStripSegmentCoordinatesBinding(
       (segmentMultiplier != 1) ?
         this.segmentCount.multiply(segmentMultiplier) :
         this.segmentCount);
