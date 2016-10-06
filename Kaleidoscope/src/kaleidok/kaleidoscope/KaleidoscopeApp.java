@@ -2,6 +2,7 @@ package kaleidok.kaleidoscope;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Toggle;
 import javafx.scene.image.Image;
@@ -215,7 +216,10 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     {
       controls = new KaleidoscopeControls(this);
 
-      controls.getMessageField().setOnAction((ev) -> {
+      TextField messageField = controls.getMessageField();
+      messageField.setText(preferences.get(
+        this.getClass().getSimpleName() + ".text", null));
+      messageField.setOnAction((ev) -> {
           getSketch().getChromasthetiationService()
             .submit(((TextInputControl) ev.getSource()).getText());
           ev.consume();
@@ -240,6 +244,10 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   @Override
   protected void doSavePreferences()
   {
+    String messageText = getControls().getMessageField().getText();
+    if (messageText != null && !messageText.isEmpty())
+      preferences.put(this.getClass().getSimpleName() + ".text", messageText);
+
     Stage configurationWindow = this.configurationWindow;
     if (configurationWindow != null)
     {
@@ -252,6 +260,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
         configurationWindow.getY());
       PreferenceUtils.flush(pref);
     }
+
     super.doSavePreferences();
   }
 

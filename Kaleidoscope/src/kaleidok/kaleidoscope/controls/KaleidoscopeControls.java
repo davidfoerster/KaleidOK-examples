@@ -158,9 +158,7 @@ public class KaleidoscopeControls extends BorderPane
   {
     if (messageField == null)
     {
-      messageField =
-        new TextField(context.getNamedParameters().get(
-          context.getClass().getPackage().getName() + ".text"));
+      messageField = new TextField();
       messageField.setPrefWidth(250);
       messageField.setPromptText(
         "Write something emotional to analyze and press ENTER to submit");
