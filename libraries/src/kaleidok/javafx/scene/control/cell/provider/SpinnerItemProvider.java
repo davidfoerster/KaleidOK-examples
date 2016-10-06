@@ -16,11 +16,19 @@ public abstract class SpinnerItemProvider<T extends Number>
     DynamicEditableTreeItem<Number, Spinner<T>> item )
   {
     SpinnerValueFactory<T> svf = getValueFactory(item.getValue());
-    Spinner<T> spinner = new Spinner<>(svf);
+    Spinner<T> spinner = makeSpinner(svf);
     //noinspection unchecked
     return EditorNodeInfo.of(
       spinner, (ReadOnlyProperty<Number>) svf.valueProperty(),
       spinner.getEditor().textProperty());
+  }
+
+
+  protected Spinner<T> makeSpinner( SpinnerValueFactory<T> valueFactory )
+  {
+    Spinner<T> spinner = new Spinner<>(valueFactory);
+    spinner.setEditable(true);
+    return spinner;
   }
 
 
