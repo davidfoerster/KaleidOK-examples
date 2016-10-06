@@ -3,6 +3,7 @@ package kaleidok.kaleidoscope.controls;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Border;
@@ -184,7 +185,14 @@ public class KaleidoscopeControls extends BorderPane
       {
         configurationWindowButton.setContentDisplay(
           ContentDisplay.GRAPHIC_ONLY);
-        configurationWindowButton.setPadding(Insets.EMPTY);
+        configurationWindowButton.setPadding(new Insets(2.5));
+
+        final ColorAdjust selectedEffect =
+          new ColorAdjust(0, 0, -0.25, 0);
+        configurationWindowButton.selectedProperty().addListener(
+          (obs, oldSelected, newSelected) ->
+            configurationWindowButton.getGraphic()
+              .setEffect(newSelected ? selectedEffect : null));
       }
       configurationWindowButton.setTooltip(
         new Tooltip("Toggle configuration window"));
