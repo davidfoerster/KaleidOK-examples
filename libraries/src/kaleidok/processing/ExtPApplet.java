@@ -49,7 +49,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
-import static kaleidok.util.Math.constrainInt;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
@@ -203,9 +202,8 @@ public class ExtPApplet extends PApplet
         dTop = preferences.getDouble(PREF_GEOMETRY + "top", Double.NaN);
       if (!Double.isFinite(dLeft) || !Double.isFinite(dTop))
         return;
-      iLeft = constrainInt(dLeft);
-      //noinspection SuspiciousNameCombination
-      iTop = constrainInt(dTop);
+      iLeft = (int) dLeft;
+      iTop = (int) dTop;
       RectangleImmutable intersection =
         window.getScreen().getViewport().intersection(
           iLeft, iTop, iLeft + this.width, iTop + this.height);
