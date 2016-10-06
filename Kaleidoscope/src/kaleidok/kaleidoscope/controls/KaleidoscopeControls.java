@@ -9,7 +9,6 @@ import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
-import kaleidok.kaleidoscope.KaleidoscopeApp;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,8 +24,6 @@ public class KaleidoscopeControls extends BorderPane
     Logger.getLogger(KaleidoscopeControls.class.getName());
 
 
-  private final KaleidoscopeApp context;
-
   private ToggleButton recordingButton, configurationWindowButton;
 
   private VBox bottomPanel;
@@ -36,9 +33,8 @@ public class KaleidoscopeControls extends BorderPane
   private ToolBar toolBar;
 
 
-  public KaleidoscopeControls( KaleidoscopeApp context )
+  public KaleidoscopeControls()
   {
-    this.context = context;
     initComponents();
   }
 

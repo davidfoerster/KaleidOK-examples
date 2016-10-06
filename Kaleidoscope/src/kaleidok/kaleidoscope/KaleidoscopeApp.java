@@ -214,7 +214,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     if (controls == null)
     {
-      controls = new KaleidoscopeControls(this);
+      controls = new KaleidoscopeControls();
 
       TextField messageField = controls.getMessageField();
       messageField.setText(preferences.get(
