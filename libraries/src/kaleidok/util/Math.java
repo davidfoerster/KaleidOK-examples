@@ -141,12 +141,16 @@ public final class Math
   }
 
 
-  public static int constrainInt( double x )
+  public static int toIntExact( double x )
   {
-    return
-      (x >= Integer.MAX_VALUE) ? Integer.MAX_VALUE :
-      (x <= Integer.MIN_VALUE) ? Integer.MIN_VALUE :
-        (int) x;
+    if (x < Integer.MIN_VALUE)
+      throw new ArithmeticException("underflow");
+    if (x > Integer.MAX_VALUE)
+      throw new ArithmeticException("overflow");
+    if (Double.isNaN(x))
+      throw new ArithmeticException("not a number");
+
+    return (int) x;
   }
 
 

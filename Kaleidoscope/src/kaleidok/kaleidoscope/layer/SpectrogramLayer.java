@@ -6,14 +6,13 @@ import javafx.beans.property.DoubleProperty;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
 import kaleidok.kaleidoscope.layer.util.LayerUtils;
+import kaleidok.kaleidoscope.layer.util.SpectrumBandsPerOctaveBinding;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
 
-import static java.lang.Math.ceil;
 import static java.lang.Math.pow;
-import static kaleidok.util.Math.log2;
 
 
 /**
@@ -28,6 +27,8 @@ public class SpectrogramLayer extends CircularImageLayer
 
   private final MinimFFTProcessor avgSpectrum;
 
+  private final SpectrumBandsPerOctaveBinding bandsPerOctaveBinding;
+
   /**
    * Manages the exponent to adjust the dynamic range of the spectral
    * intensities.
@@ -35,12 +36,10 @@ public class SpectrogramLayer extends CircularImageLayer
   protected final SimpleBoundedDoubleProperty exponent =
     new SimpleBoundedDoubleProperty(this, "exponent", 1.125, 0, 4, 0.05);
 
-  private static final int MIN_FREQUENCY = 86;
-
 
   public SpectrogramLayer( ExtPApplet parent, int segmentCount,
     double innerRadius, double outerRadius, MinimFFTProcessor spectrum,
-    float sampleRate )
+    double sampleRate )
   {
     super(parent, segmentCount, SEGMENT_MULTIPLIER);
     this.innerRadius.set(innerRadius);
@@ -48,10 +47,9 @@ public class SpectrogramLayer extends CircularImageLayer
     this.scaleFactor.getBounds().setAmountToStepBy(0.0025);
 
     avgSpectrum = spectrum;
-
-    float nyquistFreq = sampleRate / 2;
-    avgSpectrum.logAverages(MIN_FREQUENCY,
-      (int) ceil(segmentCount / log2(nyquistFreq / MIN_FREQUENCY)));
+    bandsPerOctaveBinding =
+      new SpectrumBandsPerOctaveBinding(this.segmentCount, sampleRate);
+    bandsPerOctaveBinding.attach(spectrum);
   }
 
 
