@@ -94,4 +94,18 @@ public final class Objects
   {
     return hashCode(seed, Double.hashCode(thing));
   }
+
+
+  public static <T> T requireNonNull( T obj, boolean allowNull )
+  {
+    return requireNonNull(obj, allowNull, null);
+  }
+
+  public static <T> T requireNonNull( T obj, boolean allowNull, String message )
+  {
+    if (obj != null || allowNull)
+      return obj;
+
+    throw new NullPointerException(message);
+  }
 }
