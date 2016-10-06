@@ -6,6 +6,7 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.kaleidoscope.layer.*;
 import kaleidok.processing.image.PImageFuture;
+import kaleidok.util.Arrays;
 import kaleidok.util.Strings;
 import kaleidok.util.prefs.PropertyLoader;
 import org.apache.commons.io.FilenameUtils;
@@ -35,7 +36,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
 
   private final Kaleidoscope parent;
 
-  private final List<ImageLayer> layers = new ArrayList<>(8);
+  private final List<ImageLayer> layers;
 
   public List<PImageFuture> images; // list to hold input images
 
@@ -50,11 +51,12 @@ public class LayerManager implements List<ImageLayer>, Runnable
   {
     this.parent = parent;
 
-    layers.add(getBackgroundLayer());
-    layers.add(getSpectrogramLayer());
-    layers.add(getOuterMovingShape());
-    layers.add(getFoobarLayer());
-    layers.add(getCentreLayer());
+    layers = new ArrayList<>(Arrays.asImmutableList(
+      getBackgroundLayer(),
+      getSpectrogramLayer(),
+      getOuterMovingShape(),
+      getFoobarLayer(),
+      getCentreLayer()));
 
     applyLayerProperties();
 

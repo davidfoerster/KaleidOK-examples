@@ -161,7 +161,8 @@ public class Kaleidoscope extends ExtPApplet
    * @param filePrefix  A character to start a file path
    * @return  The same or another string
    */
-  String parseStringOrFile( String s, char filePrefix )
+  String parseStringOrFile( String s,
+    @SuppressWarnings("SameParameterValue") char filePrefix )
   {
     if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {
       s = new String((s.length() == 2 && s.charAt(1) == '-') ?
