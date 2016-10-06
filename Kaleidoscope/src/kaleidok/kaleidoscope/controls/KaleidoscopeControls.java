@@ -194,12 +194,6 @@ public class KaleidoscopeControls extends BorderPane
       }
       configurationWindowButton.setTooltip(
         new Tooltip("Toggle configuration window"));
-
-      configurationWindowButton.setOnAction((ev) -> {
-          context.setShowConfigurationEditor(
-            ((Toggle) ev.getSource()).isSelected());
-          ev.consume();
-        });
     }
     return configurationWindowButton;
   }
