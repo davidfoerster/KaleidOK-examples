@@ -1,4 +1,4 @@
-package kaleidok.javafx.scene.control.cell.factory;
+package kaleidok.javafx.scene.control.cell.provider;
 
 import javafx.scene.Node;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;

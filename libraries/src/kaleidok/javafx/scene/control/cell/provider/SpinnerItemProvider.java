@@ -1,4 +1,4 @@
-package kaleidok.javafx.scene.control.cell.factory;
+package kaleidok.javafx.scene.control.cell.provider;
 
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.control.Spinner;

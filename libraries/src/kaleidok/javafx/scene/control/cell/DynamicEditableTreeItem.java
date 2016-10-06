@@ -23,7 +23,7 @@ public class DynamicEditableTreeItem<T, N extends Node>
   {
     super(value);
     this.cellNodeFactory = new SimpleObjectProperty<>(
-      this, "cell node factory", treeItemProvider);
+      this, "cell node provider", treeItemProvider);
   }
 
 
