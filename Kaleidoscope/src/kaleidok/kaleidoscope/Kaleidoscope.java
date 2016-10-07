@@ -161,19 +161,18 @@ public class Kaleidoscope extends ExtPApplet
    * @param filePrefix  A character to start a file path
    * @return  The same or another string
    */
-  String parseStringOrFile( String s,
-    @SuppressWarnings("SameParameterValue") char filePrefix )
+  String parseStringOrFile( String s, char filePrefix )
   {
     if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {
       s = new String((s.length() == 2 && s.charAt(1) == '-') ?
         loadBytes(System.in) : loadBytes(s.substring(1)));
-      String ls = System.getProperty("line.separator");
-      int lsLen = ls.length();
-      if (lsLen > 0)
+      String suffix = System.lineSeparator();
+      int suffixLen = suffix.length();
+      if (suffixLen > 0)
       {
         int sLen = s.length();
-        while (s.startsWith(ls, sLen - lsLen))
-          sLen -= lsLen;
+        while (s.startsWith(suffix, sLen - suffixLen))
+          sLen -= suffixLen;
         s = s.substring(0, sLen);
       }
     }
