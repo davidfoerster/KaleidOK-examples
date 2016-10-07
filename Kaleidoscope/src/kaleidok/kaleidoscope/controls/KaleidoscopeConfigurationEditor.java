@@ -85,18 +85,34 @@ public class KaleidoscopeConfigurationEditor
   private void initItems()
   {
     TreeItem<ReadOnlyProperty<?>> root = new TreeItem<>(
-      new ReadOnlyStringWrapper(null, "name", "Kaleidoscope")
+      new ReadOnlyStringWrapper(null, "name", "KaleidOK")
         .getReadOnlyProperty());
-
-    root.getChildren().addAll(
-      parent.getLayers().stream()
-        .map(KaleidoscopeConfigurationEditor::makeLayerItem)
-        .collect(Collectors.toList()));
-
+    root.getChildren().add(getLayerRoot());
     root.setExpanded(true);
     setShowRoot(false);
     //noinspection unchecked
     setRoot((TreeItem<ReadOnlyProperty<Object>>) (TreeItem<?>) root);
+  }
+
+
+  private TreeItem<ReadOnlyProperty<?>> layerRoot = null;
+
+  private TreeItem<ReadOnlyProperty<?>> getLayerRoot()
+  {
+    if (layerRoot == null)
+    {
+      layerRoot = new TreeItem<>(
+        new ReadOnlyStringWrapper(null, "name", "Kaleidoscope")
+          .getReadOnlyProperty());
+
+      layerRoot.getChildren().addAll(
+        parent.getLayers().stream()
+          .map(KaleidoscopeConfigurationEditor::makeLayerItem)
+          .collect(Collectors.toList()));
+
+      layerRoot.setExpanded(true);
+    }
+    return layerRoot;
   }
 
 
