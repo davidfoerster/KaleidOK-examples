@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 import static kaleidok.http.util.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.util.AssertionUtils.fastAssert;
 import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
 
 
@@ -83,7 +84,7 @@ public abstract class MockRequestHandlerBase implements HttpHandler
       try (InputStream bodyStream = t.getRequestBody()) {
         count = IOUtils.read(bodyStream, buf);
       }
-      assert count == buf.length : "Content length mismatch";
+      fastAssert(count == buf.length, "Content length mismatch");
       sFormData = new String(buf, contentType.getCharset());
     }
     else

@@ -14,6 +14,8 @@ import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static kaleidok.util.AssertionUtils.fastAssert;
+
 
 public final class PropertyLoader
 {
@@ -56,7 +58,7 @@ public final class PropertyLoader
     } else {
       clazz = classLoaderReference.getClass();
     }
-    assert clazz != null || classLoader != null;
+    fastAssert(clazz != null || classLoader != null);
 
     URL[] urls = new URL[resourcePaths.length + filesystemPaths.length];
     int i = 0;

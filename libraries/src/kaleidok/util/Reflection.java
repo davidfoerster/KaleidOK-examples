@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import static kaleidok.util.AssertionUtils.fastAssert;
+
 
 public final class Reflection
 {
@@ -24,7 +26,7 @@ public final class Reflection
         try
         {
           primitive = (Class<?>) clazz.getDeclaredField("TYPE").get(null);
-          assert primitive.isPrimitive();
+          fastAssert(primitive.isPrimitive());
         }
         catch (@SuppressWarnings("ProhibitedExceptionCaught")
           NoSuchFieldException | IllegalAccessException | ClassCastException | NullPointerException ex)

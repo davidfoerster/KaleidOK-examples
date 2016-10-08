@@ -26,4 +26,16 @@ public final class AssertionUtils
     clazz.getClassLoader()
       .setPackageAssertionStatus(clazz.getPackage().getName(), true);
   }
+
+
+  public static void fastAssert( boolean assertionValue )
+  {
+    fastAssert(assertionValue, null);
+  }
+
+  public static void fastAssert( boolean assertionValue, String message )
+  {
+    if (!assertionValue)
+      throw new AssertionError(message);
+  }
 }

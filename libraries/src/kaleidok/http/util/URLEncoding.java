@@ -10,6 +10,7 @@ import java.util.BitSet;
 import static java.lang.System.arraycopy;
 import static java.nio.charset.CodingErrorAction.REPLACE;
 import static java.nio.charset.CodingErrorAction.REPORT;
+import static kaleidok.util.AssertionUtils.fastAssert;
 
 
 public final class URLEncoding
@@ -210,7 +211,7 @@ public final class URLEncoding
         }
         while (cr.isOverflow());
 
-        assert !s.hasRemaining();
+        fastAssert(!s.hasRemaining());
         s.limit(s.capacity());
       }
 
@@ -359,7 +360,7 @@ public final class URLEncoding
           }
 
           if (bytes.position() == 0) {
-            assert bytes.hasRemaining() : "empty byte buffer";
+            fastAssert(bytes.hasRemaining(), "empty byte buffer");
             break;
           }
 
@@ -387,11 +388,11 @@ public final class URLEncoding
               new UnmappableCharacterException(cr.length()));
           }
 
-          assert chars.arrayOffset() == 0;
+          fastAssert(chars.arrayOffset() == 0);
           dst.append(aChars, 0, chars.position());
           chars.rewind();
 
-          assert bytes.arrayOffset() == 0;
+          fastAssert(bytes.arrayOffset() == 0);
           int remaining = bytes.remaining();
           arraycopy(aBytes, bytes.position(), aBytes, 0, remaining);
           bytes.position(remaining);

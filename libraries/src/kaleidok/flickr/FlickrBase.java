@@ -1,7 +1,5 @@
 package kaleidok.flickr;
 
-import kaleidok.flickr.Size;
-import kaleidok.flickr.SizeMap;
 import kaleidok.google.gson.TypeAdapterManager;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -9,6 +7,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+
+import static kaleidok.util.AssertionUtils.fastAssert;
 
 
 class FlickrBase
@@ -89,7 +89,7 @@ class FlickrBase
 
     if (base != null && !base.equals(this.uriBase))
     {
-      assert base.getScheme() != null && base.getHost() != null;
+      fastAssert(base.getScheme() != null && base.getHost() != null);
       this.uriBase = base;
       ub.setScheme(base.getScheme())
         .setUserInfo(base.getUserInfo())
@@ -115,7 +115,7 @@ class FlickrBase
 
   protected URIBuilder copyUriBuilder()
   {
-    assert ub.getScheme() != null && ub.getHost() != null;
+    fastAssert(ub.getScheme() != null && ub.getHost() != null);
     return new URIBuilder()
       .setScheme(ub.getScheme())
       .setUserInfo(ub.getUserInfo())
