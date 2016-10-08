@@ -11,7 +11,6 @@ import kaleidok.util.Arrays;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.stream.DoubleStream;
 
 import static kaleidok.google.speech.STT.logger;
 
@@ -233,15 +232,13 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   }
 
 
-  @SuppressWarnings("OptionalGetWithoutIsPresent")
   private static String getSampleValueErrorMessage( final float[] aSamples,
     int idx )
   {
-    assert aSamples.length != 0;
-    DoubleStream sSamples = Arrays.stream(aSamples);
     return String.format(
       "Encountered sample value %g at index %d; min=%g, max=%g",
       aSamples[idx], idx,
-      sSamples.min().getAsDouble(), sSamples.max().getAsDouble());
+      Arrays.stream(aSamples).min().orElse(Double.NaN),
+      Arrays.stream(aSamples).max().orElse(Double.NaN));
   }
 }
