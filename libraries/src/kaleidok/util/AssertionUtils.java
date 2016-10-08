@@ -10,17 +10,14 @@ public final class AssertionUtils
 
   public static boolean enableAssertionsOnDebugging()
   {
-    for (String arg:
-      ManagementFactory.getRuntimeMXBean().getInputArguments())
-    {
-      //noinspection SpellCheckingInspection
-      if (Strings.startsWithToken(arg, "-agentlib:jdwp", '='))
-      {
-        ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
-        return true;
-      }
-    }
-    return false;
+    @SuppressWarnings("SpellCheckingInspection")
+    boolean remoteDebuggingStatus =
+      ManagementFactory.getRuntimeMXBean().getInputArguments().stream()
+        .anyMatch((arg) ->
+          Strings.startsWithToken(arg, "-agentlib:jdwp", '='));
+    if (remoteDebuggingStatus)
+      ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+    return remoteDebuggingStatus;
   }
 
 
