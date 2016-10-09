@@ -121,7 +121,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
     if (spectrogramLayer == null) {
       AudioProcessingManager apm = parent.getAudioProcessingManager();
       spectrogramLayer = new SpectrogramLayer(parent,
-        1 << 8, 0.275f, 0.480f,
+        1 << 8, 0.275, 0.480,
         apm.getFftProcessor(),
         apm.getAudioDispatcher().getFormat().getSampleRate());
       spectrogramLayer.setNextImage(getImages().get(0));
@@ -133,7 +133,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
   private OuterMovingShape getOuterMovingShape()
   {
     if (outerMovingShape == null) {
-      outerMovingShape = new OuterMovingShape(parent, 16, 0.280f);
+      outerMovingShape = new OuterMovingShape(parent, 16, 0.280);
       outerMovingShape.setNextImage(getImages().get(4));
 
       AudioProcessingManager apm = parent.getAudioProcessingManager();
@@ -151,7 +151,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
   private FoobarLayer getFoobarLayer()
   {
     if (foobarLayer == null) {
-      foobarLayer = new FoobarLayer(parent, 16, 0.100f, 0.300f);
+      foobarLayer = new FoobarLayer(parent, 16, 0.100, 0.300);
       foobarLayer.setNextImage(getImages().get(3));
     }
     return foobarLayer;
@@ -162,7 +162,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
   {
     if (centreLayer == null) {
       centreLayer = new CentreMovingShape(parent,
-        getImages(), 1 << 5, 0.050f, 0.150f,
+        getImages(), 1 << 5, 0.050, 0.150,
         parent.getAudioProcessingManager().getVolumeLevelProcessor());
     }
     return centreLayer;
