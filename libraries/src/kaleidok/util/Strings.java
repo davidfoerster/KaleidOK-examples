@@ -1,12 +1,11 @@
 package kaleidok.util;
 
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
 import static java.lang.Math.log;
+import static kaleidok.util.AssertionUtils.fastAssert;
 
 
 public final class Strings
@@ -124,31 +123,106 @@ public final class Strings
 
 
   public static final Pattern SIMPLE_URL_PREFIX_PATTERN =
-    Pattern.compile("^[a-z](?:[a-z0-9+.-])*:");
+    Pattern.compile("^[a-z][a-z0-9+.-]*://", Pattern.CASE_INSENSITIVE);
 
   public static boolean looksLikeUrl( CharSequence s )
   {
-    return SIMPLE_URL_PREFIX_PATTERN.matcher(s).matches();
+    return SIMPLE_URL_PREFIX_PATTERN.matcher(s).find();
   }
 
 
+  @FunctionalInterface
+  public interface ReplaceCallback
+  {
+    enum Replacement
+    {
+      /**
+       * Replace the current match with itself.
+       */
+      DONT_REPLACE,
+
+      /**
+       * Like {@link #DONT_REPLACE} but don't perform any further matches. The
+       * remainder of the input sequence is <em>left as it is</em>.
+       */
+      BREAK,
+
+      /**
+       * Like {@link #DONT_REPLACE} but don't perform any further matches. The
+       * remainder of the input sequence is <em>deleted</em>.
+       */
+      STOP,
+
+      /**
+       * Abort the entire replacement operation.
+       * {@link #replaceAll(Pattern, CharSequence, ReplaceCallback)} will return
+       * {@code null}.
+       */
+      ABORT
+    }
+
+
+    Object apply( MatchResult matchResult, CharSequence input,
+      StringBuilder resultBuffer );
+  }
+
+
+  /**
+   * Finds all occurrences of {@code pattern} in {@code input} and replaces
+   * them according to the return value of the {@code replacer} callback.
+   *
+   * @param pattern  A regular expression
+   * @param input  The input character sequence (never modified)
+   * @param replacer  A callback function to determine the replacement string
+   *   each match. Instances of {@link CharSequence}, {@code char[]}, and
+   *   {@link Character} are replaced with an equivalent of their respective
+   *   canonical string representation. Instances of
+   *   {@link ReplaceCallback.Replacement} receive special handling.
+   * @return  The substituted character sequence
+   * @throws NullPointerException  if any arguments or any callback return
+   *   value is {@code null}.
+   * @throws ClassCastException  if the type of a callback value is not among
+   *   described above
+   * @see ReplaceCallback.Replacement
+   */
+  @SuppressWarnings("ProhibitedExceptionDeclared")
   public static CharSequence replaceAll( Pattern pattern, CharSequence input,
-    Function<? super Matcher, ?> replacer )
+    ReplaceCallback replacer )
+  throws NullPointerException, ClassCastException
   {
     Matcher matcher = pattern.matcher(input);
-    if (!matcher.find())
-      return input;
+    StringBuilder buf = null;
 
-    StringBuilder buf = new StringBuilder();
     int lastMatchEnd = 0;
-    do
+    matcherLoop:
+    while (matcher.find())
     {
-      Object replacement = replacer.apply(matcher);
-      if (replacement == null)
-        break;
+      Object replacement = replacer.apply(matcher, input, buf);
+
+      if (replacement instanceof ReplaceCallback.Replacement)
+      {
+        switch ((ReplaceCallback.Replacement) replacement)
+        {
+        case DONT_REPLACE:
+          continue matcherLoop;
+
+        case BREAK:
+          break matcherLoop;
+
+        case ABORT:
+          return null;
+        }
+      }
+
+      if (buf == null)
+        buf = new StringBuilder(matcher.start() + 16);
 
       buf.append(input, lastMatchEnd, matcher.start());
 
+      if (replacement == ReplaceCallback.Replacement.STOP)
+      {
+        return buf;
+      }
       if (replacement instanceof CharSequence)
       {
         buf.append((CharSequence) replacement);
@@ -161,33 +235,43 @@ public final class Strings
       {
         buf.append(((Character) replacement).charValue());
       }
+      else if (replacement != null)
+      {
+        throw new ClassCastException(
+          "Unsupported replacement callback value type " +
+            replacement.getClass().getName());
+      }
       else
       {
-        buf.append(replacement);
+        throw new NullPointerException("replacement callback value");
       }
 
       lastMatchEnd = matcher.end();
     }
-    while (matcher.find());
 
-    return buf.append(input, lastMatchEnd, input.length());
+    return (buf != null) ?
+      buf.append(input, lastMatchEnd, input.length()) :
+      input;
   }
 
 
   private static final Pattern CAMEL_CASE_CONVERSION_PATTERN =
-    Pattern.compile("[\\s-]+(\\p{javaLowerCase})?");
+    Pattern.compile("[\\s-]+(\\p{javaLowerCase}?)");
 
 
-  public static CharSequence toCamelCase( CharSequence name )
+  public static CharSequence toCamelCase( CharSequence s )
   {
-    return replaceAll(CAMEL_CASE_CONVERSION_PATTERN, name,
-      ( matcher ) -> {
-        String group1 = matcher.group(1);
-        return
-          (group1 == null) ? "" :
-          (matcher.start() == 0) ? group1 :
-            Character.toUpperCase(group1.charAt(0));
-      });
+    return (s.length() < 2) ?
+      s :
+      replaceAll(CAMEL_CASE_CONVERSION_PATTERN, s,
+        (matcher, input, sb) -> {
+          int start1 = matcher.start(1), end1 = matcher.end(1);
+          if (start1 == end1)
+            return "";
+          fastAssert(start1 + 1 == end1);
+          char c = input.charAt(start1);
+          return (matcher.start() != 0) ? Character.toUpperCase(c) : c;
+        });
   }
 
 
