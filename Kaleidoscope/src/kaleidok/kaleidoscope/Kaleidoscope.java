@@ -18,7 +18,7 @@ public class Kaleidoscope extends ExtPApplet
   /**
    * Manages the kaleidoscopic layers of shapes of this sketch.
    */
-  private LayerManager layers;
+  private volatile LayerManager layers;
 
   /**
    * Manages the source of an audio signal and its processing and possibly
@@ -71,7 +71,17 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  public LayerManager getLayers()
+  @Override
+  public synchronized void dispose()
+  {
+    if (layers != null)
+      layers.dispose();
+
+    super.dispose();
+  }
+
+
+  public synchronized LayerManager getLayers()
   {
     if (layers == null)
       layers = new LayerManager(this);
@@ -79,7 +89,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  public AudioProcessingManager getAudioProcessingManager()
+  public synchronized AudioProcessingManager getAudioProcessingManager()
   {
     if (audioProcessingManager == null)
       audioProcessingManager = new AudioProcessingManager(this);
@@ -87,7 +97,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  public SttManager getSTT()
+  public synchronized SttManager getSTT()
   {
     if (stt == null)
       stt = new SttManager(this);
@@ -95,7 +105,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  public KaleidoscopeChromasthetiationService getChromasthetiationService()
+  public synchronized KaleidoscopeChromasthetiationService getChromasthetiationService()
   {
     if (chromasthetiationService == null)
       chromasthetiationService = KaleidoscopeChromasthetiationService.newInstance(this);
@@ -103,7 +113,7 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
-  private Optional<ExportService> getExportService()
+  private synchronized Optional<ExportService> getExportService()
   {
     if (exportService == null)
     {

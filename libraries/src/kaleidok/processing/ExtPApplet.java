@@ -552,7 +552,7 @@ public class ExtPApplet extends PApplet
   private final Point savedSurfaceLocation = new Point();
 
 
-  public boolean toggleFullscreen()
+  public synchronized boolean toggleFullscreen()
   {
     if (!checkRendererSupported("toggle fullscreen"))
       return sketchFullScreen();
