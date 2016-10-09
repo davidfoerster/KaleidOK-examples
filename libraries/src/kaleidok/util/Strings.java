@@ -193,12 +193,15 @@ public final class Strings
 
   public static boolean isInteger( CharSequence s )
   {
-    if (s.length() == 0)
+    final int len = s.length();
+    if (len == 0)
       return false;
 
     char c0 = s.charAt(0);
-    final int start = (c0 == '+' || c0 == '-') ? 1 : 0;
-    for (int i = s.length() - 1; i >= start; i--)
+    if (!Character.isDigit(c0) && (len == 1 || (c0 != '+' && c0 != '-')))
+      return false;
+
+    for (int i = 1; i < len; i++)
     {
       if (!Character.isDigit(s.charAt(i)))
         return false;
