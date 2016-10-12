@@ -8,8 +8,8 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
-import kaleidok.javafx.beans.property.LevelOfDetail.DefaultLevelOfDetailComparator;
 import kaleidok.javafx.beans.property.PropertyUtils;
+import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag.DefaultLevelOfDetailComparator;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
@@ -129,8 +129,8 @@ public class KaleidoscopeConfigurationEditor
         PropertyUtils.getProperties(layer)
           .filter((p) -> !p.getName().isEmpty())
           .sorted(
-            new DefaultLevelOfDetailComparator<Property<?>>(0)
-              .thenComparing(Comparator.comparing(Property::getName)))
+            new DefaultLevelOfDetailComparator<ReadOnlyProperty<?>>(0)
+              .thenComparing(Comparator.comparing(ReadOnlyProperty::getName)))
           .map(MyTreeItemProvider.INSTANCE)
           .collect(Collectors.toList()));
 

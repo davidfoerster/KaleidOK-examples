@@ -1,25 +1,28 @@
 package kaleidok.kaleidoscope.layer;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import kaleidok.javafx.beans.property.AspectedIntegerProperty;
 import kaleidok.javafx.beans.property.PropertyUtils;
-import kaleidok.javafx.beans.property.SimpleBoundedIntegerProperty;
-import kaleidok.javafx.beans.property.adapter.PreferenceBean;
-import kaleidok.javafx.beans.property.adapter.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.image.PImageFuture;
-import kaleidok.util.Arrays;
 import kaleidok.util.logging.LoggingUtils;
 import kaleidok.util.SynchronizedFormat;
 import processing.core.PImage;
 
 import java.text.MessageFormat;
-import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 
 public abstract class ImageLayer implements Runnable, PreferenceBean
@@ -28,8 +31,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
 
   protected final StringProperty name;
 
-  public final SimpleBoundedIntegerProperty wireframe =
-    new SimpleBoundedIntegerProperty(this, "wireframe", 0, 0, 5);
+  protected final AspectedIntegerProperty wireframe;
 
   private final AtomicReference<PImageFuture> nextImage =
     new AtomicReference<>();
@@ -44,7 +46,12 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
     this.parent = parent;
     this.name = new SimpleStringProperty(
       this, "name", getDefaultName(getClass()));
-    wireframe.levelOfDetail = 100;
+
+    wireframe = new AspectedIntegerProperty(this, "wireframe", 0);
+    wireframe.addAspect(BoundedIntegerTag.INSTANCE,
+      new IntegerSpinnerValueFactory(0, 5));
+    wireframe.addAspect(LevelOfDetailTag.getInstance()).set(100);
+    wireframe.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 
 
@@ -69,20 +76,19 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   }
 
 
-  private Collection<? extends PropertyPreferencesAdapter<?, ?>> preferencesAdapters = null;
+  public IntegerProperty wireframeProperty()
+  {
+    return wireframe;
+  }
+
 
   @Override
-  public Collection<? extends PropertyPreferencesAdapter<?, ?>>
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    if (preferencesAdapters == null)
-    {
-      preferencesAdapters = Arrays.asImmutableList(
-        PropertyUtils.getProperties(this)
-          .map(PreferenceBean::ofAny)
-          .toArray(PropertyPreferencesAdapter<?,?>[]::new));
-    }
-    return preferencesAdapters;
+    return PropertyUtils.getProperties(this)
+      .map(PropertyPreferencesAdapterTag.getWritableInstance()::ofAny)
+      .filter(Objects::nonNull);
   }
 
 

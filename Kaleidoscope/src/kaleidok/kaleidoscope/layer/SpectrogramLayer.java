@@ -3,9 +3,11 @@ package kaleidok.kaleidoscope.layer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.DoubleProperty;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import kaleidok.audio.processor.MinimFFTProcessor;
-import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
-import kaleidok.kaleidoscope.layer.util.LayerUtils;
+import kaleidok.javafx.beans.property.AspectedDoubleProperty;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
 import kaleidok.kaleidoscope.layer.util.SpectrumBandsPerOctaveBinding;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
@@ -13,6 +15,7 @@ import processing.core.PConstants;
 import processing.core.PImage;
 
 import static java.lang.Math.pow;
+import static kaleidok.kaleidoscope.layer.util.LayerUtils.adjustFormat;
 
 
 /**
@@ -27,14 +30,14 @@ public class SpectrogramLayer extends CircularImageLayer
 
   private final MinimFFTProcessor avgSpectrum;
 
+  // TODO: Convert to local field or remove entirely?
   private final SpectrumBandsPerOctaveBinding bandsPerOctaveBinding;
 
   /**
    * Manages the exponent to adjust the dynamic range of the spectral
    * intensities.
    */
-  protected final SimpleBoundedDoubleProperty exponent =
-    new SimpleBoundedDoubleProperty(this, "exponent", 1.125, 0, 4, 0.05);
+  protected final AspectedDoubleProperty exponent;
 
 
   public SpectrogramLayer( ExtPApplet parent, int segmentCount,
@@ -44,12 +47,19 @@ public class SpectrogramLayer extends CircularImageLayer
     super(parent, segmentCount, SEGMENT_MULTIPLIER);
     this.innerRadius.set(innerRadius);
     this.outerRadius.set(outerRadius);
-    this.scaleFactor.getBounds().setAmountToStepBy(0.0025);
+    this.scaleFactor.getAspect(BoundedDoubleTag.INSTANCE)
+      .setAmountToStepBy(0.0025);
 
     avgSpectrum = spectrum;
     bandsPerOctaveBinding =
       new SpectrumBandsPerOctaveBinding(this.segmentCount, sampleRate);
     bandsPerOctaveBinding.attach(spectrum);
+
+    exponent = new AspectedDoubleProperty(this, "exponent", 1.125);
+    exponent
+      .addAspect(BoundedDoubleTag.INSTANCE, new DoubleSpinnerValueFactory(0, 4))
+      .setAmountToStepBy(0.05);
+    exponent.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 
 
@@ -57,7 +67,7 @@ public class SpectrogramLayer extends CircularImageLayer
   public void init()
   {
     super.init();
-    LayerUtils.adjustFormat(exponent);
+    adjustFormat(exponent);
   }
 
 

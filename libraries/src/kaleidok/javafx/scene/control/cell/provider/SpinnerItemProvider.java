@@ -1,9 +1,11 @@
 package kaleidok.javafx.scene.control.cell.provider;
 
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.value.ObservableNumberValue;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import kaleidok.javafx.beans.property.BoundedValue;
+import kaleidok.javafx.beans.property.AspectedProperty;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedValueTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 import kaleidok.util.Math;
@@ -50,7 +52,13 @@ public abstract class SpinnerItemProvider<T extends Number>
     @Override
     public boolean isApplicable( DynamicEditableTreeItem<Number, Spinner<T>> item )
     {
-      return item.getValue() instanceof BoundedValue;
+      ReadOnlyProperty<Number> value = item.getValue();
+      //noinspection OverlyStrongTypeCast
+      return
+        value instanceof ObservableNumberValue &&
+        value instanceof AspectedProperty &&
+          ((AspectedProperty<Number>) value)
+            .getAspect(BoundedValueTag.getInstance()) != null;
     }
 
 
@@ -58,8 +66,8 @@ public abstract class SpinnerItemProvider<T extends Number>
     protected SpinnerValueFactory<T> getValueFactory(
       ReadOnlyProperty<Number> property )
     {
-      //noinspection unchecked
-      return ((BoundedValue<T, ? extends SpinnerValueFactory<T>>) property).getBounds();
+      //noinspection OverlyStrongTypeCast
+      return ((AspectedProperty<Number>) property).getAspect(BoundedValueTag.getInstance());
     }
   }
 }

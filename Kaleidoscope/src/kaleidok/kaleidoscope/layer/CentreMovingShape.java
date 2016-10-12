@@ -1,9 +1,11 @@
 package kaleidok.kaleidoscope.layer;
 
 import javafx.beans.property.DoubleProperty;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import kaleidok.audio.processor.VolumeLevelProcessor;
-import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
-import kaleidok.kaleidoscope.layer.util.LayerUtils;
+import kaleidok.javafx.beans.property.AspectedDoubleProperty;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.CyclingList;
@@ -14,6 +16,7 @@ import processing.core.PImage;
 import java.util.List;
 
 import static java.lang.Math.pow;
+import static kaleidok.kaleidoscope.layer.util.LayerUtils.adjustFormat;
 import static kaleidok.util.Math.mapNormalized;
 
 
@@ -33,8 +36,7 @@ public class CentreMovingShape extends CircularImageLayer
    * Manages the exponent to adjust the dynamic range of the spectral
    * intensities.
    */
-  protected final SimpleBoundedDoubleProperty exponent =
-    new SimpleBoundedDoubleProperty(this, "exponent", 0.5, 0, 4, 0.05);
+  protected final AspectedDoubleProperty exponent;
 
 
   public CentreMovingShape( ExtPApplet parent, List<PImageFuture> images,
@@ -57,6 +59,12 @@ public class CentreMovingShape extends CircularImageLayer
     setNextImage(images.getNext());
     this.images = images;
     this.volumeLevelProcessor = volumeLevelProcessor;
+
+    exponent = new AspectedDoubleProperty(this, "exponent", 0.5);
+    exponent
+      .addAspect(BoundedDoubleTag.INSTANCE, new DoubleSpinnerValueFactory(0, 4))
+      .setAmountToStepBy(0.05);
+    exponent.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 
 
@@ -64,7 +72,7 @@ public class CentreMovingShape extends CircularImageLayer
   public void init()
   {
     super.init();
-    LayerUtils.adjustFormat(exponent);
+    adjustFormat(exponent);
   }
 
 

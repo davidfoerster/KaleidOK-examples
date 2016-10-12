@@ -3,10 +3,15 @@ package kaleidok.kaleidoscope.layer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ObservableObjectValue;
-import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
-import kaleidok.javafx.beans.property.SimpleBoundedIntegerProperty;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import kaleidok.javafx.beans.property.AspectedDoubleProperty;
+import kaleidok.javafx.beans.property.AspectedIntegerProperty;
+import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding;
-import kaleidok.kaleidoscope.layer.util.LayerUtils;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -16,6 +21,8 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import static kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding.DIMENSIONS;
 import static kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding.MAX_SEGMENTS;
 import static kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding.MIN_SEGMENTS;
+import static kaleidok.kaleidoscope.layer.util.LayerUtils.adjustPercentFormat;
+import static kaleidok.kaleidoscope.layer.util.LayerUtils.adjustPermilleFormat;
 import static kaleidok.util.AssertionUtils.fastAssert;
 
 
@@ -23,15 +30,13 @@ public abstract class CircularImageLayer extends ImageLayer
 {
   public static final int MAX_SEGMENT_MULTIPLIER = MAX_SEGMENTS / MIN_SEGMENTS;
 
-  protected final SimpleBoundedDoubleProperty
-    innerRadius = new SimpleBoundedDoubleProperty(
-      this, "inner radius", 0.25, 0, 1, 0.025),
-    outerRadius = new SimpleBoundedDoubleProperty(
-      this, "outer radius", 0.50, 0, 1, 0.025),
-    scaleFactor = SimpleBoundedDoubleProperty.forFloat(
-      this, "scale factor", 1);
+  protected final AspectedDoubleProperty innerRadius;
 
-  public final SimpleBoundedIntegerProperty segmentCount;
+  protected final AspectedDoubleProperty outerRadius;
+
+  protected final AspectedDoubleProperty scaleFactor;
+
+  protected final AspectedIntegerProperty segmentCount;
 
   private final ObservableObjectValue<float[]> segmentCoords;
 
@@ -46,9 +51,6 @@ public abstract class CircularImageLayer extends ImageLayer
     int segmentMultiplier )
   {
     super(parent);
-    innerRadius.levelOfDetail = 5;
-    outerRadius.levelOfDetail = 5;
-    scaleFactor.getBounds().setAmountToStepBy(0.01);
 
     if (segmentMultiplier < 1 ||
       segmentMultiplier > MAX_SEGMENT_MULTIPLIER )
@@ -58,10 +60,33 @@ public abstract class CircularImageLayer extends ImageLayer
           "]: " + segmentMultiplier);
     }
 
+    innerRadius = new AspectedDoubleProperty(this, "inner radius", 0.25);
+    innerRadius.addAspect(LevelOfDetailTag.getInstance()).set(5);
+    innerRadius
+      .addAspect(BoundedDoubleTag.INSTANCE, new DoubleSpinnerValueFactory(0, 1))
+      .setAmountToStepBy(0.025);
+    innerRadius.addAspect(PropertyPreferencesAdapterTag.getInstance());
+
+    outerRadius = new AspectedDoubleProperty(this, "outer radius", 0.50);
+    outerRadius.addAspect(LevelOfDetailTag.getInstance()).set(5);
+    outerRadius
+      .addAspect(BoundedDoubleTag.INSTANCE, new DoubleSpinnerValueFactory(0, 1))
+      .setAmountToStepBy(0.025);
+    outerRadius.addAspect(PropertyPreferencesAdapterTag.getInstance());
+
+    scaleFactor = new AspectedDoubleProperty(this, "scale factor", 1);
+    scaleFactor
+      .addAspect(BoundedDoubleTag.INSTANCE, BoundedDoubleTag.floatBounds())
+      .setAmountToStepBy(0.01);
+    scaleFactor.addAspect(PropertyPreferencesAdapterTag.getInstance());
+
     this.segmentCount =
-      new SimpleBoundedIntegerProperty(this, "segment count", segmentCount,
-        MIN_SEGMENTS, MAX_SEGMENTS / segmentMultiplier);
-    this.segmentCount.levelOfDetail = 10;
+      new AspectedIntegerProperty(this, "segment count", segmentCount);
+    this.segmentCount.addAspect(BoundedIntegerTag.INSTANCE,
+      new IntegerSpinnerValueFactory(
+        MIN_SEGMENTS, MAX_SEGMENTS / segmentMultiplier));
+    this.segmentCount.addAspect(LevelOfDetailTag.getInstance()).set(10);
+    this.segmentCount.addAspect(PropertyPreferencesAdapterTag.getInstance());
     this.segmentCoords = new CircularTriangleStripSegmentCoordinatesBinding(
       (segmentMultiplier != 1) ?
         this.segmentCount.multiply(segmentMultiplier) :
@@ -73,9 +98,9 @@ public abstract class CircularImageLayer extends ImageLayer
   @OverridingMethodsMustInvokeSuper
   public void init()
   {
-    LayerUtils.adjustPermilleFormat(innerRadius);
-    LayerUtils.adjustPermilleFormat(outerRadius);
-    LayerUtils.adjustPercentFormat(scaleFactor);
+    adjustPermilleFormat(innerRadius);
+    adjustPermilleFormat(outerRadius);
+    adjustPercentFormat(scaleFactor);
   }
 
 

@@ -2,7 +2,8 @@ package kaleidok.kaleidoscope.layer.util;
 
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.util.StringConverter;
-import kaleidok.javafx.beans.property.SimpleBoundedDoubleProperty;
+import kaleidok.javafx.beans.property.AspectedDoubleProperty;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
 import kaleidok.javafx.util.converter.NumberStringConverterBase;
 import kaleidok.text.Numbers;
 
@@ -15,10 +16,11 @@ public final class LayerUtils
   private LayerUtils() { }
 
 
-  public static SimpleBoundedDoubleProperty adjustFormat(
-    SimpleBoundedDoubleProperty property, NumberFormat fmt )
+  public static AspectedDoubleProperty adjustFormat(
+    AspectedDoubleProperty property, NumberFormat fmt )
   {
-    DoubleSpinnerValueFactory svf = property.getBounds();
+    DoubleSpinnerValueFactory svf =
+      property.getAspect(BoundedDoubleTag.INSTANCE);
     StringConverter<Double> converter = svf.getConverter();
 
     if (fmt == null)
@@ -49,29 +51,29 @@ public final class LayerUtils
   }
 
 
-  public static SimpleBoundedDoubleProperty adjustFormat(
-    SimpleBoundedDoubleProperty property, String formatString )
+  public static AspectedDoubleProperty adjustFormat(
+    AspectedDoubleProperty property, String formatString )
   {
     return adjustFormat(property, new DecimalFormat(formatString));
   }
 
 
-  public static SimpleBoundedDoubleProperty adjustFormat(
-    SimpleBoundedDoubleProperty property )
+  public static AspectedDoubleProperty adjustFormat(
+    AspectedDoubleProperty property )
   {
     return adjustFormat(property, (NumberFormat) null);
   }
 
 
-  public static SimpleBoundedDoubleProperty adjustPercentFormat(
-    SimpleBoundedDoubleProperty property )
+  public static AspectedDoubleProperty adjustPercentFormat(
+    AspectedDoubleProperty property )
   {
     return adjustFormat(property, NumberFormat.getPercentInstance());
   }
 
 
-  public static SimpleBoundedDoubleProperty adjustPermilleFormat(
-    SimpleBoundedDoubleProperty property )
+  public static AspectedDoubleProperty adjustPermilleFormat(
+    AspectedDoubleProperty property )
   {
     String permille = "\u2030";
     DecimalFormat fmt = new DecimalFormat();
