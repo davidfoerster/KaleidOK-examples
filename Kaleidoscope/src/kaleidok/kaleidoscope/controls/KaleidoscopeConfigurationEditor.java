@@ -103,13 +103,15 @@ public class KaleidoscopeConfigurationEditor
   private static TreeItem<ReadOnlyProperty<?>> makeLayerItem(
     final ImageLayer layer )
   {
-    TreeItem<ReadOnlyProperty<?>> layerRoot = new TreeItem<>(layer.name);
+    TreeItem<ReadOnlyProperty<?>> layerRoot = new TreeItem<>(
+      new ReadOnlyStringWrapper(layer, "name", layer.getName())
+        .getReadOnlyProperty());
 
     //noinspection unchecked,OverlyStrongTypeCast,RedundantCast
     layerRoot.getChildren().addAll(
       (List<? extends TreeItem<ReadOnlyProperty<?>>>) (List<? extends TreeItem<?>>)
         PropertyUtils.getProperties(layer)
-          .filter((p) -> p != layer.name && !p.getName().isEmpty())
+          .filter((p) -> !p.getName().isEmpty())
           .sorted(
             new DefaultLevelOfDetailComparator<Property<?>>(0)
               .thenComparing(Comparator.comparing(Property::getName)))

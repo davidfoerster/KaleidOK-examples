@@ -2,14 +2,19 @@ package kaleidok.kaleidoscope.layer;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.javafx.beans.property.SimpleBoundedIntegerProperty;
+import kaleidok.javafx.beans.property.adapter.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.PropertyPreferencesAdapter;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.image.PImageFuture;
+import kaleidok.util.Arrays;
 import kaleidok.util.logging.LoggingUtils;
 import kaleidok.util.SynchronizedFormat;
 import processing.core.PImage;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -17,11 +22,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public abstract class ImageLayer implements Runnable
+public abstract class ImageLayer implements Runnable, PreferenceBean
 {
   protected final ExtPApplet parent;
 
-  public final StringProperty name;
+  protected final StringProperty name;
 
   public final SimpleBoundedIntegerProperty wireframe =
     new SimpleBoundedIntegerProperty(this, "wireframe", 0, 0, 5);
@@ -54,6 +59,30 @@ public abstract class ImageLayer implements Runnable
       className.substring(
         0, className.length() - layerSuffix.length()) :
       className;
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return name.get();
+  }
+
+
+  private Collection<? extends PropertyPreferencesAdapter<?, ?>> preferencesAdapters = null;
+
+  @Override
+  public Collection<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    if (preferencesAdapters == null)
+    {
+      preferencesAdapters = Arrays.asImmutableList(
+        PropertyUtils.getProperties(this)
+          .map(PreferenceBean::ofAny)
+          .toArray(PropertyPreferencesAdapter<?,?>[]::new));
+    }
+    return preferencesAdapters;
   }
 
 

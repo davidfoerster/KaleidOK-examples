@@ -4,6 +4,8 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.javafx.beans.property.PropertyUtils;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.kaleidoscope.layer.*;
 import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.Arrays;
@@ -67,44 +69,68 @@ public class LayerManager implements List<ImageLayer>, Runnable
   private int applyLayerProperties()
   {
     final MessageFormat screenshotPathPattern = getScreenshotPathPattern();
-    this.stream().forEach((l) ->
+    this.forEach((l) ->
       l.setScreenshotPathPattern(screenshotPathPattern));
 
     final Map<String, String> propertyEntries = loadLayerProperties();
-    Optional<Stream<String>> appliedEntriesStream = this.stream()
-      .map((l) ->
-        PropertyUtils.applyProperties(
-          propertyEntries, l.getClass().getPackage().getName(),
-          PropertyUtils.getProperties(l)))
-      .reduce(Stream::concat);
+    Stream<String> appliedEntries = getPreferenceAdapters()
+      .map((pa) -> new AbstractMap.SimpleEntry<>(
+        PropertyUtils.applyProperty(
+          propertyEntries, "kaleidok.kaleidoscope.layer", pa.property),
+        pa))
+      .peek((item) -> item.getValue().load())
+      .map(Map.Entry::getKey)
+      .filter(Objects::nonNull);
 
-    if (!logger.isLoggable(Level.FINEST))
-    {
-      return appliedEntriesStream.isPresent() ?
-        (int) appliedEntriesStream.get().count() :
-        0;
-    }
+    return logger.isLoggable(Level.FINEST) ?
+      logUnappliedPropertyEntries(propertyEntries, appliedEntries) :
+      (int) appliedEntries.count();
+  }
 
+
+  private static int logUnappliedPropertyEntries(
+    Map<String, String> allEntries, Stream<String> appliedEntries )
+  {
     final Set<String> appliedEntriesSet =
-      appliedEntriesStream.isPresent() ?
-        appliedEntriesStream.get().collect(Collectors.toSet()) :
-      Collections.emptySet();
-    if (appliedEntriesSet.size() < propertyEntries.size())
+      appliedEntries.collect(Collectors.toSet());
+
+    if (appliedEntriesSet.size() < allEntries.size())
     {
       Collection<Map.Entry<String, String>> unappliedEntries =
         appliedEntriesSet.isEmpty() ?
-          propertyEntries.entrySet() :
-          propertyEntries.entrySet().stream()
+          allEntries.entrySet() :
+          allEntries.entrySet().stream()
             .filter((e) -> !appliedEntriesSet.contains(e.getKey()))
             .collect(Collectors.toList());
 
       logger.log(Level.FINEST,
         "The following {0} of your {1} layer property entries were not " +
           "used: {2}",
-        new Object[]{ unappliedEntries.size(), propertyEntries.size(),
+        new Object[]{ unappliedEntries.size(), allEntries.size(),
           unappliedEntries });
     }
+
     return appliedEntriesSet.size();
+  }
+
+
+  public void dispose()
+  {
+    PreferenceBean.saveAndFlush(this.stream());
+
+    clear();
+    backgroundLayer = null;
+    centreLayer = null;
+    foobarLayer = null;
+    outerMovingShape = null;
+    spectrogramLayer = null;
+  }
+
+
+  private Stream<? extends PropertyPreferencesAdapter<?,?>>
+  getPreferenceAdapters()
+  {
+    return this.stream().flatMap(ImageLayer::getPreferenceAdapters);
   }
 
 
@@ -189,12 +215,13 @@ public class LayerManager implements List<ImageLayer>, Runnable
     {
       String imagesParam = parent.getParameterMap().get(
         parent.getClass().getPackage().getName() + ".images.initial");
+      //noinspection CallToStringConcatCanBeReplacedByOperator
       images = (imagesParam == null || imagesParam.isEmpty()) ?
         new ArrayList<>(MIN_IMAGES) :
         WHITESPACE_PATTERN.splitAsStream(imagesParam)
           .filter(( s ) -> !s.isEmpty())
           .map(( s ) -> parent.getImageFuture(
-            (FilenameUtils.getPrefixLength(s) == 0 && !Strings.looksLikeUrl(s)) ? "/images/" + s : s))
+            (FilenameUtils.getPrefixLength(s) == 0 && !Strings.looksLikeUrl(s)) ? "/images/".concat(s) : s))
           .collect(Collectors.toList());
       if (images.isEmpty())
         images.add(PImageFuture.EMPTY);
