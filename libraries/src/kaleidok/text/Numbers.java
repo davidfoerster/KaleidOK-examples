@@ -18,71 +18,96 @@ public final class Numbers
    */
   public static NumberFormat adjustFractionalDigits( NumberFormat fmt,
     double... values )
+    throws ArithmeticException
   {
-    if (values.length == 0)
-      throw new ArrayIndexOutOfBoundsException("empty array");
-
-    Stream<BigDecimal> valueStream =
-      DoubleStream.of(values)
-        .filter(Double::isFinite)
-        .mapToObj(BigDecimal::valueOf);
-
-    if (fmt instanceof DecimalFormat)
-    {
-      int multiplier = ((DecimalFormat) fmt).getMultiplier();
-      if (multiplier != 1)
-      {
-        double dMultiplierLog10 = Math.log10(Math.abs((long) multiplier));
-        final int iMultiplierLog10 = (int) dMultiplierLog10;
-        //assert Double.isFinite(dMultiplierLog10) || iMultiplierLog10 != dMultiplierLog10;  // This is guaranteed because non-finite floating-point numbers are converted to either 0 or INT_MAX/INT_MIN all of which are unequal to non-finite floating-point numbers.
-        if (iMultiplierLog10 == dMultiplierLog10)
-        {
-          valueStream = valueStream.map(
-            (v) -> v.scaleByPowerOfTen(iMultiplierLog10));
-          if (multiplier < 0)
-            valueStream = valueStream.map(BigDecimal::negate);
-        }
-        else if (multiplier == -1)
-        {
-          valueStream = valueStream.map(BigDecimal::negate);
-        }
-        else
-        {
-          valueStream = valueStream.map(
-            BigDecimal.valueOf(multiplier)::multiply);
-        }
-      }
-    }
-
-    int fractionalDigits = valueStream
-      .mapToInt(Numbers::getFractionalDigits)
-      .max().orElseThrow(Numbers::nonFiniteException);
-
+    int fractionalDigits = getFractionalDigits(
+      (fmt instanceof DecimalFormat) ? ((DecimalFormat) fmt).getMultiplier() : 1,
+      values);
     fmt.setMinimumFractionDigits(fractionalDigits);
     fmt.setMaximumFractionDigits(fractionalDigits);
     return fmt;
   }
 
 
-  public static int getFractionalDigits( double x )
+  private static int getFractionalDigits( int multiplier, double... values )
+    throws ArithmeticException
   {
-    if (!Double.isFinite(x))
-      throw nonFiniteException();
+    if (values.length == 0)
+      throw new ArrayIndexOutOfBoundsException("empty array");
+    for (double x: values)
+      checkFinite(x);
+    if (multiplier == 0)
+      return 0;
 
-    return (x != (long) x) ?
-      getFractionalDigits(BigDecimal.valueOf(x)) :
+    Stream<BigDecimal> valueStream =
+      DoubleStream.of(values)
+        .filter(kaleidok.util.Math::isFractional)
+        .mapToObj(BigDecimal::valueOf);
+
+    switch (multiplier)
+    {
+    case 1:
+      break;
+
+    case -1:
+      valueStream = valueStream.map(BigDecimal::negate);
+      break;
+
+    default:
+      double dMultiplierLog10 = Math.log10(Math.abs((double) multiplier));
+      final int iMultiplierLog10 = (int) dMultiplierLog10;
+      //assert Double.isFinite(dMultiplierLog10) || iMultiplierLog10 != dMultiplierLog10;  // This is guaranteed because non-finite floating-point numbers are converted to either 0 or INT_MAX/INT_MIN all of which are unequal to non-finite floating-point numbers.
+      if (iMultiplierLog10 == dMultiplierLog10)
+      {
+        valueStream = valueStream.map(
+          (v) -> v.scaleByPowerOfTen(iMultiplierLog10));
+        if (multiplier < 0)
+          valueStream = valueStream.map(BigDecimal::negate);
+      }
+      else
+      {
+        valueStream = valueStream.map(
+          BigDecimal.valueOf(multiplier)::multiply);
+      }
+      break;
+    }
+
+    return valueStream
+      .mapToInt(Numbers::getFractionalDigitCount)
+      .max().orElse(0);
+  }
+
+
+  /**
+   * @param x  A number
+   * @return  The number of decimal digits necessary to represent x accurately
+   * @throws ArithmeticException  if x is non-finite
+   * @see #getFractionalDigitCount(BigDecimal)
+   */
+  public static int getFractionalDigitCount( double x )
+    throws ArithmeticException
+  {
+    checkFinite(x);
+    return kaleidok.util.Math.isFractional(x) ?
+      getFractionalDigitCount(BigDecimal.valueOf(x)) :
       0;
   }
 
 
-  public static int getFractionalDigits( BigDecimal x )
+  /**
+   * @param x  A number
+   * @return  The number of decimal digits necessary to represent x accurately
+   */
+  public static int getFractionalDigitCount( BigDecimal x )
   {
     return Math.max(x.stripTrailingZeros().scale(), 0);
   }
 
 
-  private static ArithmeticException nonFiniteException()
+  private static void checkFinite( double x )
+    throws ArithmeticException
   {
-    return new ArithmeticException("non-finite");
+    if (!Double.isFinite(x))
+      throw new ArithmeticException("non-finite");
   }
 }
