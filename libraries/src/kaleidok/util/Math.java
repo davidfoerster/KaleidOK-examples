@@ -207,4 +207,16 @@ public final class Math
     return (x != (long) x) && // true for all fractional numbers but also "large" integers and non-finites (see below)
       (abs(x) <= (1L << DoubleConsts.SIGNIFICAND_WIDTH)); // false for non-finites and all "double" numbers too large to have a fractional part
   }
+
+
+  public static double pow10( int exponent )
+  {
+    if (exponent < 0 || exponent > 18)
+      return pow(10, exponent);
+
+    long result = 1;
+    for (; exponent != 0; exponent--)
+      result = (result << 3) + (result << 1);
+    return result;
+  }
 }
