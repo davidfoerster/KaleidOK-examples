@@ -52,34 +52,38 @@ public final class LoggingUtils
   {
     String loggingFile = "logging.properties";
     try (InputStream is =
-      newInputStreamNoThrow(loggingFile, contextClass.getClassLoader()))
+      newInputStream(loggingFile, contextClass.getClassLoader()))
     {
-      if (is != null)
-      {
-        LogManager.getLogManager().readConfiguration(is);
-        return true;
-      }
+      LogManager.getLogManager().readConfiguration(is);
     }
     catch (IOException ex)
     {
       logThrown(Logger.getAnonymousLogger(), Level.SEVERE,
         "Couldn't load default {0} file for {1}", ex,
         new Object[]{loggingFile, contextClass.getName()});
+      return false;
     }
-    return false;
+    return true;
   }
 
 
-  private static InputStream newInputStreamNoThrow( String filename,
+  private static InputStream newInputStream( String filename,
     ClassLoader cl )
+    throws FileNotFoundException
   {
     try
     {
       return new FileInputStream(filename);
     }
-    catch (FileNotFoundException ignored)
+    catch (FileNotFoundException ex)
     {
-      return (cl != null) ? cl.getResourceAsStream(filename) : null;
+      if (cl != null)
+      {
+        InputStream is = cl.getResourceAsStream(filename);
+        if (is != null)
+          return is;
+      }
+      throw ex;
     }
   }
 }
