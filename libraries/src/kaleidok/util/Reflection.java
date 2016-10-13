@@ -21,24 +21,25 @@ public final class Reflection
 
 
   private static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS =
-    new IdentityHashMap<Class<?>, Class<?>>(WRAPPER_TYPES.size() * 3) {{
-      for (Class<?> clazz: WRAPPER_TYPES)
-      {
+    WRAPPER_TYPES.stream().collect(
+      IdentityHashMap::new,
+      ( map, wrapper ) -> {
         Class<?> primitive;
         try
         {
-          primitive = (Class<?>) clazz.getDeclaredField("TYPE").get(null);
-          fastAssert(primitive.isPrimitive());
+          primitive = (Class<?>) wrapper.getDeclaredField("TYPE").get(null);
         }
         catch (@SuppressWarnings("ProhibitedExceptionCaught")
           NoSuchFieldException | IllegalAccessException | ClassCastException | NullPointerException ex)
         {
           throw new AssertionError(ex);
         }
-        put(primitive, clazz);
-        put(clazz, primitive);
-      }
-    }};
+        fastAssert(primitive.isPrimitive());
+
+        map.put(wrapper, primitive);
+        map.put(primitive, wrapper);
+      },
+      Map::putAll);
 
 
   public static Class<?> getWrapperType( Class<?> clazz )
