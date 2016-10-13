@@ -434,7 +434,7 @@
       <option name="ignoreThrown" value="true" />
     </inspection_tool>
     <inspection_tool class="TooBroadScope" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_allowConstructorAsInitializer" value="false" />
+      <option name="m_allowConstructorAsInitializer" value="true" />
       <option name="m_onlyLookAtBlocks" value="true" />
     </inspection_tool>
     <inspection_tool class="TooBroadThrows" enabled="true" level="WARNING" enabled_by_default="true">
