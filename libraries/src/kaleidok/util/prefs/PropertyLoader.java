@@ -6,13 +6,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static kaleidok.util.AssertionUtils.fastAssert;
 
@@ -60,18 +64,28 @@ public final class PropertyLoader
     }
     fastAssert(clazz != null || classLoader != null);
 
-    URL[] urls = new URL[resourcePaths.length + filesystemPaths.length];
-    int i = 0;
-    for (String rp: resourcePaths) {
-      URL url = (clazz != null) ? clazz.getResource(rp) : classLoader.getResource(rp);
-      if (url != null)
-        urls[i++] = url;
+    Stream<URL> resourceURLs = Stream.of(resourcePaths)
+      .map((clazz != null) ? clazz::getResource : classLoader::getResource)
+      .filter(Objects::nonNull);
+    Stream<URL> filesystemURLs = Stream.of(filesystemPaths)
+      .map(File::new)
+      .filter(File::exists)
+      .map((file) -> {
+        try {
+          return file.toURI().toURL();
+        } catch (MalformedURLException ex) {
+          throw new UncheckedIOException(ex);
+        }});
+
+    URL[] urls;
+    try {
+      urls = Stream.concat(resourceURLs, filesystemURLs).sequential()
+        .distinct()
+        .toArray(URL[]::new);
+    } catch (UncheckedIOException ex) {
+      throw ex.getCause();
     }
-    for (String fp: filesystemPaths) {
-      File f = new File(fp);
-      if (f.exists())
-        urls[i++] = f.toURI().toURL();
-    }
+
     return load(prop, charset, urls);
   }
 
