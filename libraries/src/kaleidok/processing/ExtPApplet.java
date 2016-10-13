@@ -40,6 +40,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
+import static kaleidok.util.prefs.PreferenceUtils.getInt;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
@@ -131,20 +133,25 @@ public class ExtPApplet extends PApplet
 
   private void parseAndSetConfigSize()
   {
-    int width = preferences.getInt(PREF_GEOMETRY + "width", 0),
-      height = preferences.getInt(PREF_GEOMETRY + "height", 0);
-    if (width <= 0 && height <= 0)
+    OptionalInt width = getInt(preferences, PREF_GEOMETRY + "width"),
+      height = getInt(preferences, PREF_GEOMETRY + "height");
+    int iWidth = 0, iHeight = 0;
+    if (width.isPresent() && height.isPresent())
     {
-      String sSize = getParameterMap().get("size");
-      if (sSize != null)
+      iWidth = width.getAsInt();
+      iHeight = height.getAsInt();
+    }
+    else
+    {
+      int[] aSize = parseParamIntDimensions("size");
+      if (aSize != null)
       {
-        String[] asSize = split(sSize, ',');
-        width = parseInt(asSize[0]);
-        height = (asSize.length >= 2) ? parseInt(asSize[1]) : width;
+        iWidth = aSize[0];
+        iHeight = aSize[1];
       }
     }
-    if (width > 0 || height > 0)
-      size(Math.max(width, MIN_DIMENSION), Math.max(height, MIN_DIMENSION));
+    if (iWidth > 0 || iHeight > 0)
+      size(Math.max(iWidth, MIN_DIMENSION), Math.max(iHeight, MIN_DIMENSION));
   }
 
 
@@ -187,33 +194,25 @@ public class ExtPApplet extends PApplet
     if (!P3D.equals(sketchRenderer()))
       return;
 
-    int iLeft, iTop;
     final Window window = (Window) getSurface().getNative();
-    String sLocation = getParameterMap().get("location");
-    if (sLocation != null)
+    int[] aLocation = null;
+    OptionalInt left = getInt(preferences, PREF_GEOMETRY + "left"),
+      top = getInt(preferences, PREF_GEOMETRY + "top");
+    if (left.isPresent() && top.isPresent())
     {
-      String[] asLocation = split(sLocation, ',');
-      iLeft = parseInt(asLocation[0]);
-      iTop = (asLocation.length >= 2) ? parseInt(asLocation[1]) : 0;
-    }
-    else
-    {
-      double dLeft = preferences.getDouble(PREF_GEOMETRY + "left", Double.NaN),
-        dTop = preferences.getDouble(PREF_GEOMETRY + "top", Double.NaN);
-      if (!Double.isFinite(dLeft) || !Double.isFinite(dTop))
-        return;
-      iLeft = (int) dLeft;
-      iTop = (int) dTop;
+      int iLeft = left.getAsInt(), iTop = top.getAsInt();
       RectangleImmutable intersection =
         window.getScreen().getViewport().intersection(
           iLeft, iTop, iLeft + this.width, iTop + this.height);
-      if (intersection.getWidth() < MIN_DIMENSION ||
-        intersection.getHeight() < MIN_DIMENSION)
-      {
-        return;
-      }
+      if (Math.min(intersection.getWidth(), intersection.getHeight()) >= MIN_DIMENSION)
+        aLocation = new int[]{iLeft, iTop};
     }
-    window.setPosition(iLeft, iTop);
+
+    if (aLocation == null)
+      aLocation = parseParamIntDimensions("location");
+
+    if (aLocation != null)
+      window.setPosition(aLocation[0], aLocation[1]);
   }
 
 
@@ -279,15 +278,14 @@ public class ExtPApplet extends PApplet
   {
     if (!sketchFullScreen())
     {
-      Preferences preferences = this.preferences;
       preferences.putInt(PREF_GEOMETRY + "width", width);
       preferences.putInt(PREF_GEOMETRY + "height", height);
 
       if (P3D.equals(sketchRenderer()))
       {
         PointImmutable l = getSurfaceLocation(savedSurfaceLocation);
-        preferences.putDouble(PREF_GEOMETRY + "left", l.getX());
-        preferences.putDouble(PREF_GEOMETRY + "top", l.getY());
+        preferences.putInt(PREF_GEOMETRY + "left", l.getX());
+        preferences.putInt(PREF_GEOMETRY + "top", l.getY());
       }
     }
   }
@@ -647,5 +645,61 @@ public class ExtPApplet extends PApplet
 
     @Override
     public void windowRepaint( WindowUpdateEvent e ) { }
+  }
+
+
+  private int[] parseParamIntDimensions( String key )
+  {
+    if (key.isEmpty())
+      throw new IllegalArgumentException("empty key");
+
+    String value = getParameterMap().get(key);
+    if (value != null)
+    {
+      int[] result = parseIntDimensions(value);
+      if (result != null)
+        return result;
+
+    }
+    return null;
+  }
+
+
+  private static int[] parseIntDimensions( String s )
+  {
+    return parseIntDimensions(s, ',');
+  }
+
+  private static int[] parseIntDimensions( String s, char delimiter )
+  {
+    if (!s.isEmpty())
+    {
+      int p = s.indexOf(delimiter);
+      if (p != 0) try
+      {
+        int x = 0, y = 0;
+        boolean success = false;
+
+        if (p < 0)
+        {
+          x = y = Integer.parseInt(s);
+          success = true;
+        }
+        else if (s.length() > p + 1 && s.indexOf(delimiter, p + 1) < 0)
+        {
+          x = Integer.parseInt(s.substring(0, p));
+          y = Integer.parseInt(s.substring(p + 1));
+          success = true;
+        }
+
+        if (success)
+          return new int[]{ x, y };
+      }
+      catch (NumberFormatException ignored)
+      {
+        // return default
+      }
+    }
+    return null;
   }
 }
