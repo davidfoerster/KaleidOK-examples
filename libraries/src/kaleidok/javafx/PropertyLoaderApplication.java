@@ -10,7 +10,6 @@ import kaleidok.util.containers.ChainedMap;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.*;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -59,8 +58,8 @@ public abstract class PropertyLoaderApplication extends Application
     Properties prop = loadProperties();
     if (!prop.isEmpty())
     {
-      namedParameters = Collections.unmodifiableMap(
-        new ChainedMap<>(namedParameters, PropertyLoader.toMap(prop, null)));
+      namedParameters =
+        new ChainedMap<>(namedParameters, PropertyLoader.toMap(prop, null));
     }
     namedParameters =
       new LowercaseStringMap<>(namedParameters, Locale.ENGLISH);
