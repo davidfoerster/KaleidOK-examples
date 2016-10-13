@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import kaleidok.javafx.PropertyLoaderApplication;
 import kaleidok.javafx.geometry.Rectangles;
 import kaleidok.javafx.stage.Screens;
+import kaleidok.javafx.stage.Windows;
 import kaleidok.util.prefs.PreferenceUtils;
 import processing.core.PApplet;
 
@@ -29,9 +30,6 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 
   protected final Preferences preferences =
     Preferences.userNodeForPackage(this.getClass());
-
-  protected final String PREF_GEOMETRY =
-    getClass().getSimpleName() + ".geometry.";
 
 
   @Override
@@ -92,13 +90,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 
   private void parseAndSetConfig( Stage stage )
   {
-    double left = preferences.getDouble(PREF_GEOMETRY + "left", Double.NaN),
-      top = preferences.getDouble(PREF_GEOMETRY + "top", Double.NaN);
-    if (Double.isFinite(left) && Double.isFinite(top))
-    {
-      stage.setX(left);
-      stage.setY(top);
-    }
+    Windows.loadPosition(stage, preferences, getClass().getSimpleName());
   }
 
 
@@ -129,14 +121,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   {
     Stage stage = this.stage;
     if (stage != null && !stage.isFullScreen())
-    {
-      String prefPrefix = PREF_GEOMETRY;
-      Preferences preferences = this.preferences;
-      preferences.putDouble(prefPrefix + "left", stage.getX());
-      preferences.putDouble(prefPrefix + "top", stage.getY());
-      preferences.putDouble(prefPrefix + "width", stage.getWidth());
-      preferences.putDouble(prefPrefix + "height", stage.getHeight());
-    }
+      Windows.saveGeometry(stage, preferences, getClass().getSimpleName());
   }
 
 

@@ -8,6 +8,7 @@ import javafx.scene.control.Toggle;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import kaleidok.javafx.stage.Icons;
+import kaleidok.javafx.stage.Windows;
 import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
 import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
 import kaleidok.processing.PAppletFactory;
@@ -57,19 +58,9 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       configurationWindow.setTitle("Kaleidoscope configuration");
       configurationWindow.setWidth(300);
       configurationWindow.setScene(new Scene(getConfigurationEditor()));
-
-      Preferences pref = getConfigurationEditorPreferences();
-      double
-        x = pref.getDouble(
-          getConfigurationEditorGeometryPreference("left"), Double.NaN),
-        y = pref.getDouble(
-          getConfigurationEditorGeometryPreference("right"), Double.NaN);
-      if (Double.isFinite(x) && Double.isFinite(y))
-      {
-        configurationWindow.setX(x);
-        configurationWindow.setY(y);
-      }
-
+      Windows.loadPosition(configurationWindow,
+        getConfigurationEditorPreferences(),
+        KaleidoscopeConfigurationEditor.class.getSimpleName());
       configurationWindow.showingProperty().addListener(
         ( obs, oldValue, newValue ) ->
           getControls().getConfigurationWindowButton().setSelected(newValue));
@@ -99,13 +90,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
         Preferences.userNodeForPackage(KaleidoscopeConfigurationEditor.class);
     }
     return configurationEditorPreferences;
-  }
-
-
-  private static String getConfigurationEditorGeometryPreference( String name )
-  {
-    return KaleidoscopeConfigurationEditor.class.getSimpleName() +
-      ".geometry." + name;
   }
 
 
@@ -252,12 +236,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     if (configurationWindow != null)
     {
       Preferences pref = getConfigurationEditorPreferences();
-      pref.putDouble(
-        getConfigurationEditorGeometryPreference("left"),
-        configurationWindow.getX());
-      pref.putDouble(
-        getConfigurationEditorGeometryPreference("right"),
-        configurationWindow.getY());
+      Windows.saveGeometry(configurationWindow, pref,
+        KaleidoscopeConfigurationEditor.class.getSimpleName());
       PreferenceUtils.flush(pref);
     }
 

@@ -10,6 +10,9 @@ public final class PreferenceUtils
   private PreferenceUtils() { }
 
 
+  public static final char KEY_PART_DELIMITER = '.';
+
+
   public static void flush( Preferences preferences )
   {
     try
