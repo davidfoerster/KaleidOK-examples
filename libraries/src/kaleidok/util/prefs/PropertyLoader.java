@@ -111,7 +111,7 @@ public final class PropertyLoader
     Map<String, String> dst )
   {
     if (dst == null)
-      dst = new HashMap<>(src.size() / 3 * 4);
+      dst = new HashMap<>(Math.multiplyExact(src.size() / 3, 4));
 
     return src.stringPropertyNames().stream().sequential()
       .collect(Collectors.toMap(
