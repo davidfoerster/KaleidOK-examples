@@ -17,8 +17,8 @@ public final class PreferenceUtils
     }
     catch (BackingStoreException ex)
     {
-      System.err.format("Couldn't save preferences %s: %s%n",
-        preferences, ex.getLocalizedMessage());
+      System.err.format("Couldn't save preference node %s: %s%n",
+        preferences.absolutePath(), ex.getLocalizedMessage());
     }
   }
 }
