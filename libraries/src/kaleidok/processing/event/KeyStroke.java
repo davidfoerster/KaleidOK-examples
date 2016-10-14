@@ -8,6 +8,7 @@ import processing.core.PConstants;
 
 import static com.jogamp.newt.event.InputEvent.META_MASK;
 import static com.jogamp.newt.event.KeyEvent.*;
+import static java.util.Objects.requireNonNull;
 import static kaleidok.processing.event.KeyEventSupport.dummySurfaceHolder;
 
 
@@ -95,10 +96,9 @@ public class KeyStroke
   protected KeyStroke( short eventType, int modifiers, KeyType keyType,
     int keyValue )
   {
-    java.util.Objects.requireNonNull(keyType);
     this.eventType = eventType;
     this.modifiers = modifiers;
-    this.keyType = keyType;
+    this.keyType = requireNonNull(keyType);
     this.keyValue = keyValue;
   }
 
@@ -124,10 +124,7 @@ public class KeyStroke
   @Override
   public int hashCode()
   {
-    return
-      Objects.hashCode(eventType,
-      Objects.hashCode(modifiers,
-      Objects.hashCode(keyValue, keyType.hashCode())));
+    return Objects.hashCode(Objects.hashCode(Objects.hashCode(keyType.hashCode(), modifiers), keyValue), eventType);
   }
 
 
@@ -168,12 +165,14 @@ public class KeyStroke
     if (ev == null)
       return false;
     Object nativeEvent = ev.getNative();
+    if (nativeEvent == null)
+      throw new NullPointerException();
     if (nativeEvent instanceof KeyEvent)
       return matches((KeyEvent) nativeEvent);
     if (nativeEvent instanceof java.awt.event.KeyEvent)
       return matches((java.awt.event.KeyEvent) nativeEvent);
     throw new UnsupportedOperationException(
-      nativeEvent.getClass().getCanonicalName() +
+      nativeEvent.getClass().getName() +
         " events are currently unsupported");
   }
 }
