@@ -85,8 +85,12 @@ public final class Strings
     }
 
     int i;
-    for (i = offset + len - 1; i >= offset && n != 0; i--, n /= base)
+    for (i = offset + len - 1; i >= offset && n > Integer.MAX_VALUE; i--, n /= base)
       dst[i] = toDigit((int)(n % base));
+
+    int intN = (int) n, intBase = (int) base;
+    for (i = offset + len - 1; i >= offset && intN != 0; i--, intN /= intBase)
+      dst[i] = toDigit(intN % intBase);
 
     if (i >= offset) {
       if (negative)
