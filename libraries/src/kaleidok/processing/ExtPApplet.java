@@ -37,7 +37,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
@@ -76,17 +77,17 @@ public class ExtPApplet extends PApplet
 
   private CountDownLatch showSurfaceLatch = new CountDownLatch(1);
 
-  protected final List<Map<KeyStroke, Consumer<? super KeyEvent>>> keyEventHandlers;
+  protected final List<List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>>> keyEventHandlers;
 
   {
     @SuppressWarnings("unchecked")
-    Map<KeyStroke, Consumer<? super KeyEvent>>[] keyEventHandlers = new Map[3];
+    List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>>[] keyEventHandlers = new List[3];
     for (int i = keyEventHandlers.length - 1; i >= 0; i--)
-      keyEventHandlers[i] = new HashMap<>();
+      keyEventHandlers[i] = new ArrayList<>(0);
 
     final Runnable toggleFullScreenAction = this::toggleFullscreen;
-    keyEventHandlers[TYPE-1].put(
-      KeyStroke.fullscreenKeystroke, ( ev ) -> thread(toggleFullScreenAction));
+    keyEventHandlers[TYPE-1].add(new SimpleEntry<>(
+      KeyStroke.fullscreenKeystroke, ( ev ) -> thread(toggleFullScreenAction)));
 
     this.keyEventHandlers = Arrays.asImmutableList(keyEventHandlers);
   }
@@ -486,15 +487,14 @@ public class ExtPApplet extends PApplet
   @Override
   protected void handleKeyEvent( processing.event.KeyEvent event )
   {
-    Map<KeyStroke, Consumer<? super KeyEvent>> handlers =
+    List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>> handlers =
       keyEventHandlers.get(event.getAction() - 1);
     if (!handlers.isEmpty())
     {
       KeyEvent newtEvent = KeyEventSupport.convert(event);
       if (newtEvent != null)
       {
-        for (Map.Entry<KeyStroke, Consumer<? super KeyEvent>> e :
-          handlers.entrySet())
+        for (Map.Entry<KeyStroke, Consumer<? super KeyEvent>> e: handlers)
         {
           if (e.getKey().matches(newtEvent))
           {
