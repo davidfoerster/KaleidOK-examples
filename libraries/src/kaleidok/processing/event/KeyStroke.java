@@ -42,7 +42,7 @@ public class KeyStroke
   public static KeyStroke keyCharStroke( short eventType, int modifiers,
     char keyChar )
   {
-    return new KeyStroke(eventType, modifiers, KeyType.CODE, keyChar);
+    return new KeyStroke(eventType, modifiers, KeyType.CHAR, keyChar);
   }
 
 
