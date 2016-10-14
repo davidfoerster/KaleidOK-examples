@@ -68,21 +68,31 @@ public final class Parser
       throw new AssertionError("Unexpected operator");
     }
 
-    switch (m.group("colormodel").toLowerCase(Locale.ROOT))
+    //noinspection SpellCheckingInspection
+    String colorModel = m.group("colormodel").toLowerCase(Locale.ROOT);
+    switch (colorModel)
     {
     case "hsb":
-      if (args.length != 3)
-      {
-        throw new IllegalArgumentException(
-          "hsb() expects 3 arguments, " + args.length + " given");
-      }
+      checkArgumentCount(3, args.length, colorModel);
       return new HSBAdjustFilter(
         (float) args[0], (float) args[1], (float) args[2], operator);
 
     case "rgb":
     default:
       throw new UnsupportedOperationException(
-        "Unknown or unimplemented color model: " + m.group("colormodel"));
+        "Unknown or unimplemented color model: " + colorModel);
+    }
+  }
+
+
+  private static void checkArgumentCount( int expected, int actual,
+    String methodName )
+  {
+    if (actual != expected)
+    {
+      throw new IllegalArgumentException(String.format(
+        "%s() expects %d arguments, %d given",
+        methodName, expected, actual));
     }
   }
 }
