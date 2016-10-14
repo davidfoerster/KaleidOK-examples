@@ -6,34 +6,61 @@ import processing.event.MouseEvent;
 import processing.event.TouchEvent;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import java.util.EnumMap;
+import java.lang.reflect.Method;
 import java.util.EnumSet;
-import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 
 
-@SuppressWarnings("unused")
 public class Plugin<P extends PApplet>
 {
   public enum HookMethod {
     pre, draw, post, pause, resume, dispose,
-    mouseEvent, keyEvent, touchEvent
-  }
+    mouseEvent(new Class<?>[]{ MouseEvent.class }),
+    keyEvent(new Class<?>[]{ KeyEvent.class }),
+    touchEvent(new Class<?>[]{ TouchEvent.class });
 
-  private static final Map<HookMethod, Class<?>[]> HOOK_METHODS =
-    new EnumMap<HookMethod, Class<?>[]>(HookMethod.class) {{
-      put(HookMethod.pre, EMPTY_CLASS_ARRAY);
-      put(HookMethod.draw, EMPTY_CLASS_ARRAY);
-      put(HookMethod.post, EMPTY_CLASS_ARRAY);
-      put(HookMethod.pause, EMPTY_CLASS_ARRAY);
-      put(HookMethod.resume, EMPTY_CLASS_ARRAY);
-      put(HookMethod.dispose, EMPTY_CLASS_ARRAY);
-      put(HookMethod.mouseEvent, new Class<?>[]{ MouseEvent.class });
-      put(HookMethod.keyEvent, new Class<?>[]{ KeyEvent.class });
-      put(HookMethod.touchEvent, new Class<?>[]{ TouchEvent.class });
-      assert this.size() == HookMethod.values().length;
-    }};
+
+    private final Class<?>[] argumentTypes;
+
+
+    HookMethod( Class<?>[] argumentTypes )
+    {
+      this.argumentTypes = Objects.requireNonNull(argumentTypes);
+    }
+
+
+    HookMethod()
+    {
+      this(EMPTY_CLASS_ARRAY);
+    }
+
+
+    public Class<?>[] getArgumentTypes()
+    {
+      return (argumentTypes.length == 0) ? argumentTypes : argumentTypes.clone();
+    }
+
+
+    public Method getMethodReference( Plugin<?> plugin )
+    {
+      try
+      {
+        return plugin.getClass().getMethod(name(), argumentTypes);
+      }
+      catch (NoSuchMethodException ex)
+      {
+        throw new AssertionError(ex);
+      }
+    }
+
+
+    public boolean isOverriddenOn( Plugin<?> plugin )
+    {
+      return getMethodReference(plugin).getDeclaringClass() != Plugin.class;
+    }
+  }
 
 
   protected final P p;
@@ -51,28 +78,10 @@ public class Plugin<P extends PApplet>
 
   private void registerHooks()
   {
-    @SuppressWarnings("unchecked")
-    final Class<? extends Plugin<P>> clazz =
-      (Class<? extends Plugin<P>>) this.getClass();
-
-    for (Map.Entry<HookMethod, Class<?>[]> e: HOOK_METHODS.entrySet())
+    for (HookMethod method: HookMethod.values())
     {
-      HookMethod method = e.getKey();
-      Class<?>[] argsTypes = e.getValue();
-      try
-      {
-        if (method == HookMethod.dispose ||
-          clazz.getMethod(method.name(), argsTypes).getDeclaringClass() !=
-            Plugin.class)
-        {
-          p.registerMethod(method.name(), this);
-          registeredHooks.add(method);
-        }
-      }
-      catch (NoSuchMethodException ex)
-      {
-        throw new AssertionError(ex);
-      }
+      if (method == HookMethod.dispose || method.isOverriddenOn(this))
+        registerHook(method);
     }
   }
 
@@ -124,9 +133,11 @@ public class Plugin<P extends PApplet>
 
   public void pause() { }
 
+  @SuppressWarnings("unused")
   public void mouseEvent( MouseEvent ev ) { }
 
   public void keyEvent( KeyEvent ev ) { }
 
+  @SuppressWarnings("unused")
   public void touchEvent( TouchEvent ev ) { }
 }
