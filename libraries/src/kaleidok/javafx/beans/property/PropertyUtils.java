@@ -8,6 +8,7 @@ import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
 import kaleidok.util.Strings;
 import kaleidok.util.prefs.DefaultValueParser;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Modifier;
 import java.util.Map;
@@ -217,5 +218,21 @@ public final class PropertyUtils
       (prop instanceof WritableSetValue) ? ObservableSet.class :
       (prop instanceof WritableMapValue) ? ObservableMap.class :
         null);
+  }
+
+
+  public static <T> void debugPropertyChanges( ReadOnlyProperty<T> property )
+  {
+    property.addListener(( observable, oldValue, newValue ) -> {
+      if (!Objects.equals(oldValue, newValue))
+      {
+        //noinspection unchecked
+        System.out.format(
+          "Property \"%s\": \"%s\" -> \"%s\"%n",
+          StringUtils.defaultIfEmpty(
+            ((ReadOnlyProperty<T>) observable).getName(), "<unnamed>"),
+          oldValue, newValue);
+      }
+    });
   }
 }

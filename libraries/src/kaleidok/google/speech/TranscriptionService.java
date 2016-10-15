@@ -1,27 +1,44 @@
 package kaleidok.google.speech;
 
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableStringValue;
+import javafx.beans.value.ObservableValue;
+import kaleidok.javafx.beans.property.AspectedObjectProperty;
+import kaleidok.javafx.beans.property.AspectedStringProperty;
+import kaleidok.javafx.beans.property.PropertyUtils;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.adapter.preference.StringPropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.util.concurrent.DaemonThreadFactory;
 import org.apache.http.concurrent.FutureCallback;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static kaleidok.http.util.URLEncoding.appendEncoded;
 
 
-public class TranscriptionService
+public class TranscriptionService implements PreferenceBean
 {
-  private URL apiBase;
+  private final AspectedObjectProperty<URL> apiBase;
 
-  private String accessKey;
+  private final AspectedStringProperty accessKey;
 
-  private String language = "en";
+  private final AspectedStringProperty language;
+
+  private final ServiceUrlBinding serviceUrl;
 
   public FutureCallback<SttResponse> resultHandler;
 
@@ -49,78 +66,97 @@ public class TranscriptionService
     this(DEFAULT_API_BASE, accessKey, resultHandler);
   }
 
+
   public TranscriptionService( URL apiBase, String accessKey, FutureCallback<SttResponse> resultHandler )
   {
-    this(resultHandler);
-    this.apiBase = apiBase;
-    this.accessKey = accessKey;
-  }
+    this.apiBase =
+      new AspectedObjectProperty<>(this, "REST API base URL", apiBase);
+    /*this.apiBase.addAspect(
+      StringConverterAspectTag.getInstance(), UrlStringConverter.INSTANCE);*/
+    /*this.apiBase.addAspect(
+      PropertyPreferencesAdapterTag.getWritableInstance());*/
 
-  protected TranscriptionService( FutureCallback<SttResponse> resultHandler )
-  {
+    this.accessKey =
+      new AspectedStringProperty(this, "API access key", accessKey);
+    PropertyUtils.debugPropertyChanges(this.accessKey); // TODO: remove
+    this.accessKey.addAspect(PropertyPreferencesAdapterTag.getInstance(),
+      new StringPropertyPreferencesAdapter<>(this.accessKey,
+        TranscriptionService.class));
+
+    language = new AspectedStringProperty(this, "language", "en");
+    PropertyUtils.debugPropertyChanges(language); // TODO: remove
+    language.addAspect(PropertyPreferencesAdapterTag.getInstance(),
+      new StringPropertyPreferencesAdapter<>(language,
+        TranscriptionService.class));
+
     this.resultHandler = resultHandler;
+    this.serviceUrl =
+      new ServiceUrlBinding(this.apiBase, this.accessKey, language);
   }
 
 
-  public URL getApiBase()
+  public ObjectProperty<URL> apiBaseProperty()
   {
     return apiBase;
   }
 
+  public URL getApiBase()
+  {
+    return apiBase.get();
+  }
+
   public void setApiBase( URL apiBase )
   {
-    this.apiBase = apiBase;
-    serviceUrl = null;
+    this.apiBase.set(apiBase);
   }
 
 
-  public String getAccessKey()
+  public StringProperty accessKeyProperty()
   {
     return accessKey;
   }
 
+  public String getAccessKey()
+  {
+    return accessKey.get();
+  }
+
   public void setAccessKey( String accessKey )
   {
-    this.accessKey = accessKey;
-    serviceUrl = null;
+    this.accessKey.set(accessKey);
   }
 
 
-  public String getLanguage()
+  public StringProperty languageProperty()
   {
     return language;
   }
 
+  public String getLanguage()
+  {
+    return language.get();
+  }
+
   public void setLanguage( String language )
   {
-    this.language = language;
-    serviceUrl = null;
+    this.language.set(language);
   }
 
-
-  protected URL getServiceUrl()
-  {
-    if (serviceUrl == null) {
-      StringBuilder urlSpec = new StringBuilder(
-        URL_SPEC_PREFIX.length() + language.length() +
-          URL_SPEC_KEY_BIT.length() + accessKey.length());
-      appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
-      appendEncoded(accessKey, urlSpec.append(URL_SPEC_KEY_BIT));
-
-      try {
-        serviceUrl = new URL(apiBase, urlSpec.toString());
-      } catch (MalformedURLException ex) {
-        throw new AssertionError(ex);
-      }
-    }
-    return serviceUrl;
-  }
-
-  private URL serviceUrl = null;
 
   private static final String
     URL_SPEC_PREFIX = "recognize?output=json&lang=",
     URL_SPEC_KEY_BIT = "&key=";
+
+
+  protected ObservableObjectValue<URL> serviceUrlValue()
+  {
+    return serviceUrl;
+  }
+
+  protected URL getServiceUrl()
+  {
+    return serviceUrl.get();
+  }
 
 
   @OverridingMethodsMustInvokeSuper
@@ -141,5 +177,73 @@ public class TranscriptionService
   {
     return executor instanceof ThreadPoolExecutor &&
       ((ThreadPoolExecutor) executor).getQueue().contains(task);
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return "Transcription service";
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return Stream.of(apiBase, accessKey, language)
+      .map(PropertyPreferencesAdapterTag.getWritableInstance()::ofAny)
+      .filter(Objects::nonNull);
+  }
+
+
+  private static final class ServiceUrlBinding extends ObjectBinding<URL>
+  {
+    private final ObservableValue<URL> apiBase;
+
+    private final ObservableStringValue accessKey;
+
+    private final ObservableStringValue language;
+
+
+    private ServiceUrlBinding( ObservableValue<URL> apiBase,
+      ObservableStringValue accessKey, ObservableStringValue language )
+    {
+      bind(apiBase, accessKey, language);
+
+      this.apiBase = apiBase;
+      this.accessKey = accessKey;
+      this.language = language;
+    }
+
+
+    @Override
+    protected URL computeValue()
+    {
+      URL apiBase =
+        Objects.requireNonNull(this.apiBase.getValue(), "API base");
+      String
+        language = Objects.requireNonNull(this.language.get(), "language"),
+        accessKey = Objects.requireNonNull(this.accessKey.get(), "access key");
+
+      StringBuilder urlSpec = new StringBuilder(
+        URL_SPEC_PREFIX.length() + language.length() +
+          URL_SPEC_KEY_BIT.length() + accessKey.length());
+      appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
+      appendEncoded(accessKey, urlSpec.append(URL_SPEC_KEY_BIT));
+
+      try {
+        return new URL(apiBase, urlSpec.toString());
+      } catch (MalformedURLException ex) {
+        throw new AssertionError(ex);
+      }
+    }
+
+
+    @Override
+    public void dispose()
+    {
+      unbind(apiBase, accessKey, language);
+    }
   }
 }
