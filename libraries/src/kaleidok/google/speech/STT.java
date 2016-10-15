@@ -1,6 +1,8 @@
 package kaleidok.google.speech;
 
 import kaleidok.google.speech.mock.MockTranscriptionService;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.util.Timer;
 import org.apache.http.concurrent.FutureCallback;
 
@@ -13,9 +15,10 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 
-public class STT
+public class STT implements PreferenceBean
 {
   public enum State
   {
@@ -214,5 +217,20 @@ public class STT
   public static boolean isLoggingStatus()
   {
     return logger.isLoggable(statusLoggingLevel);
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return "Speech-to-Text";
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return service.getPreferenceAdapters();
   }
 }

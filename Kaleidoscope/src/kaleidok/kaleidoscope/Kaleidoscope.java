@@ -1,5 +1,6 @@
 package kaleidok.kaleidoscope;
 
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.processing.ProcessingSketchApplication;
@@ -81,6 +82,16 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  @Override
+  protected void doSavePreferences()
+  {
+    if (stt != null)
+      stt.getPreferenceAdapters().forEach(PropertyPreferencesAdapter::save);
+
+    super.doSavePreferences();
+  }
+
+
   public synchronized LayerManager getLayers()
   {
     if (layers == null)
@@ -100,7 +111,10 @@ public class Kaleidoscope extends ExtPApplet
   public synchronized SttManager getSTT()
   {
     if (stt == null)
+    {
       stt = new SttManager(this);
+      stt.getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);
+    }
     return stt;
   }
 

@@ -4,6 +4,8 @@ import kaleidok.google.speech.RecorderIcon;
 import kaleidok.google.speech.STT;
 import kaleidok.google.speech.SttResponse;
 import kaleidok.google.speech.Transcription;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.processing.Plugin;
@@ -15,11 +17,13 @@ import java.text.Format;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 
 
 public class SttManager extends Plugin<Kaleidoscope>
+  implements PreferenceBean
 {
   private final STT stt;
 
@@ -167,5 +171,20 @@ public class SttManager extends Plugin<Kaleidoscope>
     } else {
       end(doThrow);
     }
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return stt.getName();
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return stt.getPreferenceAdapters();
   }
 }

@@ -83,6 +83,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
         (List<TreeItem<ReadOnlyProperty<?>>>) (List<?>)
           configurationEditor.getRoot().getChildren();
 
+      root.add(KaleidoscopeConfigurationEditor.makeSubtree(sketch.getSTT()));
+
       LayerManager layers = sketch.getLayers();
       root.add(KaleidoscopeConfigurationEditor.makeSubtree2(
         layers, "Kaleidoscope", layers.stream()));
