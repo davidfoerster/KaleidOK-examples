@@ -14,6 +14,7 @@ import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvid
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
 import kaleidok.javafx.scene.control.cell.provider.SpinnerItemProvider;
 import kaleidok.javafx.scene.control.cell.provider.MultiTreeItemProvider;
+import kaleidok.javafx.scene.control.cell.provider.TextFieldItemProvider;
 import kaleidok.util.Arrays;
 
 import java.util.Comparator;
@@ -92,7 +93,8 @@ public class KaleidoscopeConfigurationEditor
       super(
         (List<? extends TreeItemProvider<Object, Node>>) (List<? extends TreeItemProvider<?,?>>)
         Arrays.asImmutableList(
-          new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>()));
+          new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>(),
+          new TextFieldItemProvider()));
     }
 
 
