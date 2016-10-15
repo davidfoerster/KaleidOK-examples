@@ -53,7 +53,7 @@ public class EditableTreeTableCell<T, N extends Node>
   private ReadOnlyProperty<T> getEditorValue()
   {
     EditorNodeInfo<N, T> nodeInfo = getEditorNodeInfo();
-    return (nodeInfo != null) ? nodeInfo.editorValue : null;
+    return (nodeInfo != null) ? nodeInfo.value : null;
   }
 
 
@@ -68,8 +68,8 @@ public class EditableTreeTableCell<T, N extends Node>
       return null;
 
     EditorNodeInfo<N, T> nodeInfo = getEditorNodeInfo();
-    return (nodeInfo != null && nodeInfo.editorStringValue != null) ?
-      nodeInfo.editorStringValue.get() :
+    return (nodeInfo != null && nodeInfo.stringValue != null) ?
+      nodeInfo.stringValue.getValue() :
       item.toString();
   }
 
@@ -105,9 +105,9 @@ public class EditableTreeTableCell<T, N extends Node>
           setText(null);
 
           // TODO: Is this part necessary?
-          //Property<S> editorValue = getEditorValue();
-          //if (editorValue != null)
-            //editorValue.setValue(!isEmpty() ? getItem() : null);
+          //Property<S> value = getEditorValue();
+          //if (value != null)
+            //value.setValue(!isEmpty() ? getItem() : null);
 
           setGraphic(node);
           node.requestFocus();
@@ -136,8 +136,8 @@ public class EditableTreeTableCell<T, N extends Node>
     super.cancelEdit();
 
     // TODO: Is this really necessary even though the cell item value is bound to the spinner value?
-    //if (editorValue != null)
-      //setItem(editorValue.getValue());
+    //if (value != null)
+      //setItem(value.getValue());
 
     setText(getEditorText());
     setGraphic(null);

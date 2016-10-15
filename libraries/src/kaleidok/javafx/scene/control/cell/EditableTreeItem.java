@@ -1,7 +1,7 @@
 package kaleidok.javafx.scene.control.cell;
 
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.value.ObservableStringValue;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import kaleidok.util.Objects;
@@ -32,22 +32,22 @@ public abstract class EditableTreeItem<T, N extends Node>
 
     public final N node;
 
-    public final ReadOnlyProperty<T> editorValue;
+    public final ReadOnlyProperty<T> value;
 
-    public final ObservableStringValue editorStringValue;
+    public final ObservableValue<String> stringValue;
 
 
-    protected EditorNodeInfo( N node, ReadOnlyProperty<T> editorValue,
-      ObservableStringValue editorStringValue )
+    protected EditorNodeInfo( N node, ReadOnlyProperty<T> value,
+      ObservableValue<String> stringValue )
     {
       this.node = node;
-      this.editorValue = editorValue;
-      this.editorStringValue = editorStringValue;
+      this.value = value;
+      this.stringValue = stringValue;
     }
 
 
     public static <N extends Node, T> EditorNodeInfo<N, T> of( N node,
-      ReadOnlyProperty<T> editorValue, ObservableStringValue editorStringValue )
+      ReadOnlyProperty<T> editorValue, ObservableValue<String> editorStringValue )
     {
       return (node != null) ?
         new EditorNodeInfo<>(node, editorValue, editorStringValue) :
@@ -67,8 +67,8 @@ public abstract class EditableTreeItem<T, N extends Node>
     {
       return Objects.hashCode(Objects.hashCode(
         java.util.Objects.hashCode(node),
-        editorValue),
-        editorStringValue);
+        value),
+        stringValue);
     }
 
 
@@ -82,8 +82,8 @@ public abstract class EditableTreeItem<T, N extends Node>
 
       EditorNodeInfo<?,?> otherENI = (EditorNodeInfo<?, ?>) other;
       return (isEmpty() && otherENI.isEmpty()) ||
-        (node == otherENI.node && editorValue == otherENI.editorValue &&
-          editorStringValue == otherENI.editorStringValue);
+        (node == otherENI.node && value == otherENI.value &&
+          stringValue == otherENI.stringValue);
     }
 
 

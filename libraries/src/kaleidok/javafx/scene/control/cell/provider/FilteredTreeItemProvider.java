@@ -12,12 +12,12 @@ public abstract class FilteredTreeItemProvider<T, N extends Node>
 
 
   @Override
-  public EditorNodeInfo<N, T> call( DynamicEditableTreeItem<T, N> cell )
+  public EditorNodeInfo<N, T> call( DynamicEditableTreeItem<T, N> item )
   {
-    return isApplicable(cell) ? callTypeChecked(cell) : null;
+    return isApplicable(item) ? callTypeChecked(item) : null;
   }
 
 
   protected abstract EditorNodeInfo<N, T> callTypeChecked(
-    DynamicEditableTreeItem<T, N> cell );
+    DynamicEditableTreeItem<T, N> item );
 }
