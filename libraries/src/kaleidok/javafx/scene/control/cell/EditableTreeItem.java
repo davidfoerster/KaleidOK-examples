@@ -1,10 +1,10 @@
 package kaleidok.javafx.scene.control.cell;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
-import kaleidok.util.Objects;
+import javafx.util.StringConverter;
 
 
 public abstract class EditableTreeItem<T, N extends Node>
@@ -32,25 +32,25 @@ public abstract class EditableTreeItem<T, N extends Node>
 
     public final N node;
 
-    public final ReadOnlyProperty<T> value;
+    public final Property<T> editorValue;
 
-    public final ObservableValue<String> stringValue;
+    public final StringConverter<T> converter;
 
 
-    protected EditorNodeInfo( N node, ReadOnlyProperty<T> value,
-      ObservableValue<String> stringValue )
+    protected EditorNodeInfo( N node, Property<T> editorValue,
+      StringConverter<T> converter )
     {
       this.node = node;
-      this.value = value;
-      this.stringValue = stringValue;
+      this.editorValue = editorValue;
+      this.converter = converter;
     }
 
 
     public static <N extends Node, T> EditorNodeInfo<N, T> of( N node,
-      ReadOnlyProperty<T> editorValue, ObservableValue<String> editorStringValue )
+      Property<T> editorValue, StringConverter<T> converter )
     {
       return (node != null) ?
-        new EditorNodeInfo<>(node, editorValue, editorStringValue) :
+        new EditorNodeInfo<>(node, editorValue, converter) :
         empty();
     }
 
@@ -59,31 +59,6 @@ public abstract class EditableTreeItem<T, N extends Node>
     public static <N extends Node, T> EditorNodeInfo<N, T> empty()
     {
       return (EditorNodeInfo<N, T>) EMPTY;
-    }
-
-
-    @Override
-    public int hashCode()
-    {
-      return Objects.hashCode(Objects.hashCode(
-        java.util.Objects.hashCode(node),
-        value),
-        stringValue);
-    }
-
-
-    @Override
-    public boolean equals( Object other )
-    {
-      if (other == this)
-        return true;
-      if (!(other instanceof EditorNodeInfo))
-        return false;
-
-      EditorNodeInfo<?,?> otherENI = (EditorNodeInfo<?, ?>) other;
-      return (isEmpty() && otherENI.isEmpty()) ||
-        (node == otherENI.node && value == otherENI.value &&
-          stringValue == otherENI.stringValue);
     }
 
 

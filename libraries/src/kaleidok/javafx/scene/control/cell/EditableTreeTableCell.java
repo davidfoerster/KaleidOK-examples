@@ -1,5 +1,6 @@
 package kaleidok.javafx.scene.control.cell;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
@@ -39,27 +40,35 @@ public class EditableTreeTableCell<T, N extends Node>
   }
 
 
-  private ReadOnlyProperty<T> getEditorValue()
+  private Property<T> getEditorValue()
   {
-    EditorNodeInfo<N, T> nodeInfo = getEditorNodeInfo();
-    return (nodeInfo != null) ? nodeInfo.value : null;
+    EditorNodeInfo<?, T> nodeInfo = getEditorNodeInfo();
+    return (nodeInfo != null) ? nodeInfo.editorValue : null;
   }
 
 
-  private String getEditorText()
+  private String itemToString()
   {
-    return getEditorText(getItem(), isEmpty());
+    return itemToString(getItem(), isEmpty());
   }
 
-  private String getEditorText( T item, boolean empty )
+  private String itemToString( T item, boolean empty )
   {
     if (item == null || empty)
       return null;
 
-    EditorNodeInfo<N, T> nodeInfo = getEditorNodeInfo();
-    return (nodeInfo != null && nodeInfo.stringValue != null) ?
-      nodeInfo.stringValue.getValue() :
+    EditorNodeInfo<?, T> nodeInfo = getEditorNodeInfo();
+    return (nodeInfo != null && nodeInfo.converter != null) ?
+      nodeInfo.converter.toString(item) :
       item.toString();
+  }
+
+
+  public boolean isEditableInherited()
+  {
+    return isEditable() &&
+      getTableColumn().isEditable() &&
+      getTreeTableView().isEditable();
   }
 
 
@@ -69,7 +78,7 @@ public class EditableTreeTableCell<T, N extends Node>
     super.updateItem(item, empty);
 
     boolean editing = isEditing();
-    setText(!editing ? getEditorText(item, empty) : null);
+    setText(!editing ? itemToString(item, empty) : null);
     setGraphic((editing && !empty) ? getEditorNode() : null);
   }
 
@@ -85,7 +94,7 @@ public class EditableTreeTableCell<T, N extends Node>
   {
     if (!isEditing() && isEditableInherited())
     {
-      N node = getEditorNode();
+      Node node = getEditorNode();
       if (node != null)
       {
         super.startEdit();
@@ -93,10 +102,13 @@ public class EditableTreeTableCell<T, N extends Node>
         {
           setText(null);
 
-          // TODO: Is this part necessary?
-          //Property<S> value = getEditorValue();
-          //if (value != null)
-            //value.setValue(!isEmpty() ? getItem() : null);
+          if (!isEmpty())
+          {
+            T item = getItem();
+            Property<T> editorValue = getEditorValue();
+            if (item != null && editorValue != null)
+              editorValue.setValue(item);
+          }
 
           setGraphic(node);
           node.requestFocus();
@@ -108,14 +120,6 @@ public class EditableTreeTableCell<T, N extends Node>
   }
 
 
-  public boolean isEditableInherited()
-  {
-    return isEditable() &&
-      getTableColumn().isEditable() &&
-      getTreeTableView().isEditable();
-  }
-
-
   @Override
   public void cancelEdit()
   {
@@ -123,12 +127,7 @@ public class EditableTreeTableCell<T, N extends Node>
       return;
 
     super.cancelEdit();
-
-    // TODO: Is this really necessary even though the cell item value is bound to the spinner value?
-    //if (value != null)
-      //setItem(value.getValue());
-
-    setText(getEditorText());
+    setText(itemToString());
     setGraphic(null);
   }
 }

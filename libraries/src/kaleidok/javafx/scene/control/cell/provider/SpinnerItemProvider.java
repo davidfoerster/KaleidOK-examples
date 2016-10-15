@@ -4,6 +4,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ObservableNumberValue;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedProperty;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedValueTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
@@ -21,9 +22,8 @@ public abstract class SpinnerItemProvider<T extends Number>
     SpinnerValueFactory<T> svf = getValueFactory(item.getValue());
     Spinner<T> spinner = makeSpinner(svf);
     //noinspection unchecked
-    return EditorNodeInfo.of(
-      spinner, (ReadOnlyProperty<Number>) svf.valueProperty(),
-      spinner.getEditor().textProperty());
+    return EditorNodeInfo.of(spinner, null,
+      (StringConverter<Number>) svf.getConverter());
   }
 
 
