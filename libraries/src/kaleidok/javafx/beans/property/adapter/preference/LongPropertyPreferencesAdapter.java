@@ -13,6 +13,11 @@ public class LongPropertyPreferencesAdapter<P extends LongProperty>
     super(property);
   }
 
+  public LongPropertyPreferencesAdapter( P property, Class<?> beanClass )
+  {
+    super(property, beanClass);
+  }
+
   public LongPropertyPreferencesAdapter( P property, Preferences preferences )
   {
     super(property, preferences);

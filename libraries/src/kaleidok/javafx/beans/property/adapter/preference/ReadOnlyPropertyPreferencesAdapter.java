@@ -25,54 +25,66 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
 
   protected ReadOnlyPropertyPreferencesAdapter( P property )
   {
-    this (property, null, true, null, true);
+    this (property, null, true, null, true, null, true);
+  }
+
+  protected ReadOnlyPropertyPreferencesAdapter( P property, Class<?> beanClass )
+  {
+    this(property, beanClass, false, null, true, null, true);
   }
 
   protected ReadOnlyPropertyPreferencesAdapter( P property,
     Preferences preferences )
   {
-    this(property, preferences, false, null, true);
+    this(property, null, true, preferences, false, null, true);
   }
 
   protected ReadOnlyPropertyPreferencesAdapter( P property, String prefix )
   {
-    this(property, null, true, prefix, false);
+    this(property, null, true, null, true, prefix, false);
   }
 
   protected ReadOnlyPropertyPreferencesAdapter( P property,
     Preferences preferences, String prefix )
   {
-    this(property, preferences, false, prefix, false);
+    this(property, null, true, preferences, false, prefix, false);
   }
 
 
   private ReadOnlyPropertyPreferencesAdapter( P property,
+    Class<?> beanClass, boolean useDefaultBeanClass,
     Preferences preferences, boolean useDefaultPreferences,
     String prefix, boolean useDefaultPrefix )
   {
     this.property = requireNonNull(property, "property");
-    verifyBeanClass(property, preferences, useDefaultPreferences, prefix,
-      useDefaultPrefix);
-    this.key = getPreferenceKey(property,
-      getPrefixFromDefault(property, prefix, useDefaultPrefix));
+    beanClass = getBeanClass(property, beanClass, useDefaultBeanClass,
+      preferences, useDefaultPreferences, prefix, useDefaultPrefix);
+    this.key = getPreferenceKey(property.getName(),
+      getPrefixFromDefault(beanClass, prefix, useDefaultPrefix));
     this.preferences =
       (requireNonNull(preferences, useDefaultPreferences, "preferences") == null) ?
-        Preferences.userNodeForPackage(property.getBean().getClass()) :
+        Preferences.userNodeForPackage(beanClass) :
         preferences;
   }
 
 
-  private static void verifyBeanClass( ReadOnlyProperty<?> property,
+  private static Class<?> getBeanClass( ReadOnlyProperty<?> property,
+    Class<?> beanClass, boolean useDefaultBeanClass,
     Preferences preferences, boolean useDefaultPreferences,
     String prefix, boolean useDefaultPrefix )
   {
+    if (requireNonNull(beanClass, useDefaultBeanClass, "bean class") == null)
+      beanClass = requireNonNull(property.getBean(), "bean").getClass();
+
     // Check for array bean
     if ((useDefaultPreferences && preferences == null) ||
       (useDefaultPrefix && prefix == null))
     {
-      if (requireNonNull(property.getBean(), "bean").getClass().isArray())
+      if (beanClass.isArray())
         throw new IllegalArgumentException("arrays aren't beans");
     }
+
+    return beanClass;
   }
 
 
@@ -82,11 +94,11 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
   public static final String NON_WORD_REPLACEMENT = "-";
 
 
-  private static String getPrefixFromDefault( ReadOnlyProperty<?> property,
+  private static String getPrefixFromDefault( Class<?> beanClass,
     String prefix, boolean useDefaultPrefix )
   {
     if (requireNonNull(prefix, useDefaultPrefix, "prefix") == null)
-      prefix = property.getBean().getClass().getSimpleName();
+      prefix = beanClass.getSimpleName();
 
     assert prefix.isEmpty() || !NON_WORD_SEQUENCE.matcher(prefix).find() :
       "Weird preference key prefix encountered: " + StringEscapeUtils.escapeJava(prefix);
@@ -95,10 +107,10 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
   }
 
 
-  private static String getPreferenceKey( ReadOnlyProperty<?> property,
+  private static String getPreferenceKey( String name,
     String prefix )
   {
-    String name = property.getName().trim();
+    name = name.trim();
     if (!name.isEmpty())
     {
       name =

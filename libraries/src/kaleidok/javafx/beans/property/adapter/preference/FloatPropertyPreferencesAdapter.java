@@ -13,6 +13,11 @@ public class FloatPropertyPreferencesAdapter<P extends FloatProperty>
     super(property);
   }
 
+  public FloatPropertyPreferencesAdapter( P property, Class<?> beanClass )
+  {
+    super(property, beanClass);
+  }
+
   public FloatPropertyPreferencesAdapter( P property, Preferences preferences )
   {
     super(property, preferences);

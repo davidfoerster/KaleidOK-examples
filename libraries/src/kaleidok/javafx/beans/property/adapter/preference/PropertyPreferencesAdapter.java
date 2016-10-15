@@ -16,6 +16,11 @@ public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
     super(property);
   }
 
+  protected PropertyPreferencesAdapter( P property, Class<?> beanClass )
+  {
+    super(property, beanClass);
+  }
+
   protected PropertyPreferencesAdapter( P property, Preferences preferences )
   {
     super(property, preferences);

@@ -13,6 +13,11 @@ public class StringPropertyPreferencesAdapter<P extends Property<String>>
     super(property);
   }
 
+  public StringPropertyPreferencesAdapter( P property, Class<?> beanClass )
+  {
+    super(property, beanClass);
+  }
+
   public StringPropertyPreferencesAdapter( P property, Preferences preferences )
   {
     super(property, preferences);

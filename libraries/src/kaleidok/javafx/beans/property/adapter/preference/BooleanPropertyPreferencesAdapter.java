@@ -13,6 +13,11 @@ public class BooleanPropertyPreferencesAdapter<P extends BooleanProperty>
     super(property);
   }
 
+  public BooleanPropertyPreferencesAdapter( P property, Class<?> beanClass )
+  {
+    super(property, beanClass);
+  }
+
   public BooleanPropertyPreferencesAdapter( P property, Preferences preferences )
   {
     super(property, preferences);

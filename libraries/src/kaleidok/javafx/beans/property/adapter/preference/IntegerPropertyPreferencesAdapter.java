@@ -13,6 +13,11 @@ public class IntegerPropertyPreferencesAdapter<P extends IntegerProperty>
     super(property);
   }
 
+  public IntegerPropertyPreferencesAdapter( P property, Class<?> beanClass )
+  {
+    super(property, beanClass);
+  }
+
   public IntegerPropertyPreferencesAdapter( P property, Preferences preferences )
   {
     super(property, preferences);

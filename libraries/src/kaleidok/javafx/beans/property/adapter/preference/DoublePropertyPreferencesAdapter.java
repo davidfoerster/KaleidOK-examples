@@ -13,6 +13,11 @@ public class DoublePropertyPreferencesAdapter<P extends DoubleProperty>
     super(property);
   }
 
+  public DoublePropertyPreferencesAdapter( P property, Class<?> beanClass )
+  {
+    super(property, beanClass);
+  }
+
   public DoublePropertyPreferencesAdapter( P property, Preferences preferences )
   {
     super(property, preferences);
