@@ -1,26 +1,15 @@
 package kaleidok.javafx.scene.control.cell;
 
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 
 
 public class EditableTreeTableCell<T, N extends Node>
   extends TreeTableCell<ReadOnlyProperty<T>, T>
 {
-  public EditableTreeTableCell()
-  {
-    setOnMouseClicked(DefaultMouseHandler.INSTANCE);
-    setOnKeyTyped(DefaultKeyHandler.INSTANCE);
-  }
-
-
   private EditorNodeInfo<N, T> getEditorNodeInfo()
   {
     if (isEditableInherited())
@@ -141,48 +130,5 @@ public class EditableTreeTableCell<T, N extends Node>
 
     setText(getEditorText());
     setGraphic(null);
-  }
-
-
-  protected static class DefaultMouseHandler
-    implements EventHandler<MouseEvent>
-  {
-    public static DefaultMouseHandler INSTANCE = new DefaultMouseHandler();
-
-    @Override
-    public void handle( MouseEvent ev )
-    {
-      if (ev.getEventType() == MouseEvent.MOUSE_PRESSED &&
-        ev.getButton() == MouseButton.PRIMARY && ev.getClickCount() == 2 &&
-        !ev.isAltDown() && !ev.isControlDown() && !ev.isShiftDown() &&
-        !ev.isMetaDown())
-      {
-        if (((EditableTreeTableCell<?,?>) ev.getTarget()).startEdit2())
-          ev.consume();
-      }
-    }
-  }
-
-
-  protected static class DefaultKeyHandler implements EventHandler<KeyEvent>
-  {
-    public static final DefaultKeyHandler INSTANCE = new DefaultKeyHandler();
-
-    @Override
-    public void handle( KeyEvent ev )
-    {
-      if (ev.getEventType() == KeyEvent.KEY_TYPED && !ev.isAltDown() &&
-        !ev.isControlDown() && !ev.isShiftDown() && !ev.isMetaDown())
-      {
-        switch (ev.getCode())
-        {
-        case ENTER:
-        case F2:
-          if (((EditableTreeTableCell<?, ?>) ev.getTarget()).startEdit2())
-            ev.consume();
-          break;
-        }
-      }
-    }
   }
 }
