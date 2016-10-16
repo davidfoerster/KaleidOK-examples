@@ -4,6 +4,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ObservableNumberValue;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.input.ScrollEvent;
 import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedProperty;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedValueTag;
@@ -31,14 +32,7 @@ public abstract class SpinnerItemProvider<T extends Number>
   {
     Spinner<T> spinner = new Spinner<>(valueFactory);
     spinner.setEditable(true);
-    spinner.setOnScroll((ev) -> {
-        int exponent = ev.isShiftDown() ? 1 : 0;
-        if (ev.isControlDown())
-          exponent += 2;
-        ((Spinner<?>) ev.getSource()).increment(
-          (int)(ev.getDeltaY() / ev.getMultiplierY() * Math.pow10(exponent)));
-        ev.consume();
-      });
+    spinner.setOnScroll(SpinnerItemProvider::handleScrollEvent);
     return spinner;
   }
 
@@ -69,5 +63,19 @@ public abstract class SpinnerItemProvider<T extends Number>
       //noinspection OverlyStrongTypeCast
       return ((AspectedProperty<Number>) property).getAspect(BoundedValueTag.getInstance());
     }
+  }
+
+
+  private static void handleScrollEvent( ScrollEvent ev )
+  {
+    int exponent = ev.isShiftDown() ? 1 : 0;
+    if (ev.isControlDown())
+      exponent += 2;
+
+    Spinner<?> spinner = (Spinner<?>) ev.getSource();
+    spinner.increment(
+      (int)(ev.getDeltaY() / ev.getMultiplierY() * Math.pow10(exponent)));
+
+    ev.consume();
   }
 }
