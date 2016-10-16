@@ -33,7 +33,7 @@ public class Kaleidoscope extends ExtPApplet
    * Manages the transcription of an audio signal with the "Speech-to-Text"
    * module.
    */
-  private SttManager stt;
+  private volatile SttManager stt;
 
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<ExportService> exportService;
@@ -110,9 +110,10 @@ public class Kaleidoscope extends ExtPApplet
 
   public synchronized SttManager getSTT()
   {
+    SttManager stt = this.stt;
     if (stt == null)
     {
-      stt = new SttManager(this);
+      this.stt = stt = new SttManager(this);
       stt.getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);
     }
     return stt;
