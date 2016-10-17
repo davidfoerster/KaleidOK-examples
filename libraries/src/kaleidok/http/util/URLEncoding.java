@@ -11,6 +11,7 @@ import static java.lang.System.arraycopy;
 import static java.nio.charset.CodingErrorAction.REPLACE;
 import static java.nio.charset.CodingErrorAction.REPORT;
 import static kaleidok.util.AssertionUtils.fastAssert;
+import static org.apache.commons.lang3.StringEscapeUtils.ESCAPE_JAVA;
 
 
 public final class URLEncoding
@@ -216,7 +217,7 @@ public final class URLEncoding
   private static int toHexDigit( int c )
   {
     assert c >>> 4 == 0 :
-      String.format("%1$#10x (%1$d) is outside of [0, 16)", c);
+      String.format("%#010x (%<d) is outside of [0, 16)", c);
 
     return c + ((c < 10) ? '0' : ('A' - 10));
   }
@@ -333,10 +334,11 @@ public final class URLEncoding
           {
             int v = hexDigitValue(s.charAt(i++));
             v = (v << 4) | hexDigitValue(s.charAt(i++));
-            if (v >>> Byte.SIZE != 0) {
-              throw new IllegalArgumentException(
-                "Illegal hex characters in escape (%) pattern: " +
-                  s.charAt(i - 2) + s.charAt(i - 1));
+            if ((v & ~0xff) != 0)
+            {
+              throw new IllegalArgumentException(String.format(
+                "Illegal hex characters in escape pattern: \"%c%s\"",
+                ESCAPE_PREFIX, ESCAPE_JAVA.translate(s.subSequence(i - 2, i))));
             }
             bytes.put((byte) v);
 
