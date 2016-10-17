@@ -1,6 +1,7 @@
 package kaleidok.google.speech;
 
 import javafx.beans.property.ObjectProperty;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import org.apache.http.concurrent.FutureCallback;
 
 import java.net.URI;
@@ -32,6 +33,7 @@ public class TranscriptionService extends TranscriptionServiceBase
     FutureCallback<SttResponse> resultHandler )
   {
     super(apiBase, accessKey, resultHandler);
+    this.apiBase.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 
 

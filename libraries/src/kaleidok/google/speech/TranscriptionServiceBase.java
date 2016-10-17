@@ -57,6 +57,8 @@ public abstract class TranscriptionServiceBase implements PreferenceBean
   {
     this.apiBase =
       new AspectedObjectProperty<>(this, "API base URI", apiBase);
+    this.apiBase.addAspect(StringConverterAspectTag.getInstance(),
+      UriStringConverter.INSTANCE);
 
     this.accessKey =
       new AspectedStringProperty(this, "API access key", accessKey);

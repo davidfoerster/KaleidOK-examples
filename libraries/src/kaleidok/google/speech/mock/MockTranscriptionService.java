@@ -5,7 +5,12 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import kaleidok.google.speech.STT;
 import kaleidok.google.speech.SttResponse;
 import com.sun.net.httpserver.HttpServer;
+import kaleidok.google.speech.TranscriptionService;
 import kaleidok.google.speech.TranscriptionServiceBase;
+import kaleidok.javafx.beans.property.AspectedObjectProperty;
+import kaleidok.javafx.beans.property.adapter.preference.StringConversionPropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.util.converter.UriStringConverter;
 import org.apache.http.concurrent.FutureCallback;
 
 import java.io.IOError;
@@ -23,7 +28,7 @@ import static kaleidok.google.speech.TranscriptionService.DEFAULT_API_BASE;
 
 public class MockTranscriptionService extends TranscriptionServiceBase
 {
-  static final Logger logger =
+  private static final Logger logger =
     Logger.getLogger(MockTranscriptionService.class.getPackage().getName());
 
 
@@ -58,6 +63,9 @@ public class MockTranscriptionService extends TranscriptionServiceBase
     FutureCallback<SttResponse> resultHandler )
   {
     super(uriFromContext(context), accessKey, resultHandler);
+
+    this.apiBase.addAspect(PropertyPreferencesAdapterTag.getInstance(),
+      new ApiBaseDebugPropertyPreferencesAdapter(this.apiBase));
 
     logger.log(Level.CONFIG,
       "You set your Google API access key to \"{0}\"; " +
@@ -107,5 +115,46 @@ public class MockTranscriptionService extends TranscriptionServiceBase
   {
     super.shutdownNow();
     context.getServer().stop(0);
+  }
+
+
+  private static final class ApiBaseDebugPropertyPreferencesAdapter
+    extends StringConversionPropertyPreferencesAdapter<URI, AspectedObjectProperty<URI>>
+  {
+    private ApiBaseDebugPropertyPreferencesAdapter(
+      AspectedObjectProperty<URI> property )
+    {
+      super(property, TranscriptionService.class, UriStringConverter.INSTANCE);
+    }
+
+
+    @Override
+    public void load()
+    {
+      String sValue = preferences.get(key, null);
+      if (sValue != null)
+      {
+        URI value = converter.fromString(sValue);
+        logger.log(Level.CONFIG,
+          "Simulate loading {0}/{1} into \"{2}\": {3} ({4})",
+          new Object[]{ preferences.absolutePath(), key,
+            property.getName(), value, value.getClass().getName() });
+      }
+    }
+
+
+    @Override
+    public void save()
+    {
+      URI value = property.getValue();
+      if (value != null)
+      {
+        String sValue = converter.toString(value);
+        logger.log(Level.CONFIG,
+          "Simulate saving \"{2}\" into {0}/{1}: {3}",
+          new Object[]{ preferences.absolutePath(), key,
+            property.getName(), sValue });
+      }
+    }
   }
 }

@@ -12,6 +12,7 @@ import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag.DefaultLevelOfDeta
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
+import kaleidok.javafx.scene.control.cell.provider.FormattedTextFieldItemProvider;
 import kaleidok.javafx.scene.control.cell.provider.SpinnerItemProvider;
 import kaleidok.javafx.scene.control.cell.provider.MultiTreeItemProvider;
 import kaleidok.javafx.scene.control.cell.provider.TextFieldItemProvider;
@@ -94,6 +95,7 @@ public class KaleidoscopeConfigurationEditor
         (List<? extends TreeItemProvider<Object, Node>>) (List<? extends TreeItemProvider<?,?>>)
         Arrays.asImmutableList(
           new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>(),
+          new FormattedTextFieldItemProvider<>(),
           new TextFieldItemProvider()));
     }
 
