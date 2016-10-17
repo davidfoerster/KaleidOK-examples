@@ -37,7 +37,8 @@ public class STT implements PreferenceBean
 
   private State status = State.IDLE;
 
-  protected final TranscriptionService service;
+  protected final TranscriptionServiceBase service;
+
   private final AudioTranscriptionProcessor processor;
 
   private final Timer recordingTimer = new Timer();
