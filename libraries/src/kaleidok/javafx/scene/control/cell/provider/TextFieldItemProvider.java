@@ -24,7 +24,9 @@ public class TextFieldItemProvider extends FilteredTreeItemProvider<String, Text
     final TextField textField = new TextField();
     textField.setEditable(true);
     textField.setOnAction(TextFieldItemProvider::actionEventHandler);
-    return EditorNodeInfo.of(textField, textField.textProperty(), null);
+    return EditorNodeInfo.of(textField,
+      (c, v) -> c.getEditorNode().setText((v != null) ? v : ""),
+      null);
   }
 
 

@@ -1,10 +1,11 @@
 package kaleidok.javafx.scene.control.cell;
 
-import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.util.StringConverter;
+
+import java.util.function.BiConsumer;
 
 
 public abstract class EditableTreeItem<T, N extends Node>
@@ -32,22 +33,24 @@ public abstract class EditableTreeItem<T, N extends Node>
 
     public final N node;
 
-    public final Property<T> editorValue;
+    public final BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> valueChange;
 
     public final StringConverter<T> converter;
 
 
-    protected EditorNodeInfo( N node, Property<T> editorValue,
+    protected EditorNodeInfo( N node,
+      BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> valueChange,
       StringConverter<T> converter )
     {
       this.node = node;
-      this.editorValue = editorValue;
+      this.valueChange = valueChange;
       this.converter = converter;
     }
 
 
     public static <N extends Node, T> EditorNodeInfo<N, T> of( N node,
-      Property<T> editorValue, StringConverter<T> converter )
+      BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> editorValue,
+      StringConverter<T> converter )
     {
       return (node != null) ?
         new EditorNodeInfo<>(node, editorValue, converter) :

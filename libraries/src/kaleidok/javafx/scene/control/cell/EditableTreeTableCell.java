@@ -1,11 +1,12 @@
 package kaleidok.javafx.scene.control.cell;
 
-import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
+
+import java.util.function.BiConsumer;
 
 
 public class EditableTreeTableCell<T, N extends Node>
@@ -40,17 +41,25 @@ public class EditableTreeTableCell<T, N extends Node>
   }
 
 
-  private Property<T> getEditorValue()
+  private BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T>
+  getValueChangeListener()
   {
-    EditorNodeInfo<?, T> nodeInfo = getEditorNodeInfo();
-    return (nodeInfo != null) ? nodeInfo.editorValue : null;
+    EditorNodeInfo<N, T> nodeInfo = getEditorNodeInfo();
+    return (nodeInfo != null) ? nodeInfo.valueChange : null;
   }
 
 
-  private String itemToString()
+  private void updateEditorValue( T item, boolean empty )
   {
-    return itemToString(getItem(), isEmpty());
+    if (!empty)
+    {
+      BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> changeListener =
+        getValueChangeListener();
+      if (changeListener != null)
+        changeListener.accept(this, item);
+    }
   }
+
 
   private String itemToString( T item, boolean empty )
   {
@@ -76,6 +85,7 @@ public class EditableTreeTableCell<T, N extends Node>
   protected void updateItem( T item, boolean empty )
   {
     super.updateItem(item, empty);
+    updateEditorValue(item, empty);
 
     boolean editing = isEditing();
     setText(!editing ? itemToString(item, empty) : null);
@@ -101,15 +111,7 @@ public class EditableTreeTableCell<T, N extends Node>
         if (isEditing())
         {
           setText(null);
-
-          if (!isEmpty())
-          {
-            T item = getItem();
-            Property<T> editorValue = getEditorValue();
-            if (item != null && editorValue != null)
-              editorValue.setValue(item);
-          }
-
+          updateEditorValue(getItem(), isEmpty());
           setGraphic(node);
           node.requestFocus();
           return true;
@@ -127,7 +129,7 @@ public class EditableTreeTableCell<T, N extends Node>
       return;
 
     super.cancelEdit();
-    setText(itemToString());
+    setText(itemToString(getItem(), isEmpty()));
     setGraphic(null);
   }
 }
