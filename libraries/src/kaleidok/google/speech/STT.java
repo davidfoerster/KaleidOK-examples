@@ -57,7 +57,7 @@ public class STT implements PreferenceBean
   public STT( FutureCallback<SttResponse> resultHandler, String accessKey )
   {
     service = accessKey.startsWith("!MOCK") ?
-      new MockTranscriptionService(accessKey, resultHandler, this) :
+      MockTranscriptionService.newInstance(accessKey, resultHandler, this) :
       new TranscriptionService(accessKey, resultHandler);
     processor = new AudioTranscriptionProcessor(this);
   }
