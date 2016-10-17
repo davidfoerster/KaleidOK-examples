@@ -2,6 +2,9 @@ package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableNumberValue;
+import javafx.util.StringConverter;
+import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
+import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 
 import java.util.stream.Stream;
 
@@ -88,6 +91,23 @@ public interface PreferenceBean
       (property instanceof BooleanProperty) ?
         new BooleanPropertyPreferencesAdapter<>((BooleanProperty) property) :
         null;
+
+    if (ppa == null)
+    {
+      if (property instanceof AspectedReadOnlyProperty)
+      {
+        @SuppressWarnings("unchecked")
+        StringConverter<T> converter =
+          ((AspectedReadOnlyProperty<T>) property).getAspect(
+            StringConverterAspectTag.getInstance());
+        if (converter != null)
+        {
+          ppa =
+            new StringConversionPropertyPreferencesAdapter<>(
+              property, converter);
+        }
+      }
+    }
 
     if (ppa != null)
     {
