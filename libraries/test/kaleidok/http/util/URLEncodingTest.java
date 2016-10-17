@@ -9,8 +9,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.*;
-import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Random;
 
 import static java.lang.Character.*;
@@ -27,7 +28,7 @@ public class URLEncodingTest
     RANDOM_TEST_LENGTH = 40;
 
   private static final Collection<Charset> CHARSETS =
-    new ArrayList<Charset>(10) {{
+    new HashSet<Charset>(10) {{
       add(UTF_8);
       add(UTF_16BE);
       add(Charset.forName("UTF-32BE"));
@@ -40,10 +41,32 @@ public class URLEncodingTest
         add(Charset.forName("Windows-" + i));
       }
 
-      Charset defaultPlatformCharset = Charset.defaultCharset();
-      if (!contains(defaultPlatformCharset))
-        add(defaultPlatformCharset);
+      add(Charset.defaultCharset());
     }};
+
+
+  /**
+   * Construct a bit set according to the rules laid out for
+   * {@link URLEncoding#dontNeedEncoding} but in a human-readable way.
+   *
+   * @see URLEncoding#dontNeedEncoding
+   */
+  @Test
+  public void testDontNeedEncoding()
+  {
+    BitSet bs = new BitSet(1 << 7);
+
+    bs.set('A', 'Z' + 1);
+    bs.set('a', 'z' + 1);
+    bs.set('0', '9' + 1);
+    bs.set(' '); // Encoding a space to a "+" is done in the encode() method.
+    bs.set('-');
+    bs.set('_');
+    bs.set('.');
+    bs.set('*');
+
+    assertEquals(bs, URLEncoding.dontNeedEncoding);
+  }
 
 
   @Test

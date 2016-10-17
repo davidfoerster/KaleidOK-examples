@@ -25,52 +25,40 @@ public final class URLEncoding
     ESCAPE_PREFIX = '%',
     SPACE_ESCAPER = '+';
 
-  private static final BitSet dontNeedEncoding = new BitSet(128) {{
-    /* The list of characters that are not encoded has been determined as
-     * follows:
-     *
-     * RFC 2396 states:
-     * -----
-     * Data characters that are allowed in a URI but do not have a reserved
-     * purpose are called unreserved.  These include upper and lower case
-     * letters, decimal digits, and a limited set of punctuation marks and
-     * symbols.
-     *
-     * unreserved  = alphanum | mark
-     *
-     * mark        = "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")"
-     *
-     * Unreserved characters can be escaped without changing the semantics
-     * of the URI, but this should not be done unless the URI is being used in
-     * a context that does not allow the unescaped character to appear.
-     * -----
-     *
-     * It appears that both Netscape and Internet Explorer escape all special
-     * characters from this list with the exception of "-", "_", ".", "*".
-     * While it is not clear why they are escaping the other characters,
-     * perhaps it is safest to assume that there might be contexts in which the
-     * others are unsafe if not escaped. Therefore, we will use the same list.
-     * It is also noteworthy that this is consistent with O'Reilly's "HTML: The
-     * Definitive Guide" (page 164).
-     *
-     * As a last note, Internet Explorer does not encode the "@" character
-     * which is clearly not unreserved according to the RFC. We are being
-     * consistent with the RFC in this matter, as is Netscape.
-     */
-
-    for (int i = 'A'; i <= 'Z'; i++) {
-      set(i);
-      set(i | LOWERCASE_BIT);
-    }
-    for (int i = '0'; i <= '9'; i++) {
-      set(i);
-    }
-    set(' '); // Encoding a space to a "+" is done in the encode() method.
-    set('-');
-    set('_');
-    set('.');
-    set('*');
-  }};
+  /**
+   * The list of characters that are not encoded has been determined as
+   * follows:
+   *
+   * RFC 2396 states:
+   * -----
+   * Data characters that are allowed in a URI but do not have a reserved
+   * purpose are called unreserved.  These include upper and lower case
+   * letters, decimal digits, and a limited set of punctuation marks and
+   * symbols.
+   *
+   * unreserved  = alphanum | mark
+   *
+   * mark        = "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")"
+   *
+   * Unreserved characters can be escaped without changing the semantics
+   * of the URI, but this should not be done unless the URI is being used in
+   * a context that does not allow the unescaped character to appear.
+   * -----
+   *
+   * It appears that both Netscape and Internet Explorer escape all special
+   * characters from this list with the exception of "-", "_", ".", "*".
+   * While it is not clear why they are escaping the other characters,
+   * perhaps it is safest to assume that there might be contexts in which the
+   * others are unsafe if not escaped. Therefore, we will use the same list.
+   * It is also noteworthy that this is consistent with O'Reilly's "HTML: The
+   * Definitive Guide" (page 164).
+   *
+   * As a last note, Internet Explorer does not encode the "@" character
+   * which is clearly not unreserved according to the RFC. We are being
+   * consistent with the RFC in this matter, as is Netscape.
+   */
+  static final BitSet dontNeedEncoding =
+    BitSet.valueOf(new long[]{ 0x3ff640100000000L, 0x7fffffe87fffffeL });
 
 
   public static String encode( String s )
