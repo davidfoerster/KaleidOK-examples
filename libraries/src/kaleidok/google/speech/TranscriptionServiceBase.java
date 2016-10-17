@@ -57,18 +57,13 @@ public abstract class TranscriptionServiceBase implements PreferenceBean
   {
     this.apiBase =
       new AspectedObjectProperty<>(this, "API base URI", apiBase);
-    PropertyUtils.debugPropertyChanges(this.apiBase); // TODO: remove
 
     this.accessKey =
       new AspectedStringProperty(this, "API access key", accessKey);
-    PropertyUtils.debugPropertyChanges(this.accessKey); // TODO: remove
-    this.accessKey.addAspect(PropertyPreferencesAdapterTag.getInstance(),
-      new StringPropertyPreferencesAdapter<>(this.accessKey));
+    this.accessKey.addAspect(PropertyPreferencesAdapterTag.getInstance());
 
     language = new AspectedStringProperty(this, "language", "en");
-    PropertyUtils.debugPropertyChanges(language); // TODO: remove
-    language.addAspect(PropertyPreferencesAdapterTag.getInstance(),
-      new StringPropertyPreferencesAdapter<>(language));
+    language.addAspect(PropertyPreferencesAdapterTag.getInstance());
 
     this.resultHandler = resultHandler;
     this.serviceUrl =
