@@ -8,7 +8,7 @@ import org.apache.http.concurrent.FutureCallback;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.net.URL;
+import java.net.URI;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,12 +69,12 @@ public class STT implements PreferenceBean
   }
 
 
-  public URL getApiBase()
+  public URI getApiBase()
   {
     return service.getApiBase();
   }
 
-  public void setApiBase( URL apiBase )
+  public void setApiBase( URI apiBase )
   {
     service.setApiBase(apiBase);
   }

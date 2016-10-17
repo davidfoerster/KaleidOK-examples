@@ -159,7 +159,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
     public FlacTranscription( float sampleRate ) throws IOException
     {
-      super(stt.service.getServiceUrl(), "audio/x-flac", sampleRate);
+      super(stt.service.getServiceUri().toURL(), "audio/x-flac", sampleRate);
       callback = stt.service.resultHandler;
       logfilePattern = stt.logfilePattern;
       outputStream = new FLACStreamOutputStream(getOutputStream());

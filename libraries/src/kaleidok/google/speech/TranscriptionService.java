@@ -17,8 +17,8 @@ import kaleidok.util.concurrent.DaemonThreadFactory;
 import org.apache.http.concurrent.FutureCallback;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +32,7 @@ import static kaleidok.http.util.URLEncoding.appendEncoded;
 
 public class TranscriptionService implements PreferenceBean
 {
-  private final AspectedObjectProperty<URL> apiBase;
+  private final AspectedObjectProperty<URI> apiBase;
 
   private final AspectedStringProperty accessKey;
 
@@ -51,11 +51,11 @@ public class TranscriptionService implements PreferenceBean
     new DaemonThreadFactory("Speech transcription", true);
 
 
-  public static final URL DEFAULT_API_BASE;
+  public static final URI DEFAULT_API_BASE;
   static {
     try {
-      DEFAULT_API_BASE = new URL("https", "www.google.com", "/speech-api/v2/");
-    } catch (MalformedURLException ex) {
+      DEFAULT_API_BASE = new URI("https://www.google.com/speech-api/v2/");
+    } catch (URISyntaxException ex) {
       throw new AssertionError(ex);
     }
   }
@@ -67,14 +67,11 @@ public class TranscriptionService implements PreferenceBean
   }
 
 
-  public TranscriptionService( URL apiBase, String accessKey, FutureCallback<SttResponse> resultHandler )
+  public TranscriptionService( URI apiBase, String accessKey, FutureCallback<SttResponse> resultHandler )
   {
     this.apiBase =
-      new AspectedObjectProperty<>(this, "REST API base URL", apiBase);
-    /*this.apiBase.addAspect(
-      StringConverterAspectTag.getInstance(), UrlStringConverter.INSTANCE);*/
-    /*this.apiBase.addAspect(
-      PropertyPreferencesAdapterTag.getWritableInstance());*/
+      new AspectedObjectProperty<>(this, "API base URI", apiBase);
+    PropertyUtils.debugPropertyChanges(this.apiBase); // TODO: remove
 
     this.accessKey =
       new AspectedStringProperty(this, "API access key", accessKey);
@@ -95,17 +92,17 @@ public class TranscriptionService implements PreferenceBean
   }
 
 
-  public ObjectProperty<URL> apiBaseProperty()
+  public ObjectProperty<URI> apiBaseProperty()
   {
     return apiBase;
   }
 
-  public URL getApiBase()
+  public URI getApiBase()
   {
     return apiBase.get();
   }
 
-  public void setApiBase( URL apiBase )
+  public void setApiBase( URI apiBase )
   {
     this.apiBase.set(apiBase);
   }
@@ -148,12 +145,12 @@ public class TranscriptionService implements PreferenceBean
     URL_SPEC_KEY_BIT = "&key=";
 
 
-  protected ObservableObjectValue<URL> serviceUrlValue()
+  protected ObservableObjectValue<URI> serviceUrlValue()
   {
     return serviceUrl;
   }
 
-  protected URL getServiceUrl()
+  protected URI getServiceUri()
   {
     return serviceUrl.get();
   }
@@ -193,20 +190,20 @@ public class TranscriptionService implements PreferenceBean
   {
     return Stream.of(apiBase, accessKey, language)
       .map(PropertyPreferencesAdapterTag.getWritableInstance()::ofAny)
-      .filter(Objects::nonNull);
+      .filter(Objects::nonNull); // TODO: remove this filter once unnecessary
   }
 
 
-  private static final class ServiceUrlBinding extends ObjectBinding<URL>
+  private static final class ServiceUrlBinding extends ObjectBinding<URI>
   {
-    private final ObservableValue<URL> apiBase;
+    private final ObservableValue<URI> apiBase;
 
     private final ObservableStringValue accessKey;
 
     private final ObservableStringValue language;
 
 
-    private ServiceUrlBinding( ObservableValue<URL> apiBase,
+    private ServiceUrlBinding( ObservableValue<URI> apiBase,
       ObservableStringValue accessKey, ObservableStringValue language )
     {
       bind(apiBase, accessKey, language);
@@ -218,9 +215,9 @@ public class TranscriptionService implements PreferenceBean
 
 
     @Override
-    protected URL computeValue()
+    protected URI computeValue()
     {
-      URL apiBase =
+      URI apiBase =
         Objects.requireNonNull(this.apiBase.getValue(), "API base");
       String
         language = Objects.requireNonNull(this.language.get(), "language"),
@@ -232,9 +229,12 @@ public class TranscriptionService implements PreferenceBean
       appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
       appendEncoded(accessKey, urlSpec.append(URL_SPEC_KEY_BIT));
 
-      try {
-        return new URL(apiBase, urlSpec.toString());
-      } catch (MalformedURLException ex) {
+      try
+      {
+        return apiBase.resolve(urlSpec.toString());
+      }
+      catch (IllegalArgumentException ex)
+      {
         throw new AssertionError(ex);
       }
     }
