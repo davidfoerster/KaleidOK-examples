@@ -1,5 +1,7 @@
 package kaleidok.google.speech;
 
+import javafx.beans.value.ObservableValue;
+import kaleidok.google.speech.STT.State;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
 import kaleidok.util.prefs.DefaultValueParser;
@@ -9,7 +11,7 @@ import processing.core.PConstants;
 
 public class RecorderIcon extends Plugin<PApplet>
 {
-  protected final STT stt;
+  protected final ObservableValue<State> recorderState;
 
 
   public float radius = 20;
@@ -21,15 +23,15 @@ public class RecorderIcon extends Plugin<PApplet>
   public int fillColor = 0xffff0000, strokeColor = 0xc0ffffff;
 
 
-  public RecorderIcon( PApplet sketch, STT stt )
+  public RecorderIcon( PApplet sketch, ObservableValue<State> recorderState )
   {
     super(sketch);
-    this.stt = stt;
+    this.recorderState = Objects.requireNonNull(recorderState);
   }
 
 
-  public static RecorderIcon fromConfiguration( ExtPApplet sketch, STT stt,
-    boolean defaultOn )
+  public static RecorderIcon fromConfiguration( ExtPApplet sketch,
+    ObservableValue<State> recorderState, boolean defaultOn )
   {
     String strEnabled =
       sketch.getParameterMap().getOrDefault(
@@ -38,16 +40,19 @@ public class RecorderIcon extends Plugin<PApplet>
       "default".equals(strEnabled) ?
         defaultOn :
         DefaultValueParser.parseBoolean(strEnabled);
-    return enabled ? new RecorderIcon(sketch, stt) : null;
+    return enabled ? new RecorderIcon(sketch, recorderState) : null;
   }
 
 
   @Override
   public void draw()
   {
+    if (enabled.get() <= 0)
+      return;
+
     PApplet p = this.p;
-    switch (stt.getStatus()) {
-    case RECORDING:
+    if (recorderState.getValue() == State.RECORDING)
+    {
       int previousEllipseMode = p.g.ellipseMode;
       p.ellipseMode(PConstants.RADIUS);
       p.fill(fillColor);
@@ -61,7 +66,6 @@ public class RecorderIcon extends Plugin<PApplet>
         y += p.height;
       p.ellipse(x, y, radius, radius);
       p.ellipseMode(previousEllipseMode);
-      break;
     }
   }
 }

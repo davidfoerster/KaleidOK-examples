@@ -1,5 +1,7 @@
 package kaleidok.google.speech;
 
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import kaleidok.google.speech.mock.MockTranscriptionService;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
@@ -35,7 +37,8 @@ public class STT implements PreferenceBean
 
   private boolean isActive = false;
 
-  private State status = State.IDLE;
+  private final ReadOnlyObjectWrapper<State> status =
+    new ReadOnlyObjectWrapper<>(this, "status", State.IDLE);
 
   protected final TranscriptionServiceBase service;
 
@@ -124,7 +127,7 @@ public class STT implements PreferenceBean
   public void shutdown()
   {
     // TODO
-    status = State.SHUTDOWN;
+    status.set(State.SHUTDOWN);
     service.shutdownNow();
     signalChange();
   }
@@ -154,8 +157,14 @@ public class STT implements PreferenceBean
   }
 
 
-  public State getStatus() {
-    return status;
+  public ReadOnlyObjectProperty<State> statusProperty()
+  {
+    return status.getReadOnlyProperty();
+  }
+
+  public State getStatus()
+  {
+    return status.get();
   }
 
 
@@ -163,11 +172,11 @@ public class STT implements PreferenceBean
 
   private synchronized void onBegin()
   {
-    status = State.RECORDING;
+    status.set(State.RECORDING);
     processor.shouldRecord = true;
     startListening();
 
-    logger.log(statusLoggingLevel, status.name());
+    logger.log(statusLoggingLevel, status.get().name());
 
     signalChange();
   }
@@ -175,7 +184,7 @@ public class STT implements PreferenceBean
 
   public synchronized void onSpeechFinish()
   {
-    status = State.IDLE;
+    status.set(State.IDLE);
     processor.shouldRecord = false;
 
     logger.log(Level.FINER,
