@@ -1,18 +1,31 @@
 package kaleidok.google.speech;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.google.speech.STT.State;
+import kaleidok.javafx.beans.property.AspectedIntegerProperty;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
 import kaleidok.util.prefs.DefaultValueParser;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
+import java.util.Objects;
+import java.util.stream.Stream;
 
-public class RecorderIcon extends Plugin<PApplet>
+import static kaleidok.util.Math.clamp;
+
+
+public class RecorderIcon extends Plugin<PApplet> implements PreferenceBean
 {
   protected final ObservableValue<State> recorderState;
 
+  private final AspectedIntegerProperty enabled;
 
   public float radius = 20;
 
@@ -25,22 +38,36 @@ public class RecorderIcon extends Plugin<PApplet>
 
   public RecorderIcon( PApplet sketch, ObservableValue<State> recorderState )
   {
+    this(sketch, recorderState, 1);
+  }
+
+
+  public RecorderIcon( PApplet sketch, ObservableValue<State> recorderState,
+    int enabled )
+  {
     super(sketch);
     this.recorderState = Objects.requireNonNull(recorderState);
+
+    IntegerSpinnerValueFactory bounds = new IntegerSpinnerValueFactory(0, 1);
+    this.enabled =
+      new AspectedIntegerProperty(this, "enabled",
+        clamp(enabled, bounds.getMin(), bounds.getMax()));
+    this.enabled.addAspect(BoundedIntegerTag.INSTANCE, bounds);
+    this.enabled.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 
 
   public static RecorderIcon fromConfiguration( ExtPApplet sketch,
     ObservableValue<State> recorderState, boolean defaultOn )
   {
-    String strEnabled =
-      sketch.getParameterMap().getOrDefault(
-        RecorderIcon.class.getCanonicalName() + ".enabled", "default");
+    String strDefault = "default",
+      strEnabled = sketch.getParameterMap().getOrDefault(
+        RecorderIcon.class.getName() + '.' + "enabled", strDefault);
     boolean enabled =
-      "default".equals(strEnabled) ?
+      strDefault.equals(strEnabled) ?
         defaultOn :
         DefaultValueParser.parseBoolean(strEnabled);
-    return enabled ? new RecorderIcon(sketch, recorderState) : null;
+    return new RecorderIcon(sketch, recorderState, enabled ? 1 : 0);
   }
 
 
@@ -67,5 +94,37 @@ public class RecorderIcon extends Plugin<PApplet>
       p.ellipse(x, y, radius, radius);
       p.ellipseMode(previousEllipseMode);
     }
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return "recording icon";
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return Stream.of(enabled.getAspect(
+      PropertyPreferencesAdapterTag.getWritableInstance()));
+  }
+
+
+  public IntegerProperty enabledProperty()
+  {
+    return enabled;
+  }
+
+  public int getEnabled()
+  {
+    return enabled.get();
+  }
+
+  public void setEnabled( int value )
+  {
+    enabled.set(value);
   }
 }

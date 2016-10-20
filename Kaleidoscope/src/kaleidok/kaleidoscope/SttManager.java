@@ -27,6 +27,8 @@ public final class SttManager extends Plugin<Kaleidoscope>
 {
   private final STT stt;
 
+  private final RecorderIcon recorderIcon;
+
 
   SttManager( Kaleidoscope sketch )
   {
@@ -49,7 +51,9 @@ public final class SttManager extends Plugin<Kaleidoscope>
     sketch.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
 
-    RecorderIcon.fromConfiguration(sketch, stt, !STT.isLoggingStatus());
+    recorderIcon = RecorderIcon.fromConfiguration(
+      sketch, stt.statusProperty(), !STT.isLoggingStatus());
+
     getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);
   }
 
@@ -186,6 +190,8 @@ public final class SttManager extends Plugin<Kaleidoscope>
   public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    return stt.getPreferenceAdapters();
+    return Stream.concat(
+      stt.getPreferenceAdapters(),
+      recorderIcon.getPreferenceAdapters());
   }
 }
