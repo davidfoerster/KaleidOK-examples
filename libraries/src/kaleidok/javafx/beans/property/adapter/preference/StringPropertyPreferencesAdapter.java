@@ -2,6 +2,7 @@ package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.property.Property;
 
+import javax.annotation.Nonnull;
 import java.util.prefs.Preferences;
 
 
@@ -35,16 +36,14 @@ public class StringPropertyPreferencesAdapter<P extends Property<String>>
 
 
   @Override
-  public void load()
+  protected void doLoad( @Nonnull String value )
   {
-    String value = preferences.get(key, null);
-    if (value != null)
-      property.setValue(value);
+    property.setValue(value);
   }
 
 
   @Override
-  public void save()
+  protected void doSave()
   {
     String value = property.getValue();
     if (value != null)

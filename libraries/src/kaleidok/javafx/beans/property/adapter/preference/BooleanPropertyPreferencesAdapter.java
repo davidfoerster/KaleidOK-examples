@@ -2,6 +2,7 @@ package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.property.BooleanProperty;
 
+import javax.annotation.Nonnull;
 import java.util.prefs.Preferences;
 
 
@@ -35,16 +36,14 @@ public class BooleanPropertyPreferencesAdapter<P extends BooleanProperty>
 
 
   @Override
-  public void load()
+  protected void doLoad( @Nonnull String value )
   {
-    String value = preferences.get(key, null);
-    if (value != null)
-      property.set(Boolean.parseBoolean(value));
+    property.set(Boolean.parseBoolean(value));
   }
 
 
   @Override
-  public void save()
+  protected void doSave()
   {
     preferences.putBoolean(key, property.get());
   }

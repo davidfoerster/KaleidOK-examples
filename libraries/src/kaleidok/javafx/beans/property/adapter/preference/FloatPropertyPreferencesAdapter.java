@@ -2,6 +2,7 @@ package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.property.FloatProperty;
 
+import javax.annotation.Nonnull;
 import java.util.prefs.Preferences;
 
 
@@ -35,16 +36,14 @@ public class FloatPropertyPreferencesAdapter<P extends FloatProperty>
 
 
   @Override
-  public void load()
+  protected void doLoad( @Nonnull String value )
   {
-    String value = preferences.get(key, null);
-    if (value != null)
-      property.set(Float.parseFloat(value));
+    property.set(Float.parseFloat(value));
   }
 
 
   @Override
-  public void save()
+  protected void doSave()
   {
     preferences.putFloat(key, property.get());
   }

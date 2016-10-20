@@ -118,6 +118,7 @@ public class MockTranscriptionService extends TranscriptionServiceBase
   }
 
 
+  @SuppressWarnings("UnnecessarySuperQualifier")
   private static final class ApiBaseDebugPropertyPreferencesAdapter
     extends StringConversionPropertyPreferencesAdapter<URI, AspectedObjectProperty<URI>>
   {
@@ -135,7 +136,7 @@ public class MockTranscriptionService extends TranscriptionServiceBase
       if (sValue != null)
       {
         URI value = converter.fromString(sValue);
-        logger.log(Level.CONFIG,
+        super.logger.log(Level.CONFIG,
           "Simulate loading {0}/{1} into \"{2}\": {3} ({4})",
           new Object[]{ preferences.absolutePath(), key,
             property.getName(), value, value.getClass().getName() });
@@ -150,7 +151,7 @@ public class MockTranscriptionService extends TranscriptionServiceBase
       if (value != null)
       {
         String sValue = converter.toString(value);
-        logger.log(Level.CONFIG,
+        super.logger.log(Level.CONFIG,
           "Simulate saving \"{2}\" into {0}/{1}: {3}",
           new Object[]{ preferences.absolutePath(), key,
             property.getName(), sValue });

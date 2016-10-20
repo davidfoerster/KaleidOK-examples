@@ -4,6 +4,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 
+import javax.annotation.Nonnull;
+import java.util.logging.Level;
 import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
 
@@ -37,7 +39,24 @@ public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
   }
 
 
-  public abstract void load();
+  public void load()
+  {
+    String value = preferences.get(key, null);
+    if (value != null)
+      doLoad(value);
+
+    if (logger != null && logger.isLoggable(LOG_LEVEL))
+    {
+      logger.log(LOG_LEVEL,
+        (value != null) ?
+          "Loaded preference value {0}/{1} = \"{2}\"" :
+          "Loaded preference value {0}/{1} but there was no entry",
+        new Object[]{ preferences.absolutePath(), key, property.getValue() });
+    }
+  }
+
+
+  protected abstract void doLoad( @Nonnull String value );
 
 
   private volatile PreferenceChangeListener autoLoadListener = null;

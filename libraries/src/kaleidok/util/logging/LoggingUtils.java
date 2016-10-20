@@ -1,5 +1,6 @@
 package kaleidok.util.logging;
 
+import kaleidok.util.Reflection;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileInputStream;
@@ -85,5 +86,14 @@ public final class LoggingUtils
       }
       throw ex;
     }
+  }
+
+
+  public static Logger getLogger( Class<?> clazz )
+  {
+    return
+      (clazz.isPrimitive() || clazz.isArray() || clazz == void.class) ?
+        Logger.getAnonymousLogger() :
+        Logger.getLogger(Reflection.getTopLevelClass(clazz).getName());
   }
 }

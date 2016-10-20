@@ -108,4 +108,16 @@ public final class Objects
 
     throw new NullPointerException(message);
   }
+
+
+  public static String objectToString( Object obj )
+  {
+    String className = obj.getClass().getName();
+    int classNameLength = className.length();
+    char[] s = new char[classNameLength + (Integer.BYTES * 2 + 1)];
+    className.getChars(0, classNameLength, s, 0);
+    s[classNameLength] = '@';
+    return new String(Strings.toHexDigits(
+      System.identityHashCode(obj), s, classNameLength + 1, Integer.BYTES * 2));
+  }
 }

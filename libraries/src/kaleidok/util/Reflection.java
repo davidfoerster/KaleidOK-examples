@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static kaleidok.util.AssertionUtils.fastAssert;
 
@@ -77,5 +78,14 @@ public final class Reflection
     }
 
     return ((ParameterizedType) type).getActualTypeArguments();
+  }
+
+
+  public static Class<?> getTopLevelClass( Class<?> clazz )
+  {
+    Class<?> enclosingClass;
+    while ((enclosingClass = clazz.getEnclosingClass()) != null)
+      clazz = enclosingClass;
+    return clazz;
   }
 }

@@ -2,6 +2,7 @@ package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.property.IntegerProperty;
 
+import javax.annotation.Nonnull;
 import java.util.prefs.Preferences;
 
 
@@ -35,16 +36,14 @@ public class IntegerPropertyPreferencesAdapter<P extends IntegerProperty>
 
 
   @Override
-  public void load()
+  protected void doLoad( @Nonnull String value )
   {
-    String value = preferences.get(key, null);
-    if (value != null)
-      property.set(Integer.parseInt(value));
+    property.set(Integer.parseInt(value));
   }
 
 
   @Override
-  public void save()
+  protected void doSave()
   {
     preferences.putInt(key, property.get());
   }

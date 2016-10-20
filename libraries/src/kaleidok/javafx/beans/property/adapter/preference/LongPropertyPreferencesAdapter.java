@@ -2,6 +2,7 @@ package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.property.LongProperty;
 
+import javax.annotation.Nonnull;
 import java.util.prefs.Preferences;
 
 
@@ -35,16 +36,14 @@ public class LongPropertyPreferencesAdapter<P extends LongProperty>
 
 
   @Override
-  public void load()
+  protected void doLoad( @Nonnull String value )
   {
-    String value = preferences.get(key, null);
-    if (value != null)
-      property.set(Long.parseLong(value));
+    property.set(Long.parseLong(value));
   }
 
 
   @Override
-  public void save()
+  protected void doSave()
   {
     preferences.putLong(key, property.get());
   }

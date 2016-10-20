@@ -2,6 +2,7 @@ package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.property.DoubleProperty;
 
+import javax.annotation.Nonnull;
 import java.util.prefs.Preferences;
 
 
@@ -35,16 +36,14 @@ public class DoublePropertyPreferencesAdapter<P extends DoubleProperty>
 
 
   @Override
-  public void load()
+  protected void doLoad( @Nonnull String value )
   {
-    String value = preferences.get(key, null);
-    if (value != null)
-      property.set(Double.parseDouble(value));
+    property.set(Double.parseDouble(value));
   }
 
 
   @Override
-  public void save()
+  protected void doSave()
   {
     preferences.putDouble(key, property.get());
   }

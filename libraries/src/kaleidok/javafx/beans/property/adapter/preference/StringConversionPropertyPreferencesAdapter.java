@@ -5,6 +5,7 @@ import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedProperty;
 import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.prefs.Preferences;
 
@@ -104,20 +105,16 @@ public class StringConversionPropertyPreferencesAdapter<T, P extends Property<T>
 
 
   @Override
-  public void load()
+  protected void doLoad( @Nonnull String sValue )
   {
-    String sValue = preferences.get(key, null);
-    if (sValue != null)
-    {
-      T value = converter.fromString(sValue);
-      if (value != null)
-        property.setValue(value);
-    }
+    T value = converter.fromString(sValue);
+    if (value != null)
+      property.setValue(value);
   }
 
 
   @Override
-  public void save()
+  protected void doSave()
   {
     T value = property.getValue();
     if (value != null)
