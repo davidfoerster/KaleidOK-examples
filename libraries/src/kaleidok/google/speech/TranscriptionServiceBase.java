@@ -155,6 +155,13 @@ public abstract class TranscriptionServiceBase implements PreferenceBean
 
 
   @Override
+  public Object getParent()
+  {
+    return null;
+  }
+
+
+  @Override
   public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {

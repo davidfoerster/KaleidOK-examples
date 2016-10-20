@@ -14,6 +14,9 @@ public interface PreferenceBean
   String getName();
 
 
+  Object getParent();
+
+
   Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>> getPreferenceAdapters();
 
 

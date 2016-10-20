@@ -76,6 +76,13 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   }
 
 
+  @Override
+  public Object getParent()
+  {
+    return parent;
+  }
+
+
   public IntegerProperty wireframeProperty()
   {
     return wireframe;

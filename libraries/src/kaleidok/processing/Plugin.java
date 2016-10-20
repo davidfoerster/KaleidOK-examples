@@ -140,4 +140,10 @@ public class Plugin<P extends PApplet>
 
   @SuppressWarnings("unused")
   public void touchEvent( TouchEvent ev ) { }
+
+
+  public P getParent()
+  {
+    return p;
+  }
 }
