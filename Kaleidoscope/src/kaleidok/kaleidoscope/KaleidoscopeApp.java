@@ -1,12 +1,10 @@
 package kaleidok.kaleidoscope;
 
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Toggle;
-import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import kaleidok.javafx.stage.Icons;
@@ -77,17 +75,9 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     {
       configurationEditor = new KaleidoscopeConfigurationEditor();
       configurationEditor.init();
+
       Kaleidoscope sketch = getSketch();
-      @SuppressWarnings("unchecked")
-      List<TreeItem<ReadOnlyProperty<?>>> root =
-        (List<TreeItem<ReadOnlyProperty<?>>>) (List<?>)
-          configurationEditor.getRoot().getChildren();
-
-      root.add(KaleidoscopeConfigurationEditor.makeSubtree(sketch.getSTT()));
-
-      LayerManager layers = sketch.getLayers();
-      root.add(KaleidoscopeConfigurationEditor.makeSubtree2(
-        layers, "Kaleidoscope", layers.stream()));
+      configurationEditor.addBean(sketch);
     }
     return configurationEditor;
   }
