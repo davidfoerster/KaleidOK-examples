@@ -10,6 +10,7 @@ import processing.event.KeyEvent;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -42,6 +43,8 @@ public class Kaleidoscope extends ExtPApplet
   @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private Optional<ExportService> exportService;
 
+  private FrameRateDisplay frameRateDisplay;
+
 
   public Kaleidoscope( ProcessingSketchApplication<Kaleidoscope> parent )
   {
@@ -72,7 +75,7 @@ public class Kaleidoscope extends ExtPApplet
     getSTT();
     getAudioProcessingManager().getAudioDispatcherThread().start();
     getExportService();
-    FrameRateDisplay.fromConfiguration(this);
+    getFrameRateDisplay();
   }
 
 
@@ -135,6 +138,14 @@ public class Kaleidoscope extends ExtPApplet
       }
     }
     return exportService;
+  }
+
+
+  public synchronized FrameRateDisplay getFrameRateDisplay()
+  {
+    if (frameRateDisplay == null)
+      frameRateDisplay = FrameRateDisplay.fromConfiguration(this);
+    return frameRateDisplay;
   }
 
 
@@ -215,8 +226,11 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public Stream<? extends PropertyPreferencesAdapter<?, ?>> getPreferenceAdapters()
   {
-    return Stream.concat(
+    Stream<Stream<? extends PropertyPreferencesAdapter<?,?>>> s = Stream.of(
       getSTT().getPreferenceAdapters(),
-      getLayers().stream().flatMap(ImageLayer::getPreferenceAdapters));
+      getLayers().stream().flatMap(ImageLayer::getPreferenceAdapters),
+      getFrameRateDisplay().getPreferenceAdapters());
+
+    return s.flatMap(Function.identity());
   }
 }
