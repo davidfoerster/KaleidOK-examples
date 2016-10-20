@@ -5,7 +5,6 @@ import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedIntegerProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
-import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.util.prefs.DefaultValueParser;
@@ -79,14 +78,6 @@ public class FrameRateDisplay extends Plugin<PApplet>
     frameRateDisplay.getPreferenceAdapters()
       .forEach(PropertyPreferencesAdapter::load);
     return frameRateDisplay;
-  }
-
-
-  @Override
-  public void dispose()
-  {
-    ReadOnlyPropertyPreferencesAdapter.saveAndFlush(this);
-    super.dispose();
   }
 
 

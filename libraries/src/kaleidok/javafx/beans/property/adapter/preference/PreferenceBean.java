@@ -27,6 +27,12 @@ public interface PreferenceBean
   }
 
 
+  default void saveAndFlush()
+  {
+    ReadOnlyPropertyPreferencesAdapter.saveAndFlush(getPreferenceAdapters());
+  }
+
+
   static void saveAndFlush( Stream<? extends PreferenceBean> prefBeans )
   {
     ReadOnlyPropertyPreferencesAdapter.saveAndFlush(

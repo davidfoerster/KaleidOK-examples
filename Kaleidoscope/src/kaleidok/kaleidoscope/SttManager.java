@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 
 
-public class SttManager extends Plugin<Kaleidoscope>
+public final class SttManager extends Plugin<Kaleidoscope>
   implements PreferenceBean
 {
   private final STT stt;
@@ -50,6 +50,7 @@ public class SttManager extends Plugin<Kaleidoscope>
       .addAudioProcessor(stt.getAudioProcessor());
 
     RecorderIcon.fromConfiguration(sketch, stt, !STT.isLoggingStatus());
+    getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);
   }
 
 

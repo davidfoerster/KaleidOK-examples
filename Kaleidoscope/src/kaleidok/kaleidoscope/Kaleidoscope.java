@@ -1,6 +1,8 @@
 package kaleidok.kaleidoscope;
 
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.kaleidoscope.layer.ImageLayer;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.processing.ProcessingSketchApplication;
@@ -9,9 +11,11 @@ import processing.event.KeyEvent;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 
 public class Kaleidoscope extends ExtPApplet
+  implements PreferenceBean
 {
   static final Logger logger =
     Logger.getLogger(Kaleidoscope.class.getPackage().getName());
@@ -75,20 +79,12 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public synchronized void dispose()
   {
+    saveAndFlush();
+
     if (layers != null)
       layers.dispose();
 
     super.dispose();
-  }
-
-
-  @Override
-  protected void doSavePreferences()
-  {
-    if (stt != null)
-      stt.getPreferenceAdapters().forEach(PropertyPreferencesAdapter::save);
-
-    super.doSavePreferences();
   }
 
 
@@ -112,10 +108,7 @@ public class Kaleidoscope extends ExtPApplet
   {
     SttManager stt = this.stt;
     if (stt == null)
-    {
       this.stt = stt = new SttManager(this);
-      stt.getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);
-    }
     return stt;
   }
 
@@ -202,5 +195,28 @@ public class Kaleidoscope extends ExtPApplet
       }
     }
     return s;
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return "Kaleidoscope";
+  }
+
+
+  @Override
+  public Object getParent()
+  {
+    return null;
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>> getPreferenceAdapters()
+  {
+    return Stream.concat(
+      getSTT().getPreferenceAdapters(),
+      getLayers().stream().flatMap(ImageLayer::getPreferenceAdapters));
   }
 }

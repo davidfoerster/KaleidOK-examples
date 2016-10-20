@@ -4,7 +4,6 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.javafx.beans.property.PropertyUtils;
-import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.kaleidoscope.layer.*;
 import kaleidok.processing.image.PImageFuture;
@@ -116,8 +115,6 @@ public class LayerManager implements List<ImageLayer>, Runnable
 
   public void dispose()
   {
-    PreferenceBean.saveAndFlush(this.stream());
-
     clear();
     backgroundLayer = null;
     centreLayer = null;

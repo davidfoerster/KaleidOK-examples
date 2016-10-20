@@ -211,10 +211,4 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
       .distinct()
       .forEach(PreferenceUtils::flush);
   }
-
-
-  public static void saveAndFlush( PreferenceBean bean )
-  {
-    saveAndFlush(bean.getPreferenceAdapters());
-  }
 }
