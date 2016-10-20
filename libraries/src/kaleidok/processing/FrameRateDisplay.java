@@ -1,10 +1,19 @@
 package kaleidok.processing;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import kaleidok.javafx.beans.property.AspectedIntegerProperty;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Strings;
 import processing.core.PApplet;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.log10;
@@ -14,9 +23,11 @@ import static kaleidok.util.Math.clamp;
 /**
  * Displays the frame rate and frame rendering duration in a Processing sketch.
  */
-@SuppressWarnings("unused")
 public class FrameRateDisplay extends Plugin<PApplet>
+  implements PreferenceBean
 {
+  private final AspectedIntegerProperty enabled;
+
   public float offsetX = 4, offsetY = 4, textSize = 8;
 
   public int textColor = 0xff00ff00;
@@ -26,7 +37,11 @@ public class FrameRateDisplay extends Plugin<PApplet>
 
   private final char[] sampledFrameRate = new char[19];
 
-  private int sampledFrameRateLength;
+  {
+    sampledFrameRate[0] = '0';
+  }
+
+  private int sampledFrameRateLength = 1;
 
 
   private final char[] frameDrawTime = new char[19];
@@ -38,20 +53,40 @@ public class FrameRateDisplay extends Plugin<PApplet>
 
   public FrameRateDisplay( PApplet sketch )
   {
+    this(sketch, 1);
+  }
+
+
+  public FrameRateDisplay( PApplet sketch, int enabled )
+  {
     super(sketch);
-    sampledFrameRate[0] = '0';
-    sampledFrameRateLength = 1;
+
+    IntegerSpinnerValueFactory bounds = new IntegerSpinnerValueFactory(0, 1);
+    this.enabled =
+      new AspectedIntegerProperty(this, "enabled",
+        clamp(enabled, bounds.getMin(), bounds.getMax()));
+    this.enabled.addAspect(BoundedIntegerTag.INSTANCE, bounds);
+    this.enabled.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 
 
   public static FrameRateDisplay fromConfiguration( ExtPApplet sketch )
   {
-    return
-      DefaultValueParser.parseBoolean(
-        sketch.getParameterMap().get("framerate.display"), false)
-      ?
-        new FrameRateDisplay(sketch) :
-        null;
+    boolean enabled = DefaultValueParser.parseBoolean(
+      sketch.getParameterMap().get("framerate.display"), false);
+    FrameRateDisplay frameRateDisplay =
+      new FrameRateDisplay(sketch, enabled ? 1 : 0);
+    frameRateDisplay.getPreferenceAdapters()
+      .forEach(PropertyPreferencesAdapter::load);
+    return frameRateDisplay;
+  }
+
+
+  @Override
+  public void dispose()
+  {
+    ReadOnlyPropertyPreferencesAdapter.saveAndFlush(this);
+    super.dispose();
   }
 
 
@@ -78,6 +113,9 @@ public class FrameRateDisplay extends Plugin<PApplet>
   @Override
   public void draw()
   {
+    if (enabled.get() <= 0)
+      return;
+
     final PApplet p = this.p;
     p.textSize(textSize);
     p.fill(textColor);
@@ -96,5 +134,37 @@ public class FrameRateDisplay extends Plugin<PApplet>
       clamp((int) ceil(log10(drawTime)), 1, frameDrawTime.length);
     p.text(Strings.toDigits(drawTime, 10, frameDrawTime, 0, drawTimeLength),
       0, drawTimeLength, offsetX, 2 * textSize + offsetY);
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return "frame rate display";
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return Stream.of(enabled.getAspect(
+      PropertyPreferencesAdapterTag.getWritableInstance()));
+  }
+
+
+  public IntegerProperty enabledProperty()
+  {
+    return enabled;
+  }
+
+  public int getEnabled()
+  {
+    return enabled.get();
+  }
+
+  public void setEnabled( int value )
+  {
+    enabled.set(value);
   }
 }
