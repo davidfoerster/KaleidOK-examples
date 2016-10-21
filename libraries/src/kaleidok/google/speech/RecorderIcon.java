@@ -9,9 +9,7 @@ import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
-import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
-import kaleidok.util.prefs.DefaultValueParser;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
@@ -54,20 +52,6 @@ public class RecorderIcon extends Plugin<PApplet> implements PreferenceBean
         clamp(enabled, bounds.getMin(), bounds.getMax()));
     this.enabled.addAspect(BoundedIntegerTag.INSTANCE, bounds);
     this.enabled.addAspect(PropertyPreferencesAdapterTag.getInstance());
-  }
-
-
-  public static RecorderIcon fromConfiguration( ExtPApplet sketch,
-    ObservableValue<State> recorderState, boolean defaultOn )
-  {
-    String strDefault = "default",
-      strEnabled = sketch.getParameterMap().getOrDefault(
-        RecorderIcon.class.getName() + '.' + "enabled", strDefault);
-    boolean enabled =
-      strDefault.equals(strEnabled) ?
-        defaultOn :
-        DefaultValueParser.parseBoolean(strEnabled);
-    return new RecorderIcon(sketch, recorderState, enabled ? 1 : 0);
   }
 
 

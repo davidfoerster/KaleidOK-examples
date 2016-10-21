@@ -51,8 +51,7 @@ public final class SttManager extends Plugin<Kaleidoscope>
     sketch.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
 
-    recorderIcon = RecorderIcon.fromConfiguration(
-      sketch, stt.statusProperty(), !STT.isLoggingStatus());
+    recorderIcon = new RecorderIcon(sketch, stt.statusProperty(), 0);
 
     getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);
   }

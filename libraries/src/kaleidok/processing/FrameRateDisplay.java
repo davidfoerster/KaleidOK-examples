@@ -7,7 +7,6 @@ import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
-import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Strings;
 import processing.core.PApplet;
 
@@ -66,18 +65,6 @@ public class FrameRateDisplay extends Plugin<PApplet>
         clamp(enabled, bounds.getMin(), bounds.getMax()));
     this.enabled.addAspect(BoundedIntegerTag.INSTANCE, bounds);
     this.enabled.addAspect(PropertyPreferencesAdapterTag.getInstance());
-  }
-
-
-  public static FrameRateDisplay fromConfiguration( ExtPApplet sketch )
-  {
-    boolean enabled = DefaultValueParser.parseBoolean(
-      sketch.getParameterMap().get("framerate.display"), false);
-    FrameRateDisplay frameRateDisplay =
-      new FrameRateDisplay(sketch, enabled ? 1 : 0);
-    frameRateDisplay.getPreferenceAdapters()
-      .forEach(PropertyPreferencesAdapter::load);
-    return frameRateDisplay;
   }
 
 
