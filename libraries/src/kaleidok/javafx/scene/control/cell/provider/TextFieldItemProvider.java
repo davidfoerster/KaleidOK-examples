@@ -11,7 +11,7 @@ import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 public class TextFieldItemProvider extends FilteredTreeItemProvider<String, TextField>
 {
   @Override
-  public boolean isApplicable( DynamicEditableTreeItem<String, TextField> item )
+  public boolean isApplicable( DynamicEditableTreeItem<?, ?> item )
   {
     return item.getValue() instanceof StringProperty;
   }

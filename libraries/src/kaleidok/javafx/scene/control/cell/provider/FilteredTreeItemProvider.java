@@ -8,13 +8,16 @@ import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 public abstract class FilteredTreeItemProvider<T, N extends Node>
   implements DynamicEditableTreeItem.TreeItemProvider<T, N>
 {
-  public abstract boolean isApplicable( DynamicEditableTreeItem<T, N> item );
+  public abstract boolean isApplicable( DynamicEditableTreeItem<?, ?> item );
 
 
   @Override
-  public EditorNodeInfo<N, T> call( DynamicEditableTreeItem<T, N> item )
+  public EditorNodeInfo<N, T> call( DynamicEditableTreeItem<?, ?> item )
   {
-    return isApplicable(item) ? callTypeChecked(item) : null;
+    //noinspection unchecked
+    return isApplicable(item) ?
+      callTypeChecked((DynamicEditableTreeItem<T, N>) item) :
+      null;
   }
 
 

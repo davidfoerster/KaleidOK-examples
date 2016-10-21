@@ -34,7 +34,7 @@ public class MultiTreeItemProvider<T, N extends Node>
 
 
   @Override
-  public EditorNodeInfo<N, T> call( final DynamicEditableTreeItem<T, N> item )
+  public EditorNodeInfo<N, T> call( final DynamicEditableTreeItem<?, ?> item )
   {
     return this.stream()
       .map((cnf) -> cnf.call(item))

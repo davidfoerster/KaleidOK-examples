@@ -28,7 +28,7 @@ public class FormattedTextFieldItemProvider<T>
 
 
   @Override
-  public boolean isApplicable( DynamicEditableTreeItem<T, TextField> item )
+  public boolean isApplicable( DynamicEditableTreeItem<?, ?> item )
   {
     return super.isApplicable(item) && item.getValue().getValue() != null;
   }

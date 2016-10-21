@@ -21,10 +21,12 @@ public abstract class AspectedTreeItemProvider<T, N extends Node, A, Tag extends
 
 
   @Override
-  public boolean isApplicable( DynamicEditableTreeItem<T, N> item )
+  public boolean isApplicable( DynamicEditableTreeItem<?, ?> item )
   {
+    //noinspection unchecked
     return item.getValue() instanceof AspectedReadOnlyProperty &&
-      (aspectTag == null || getAspect(item) != null);
+      (aspectTag == null ||
+         getAspect((DynamicEditableTreeItem<T, N>) item) != null);
   }
 
 

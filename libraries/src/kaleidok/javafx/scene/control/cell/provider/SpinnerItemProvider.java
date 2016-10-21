@@ -52,10 +52,10 @@ public abstract class SpinnerItemProvider<T extends Number>
     extends SpinnerItemProvider<T>
   {
     @Override
-    public boolean isApplicable( DynamicEditableTreeItem<Number, Spinner<T>> item )
+    public boolean isApplicable( DynamicEditableTreeItem<?, ?> item )
     {
-      ReadOnlyProperty<Number> value = item.getValue();
-      //noinspection OverlyStrongTypeCast
+      ReadOnlyProperty<?> value = item.getValue();
+      //noinspection OverlyStrongTypeCast,unchecked
       return
         value instanceof ObservableNumberValue &&
         value instanceof AspectedProperty &&

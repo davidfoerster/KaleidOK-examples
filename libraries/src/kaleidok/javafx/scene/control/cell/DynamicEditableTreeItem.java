@@ -11,7 +11,7 @@ public class DynamicEditableTreeItem<T, N extends Node>
   extends EditableTreeItem<T, N>
 {
   public interface TreeItemProvider<T, N extends Node>
-    extends Callback<DynamicEditableTreeItem<T, N>, EditorNodeInfo<N, T>>
+    extends Callback<DynamicEditableTreeItem<?, ?>, EditorNodeInfo<N, T>>
   { }
 
   public final ObjectProperty<TreeItemProvider<T,N>> cellNodeFactory;
