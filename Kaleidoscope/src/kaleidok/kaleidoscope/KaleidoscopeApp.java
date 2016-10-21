@@ -54,10 +54,11 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     if (configurationWindow == null)
     {
+      KaleidoscopeConfigurationEditor ce = getConfigurationEditor();
       configurationWindow = new Stage();
-      configurationWindow.setTitle("Kaleidoscope configuration");
-      configurationWindow.setWidth(300);
-      configurationWindow.setScene(new Scene(getConfigurationEditor()));
+      configurationWindow.setTitle(getSketch().getName() + " configuration");
+      configurationWindow.setWidth(ce.getPrefWidth() + 20);
+      configurationWindow.setScene(new Scene(ce));
       Windows.loadPosition(configurationWindow,
         getConfigurationEditorPreferences(),
         KaleidoscopeConfigurationEditor.class.getSimpleName());

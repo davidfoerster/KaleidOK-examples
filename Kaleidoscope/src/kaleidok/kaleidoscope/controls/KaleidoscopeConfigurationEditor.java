@@ -53,6 +53,7 @@ public class KaleidoscopeConfigurationEditor
     TreeTableColumn<ReadOnlyProperty<Object>, String> propertyNameColumn =
       new TreeTableColumn<>("Property");
     propertyNameColumn.setEditable(false);
+    propertyNameColumn.setMaxWidth(200);
     propertyNameColumn.setCellValueFactory((cdf) -> {
         TreeItem<ReadOnlyProperty<Object>> item = cdf.getValue();
         ReadOnlyProperty<?> p = item.getValue();
@@ -75,6 +76,9 @@ public class KaleidoscopeConfigurationEditor
     propertyValueColumn.setCellFactory(
       (col) -> new EditableTreeTableCell<>());
     columns.add(propertyValueColumn);
+
+    setPrefWidth(
+      propertyNameColumn.getMaxWidth() + propertyValueColumn.getPrefWidth());
   }
 
 
