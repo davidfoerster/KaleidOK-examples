@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.text.Format;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.*;
@@ -233,7 +234,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
   }
 
 
-  private static Path tempDir = null;
+  private static final AtomicReference<Path> tempDir = new AtomicReference<>();
 
   protected Path createTempFile()
     throws IOException
@@ -242,14 +243,34 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     if (logfilePattern == null)
       return null;
 
-    if (tempDir == null) {
+    Path tempDir = MockSpeechToTextHandler.tempDir.get();
+    if (tempDir == null)
+    {
       tempDir =
         PlatformPaths.getTempDir().resolve(this.getClass().getCanonicalName());
-      try {
+      try
+      {
         Files.createDirectory(tempDir);
-      } catch (FileAlreadyExistsException ex) {
+      }
+      catch (FileAlreadyExistsException ex)
+      {
         if (!Files.isDirectory(tempDir))
           throw ex;
+      }
+      finally
+      {
+        if (!MockSpeechToTextHandler.tempDir.compareAndSet(null, tempDir))
+        {
+          Path tempDir2 = MockSpeechToTextHandler.tempDir.get();
+          if (!tempDir.equals(tempDir2))
+          {
+            logger.log(Level.WARNING,
+              "Temporary directory path was updated concurrently with " +
+                "different values: \"{0}\" ≠ \"{1}\"",
+              new Object[]{ tempDir, tempDir2 });
+          }
+          tempDir = tempDir2;
+        }
       }
     }
 
