@@ -6,16 +6,13 @@ import kaleidok.google.speech.SttResponse;
 import kaleidok.google.speech.Transcription;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
-import kaleidok.processing.ExtPApplet;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.processing.Plugin;
-import kaleidok.util.prefs.DefaultValueParser;
 import processing.event.KeyEvent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.Format;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
@@ -38,19 +35,9 @@ public final class SttManager extends Plugin<Kaleidoscope>
     stt = new STT(new SttResponseHandler(),
       sketch.parseStringOrFile(
         params.get("com.google.developer.api.key"), '@'));
-    String paramBase = stt.getClass().getCanonicalName() + '.';
-    stt.setLanguage(
-      params.getOrDefault(paramBase + "language", "en"));
-    stt.setMaxTranscriptionInterval(DefaultValueParser.parseInt(
-      params.get(paramBase + "interval"), 8000),
-      TimeUnit.MILLISECONDS);
-    stt.intervalSequenceCountMax = DefaultValueParser.parseInt(
-      params.get(paramBase + "interval.count"),
-      stt.intervalSequenceCountMax);
     stt.logfilePattern = getLogfilePattern();
     sketch.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
-
     recorderIcon = new RecorderIcon(sketch, stt.statusProperty(), 0);
 
     getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);

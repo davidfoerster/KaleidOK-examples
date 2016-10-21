@@ -9,7 +9,6 @@ import javaFlacEncoder.StreamConfiguration;
 import kaleidok.util.Arrays;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static kaleidok.google.speech.STT.logger;
@@ -71,9 +70,8 @@ public class AudioTranscriptionProcessor implements AudioProcessor
           "Speech recording interrupted at {0} of up to {1} intervals after " +
             "excess of the max. interval of {2,number,0.###} s",
           new Object[]{
-            intervalSequenceCount,
-            (stt.intervalSequenceCountMax > 0) ? stt.intervalSequenceCountMax : "∞",
-            stt.getMaxTranscriptionInterval() * 1e-9
+            intervalSequenceCount, getIntervalSequenceCountMaxString(),
+            stt.getMaxTranscriptionInterval()
           });
       }
 
@@ -92,8 +90,17 @@ public class AudioTranscriptionProcessor implements AudioProcessor
 
   private int getIntervalSequenceCountMax()
   {
-    int n = stt.intervalSequenceCountMax;
+    int n = stt.getIntervalSequenceCountMax();
     return (n > 0) ? n : Integer.MAX_VALUE;
+  }
+
+
+  private Object getIntervalSequenceCountMaxString()
+  {
+    int n = stt.getIntervalSequenceCountMax();
+    // We need to perform the explicit cast inside the branches as to receive either an Integer or Character instance. Otherwise we'll always get Integer.
+    //noinspection ConditionalExpressionWithIdenticalBranches
+    return (n > 0 && n < Integer.MAX_VALUE) ? (Object) n : (Object) '∞';
   }
 
 
@@ -118,10 +125,10 @@ public class AudioTranscriptionProcessor implements AudioProcessor
     if (task == null) {
       task = new FlacTranscription(ev.getSampleRate());
 
-      long maxTranscriptionInterval = stt.getMaxTranscriptionInterval();
+      double maxTranscriptionInterval = stt.getMaxTranscriptionInterval();
       transcriptionEndTimestamp =
         (maxTranscriptionInterval > 0) ?
-          ev.getTimeStamp() + maxTranscriptionInterval * 1e-9 :
+          ev.getTimeStamp() + maxTranscriptionInterval :
           Double.POSITIVE_INFINITY;
     }
 
@@ -180,7 +187,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
       long encodingStartTime = System.nanoTime();
       encoder.t_encodeSamples(availableSamples, true, availableSamples);
       logExcessDuration(encodingStartTime, stt.getMaxTranscriptionInterval(),
-        TimeUnit.NANOSECONDS, "Encoding the remaining samples took too long");
+        "Encoding the remaining samples took too long");
 
       stt.service.execute(this);
     }
@@ -200,13 +207,14 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   }
 
 
-  private static void logExcessDuration( long startTimeNanos, long maxDuration,
-    TimeUnit maxDurationUnit, String message )
+  private static void logExcessDuration( long startTimeNanos, double maxDuration,
+    String message )
   {
-    long duration = System.nanoTime() - startTimeNanos;
-    if (duration >= maxDurationUnit.toNanos(maxDuration)) {
+    double duration = (System.nanoTime() - startTimeNanos) * 1e-9;
+    if (duration >= maxDuration)
+    {
      logger.log(Level.FINER, "{0}: {1,number,0.0000E0} seconds",
-       new Object[]{message, duration * 1e-9});
+       new Object[]{ message, duration });
     }
   }
 

@@ -1,10 +1,19 @@
 package kaleidok.google.speech;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.google.speech.mock.MockTranscriptionService;
+import kaleidok.javafx.beans.property.AspectedDoubleProperty;
+import kaleidok.javafx.beans.property.AspectedIntegerProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.util.Timer;
 import org.apache.http.concurrent.FutureCallback;
 
@@ -33,7 +42,7 @@ public class STT implements PreferenceBean
     SHUTDOWN
   }
 
-  public int intervalSequenceCountMax = 1;
+  private final AspectedIntegerProperty intervalSequenceCountMax;
 
   private boolean isActive = false;
 
@@ -64,6 +73,13 @@ public class STT implements PreferenceBean
       MockTranscriptionService.newInstance(accessKey, resultHandler, this) :
       new TranscriptionService(accessKey, resultHandler);
     processor = new AudioTranscriptionProcessor(this);
+
+    intervalSequenceCountMax = new AspectedIntegerProperty(
+      this, "max. automatic sequential recordings", 1);
+    intervalSequenceCountMax.addAspect(BoundedIntegerTag.INSTANCE,
+      new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
+    intervalSequenceCountMax.addAspect(
+      PropertyPreferencesAdapterTag.getInstance());
   }
 
 
@@ -117,6 +133,22 @@ public class STT implements PreferenceBean
   }
 
 
+  public IntegerProperty intervalSequenceCountMaxProperty()
+  {
+    return intervalSequenceCountMax;
+  }
+
+  public int getIntervalSequenceCountMax()
+  {
+    return intervalSequenceCountMax.get();
+  }
+
+  public void setIntervalSequenceCountMax( int n )
+  {
+    intervalSequenceCountMaxProperty().set(n);
+  }
+
+
   private void signalChange()
   {
     for (ChangeListener listener: changeListeners)
@@ -126,7 +158,6 @@ public class STT implements PreferenceBean
 
   public void shutdown()
   {
-    // TODO
     status.set(State.SHUTDOWN);
     service.shutdownNow();
     signalChange();
@@ -198,23 +229,73 @@ public class STT implements PreferenceBean
 
   private void startListening()
   {
-    // TODO: stop and then restart "recorder"
     recordingTimer.start();
   }
 
 
-  public long getMaxTranscriptionInterval()
+  private final AspectedDoubleProperty maxTranscriptionInterval =
+    new AspectedDoubleProperty(this, "max. transcription interval", 0)
+    {
+      {
+        @SuppressWarnings("IntegerDivisionInFloatingPointContext")
+        DoubleSpinnerValueFactory bounds =
+          new DoubleSpinnerValueFactory(0, Double.MAX_VALUE);
+        bounds.setAmountToStepBy(0.5);
+        addAspect(BoundedDoubleTag.INSTANCE, bounds);
+        addAspect(PropertyPreferencesAdapterTag.getInstance());
+
+        invalidated();
+      }
+
+
+      public long getAsTotalRecorderTime()
+      {
+        double seconds = get();
+        return
+          (seconds > 0 && Double.isFinite(seconds)) ?
+            (long) (seconds * 1e9) :
+            -1;
+      }
+
+
+      @Override
+      protected void invalidated()
+      {
+        Timer recordingTimer = STT.this.recordingTimer;
+        long newValueNanos = getAsTotalRecorderTime();
+        if (newValueNanos != recordingTimer.getTotalTime())
+        {
+          if (recordingTimer.isStarted())
+          {
+            throw new IllegalStateException(
+              "Cannot change the max. transcription interval while a " +
+                "transcription is running");
+          }
+
+          recordingTimer.reset(newValueNanos, TimeUnit.NANOSECONDS);
+        }
+      }
+    };
+
+
+  public DoubleProperty maxTranscriptionIntervalProperty()
   {
-    return recordingTimer.getTotalTime();
+    return maxTranscriptionInterval;
+  }
+
+  public double getMaxTranscriptionInterval()
+  {
+    return maxTranscriptionInterval.get();
+  }
+
+  public void setMaxTranscriptionInterval( double interval )
+  {
+    maxTranscriptionInterval.set(interval);
   }
 
   public void setMaxTranscriptionInterval( long interval, TimeUnit unit )
   {
-    if (isRecording()) {
-      throw new IllegalStateException(
-        "Cannot change the transcription interval while a transcription is running");
-    }
-    recordingTimer.reset(interval, unit);
+    setMaxTranscriptionInterval(unit.toNanos(interval) * 1e-9);
   }
 
 
@@ -248,6 +329,12 @@ public class STT implements PreferenceBean
   public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    return service.getPreferenceAdapters();
+    return Stream.concat(
+      service.getPreferenceAdapters(),
+      Stream.of(
+        maxTranscriptionInterval.getAspect(
+          PropertyPreferencesAdapterTag.getWritableInstance()),
+        intervalSequenceCountMax.getAspect(
+          PropertyPreferencesAdapterTag.getWritableInstance())));
   }
 }
