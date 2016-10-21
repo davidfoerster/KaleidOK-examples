@@ -5,7 +5,6 @@ import com.sun.net.httpserver.HttpExchange;
 import kaleidok.http.requesthandler.MockRequestHandlerBase;
 import kaleidok.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
-import kaleidok.util.AssertionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -25,17 +24,14 @@ import java.util.logging.Logger;
 import java.util.regex.*;
 
 import static kaleidok.http.util.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.util.AssertionUtils.fastAssert;
+import static kaleidok.util.AssertionUtils.fastAssertFmt;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 @SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")
 public class MockSpeechToTextHandler extends MockRequestHandlerBase
 {
-  static {
-    AssertionUtils.enablePackageAssertions(MockSpeechToTextHandler.class);
-  }
-
-
   private static final Logger logger =
     Logger.getLogger(MockSpeechToTextHandler.class.getCanonicalName());
 
@@ -55,7 +51,8 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       uriPath = t.getRequestURI().getPath(),
       pathWithinContext = uriPath.substring(contextPath.length());
 
-    switch (pathWithinContext) {
+    switch (pathWithinContext)
+    {
     case "recognize":
       if (handleRecognize(t))
         break;
@@ -70,33 +67,40 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
 
   protected boolean handleRecognize( HttpExchange t ) throws IOException
   {
-    if (!"POST".equals(t.getRequestMethod())) {
+    if (!"POST".equals(t.getRequestMethod()))
+    {
       t.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, -1);
       return true;
     }
 
     Map<String, String> q =
       Parsers.getQueryMap(t.getRequestURI(), DEFAULT_CHARSET);
-    assert q != null && !q.isEmpty() : "No request parameters";
-    assert "json".equals(q.get("output")) :
-      "Invalid request parameter value: output=" + q.get("output");
-    assert !StringUtils.isEmpty(q.get("key")) : "Empty request parameter: key";
-    assert !StringUtils.isEmpty(q.get("lang")) : "Empty request parameter: lang";
-    assert q.size() == 3 : "Superfluous request parameters";
+    fastAssert(q != null && !q.isEmpty(), "No request parameters");
+    fastAssert("json".equals(q.get("output")),
+      "Invalid request parameter value: output=" + q.get("output"));
+    fastAssert(!StringUtils.isEmpty(q.get("key")),
+      "Empty request parameter: key");
+    fastAssert(!StringUtils.isEmpty(q.get("lang")),
+      "Empty request parameter: lang");
+    fastAssert(q.size() == 3, "Superfluous request parameters");
 
     ContentType contentType =
       ContentType.parse(t.getRequestHeaders().getFirst(CONTENT_TYPE));
-    assert "audio/x-flac".equals(contentType.getMimeType()) :
-      "Invalid request content-type: " + contentType.getMimeType();
-    float sampleRate;
-    try {
-      sampleRate = Float.parseFloat(contentType.getParameter("rate"));
-      if (!(sampleRate > 0 && !Float.isInfinite(sampleRate))) {
+    fastAssert("audio/x-flac".equals(contentType.getMimeType()),
+      "Invalid request content-type: " + contentType.getMimeType());
+    double sampleRate;
+    try
+    {
+      sampleRate = Double.parseDouble(contentType.getParameter("rate"));
+      if (sampleRate <= 0 || !Double.isFinite(sampleRate))
+      {
         //noinspection ThrowCaughtLocally
         throw new IllegalArgumentException(
           "Sampling rate must be positive and finite");
       }
-    } catch (IllegalArgumentException ex) {
+    }
+    catch (IllegalArgumentException ex)
+    {
       throw new AssertionError(
         "Invalid request content-type parameter: rate=" +
           contentType.getParameter("rate"),
@@ -110,8 +114,8 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     logger.log(Level.FINEST,
       "Received {0} bytes on request to {1}",
       new Object[]{flacBuffer.length, t.getRequestURI()});
-    assert flacBuffer.length > 86 :
-      "Transmitted data only seems to contain FLAC header";
+    fastAssert(flacBuffer.length > 86,
+      "Transmitted data only seems to contain FLAC header");
 
     Path tmpFilePath = createTempFile();
     if (tmpFilePath != null) {
@@ -122,8 +126,8 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
 
     double duration = testFlacFile(flacBuffer, sampleRate);
     if (!Double.isNaN(duration)) {
-      assert duration <= stt.getMaxTranscriptionInterval() * 1e-9 :
-        "FLAC stream duration exceeds maximum transcription interval";
+      fastAssert(duration <= stt.getMaxTranscriptionInterval() * 1e-9,
+        "FLAC stream duration exceeds maximum transcription interval");
     } else {
       logger.finest("Couldn't determine duration of the submitted audio record");
     }
@@ -149,14 +153,15 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
   }
 
   private static final Pattern
-    SAMPLERATE_PATTERN = Pattern.compile("^(\\d+(?:\\.\\d*)?) (k)?Hz$"),
-    SAMPLECOUNT_PATTERN = Pattern.compile("^(\\d+) samples$");
+    SAMPLE_RATE_PATTERN = Pattern.compile("(\\d+(?:\\.\\d*)?) (k)?Hz"),
+    SAMPLE_COUNT_PATTERN = Pattern.compile("(\\d+) samples");
 
-  private static double testFlacFile( byte[] flacData, float expectedSampleRate )
+  private static double testFlacFile( byte[] flacData, double expectedSampleRate )
   {
     Process pr;
     String fileOutput;
-    try {
+    try
+    {
       pr = pbFlacFileTest.start();
       try (OutputStream os = pr.getOutputStream()) {
         os.write(flacData);
@@ -165,56 +170,68 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
         new BufferedReader(new InputStreamReader(pr.getInputStream())))
       {
         fileOutput = r.readLine();
-        assert fileOutput == null || r.read() == -1;
+        fastAssert(fileOutput == null || r.read() == -1);
       }
-    } catch (IOException ex) {
+    }
+    catch (IOException ex)
+    {
       logger.log(Level.WARNING,
         "Your system configuration doesn't permit the validation of submitted audio data",
         ex);
       return Double.NaN;
     }
-    while (true) {
-      try {
-        assert pr.waitFor() == 0;
+
+    while (true)
+    {
+      try
+      {
+        fastAssert(pr.waitFor() == 0);
         break;
-      } catch (InterruptedException ex) {
+      }
+      catch (InterruptedException ex)
+      {
         logThrown(logger, Level.FINEST,
           "Waiting for termination of {0} was interrupted", ex, pr);
       }
     }
 
-    assert fileOutput != null : "The type of the sent data is unknown";
+    fastAssert(fileOutput != null, "The type of the sent data is unknown");
     int p = fileOutput.indexOf(':');
-    assert p >= 0;
-    String[] fileSpec = fileOutput.substring(p + 2).split(", ");
-    assert fileSpec[0].startsWith("FLAC") :
-      "The sent data doesn't look like a FLAC stream: " + fileOutput.substring(p + 2);
+    fastAssert(p >= 0);
+    fileOutput = fileOutput.substring(p + 2);
+    String[] fileSpec = fileOutput.split(", ");
+    fastAssert(fileSpec[0].startsWith("FLAC"),
+      "The sent data doesn't look like a FLAC stream: " + fileOutput);
 
     double sampleRate = Double.NaN;
     long sampleCount = -1;
-    for (int i = 1; i < fileSpec.length; i++) {
+    for (int i = 1; i < fileSpec.length; i++)
+    {
       String s = fileSpec[i];
       Matcher m;
-      if ((m = SAMPLERATE_PATTERN.matcher(s)).matches())
+      if ((m = SAMPLE_RATE_PATTERN.matcher(s)).matches())
       {
         try {
           sampleRate = Double.parseDouble(m.group(1));
         } catch (NumberFormatException ex) {
           throw new AssertionError(s, ex);
         }
-        assert sampleRate > 0 && !Double.isInfinite(sampleRate);
 
         if (m.groupCount() >= 2)
-        switch (m.group(2).charAt(0)) {
-        case 'k':
-          sampleRate *= 1000;
-          break;
+        {
+          switch (s.charAt(m.start(2)))
+          {
+          case 'k':
+            sampleRate *= 1000;
+            break;
 
-        default:
-          throw new AssertionError("Unsupported magnitude prefix: " + m.group(2));
+          default:
+            throw new AssertionError(
+              "Unsupported magnitude prefix: " + m.group(2));
+          }
         }
       }
-      else if ((m = SAMPLECOUNT_PATTERN.matcher(s)).matches())
+      else if ((m = SAMPLE_COUNT_PATTERN.matcher(s)).matches())
       {
         try {
           sampleCount = Long.parseLong(m.group(1));
@@ -224,9 +241,9 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       }
     }
 
-    assert !Double.isNaN(sampleRate) :
-      "Couldn't determine sample rate of submitted audio stream";
-    assert sampleRate == expectedSampleRate : String.format(
+    fastAssert(sampleRate > 0 && Double.isFinite(sampleRate),
+      "Couldn't determine sample rate of submitted audio stream");
+    fastAssertFmt(sampleRate == expectedSampleRate,
       "Sample rate of submitted audio stream (%f) doesn't match expectation (%f)",
       sampleRate, expectedSampleRate);
 

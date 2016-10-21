@@ -38,4 +38,11 @@ public final class AssertionUtils
     if (!assertionValue)
       throw new AssertionError(message);
   }
+
+  public static void fastAssertFmt( boolean assertionValue, String format,
+    Object... formatArgs )
+  {
+    if (!assertionValue)
+      throw new AssertionError(String.format(format, formatArgs));
+  }
 }
