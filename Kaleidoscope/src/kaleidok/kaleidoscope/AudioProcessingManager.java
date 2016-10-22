@@ -231,8 +231,6 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
     private volatile int idx = -1;
 
-    private Boolean ignoreTranscriptionResult = null;
-
 
     private ReplayAction( Kaleidoscope sketch, String filename )
       throws IOException, JsonParseException, UnsupportedAudioFileException
@@ -385,22 +383,13 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     @Override
     public void actionPerformed( ActionEvent ev )
     {
-      if (!isIgnoreTranscriptionResult()) {
+      if (!p.getSTT().enableResponseHandlerProperty().get())
+      {
         p.getChromasthetiationService()
           .submit(replayList.items[idx].transcription);
       }
 
       doNextReplayItem();
-    }
-
-
-    private boolean isIgnoreTranscriptionResult()
-    {
-      if (ignoreTranscriptionResult == null) {
-        ignoreTranscriptionResult =
-          SttManager.getParamIgnoreTranscriptionResult(p);
-      }
-      return ignoreTranscriptionResult;
     }
   }
 

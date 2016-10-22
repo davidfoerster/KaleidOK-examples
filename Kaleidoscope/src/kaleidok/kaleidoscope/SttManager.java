@@ -1,11 +1,14 @@
 package kaleidok.kaleidoscope;
 
+import javafx.beans.property.BooleanProperty;
 import kaleidok.google.speech.RecorderIcon;
 import kaleidok.google.speech.STT;
 import kaleidok.google.speech.SttResponse;
 import kaleidok.google.speech.Transcription;
+import kaleidok.javafx.beans.property.AspectedBooleanProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.processing.Plugin;
 import processing.event.KeyEvent;
@@ -13,6 +16,7 @@ import processing.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.text.Format;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
@@ -24,7 +28,9 @@ public final class SttManager extends Plugin<Kaleidoscope>
 {
   private final STT stt;
 
-  private final RecorderIcon recorderIcon;
+  public final RecorderIcon recorderIcon;
+
+  private final AspectedBooleanProperty enableResponseHandler;
 
 
   SttManager( Kaleidoscope sketch )
@@ -39,6 +45,11 @@ public final class SttManager extends Plugin<Kaleidoscope>
     sketch.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
     recorderIcon = new RecorderIcon(sketch, stt.statusProperty(), 0);
+
+    enableResponseHandler =
+      new AspectedBooleanProperty(this, "enable response handler", true);
+    enableResponseHandler.addAspect(
+      PropertyPreferencesAdapterTag.getInstance());
 
     getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);
   }
@@ -59,11 +70,14 @@ public final class SttManager extends Plugin<Kaleidoscope>
   }
 
 
+  public BooleanProperty enableResponseHandlerProperty()
+  {
+    return enableResponseHandler;
+  }
+
+
   private class SttResponseHandler extends AbstractFutureCallback<SttResponse>
   {
-    private Boolean isIgnoreTranscriptionResult = null;
-
-
     @Override
     public void completed( SttResponse response )
     {
@@ -75,7 +89,8 @@ public final class SttManager extends Plugin<Kaleidoscope>
           "Transcribed with confidence {0,number,percent}: {1}",
           new Object[]{topAlternative.confidence, topAlternative.transcript});
 
-        if (!isIgnoreTranscriptionResult()) {
+        if (enableResponseHandlerProperty().get())
+        {
           p.getChromasthetiationService()
             .submit(topAlternative.transcript);
         }
@@ -83,32 +98,6 @@ public final class SttManager extends Plugin<Kaleidoscope>
         logger.info("Transcription returned no result");
       }
     }
-
-
-    private boolean isIgnoreTranscriptionResult()
-    {
-      if (isIgnoreTranscriptionResult == null) {
-        isIgnoreTranscriptionResult =
-          getParamIgnoreTranscriptionResult(p);
-      }
-      return isIgnoreTranscriptionResult;
-    }
-  }
-
-
-  static boolean getParamIgnoreTranscriptionResult( ExtPApplet parent )
-  {
-    @SuppressWarnings("SpellCheckingInspection")
-    boolean isIgnoreTranscriptionResult =
-      DefaultValueParser.parseBoolean(
-        parent.getParameterMap().get(
-          parent.getClass().getPackage().getName() + ".ignoretranscription"),
-        false);
-    if (isIgnoreTranscriptionResult) {
-      logger.config(
-        "Speech transcription results are configured to be ignored");
-    }
-    return isIgnoreTranscriptionResult;
   }
 
 
@@ -176,8 +165,12 @@ public final class SttManager extends Plugin<Kaleidoscope>
   public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    return Stream.concat(
+    Stream<Stream<? extends PropertyPreferencesAdapter<?,?>>> s = Stream.of(
       stt.getPreferenceAdapters(),
-      recorderIcon.getPreferenceAdapters());
+      recorderIcon.getPreferenceAdapters(),
+      Stream.of(enableResponseHandler.getAspect(
+        PropertyPreferencesAdapterTag.getWritableInstance())));
+
+    return s.flatMap(Function.identity());
   }
 }
