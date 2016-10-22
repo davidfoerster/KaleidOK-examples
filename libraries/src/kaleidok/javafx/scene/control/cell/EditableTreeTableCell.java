@@ -41,6 +41,8 @@ public class EditableTreeTableCell<T, N extends Node>
   {
     updateNodeInfo(getTreeTableView().getTreeItem(i));
     super.updateIndex(i);
+    if (isAlwaysEditing())
+      startEdit();
   }
 
 
@@ -48,6 +50,13 @@ public class EditableTreeTableCell<T, N extends Node>
   {
     EditorNodeInfo<N, ?> nodeInfo = this.nodeInfo;
     return (nodeInfo != null) ? nodeInfo.node : null;
+  }
+
+
+  private boolean isAlwaysEditing()
+  {
+    EditorNodeInfo<N, ?> nodeInfo = this.nodeInfo;
+    return nodeInfo != null && nodeInfo.alwaysEditing;
   }
 
 
@@ -133,13 +142,33 @@ public class EditableTreeTableCell<T, N extends Node>
 
 
   @Override
+  public void commitEdit( T newValue )
+  {
+    if (!isEditing())
+      return;
+
+    if (isAlwaysEditing())
+    {
+      updateItem(newValue, false);
+    }
+    else
+    {
+      super.commitEdit(newValue);
+    }
+  }
+
+
+  @Override
   public void cancelEdit()
   {
     if (!isEditing())
       return;
 
-    super.cancelEdit();
-    setText(itemToString(getItem(), isEmpty()));
-    setGraphic(null);
+    if (!isAlwaysEditing())
+    {
+      super.cancelEdit();
+      setText(itemToString(getItem(), isEmpty()));
+      setGraphic(null);
+    }
   }
 }

@@ -29,22 +29,36 @@ public abstract class EditableTreeItem<T, N extends Node>
   public static class EditorNodeInfo<N extends Node, T>
   {
     private static EditorNodeInfo<?, ?> EMPTY =
-      new EditorNodeInfo<>(null, null, null);
+      new EditorNodeInfo<>(null, false, null, null);
 
     public final N node;
+
+    public final boolean alwaysEditing;
 
     public final BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> valueChange;
 
     public final StringConverter<T> converter;
 
 
-    protected EditorNodeInfo( N node,
+    protected EditorNodeInfo( N node, boolean alwaysEditing,
       BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> valueChange,
       StringConverter<T> converter )
     {
       this.node = node;
+      this.alwaysEditing = alwaysEditing;
       this.valueChange = valueChange;
       this.converter = converter;
+    }
+
+
+    public static <N extends Node, T> EditorNodeInfo<N, T> of( N node,
+      boolean alwaysEditing,
+      BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> editorValue,
+      StringConverter<T> converter )
+    {
+      return (node != null) ?
+        new EditorNodeInfo<>(node, alwaysEditing, editorValue, converter) :
+        empty();
     }
 
 
@@ -52,9 +66,22 @@ public abstract class EditableTreeItem<T, N extends Node>
       BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> editorValue,
       StringConverter<T> converter )
     {
-      return (node != null) ?
-        new EditorNodeInfo<>(node, editorValue, converter) :
-        empty();
+      return of(node, false, editorValue, converter);
+    }
+
+
+    public static <N extends Node, T> EditorNodeInfo<N, T> of( N node,
+      boolean alwaysEditing,
+      BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> editorValue )
+    {
+      return of(node, alwaysEditing, editorValue, null);
+    }
+
+
+    public static <N extends Node, T> EditorNodeInfo<N, T> of( N node,
+      BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> editorValue )
+    {
+      return of(node, editorValue, null);
     }
 
 
