@@ -6,6 +6,8 @@ import java.text.NumberFormat;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
+import static kaleidok.util.AssertionUtils.fastAssert;
+
 
 public final class Numbers
 {
@@ -21,7 +23,9 @@ public final class Numbers
     throws ArithmeticException
   {
     int fractionalDigits = getFractionalDigits(
-      (fmt instanceof DecimalFormat) ? ((DecimalFormat) fmt).getMultiplier() : 1,
+      (fmt instanceof DecimalFormat) ?
+        Math.abs((long) ((DecimalFormat) fmt).getMultiplier()) :
+        1,
       values);
     fmt.setMinimumFractionDigits(fractionalDigits);
     fmt.setMaximumFractionDigits(fractionalDigits);
@@ -29,11 +33,11 @@ public final class Numbers
   }
 
 
-  private static int getFractionalDigits( int multiplier, double... values )
+  private static int getFractionalDigits( long multiplier, double[] values )
     throws ArithmeticException
   {
     if (values.length == 0)
-      throw new ArrayIndexOutOfBoundsException("empty array");
+      throw new IllegalArgumentException("empty values array");
     for (double x: values)
       checkFinite(x);
     if (multiplier == 0)
@@ -44,32 +48,17 @@ public final class Numbers
         .filter(kaleidok.util.Math::isFractional)
         .mapToObj(BigDecimal::valueOf);
 
-    switch (multiplier)
+    if (multiplier != 1)
     {
-    case 1:
-      break;
+      fastAssert(multiplier > 0);
 
-    case -1:
-      valueStream = valueStream.map(BigDecimal::negate);
-      break;
-
-    default:
-      double dMultiplierLog10 = Math.log10(Math.abs((double) multiplier));
+      double dMultiplierLog10 = Math.log10(multiplier);
       final int iMultiplierLog10 = (int) dMultiplierLog10;
       //assert Double.isFinite(dMultiplierLog10) || iMultiplierLog10 != dMultiplierLog10;  // This is guaranteed because non-finite floating-point numbers are converted to either 0 or INT_MAX/INT_MIN all of which are unequal to non-finite floating-point numbers.
-      if (iMultiplierLog10 == dMultiplierLog10)
-      {
-        valueStream = valueStream.map(
-          (v) -> v.scaleByPowerOfTen(iMultiplierLog10));
-        if (multiplier < 0)
-          valueStream = valueStream.map(BigDecimal::negate);
-      }
-      else
-      {
-        valueStream = valueStream.map(
+      valueStream = valueStream.map(
+        (iMultiplierLog10 == dMultiplierLog10) ?
+          (v) -> v.scaleByPowerOfTen(iMultiplierLog10) :
           BigDecimal.valueOf(multiplier)::multiply);
-      }
-      break;
     }
 
     return valueStream
