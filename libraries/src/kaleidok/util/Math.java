@@ -211,7 +211,7 @@ public final class Math
 
   public static double pow10( int exponent )
   {
-    if (exponent < 0 || exponent > 18)
+    if (exponent < 0 || exponent > 18)  // floor(log10(Long.MAX_VALUE)) == 18
       return pow(10, exponent);
 
     long result = 1;
