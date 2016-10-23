@@ -114,6 +114,14 @@ public class ChromatikQuery implements Serializable, Cloneable
   }
 
 
+  @Override
+  public int hashCode()
+  {
+    return Objects.hashCode(Objects.hashCode(Objects.hashCode(Objects.hashCode(
+      Integer.hashCode(start), nHits), keywords), baseUri), opts);
+  }
+
+
   @SuppressWarnings({ "unchecked", "CloneCallsConstructors" })
   @Override
   public ChromatikQuery clone()
