@@ -75,7 +75,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     if (configurationEditor == null)
     {
       configurationEditor = new KaleidoscopeConfigurationEditor();
-      configurationEditor.init();
 
       Kaleidoscope sketch = getSketch();
       configurationEditor.addBean(sketch);

@@ -35,7 +35,6 @@ public class KaleidoscopeConfigurationEditor
     new IdentityHashMap<>();
 
 
-  public void init()
   {
     setEditable(true);
     initColumns();
