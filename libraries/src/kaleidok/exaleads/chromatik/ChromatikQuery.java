@@ -18,7 +18,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -224,7 +226,7 @@ public class ChromatikQuery implements Serializable, Cloneable
     String searchQuery = keywords;
     if (!opts.isEmpty())
     {
-      StringBuilder sb = new StringBuilder(INITIAL_BUFFER_CAPACITY);
+      StringBuilder sb = new StringBuilder(1 << 8);
       sb.append(searchQuery);
       buildColorSubquery(sb);
 
@@ -263,38 +265,34 @@ public class ChromatikQuery implements Serializable, Cloneable
 
   private StringBuilder buildColorSubquery( StringBuilder sb )
   {
-    Map<ChromatikColor, Number> colors = new HashMap<>(8);
-    Map<String, Number> colorGroups = new HashMap<>(8);
-    double totalWeight = 0;
+    Map<ChromatikColor, Number> colors = opts.entrySet().stream()
+      .filter((o) -> o.getKey() instanceof ChromatikColor)
+      .collect(Collectors.toMap(
+        (o) -> (ChromatikColor) o.getKey(),
+        (o) -> (Number) requireNonNull(o.getValue())));
 
-    for (Map.Entry<?, ?> o: opts.entrySet())
-    {
-      if (o.getKey() instanceof ChromatikColor)
-      {
-        ChromatikColor c = (ChromatikColor) o.getKey();
-        Number weight = (Number) o.getValue();
-        double fWeight = weight.doubleValue();
-
-        if (fWeight <= 0 || fWeight > 1) {
+    colors.values().stream()
+      .mapToDouble(Number::doubleValue)
+      .filter((w) -> w != w || w <= 0 || w > 1)
+      .findAny().ifPresent((illegalWeight) -> {
           throw new IllegalArgumentException(
-            "Color weight lies outside of (0, 1]: " + fWeight);
-        }
+            "Color weight lies outside of (0, 1]: " + illegalWeight);
+        });
 
-        colors.put(c, weight);
-        Number groupWeight = colorGroups.get(c.groupName);
-        groupWeight = (groupWeight != null) ?
-          groupWeight.doubleValue() + fWeight :
-          weight;
-        colorGroups.put(c.groupName, groupWeight);
-
-        totalWeight += fWeight;
-      }
-    }
-
+    double totalWeight =
+      colors.values().stream().mapToDouble(Number::doubleValue).sum();
     if (totalWeight > 1) {
       throw new IllegalArgumentException(
         "Total color weight exceeds 1: " + totalWeight);
     }
+
+    Map<String, Number> colorGroups = colors.entrySet().stream()
+      .collect(Collectors.groupingBy(
+        (e) -> e.getKey().groupName,
+        Collectors.reducing(null, Map.Entry::getValue, (a, b) ->
+          (a == null) ? b :
+          (b == null) ? a :
+            a.doubleValue() + b.doubleValue())));
 
     if (!colors.isEmpty())
     {
@@ -306,21 +304,21 @@ public class ChromatikQuery implements Serializable, Cloneable
       for (Map.Entry<ChromatikColor, Number> o: colors.entrySet())
       {
         ChromatikColor c = o.getKey();
-        double weight = o.getValue().doubleValue() * 100;
+        int weight = (int) (o.getValue().doubleValue() * 100);
         sb.append("OPT").append(' ')
           .append(QUERY_OPT_COLOR).append(QUERY_OPT_NAMEDELIM)
           .append(c.groupName).append(QUERY_OPT_VALUEDELIM)
           .append(Strings.toHexDigits(c.value, hexStrBuf))
-          .append(QUERY_OPT_VALUEDELIM).append((int) weight)
+          .append(QUERY_OPT_VALUEDELIM).append(weight)
           .append("{s=200000}").append(' ');
       }
 
       for (Map.Entry<String, Number> o: colorGroups.entrySet())
       {
-        double weight = o.getValue().doubleValue() * 100;
+        int weight = (int) (o.getValue().doubleValue() * 100);
         sb.append(QUERY_OPT_COLORGROUP).append(QUERY_OPT_NAMEDELIM)
           .append(o.getKey()).append(QUERY_OPT_VALUEDELIM)
-          .append((int) weight).append(' ');
+          .append(weight).append(' ');
       }
 
       sb.setCharAt(sb.length() - 1, ')');
@@ -398,6 +396,4 @@ public class ChromatikQuery implements Serializable, Cloneable
   public static final int QUERY_NHITS_DEFAULT = 40;
 
   public static final float MAX_COLOR_WEIGHT = 0.25f;
-
-  public static int INITIAL_BUFFER_CAPACITY = 1 << 8;
 }
