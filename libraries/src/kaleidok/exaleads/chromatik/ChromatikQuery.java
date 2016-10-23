@@ -18,9 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
 
-import static kaleidok.exaleads.chromatik.ChromasthetiatorBase.logger;
 
 
 /**
@@ -158,9 +156,7 @@ public class ChromatikQuery implements Serializable, Cloneable
    */
   public ChromatikResponse getResult() throws IOException
   {
-    URL url = getUrl();
-    //System.err.println(url.toString());
-    return fetch(url);
+    return fetch(getUrl());
   }
 
   protected static ChromatikResponse fetch( URL url ) throws IOException
@@ -333,12 +329,8 @@ public class ChromatikQuery implements Serializable, Cloneable
 
   public void randomizeRequestedSubset( int expectedResultCount, Random random )
   {
-    if (expectedResultCount > nHits) {
+    if (expectedResultCount > nHits)
       start = random.nextInt(expectedResultCount - nHits + 1);
-      logger.log(Level.FINEST,
-        "Randomized query result subset to start at %d of %d expected results",
-        new Object[]{start, expectedResultCount});
-    }
   }
 
 
