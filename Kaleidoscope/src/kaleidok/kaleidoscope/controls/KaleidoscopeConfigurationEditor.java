@@ -47,11 +47,11 @@ public class KaleidoscopeConfigurationEditor
   {
     List<TreeTableColumn<ReadOnlyProperty<Object>, ?>> columns = getColumns();
 
-    TreeTableColumn<ReadOnlyProperty<Object>, String> propertyNameColumn =
+    TreeTableColumn<ReadOnlyProperty<Object>, String> nameCol =
       new TreeTableColumn<>("Property");
-    propertyNameColumn.setEditable(false);
-    propertyNameColumn.setMaxWidth(200);
-    propertyNameColumn.setCellValueFactory((cdf) -> {
+    nameCol.setEditable(false);
+    nameCol.setMaxWidth(200);
+    nameCol.setCellValueFactory((cdf) -> {
         TreeItem<ReadOnlyProperty<Object>> item = cdf.getValue();
         ReadOnlyProperty<?> p = item.getValue();
         //noinspection OverlyStrongTypeCast
@@ -60,22 +60,21 @@ public class KaleidoscopeConfigurationEditor
           new ReadOnlyStringWrapper(
             p.getBean(), "property name", p.getName()).getReadOnlyProperty();
       });
-    columns.add(propertyNameColumn);
+    columns.add(nameCol);
 
-    TreeTableColumn<ReadOnlyProperty<Object>, Object> propertyValueColumn =
+    TreeTableColumn<ReadOnlyProperty<Object>, Object> valueCol =
       new TreeTableColumn<>("Value");
-    propertyValueColumn.setEditable(true);
-    propertyValueColumn.setPrefWidth(125);
-    propertyValueColumn.setCellValueFactory((cdf) -> {
+    valueCol.setEditable(true);
+    valueCol.setPrefWidth(125);
+    valueCol.setCellValueFactory((cdf) -> {
         TreeItem<ReadOnlyProperty<Object>> item = cdf.getValue();
         return item.isLeaf() ? item.getValue() : null;
       });
-    propertyValueColumn.setCellFactory(
+    valueCol.setCellFactory(
       (col) -> new EditableTreeTableCell<>());
-    columns.add(propertyValueColumn);
+    columns.add(valueCol);
 
-    setPrefWidth(
-      propertyNameColumn.getMaxWidth() + propertyValueColumn.getPrefWidth());
+    setPrefWidth(nameCol.getMaxWidth() + valueCol.getPrefWidth());
   }
 
 
