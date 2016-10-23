@@ -78,6 +78,9 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
       Kaleidoscope sketch = getSketch();
       configurationEditor.addBean(sketch);
+
+      configurationEditor.getSortOrder().add(
+        configurationEditor.getColumns().get(0));
     }
     return configurationEditor;
   }

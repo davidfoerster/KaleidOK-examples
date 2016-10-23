@@ -1,9 +1,13 @@
 package kaleidok.kaleidoscope.controls;
 
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.value.ObservableStringValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeSortMode;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import kaleidok.javafx.beans.property.SimpleReadOnlyStringProperty;
@@ -36,6 +40,9 @@ public class KaleidoscopeConfigurationEditor
 
 
   {
+    setSortPolicy((ttv) ->
+      ((KaleidoscopeConfigurationEditor) ttv).sortPolicyImpl());
+
     setEditable(true);
     initColumns();
     initRoot();
@@ -49,6 +56,7 @@ public class KaleidoscopeConfigurationEditor
     TreeTableColumn<ReadOnlyProperty<Object>, String> nameCol =
       new TreeTableColumn<>("Property");
     nameCol.setEditable(false);
+    nameCol.setSortable(true);
     nameCol.setMaxWidth(200);
     nameCol.setCellValueFactory((cdf) -> {
         TreeItem<ReadOnlyProperty<Object>> item = cdf.getValue();
@@ -63,6 +71,7 @@ public class KaleidoscopeConfigurationEditor
     TreeTableColumn<ReadOnlyProperty<Object>, Object> valueCol =
       new TreeTableColumn<>("Value");
     valueCol.setEditable(true);
+    valueCol.setSortable(false);
     valueCol.setPrefWidth(125);
     valueCol.setCellValueFactory((cdf) -> {
         TreeItem<ReadOnlyProperty<Object>> item = cdf.getValue();
@@ -72,6 +81,7 @@ public class KaleidoscopeConfigurationEditor
       (col) -> new EditableTreeTableCell<>());
     columns.add(valueCol);
 
+    setSortMode(TreeSortMode.ALL_DESCENDANTS);
     setPrefWidth(nameCol.getMaxWidth() + valueCol.getPrefWidth());
   }
 
@@ -180,11 +190,6 @@ public class KaleidoscopeConfigurationEditor
     Stream<? extends ReadOnlyProperty<?>> childProperties,
     Object defaultAnchor )
   {
-    Comparator<TreeItem<ReadOnlyProperty<Object>>> treeItemComparator =
-      Comparator.comparing(TreeItem::getValue,
-        new DefaultLevelOfDetailComparator<ReadOnlyProperty<Object>>(0)
-          .thenComparing(Comparator.comparing(ReadOnlyProperty::getName)));
-
     Map<Object, ? extends Collection<TreeItem<ReadOnlyProperty<Object>>>> beansToItemsMap =
       childProperties.collect(Collectors.groupingBy(
         ReadOnlyProperty::getBean, IdentityHashMap::new,
@@ -230,11 +235,7 @@ public class KaleidoscopeConfigurationEditor
 
       if (beanItem != null)
       {
-        List<TreeItem<ReadOnlyProperty<Object>>> beanItemChildren =
-          beanItem.getChildren();
-        beanItemChildren.addAll(e.getValue());
-        beanItemChildren.sort(treeItemComparator);
-
+        beanItem.getChildren().addAll(e.getValue());
         it.remove();
       }
     }
@@ -267,10 +268,7 @@ public class KaleidoscopeConfigurationEditor
       TreeItem<ReadOnlyProperty<Object>> beanItem =
         new TreeItem<>(makeSectionRootProperty2(bean));
       beanItem.setExpanded(true);
-      ObservableList<TreeItem<ReadOnlyProperty<Object>>> beanItemChildren =
-        beanItem.getChildren();
-      beanItemChildren.addAll(e.getValue());
-      beanItemChildren.sort(treeItemComparator);
+      beanItem.getChildren().addAll(e.getValue());
 
       this.beansToItemsMap.put(bean, beanItem);
       anchorChildren.add(beanItem);
@@ -295,5 +293,84 @@ public class KaleidoscopeConfigurationEditor
       beansToItemsMap.put(bean, sectionItem);
     }
     return sectionItem;
+  }
+
+
+  private static final Comparator<? super TreeItem<? extends ReadOnlyProperty<?>>> DEFAULT_COMPARATOR;
+
+  static
+  {
+    //noinspection OverlyStrongTypeCast
+    final Comparator<ReadOnlyProperty<?>>
+      lodComparator = new DefaultLevelOfDetailComparator<>(0),
+
+      innerComparator = lodComparator
+        .thenComparing(Comparator.nullsFirst(Comparator.comparing(
+          (ReadOnlyProperty<?> p) ->
+            (p.getBean() != null) ? p.getBean().getClass().getName() : null)))
+        .thenComparing(Comparator.nullsLast(Comparator.comparing((p) ->
+          (p instanceof ObservableStringValue) ?
+            ((ObservableStringValue) p).get() :
+            null))),
+
+      leafComparator = lodComparator.thenComparing(ReadOnlyProperty::getName);
+
+    DEFAULT_COMPARATOR = (o1, o2) -> {
+        int r = Boolean.compare(o1.isLeaf(), o2.isLeaf());
+        return (r != 0) ? -r :
+          (o1.isLeaf() ? leafComparator : innerComparator)
+            .compare(o1.getValue(), o2.getValue());
+      };
+  }
+
+
+  private boolean sortPolicyImpl()
+  {
+    TreeItem<ReadOnlyProperty<Object>> root = getRoot();
+    if (root == null)
+      return false;
+
+    TreeSortMode sortMode = getSortMode();
+    if (sortMode == null)
+      return false;
+
+    List<TreeTableColumn<ReadOnlyProperty<Object>, ?>> sortOrder =
+      getSortOrder();
+    if (sortOrder.size() != 1 || sortOrder.get(0) != getColumns().get(0))
+      return false;
+
+    TreeTableColumn.SortType sortType = sortOrder.get(0).getSortType();
+    if (sortType == null)
+      return false;
+
+    Comparator<? super TreeItem<? extends ReadOnlyProperty<?>>> comparator =
+      DEFAULT_COMPARATOR;
+    if (sortType == TreeTableColumn.SortType.DESCENDING)
+      comparator = comparator.reversed();
+
+    switch (sortMode)
+    {
+    case ALL_DESCENDANTS:
+      sort(root, comparator);
+      break;
+
+    case ONLY_FIRST_LEVEL:
+      FXCollections.sort(root.getChildren(), comparator);
+      break;
+    }
+
+    return true;
+  }
+
+
+  private static void sort( TreeItem<? extends ReadOnlyProperty<?>> item,
+    Comparator<? super TreeItem<? extends ReadOnlyProperty<?>>> comparator )
+  {
+    ObservableList<? extends TreeItem<? extends ReadOnlyProperty<?>>> children =
+      item.getChildren();
+    FXCollections.sort(children, comparator);
+
+    for (TreeItem<? extends ReadOnlyProperty<?>> subItem: children)
+      sort(subItem, comparator);
   }
 }
