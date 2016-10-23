@@ -21,7 +21,7 @@ import static kaleidok.util.Arrays.shuffle;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
-public abstract class ChromasthetiatorBase<F extends Flickr>
+public class Chromasthetiator<F extends Flickr> implements Cloneable
 {
   static final Logger logger =
     Logger.getLogger(ChromasthetiationService.class.getPackage().getName());
@@ -34,7 +34,7 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
 
   /**
    * Maximum amount of keywords to select from affect words, if no search terms
-   * are returned by {@link #getQueryKeywords()}
+   * are specified in {@link ChromatikQuery#keywords}.
    */
   public int maxKeywords = 0;
 
@@ -51,7 +51,7 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
   protected F flickr;
 
 
-  protected ChromasthetiatorBase()
+  public Chromasthetiator()
   {
     try {
       synesthetiator = new SynesthetiatorEmotion();
@@ -59,26 +59,7 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
       throw new Error(ex);
     }
     palettes = new SynesketchPalette("standard");
-
-    chromatikQuery = new ChromatikQuery();
-    chromatikQuery.nHits = 10;
-  }
-
-
-  /**
-   * Construct a new chromasthetiator with the same parent applet and
-   * parameters as the original, but don't copy the reference to
-   * {@link #flickr} (as it may have an incompatible type).
-   *
-   * @param other  The original chromasthetiator
-   */
-  protected ChromasthetiatorBase( ChromasthetiatorBase<? extends Flickr> other )
-  {
-    maxColors = other.maxColors;
-    maxKeywords = other.maxKeywords;
-    chromatikQuery = other.chromatikQuery.clone();
-    synesthetiator = other.synesthetiator;
-    palettes = other.palettes;
+    chromatikQuery = new ChromatikQuery(10, null, null);
   }
 
 
@@ -114,22 +95,18 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
   }
 
 
-  protected abstract String getQueryKeywords();
-
-
   protected String getQueryKeywords( EmotionalState synState )
   {
-    String keywords = getQueryKeywords();
-    if (keywords != null)
-      return keywords;
-
-    Emotion emo = synState.getStrongestEmotion();
-    if (emo.getType() != Emotion.NEUTRAL) {
-      keywords = String.join(" ", findStrongestAffectWords(
-        synState.getAffectWords(), maxKeywords));
-      logger.log(Level.FINE, "Selected keywords: {0}", keywords);
-    } else {
-      keywords = "";
+    String keywords = chromatikQuery.keywords;
+    if (keywords.isEmpty())
+    {
+      Emotion emo = synState.getStrongestEmotion();
+      if (emo.getType() != Emotion.NEUTRAL)
+      {
+        keywords = String.join(" ", findStrongestAffectWords(
+          synState.getAffectWords(), maxKeywords));
+        logger.log(Level.FINE, "Selected keywords: {0}", keywords);
+      }
     }
     return keywords;
   }
@@ -189,6 +166,27 @@ public abstract class ChromasthetiatorBase<F extends Flickr>
       imgInfo.flickrPhoto =
         FlickrPhoto.fromChromatikResponseResult(flickr, imgInfo);
     }
+  }
+
+
+  @Override
+  public Chromasthetiator<F> clone()
+  {
+    Chromasthetiator<F> clone;
+    try
+    {
+      //noinspection unchecked
+      clone = (Chromasthetiator<F>) super.clone();
+    }
+    catch (CloneNotSupportedException ex)
+    {
+      throw new InternalError(ex);
+    }
+
+    if (clone.chromatikQuery != null)
+      clone.chromatikQuery = clone.chromatikQuery.clone();
+
+    return clone;
   }
 
 

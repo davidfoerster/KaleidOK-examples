@@ -1,7 +1,9 @@
 package kaleidok.exaleads.chromatik;
 
+import kaleidok.exaleads.chromatik.Chromasthetiator.FlickrPhoto;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.http.responsehandler.PImageBaseResponseHandler;
+import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
 import kaleidok.flickr.*;
 import kaleidok.util.concurrent.NestedFutureCallback;
@@ -25,6 +27,8 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static kaleidok.exaleads.chromatik.Chromasthetiator.EXPECTED_NEUTRAL_RESULT_COUNT;
+import static kaleidok.exaleads.chromatik.Chromasthetiator.logger;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
@@ -38,7 +42,7 @@ public class ChromasthetiationService
 
   private final ImageAsync imageAsync;
 
-  protected final FlickrAsync flickrAsync;
+  protected final FlickrAsync flickr;
 
 
   public ChromasthetiationService( ExecutorService executor,
@@ -47,7 +51,7 @@ public class ChromasthetiationService
     this.executor = executor;
     this.jsonAsync = jsonAsync;
     this.imageAsync = imageAsync;
-    this.flickrAsync = flickrAsync;
+    this.flickr = flickrAsync;
   }
 
 
@@ -77,8 +81,8 @@ public class ChromasthetiationService
   }
 
 
-  public void submit( String text,
-    ChromasthetiatorBase<? extends Flickr> queryParams,
+  protected void submit( String text,
+    Chromasthetiator<FlickrAsync> chromasthetiator,
     FutureCallback<Future<Image>> futureImageCallback,
     FutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>> imageCallback,
     Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
@@ -86,7 +90,7 @@ public class ChromasthetiationService
   {
     if (maxCount != 0) {
       executor.execute(
-        new RunnableChromasthetiator(queryParams, text, futureImageCallback,
+        new Chromasthetiation(chromasthetiator, text, futureImageCallback,
           imageCallback, imageQueueCompletionCallback, maxCount));
     }
   }
@@ -95,14 +99,15 @@ public class ChromasthetiationService
   protected void setFlickrApiKey( String key, String secret )
   {
     if (key != null)
-      flickrAsync.setApiKey(key, secret);
+      flickr.setApiKey(key, secret);
   }
 
 
-  private class RunnableChromasthetiator
-    extends KeywordChromasthetiator<FlickrAsync>
+  private class Chromasthetiation
     implements Runnable, FutureCallback<Pair<ChromatikResponse, EmotionalState>>
   {
+    private final Chromasthetiator<FlickrAsync> chromasthetiator;
+
     private final String text;
 
     private final FutureCallback<Future<Image>> futureImageCallback;
@@ -113,13 +118,11 @@ public class ChromasthetiationService
 
 
     /**
-     * Constructs a new chromasthetiator based on the parent applet and
-     * parameters like
-     * {@link ChromasthetiatorBase#ChromasthetiatorBase(ChromasthetiatorBase)}
-     * and adds the source string as well as various callback objects to allow
-     * it to be used as a {@link Runnable}, e. g. in an {@link Executor}.
+     * Constructs a {@link Runnable} wrapper around a {@link Chromasthetiator}
+     * for a single asynchronous chromasthetiation action, e. g. to be used in
+     * an {@link Executor}.
      *
-     * @param queryParams  The original chromasthetiator
+     * @param chromasthetiator  The original chromasthetiator
      * @param text  The text to chromasthetiate
      * @param futureImageCallback  A callback that provides a {@link Future} to
      *   the images passed to {@link #imageCallback}
@@ -131,26 +134,20 @@ public class ChromasthetiationService
      * @param maxCount  Fetch up to this many images from the chromasthetiation
      *   result
      */
-    public RunnableChromasthetiator(
-      ChromasthetiatorBase<? extends Flickr> queryParams,
+    public Chromasthetiation(
+      Chromasthetiator<FlickrAsync> chromasthetiator,
       String text, FutureCallback<Future<Image>> futureImageCallback,
       FutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>> imageCallback,
       final Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
       int maxCount )
     {
-      super(queryParams);
-
-      flickr = ChromasthetiationService.this.flickrAsync;
-      if (flickr.getApiKey() == null)
-      {
-        setFlickrApiKey(queryParams.flickr.getApiKey(),
-          queryParams.flickr.getApiSecret());
-      }
-
+      this.chromasthetiator = chromasthetiator;
       this.text = text;
       this.futureImageCallback = futureImageCallback;
       this.imageCallback = imageCallback;
-      photoQueue = new BoundedCompletionQueue<>(maxCount, chromatikQuery.nHits);
+      photoQueue =
+        new BoundedCompletionQueue<>(maxCount,
+          chromasthetiator.chromatikQuery.nHits);
       if (imageQueueCompletionCallback != null)
       {
         photoQueue.completionCallback =
@@ -164,26 +161,30 @@ public class ChromasthetiationService
     public void run()
     {
       EmotionalState emoState;
-      try {
-        emoState = synesthetiator.synesthetiseDirect(text);
-      } catch (IOException ex) {
-        if (futureImageCallback != null || imageCallback != null) {
-          if (futureImageCallback != null)
-            futureImageCallback.failed(ex);
-          if (imageCallback != null)
-            imageCallback.failed(ex);
-        } else {
-          ex.printStackTrace();
-        }
+      try
+      {
+        emoState = chromasthetiator.synesthetiator.synesthetiseDirect(text);
+      }
+      catch (IOException ex)
+      {
+        if (futureImageCallback != null)
+          futureImageCallback.failed(ex);
+        if (imageCallback != null)
+          imageCallback.failed(ex);
+        if (futureImageCallback == null && imageCallback == null)
+          Threads.handleUncaught(ex);
         return;
       }
       //noinspection HardcodedLineSeparator
       logger.log(Level.FINE, "Synesthetiation result:\n{0}", emoState);
 
-      chromatikQuery.keywords = getQueryKeywords(emoState);
+      ChromatikQuery chromatikQuery = chromasthetiator.chromatikQuery;
+      chromatikQuery.keywords = chromasthetiator.getQueryKeywords(emoState);
 
       Random textRandom = new Random(emoState.getText().hashCode());
-      getQueryOptions(emoState, chromatikQuery.opts, textRandom);
+      chromatikQuery.opts =
+        chromasthetiator.getQueryOptions(
+          emoState, chromatikQuery.opts, textRandom);
 
       int queryStart = chromatikQuery.start;
       if (chromatikQuery.keywords.isEmpty() &&
@@ -200,7 +201,7 @@ public class ChromasthetiationService
 
     private void runChromatikQuery( final EmotionalState emoState )
     {
-      URI chromatikUri = chromatikQuery.getUri();
+      URI chromatikUri = chromasthetiator.chromatikQuery.getUri();
       logger.log(Level.FINER,
         "Requesting search results from: {0}", chromatikUri);
 
@@ -222,13 +223,15 @@ public class ChromasthetiationService
       ChromatikResponse response = o.getLeft();
       logger.log(Level.FINE, "Chromatik found {0} results", response.hits);
 
-      if (response.results.length == 0 && !chromatikQuery.keywords.isEmpty()) {
+      if (response.results.length == 0 &&
+        !chromasthetiator.chromatikQuery.keywords.isEmpty())
+      {
         removeLastKeyword();
         runChromatikQuery(o.getRight());
         return;
       }
 
-      Flickr flickr = this.flickr;
+      Flickr flickr = chromasthetiator.flickr;
       synchronized (photoQueue) {
         for (ChromatikResponse.Result imgInfo : response.results) {
           final FlickrPhoto flickrPhoto =
@@ -244,7 +247,7 @@ public class ChromasthetiationService
 
     private void dispatchQueue()
     {
-      FlickrAsync flickr = this.flickr;
+      FlickrAsync flickr = chromasthetiator.flickr;
       synchronized (photoQueue)
       {
         Pair<Photo, Pair<ChromatikResponse, EmotionalState>> o;
@@ -310,7 +313,7 @@ public class ChromasthetiationService
             "Couldn't load sizes of " + previousResults.getLeft(), ex);
         }
 
-        RunnableChromasthetiator.this.failed(ex);
+        Chromasthetiation.this.failed(ex);
         releaseQueuePermit();
       }
 
@@ -318,7 +321,7 @@ public class ChromasthetiationService
       @Override
       public void cancelled()
       {
-        RunnableChromasthetiator.this.cancelled();
+        Chromasthetiation.this.cancelled();
         releaseQueuePermit();
       }
     }
@@ -398,9 +401,9 @@ public class ChromasthetiationService
        * Due to sorting, the last keyword has simultaneously the weakest
        * emotional weight.
        */
-      String keywords = chromatikQuery.keywords;
+      String keywords = chromasthetiator.chromatikQuery.keywords;
       int p = keywords.lastIndexOf(' ');
-      chromatikQuery.keywords = (p > 0) ? keywords.substring(0, p) : "";
+      chromasthetiator.chromatikQuery.keywords = (p > 0) ? keywords.substring(0, p) : "";
     }
   }
 }
