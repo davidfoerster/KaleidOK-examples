@@ -167,7 +167,7 @@ public class KaleidoscopeConfigurationEditor
 
   public void addBean( PreferenceBean bean )
   {
-    addProperties(bean.getPreferenceAdapters().map((pa) -> pa.property), bean);
+    addPreferencesAdapters(bean.getPreferenceAdapters(), bean);
   }
 
 
