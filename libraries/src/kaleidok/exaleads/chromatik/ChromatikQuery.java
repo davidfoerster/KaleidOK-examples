@@ -161,8 +161,10 @@ public class ChromatikQuery implements Serializable, Cloneable
 
   protected static ChromatikResponse fetch( URL url ) throws IOException
   {
-    return JsonHttpConnection.openURL(url)
-      .get(ChromatikResponse.class, TypeAdapterManager.getGson());
+    try (JsonHttpConnection con = JsonHttpConnection.openURL(url))
+    {
+      return con.get(ChromatikResponse.class, TypeAdapterManager.getGson());
+    }
   }
 
 
