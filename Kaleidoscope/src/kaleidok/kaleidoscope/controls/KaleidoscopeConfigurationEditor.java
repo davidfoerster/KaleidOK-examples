@@ -1,12 +1,12 @@
 package kaleidok.kaleidoscope.controls;
 
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableStringValue;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import kaleidok.javafx.beans.property.SimpleReadOnlyStringProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag.DefaultLevelOfDetailComparator;
@@ -56,8 +56,7 @@ public class KaleidoscopeConfigurationEditor
         //noinspection OverlyStrongTypeCast
         return (!item.isLeaf() && p instanceof ObservableStringValue) ?
           (ObservableStringValue) p :
-          new ReadOnlyStringWrapper(
-            p.getBean(), "property name", p.getName()).getReadOnlyProperty();
+          makeSectionRootProperty("property name", p.getBean(), p.getName());
       });
     columns.add(nameCol);
 
@@ -80,7 +79,7 @@ public class KaleidoscopeConfigurationEditor
   private void initRoot()
   {
     TreeItem<ReadOnlyProperty<Object>> root = new TreeItem<>(
-      makeSectionRootProperty("root name", null, "KaleidOK"));
+      makeSectionRootProperty2("root name", null, "KaleidOK"));
     root.setExpanded(true);
     setShowRoot(false);
 
@@ -119,27 +118,32 @@ public class KaleidoscopeConfigurationEditor
   }
 
 
-  @SuppressWarnings("unchecked")
-  private static ReadOnlyProperty<Object> makeSectionRootProperty(
+  private static ReadOnlyStringProperty makeSectionRootProperty(
     String propertyName, Object bean, String beanName )
   {
-    ReadOnlyStringWrapper property =
-      new ReadOnlyStringWrapper(
-        bean, propertyName, Objects.requireNonNull(beanName));
-    return (ReadOnlyProperty<Object>) (ReadOnlyProperty<?>)
-      property.getReadOnlyProperty();
+    return new SimpleReadOnlyStringProperty(
+      bean, propertyName, Objects.requireNonNull(beanName));
   }
 
 
-  private static ReadOnlyProperty<Object> makeSectionRootProperty( Object bean,
+  @SuppressWarnings("unchecked")
+  private static ReadOnlyProperty<Object> makeSectionRootProperty2(
+    String propertyName, Object bean, String beanName )
+  {
+    return (ReadOnlyProperty<Object>) (ReadOnlyProperty<?>)
+      makeSectionRootProperty(propertyName, bean, beanName);
+  }
+
+
+  private static ReadOnlyProperty<Object> makeSectionRootProperty2( Object bean,
     String beanName )
   {
     String propertyName = (bean != null) ? "bean name" : "section name";
-    return makeSectionRootProperty(propertyName, bean, beanName);
+    return makeSectionRootProperty2(propertyName, bean, beanName);
   }
 
 
-  private static ReadOnlyProperty<Object> makeSectionRootProperty( Object bean )
+  private static ReadOnlyProperty<Object> makeSectionRootProperty2( Object bean )
   {
     String beanName =
       (bean == null) ?
@@ -147,7 +151,7 @@ public class KaleidoscopeConfigurationEditor
       (bean instanceof PreferenceBean) ?
         ((PreferenceBean) bean).getName() :
         kaleidok.util.Objects.objectToString(bean);
-    return makeSectionRootProperty(bean, beanName);
+    return makeSectionRootProperty2(bean, beanName);
   }
 
 
@@ -217,7 +221,7 @@ public class KaleidoscopeConfigurationEditor
 
           if (parentItem != null)
           {
-            beanItem = new TreeItem<>(makeSectionRootProperty(bean));
+            beanItem = new TreeItem<>(makeSectionRootProperty2(bean));
             beanItem.setExpanded(true);
             parentItem.add(beanItem);
           }
@@ -241,7 +245,7 @@ public class KaleidoscopeConfigurationEditor
         getRoot();
     if (anchor == null)
     {
-      anchor = new TreeItem<>(makeSectionRootProperty(defaultAnchor));
+      anchor = new TreeItem<>(makeSectionRootProperty2(defaultAnchor));
       anchor.setExpanded(true);
       TreeItem<ReadOnlyProperty<Object>> superAnchor =
         (defaultAnchor instanceof PreferenceBean) ?
@@ -261,9 +265,9 @@ public class KaleidoscopeConfigurationEditor
     {
       Object bean = e.getKey();
       TreeItem<ReadOnlyProperty<Object>> beanItem =
-        new TreeItem<>(makeSectionRootProperty(bean));
+        new TreeItem<>(makeSectionRootProperty2(bean));
       beanItem.setExpanded(true);
-      List<TreeItem<ReadOnlyProperty<Object>>> beanItemChildren =
+      ObservableList<TreeItem<ReadOnlyProperty<Object>>> beanItemChildren =
         beanItem.getChildren();
       beanItemChildren.addAll(e.getValue());
       beanItemChildren.sort(treeItemComparator);
@@ -281,7 +285,7 @@ public class KaleidoscopeConfigurationEditor
       beansToItemsMap.get(Objects.requireNonNull(bean));
     if (sectionItem == null)
     {
-      sectionItem = new TreeItem<>(makeSectionRootProperty(bean, name));
+      sectionItem = new TreeItem<>(makeSectionRootProperty2(bean, name));
       sectionItem.setExpanded(true);
       TreeItem<ReadOnlyProperty<Object>> anchor =
         (anchorBean != null) ?
