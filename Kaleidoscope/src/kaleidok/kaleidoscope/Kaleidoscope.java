@@ -86,6 +86,8 @@ public class Kaleidoscope extends ExtPApplet
 
     if (layers != null)
       layers.dispose();
+    if (chromasthetiationService != null)
+      chromasthetiationService.dispose();
 
     super.dispose();
   }

@@ -3,11 +3,11 @@ package kaleidok.kaleidoscope;
 import kaleidok.exaleads.chromatik.ChromasthetiationService;
 import kaleidok.exaleads.chromatik.Chromasthetiator;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
+import kaleidok.flickr.FlickrAsync;
 import kaleidok.image.filter.Parser;
 import kaleidok.processing.image.PImages;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.util.concurrent.GroupedThreadFactory;
-import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.http.cache.DiskLruHttpCacheStorage;
@@ -18,6 +18,7 @@ import kaleidok.util.prefs.DefaultValueParser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Executor;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.cache.CacheConfig;
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder;
 import processing.core.PImage;
@@ -58,7 +59,7 @@ public final class KaleidoscopeChromasthetiationService
 
   private final Kaleidoscope parent;
 
-  private Chromasthetiator<Flickr> chromasthetiator;
+  private Chromasthetiator<FlickrAsync> chromasthetiator;
 
   private final ChromasthetiationCallback chromasthetiationCallback =
     new ChromasthetiationCallback();
@@ -71,11 +72,9 @@ public final class KaleidoscopeChromasthetiationService
   {
     super(executor, Async.newInstance().use(executor).use(httpExecutor));
     this.parent = parent;
-    //parent.registerMethod("dispose", this);
   }
 
 
-  @SuppressWarnings("unused")
   public void dispose()
   {
     shutdown();
@@ -84,92 +83,135 @@ public final class KaleidoscopeChromasthetiationService
 
   static KaleidoscopeChromasthetiationService newInstance( Kaleidoscope parent )
   {
-    Map<String, String> parameters = parent.getParameterMap();
+    String[] aKey = getFlickrApiKey(parent);
 
+    HttpClientBuilder builder = getCachingHttpClientBuilder(parent);
+    if (builder == null)
+    {
+      // fall back
+      builder = HttpClientBuilder.create();
+    }
+    builder
+      .disableConnectionState()
+      .disableCookieManagement();
+
+    ExecutorService executor = getExecutor(parent.getParameterMap());
+    if (builder instanceof CachingHttpClientBuilder)
+    {
+      ((CachingHttpClientBuilder) builder).setSchedulingStrategy(
+        new ExecutorSchedulingStrategy(executor));
+    }
+
+    KaleidoscopeChromasthetiationService chromasthetiationService =
+      new KaleidoscopeChromasthetiationService(parent, executor,
+        Executor.newInstance(builder.build()));
+
+    if (aKey != null)
+      chromasthetiationService.flickr.setApiKey(aKey[0], aKey[1]);
+
+    //noinspection SpellCheckingInspection
+    String sMaxKeyWords = parent.getParameterMap().get(
+      Chromasthetiator.class.getPackage().getName() + ".maxkeywords");
+    if (sMaxKeyWords != null)
+    {
+      chromasthetiationService.getChromasthetiator().maxKeywords =
+        Integer.parseInt(sMaxKeyWords);
+    }
+
+    return chromasthetiationService;
+  }
+
+
+  private static String[] getFlickrApiKey( Kaleidoscope parent )
+  {
+    String sKey = parent.parseStringOrFile(
+      parent.getParameterMap().get("com.flickr.api.key"), '@');
+    if (sKey != null)
+    {
+      String[] aKey = KEY_SEPARATOR_PATTERN.split(sKey, 2);
+      if (aKey.length == 2)
+        return aKey;
+
+      throw new IllegalArgumentException(
+        "Malformed Flickr API key: " + sKey);
+    }
+    return null;
+  }
+
+
+  private static CachingHttpClientBuilder getCachingHttpClientBuilder(
+    Kaleidoscope parent )
+  {
+    Map<String, String> parameters = parent.getParameterMap();
+    String cacheParamBase = parent.getClass().getCanonicalName() + ".cache.";
+    long httpCacheSize = DefaultValueParser.parseLong(
+      parameters.get(cacheParamBase + "size"), -1);
+    if (httpCacheSize < 0)
+      httpCacheSize = DEFAULT_HTTP_CACHE_SIZE;
+
+    if (httpCacheSize > 0)
+    {
+      File cacheDir = new File(parameters.getOrDefault(
+        cacheParamBase + "path", parent.getClass().getCanonicalName()));
+      if (!cacheDir.isAbsolute())
+      {
+        cacheDir =
+          PlatformPaths.getCacheDir().resolve(cacheDir.getPath()).toFile();
+      }
+
+      CachingHttpClientBuilder builder = CachingHttpClientBuilder.create()
+        .setCacheConfig(CacheConfig.custom()
+          .setMaxCacheEntries(Integer.MAX_VALUE)
+          .setMaxObjectSize(httpCacheSize / 2)
+          .setSharedCache(false)
+          .setAllow303Caching(true)
+          .setHeuristicCachingEnabled(true)
+          .setHeuristicCoefficient(0.5f)
+          .setHeuristicDefaultLifetime(TimeUnit.DAYS.toSeconds(28))
+          .setAsynchronousWorkersCore(0)
+          .build());
+
+      try
+      {
+        builder.setHttpCacheStorage(new DiskLruHttpCacheStorage(
+          cacheDir, HTTP_CACHE_APP_VERSION, httpCacheSize));
+      }
+      catch (IOException ex)
+      {
+        // use default cache storage
+        logThrown(logger, Level.WARNING,
+          "Couldn't set up an HTTP cache in \"{0}\"",
+          ex, cacheDir);
+      }
+
+      return builder;
+    }
+
+    return null;
+  }
+
+
+  private static ExecutorService getExecutor( Map<String, String> parameters )
+  {
     int threadPoolSize = DefaultValueParser.parseInt(
       parameters.get(
         ChromasthetiationService.class.getCanonicalName() + ".threads"),
       ChromasthetiationService.DEFAULT_THREAD_POOL_SIZE);
 
-    String cacheParamBase = parent.getClass().getCanonicalName() + ".cache.";
-    long httpCacheSize = DefaultValueParser.parseLong(
-      parameters.get(cacheParamBase + "size"), DEFAULT_HTTP_CACHE_SIZE);
-    File cacheDir = new File(parameters.getOrDefault(
-      cacheParamBase + "path", parent.getClass().getCanonicalName()));
-    if (!cacheDir.isAbsolute()) {
-      cacheDir =
-        PlatformPaths.getCacheDir().resolve(cacheDir.getPath()).toFile();
-    }
-
-    CachingHttpClientBuilder builder = CachingHttpClientBuilder.create();
-    builder
-      .disableConnectionState()
-      .disableCookieManagement();
-
     ThreadFactory threadFactory =
       new GroupedThreadFactory("Chromasthetiation", true);
-    ExecutorService executor = (threadPoolSize == 0) ?
+    return (threadPoolSize == 0) ?
       Executors.newCachedThreadPool(threadFactory) :
       Executors.newFixedThreadPool(threadPoolSize, threadFactory);
-    builder.setSchedulingStrategy(
-      new ExecutorSchedulingStrategy(executor));
-
-    CacheConfig cacheConfig = CacheConfig.custom()
-      .setMaxCacheEntries(Integer.MAX_VALUE)
-      .setMaxObjectSize(httpCacheSize / 2)
-      .setSharedCache(false)
-      .setAllow303Caching(true)
-      .setHeuristicCachingEnabled(true)
-      .setHeuristicCoefficient(0.5f)
-      .setHeuristicDefaultLifetime(TimeUnit.DAYS.toSeconds(28))
-      .setAsynchronousWorkersCore(0)
-      .build();
-
-    try {
-      builder.setHttpCacheStorage(new DiskLruHttpCacheStorage(
-        cacheDir, HTTP_CACHE_APP_VERSION, httpCacheSize));
-    } catch (IOException ex) {
-      String msg = "Couldn't set up an HTTP cache";
-      if (KaleidoscopeChromasthetiationService.class.desiredAssertionStatus())
-        throw new AssertionError(msg, ex);
-
-      // else: use default cache storage
-      logThrown(logger, Level.WARNING, "{0} in \"{1}\"", ex,
-        new Object[]{msg, cacheDir});
-    }
-
-    builder.setCacheConfig(cacheConfig);
-    return new KaleidoscopeChromasthetiationService(parent, executor,
-      Executor.newInstance(builder.build()));
   }
 
 
-  private Chromasthetiator<Flickr> getChromasthetiator()
+  private Chromasthetiator<FlickrAsync> getChromasthetiator()
   {
     if (chromasthetiator == null)
     {
       chromasthetiator = new Chromasthetiator<>();
-
-      String data = parent.parseStringOrFile(
-        parent.getParameterMap().get("com.flickr.api.key"), '@');
-      if (data != null) {
-        String[] keys = KEY_SEPARATOR_PATTERN.split(data, 2);
-        if (keys.length != 2) {
-          throw new IllegalArgumentException(
-            "Malformed Flickr API key: " + data);
-        }
-        Flickr flickr = new Flickr();
-        flickr.setApiKey(keys[0], keys[1]);
-        chromasthetiator.setFlickrApi(flickr);
-      }
-
-      //noinspection SpellCheckingInspection
-      chromasthetiator.maxKeywords = DefaultValueParser.parseInt(
-        parent.getParameterMap().get(
-          chromasthetiator.getClass().getPackage().getName() + ".maxkeywords"),
-        chromasthetiator.maxKeywords);
-
-      chromasthetiator.chromatikQuery.nHits = 10;
+      chromasthetiator.setFlickrApi(flickr);
     }
     return chromasthetiator;
   }
