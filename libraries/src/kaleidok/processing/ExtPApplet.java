@@ -470,7 +470,7 @@ public class ExtPApplet extends PApplet
     {
       try
       {
-        method.invoke(ExtPApplet.this, EMPTY_OBJECT_ARRAY);
+        method.invoke(this, EMPTY_OBJECT_ARRAY);
       }
       catch (IllegalAccessException | IllegalArgumentException ex)
       {
@@ -478,7 +478,7 @@ public class ExtPApplet extends PApplet
       }
       catch (InvocationTargetException ex)
       {
-        Threads.handleUncaught(ex);
+        Threads.handleUncaught(ex.getCause());
       }
     });
   }

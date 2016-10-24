@@ -9,7 +9,6 @@ import kaleidok.processing.ProcessingSketchApplication;
 import processing.event.KeyEvent;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -128,18 +127,18 @@ public class Kaleidoscope extends ExtPApplet
 
   private synchronized Optional<ExportService> getExportService()
   {
-    if (exportService == null)
+    if (this.exportService == null)
     {
-      exportService = Optional.ofNullable(
-        ExportService.fromConfiguration(this, getParameterMap()));
-      if (exportService.isPresent())
+      final ExportService exportService =
+        ExportService.fromConfiguration(this, getParameterMap());
+      this.exportService = Optional.ofNullable(exportService);
+      if (exportService != null)
       {
-        final Consumer<String> callback = exportService.get().getCallback();
         getChromasthetiationService().imageQueueCompletionCallback =
-          (o) -> callback.accept(o.getLeft());
+          (text, photos) -> exportService.getCallback().accept(text);
       }
     }
-    return exportService;
+    return this.exportService;
   }
 
 

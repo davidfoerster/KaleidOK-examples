@@ -140,7 +140,9 @@ public class ChromatikQuery implements Serializable, Cloneable
       Map<Serializable, Serializable> optsClone = null;
       if (other.opts instanceof Cloneable) try
       {
-        optsClone = Objects.clone(other.opts);
+        //noinspection OverlyStrongTypeCast
+        optsClone = Objects.clone(
+          (Cloneable & Map<Serializable, Serializable>) other.opts);
       }
       catch (CloneNotSupportedException ignored)
       {

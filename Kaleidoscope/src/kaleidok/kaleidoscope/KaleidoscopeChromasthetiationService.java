@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -64,7 +65,7 @@ public final class KaleidoscopeChromasthetiationService
   private final ChromasthetiationCallback chromasthetiationCallback =
     new ChromasthetiationCallback();
 
-  public Consumer<Pair<String, Collection<? super Photo>>> imageQueueCompletionCallback = null;
+  public BiConsumer<String, Collection<? super Photo>> imageQueueCompletionCallback = null;
 
 
   private KaleidoscopeChromasthetiationService( Kaleidoscope parent,
@@ -221,7 +222,7 @@ public final class KaleidoscopeChromasthetiationService
   {
     Consumer<Collection<? super Photo>> imageQueueCompletionCallback =
       (this.imageQueueCompletionCallback != null) ?
-        (photos) -> this.imageQueueCompletionCallback.accept(Pair.of(text, photos)) :
+        (photos) -> this.imageQueueCompletionCallback.accept(text, photos) :
         null;
 
     submit(text, getChromasthetiator().clone(),

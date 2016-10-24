@@ -20,14 +20,13 @@ public final class Objects
    * @throws CloneNotSupportedException  as thrown by {@code o.clone()}
    * @see Object#clone()
    */
-  public static <T> T clone( T o )
+  public static <T extends Cloneable> T clone( T o )
     throws CloneNotSupportedException
   {
-    Class<?> clazz = o.getClass();
-    Object clone;
     try
     {
-      clone = clazz
+      //noinspection unchecked
+      return (T) o.getClass()
         .getMethod("clone", EMPTY_CLASS_ARRAY).invoke(o, EMPTY_OBJECT_ARRAY);
     }
     catch (IllegalAccessException ex)
@@ -49,19 +48,6 @@ public final class Objects
     {
       return null;
     }
-    if (clazz.isInstance(clone))
-    {
-      //noinspection unchecked
-      return (T) clone;
-    }
-    throw new InternalError(
-      clazz.getCanonicalName() + ("#clone() violated its contract and " +
-        "returned a different type"),
-      (clone != null) ?
-        new ClassCastException(
-          "Cannot cast " + clone.getClass().getName() + " to " +
-            clazz.getName()) :
-        new NullPointerException());
   }
 
 
