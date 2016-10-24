@@ -116,40 +116,47 @@ public class Chromasthetiator<F extends Flickr> implements Cloneable
     EmotionalState synState, Map<Serializable, Serializable> opts,
     Random random )
   {
-    Emotion emo = synState.getStrongestEmotion();
-
-    // Derive color weight in search query from emotional weighting
-    Double weight = max(sqrt(emo.getWeight()) * 0.5, 0.1) / maxColors;
-
     if (opts == null)
       opts = new HashMap<>();
 
-    // Use (up to) maxColors random colors from palette for search query
-    @SuppressWarnings({ "resource", "IOResourceOpenedButNotSafelyClosed" })
-    final Formatter fmt =
-      logger.isLoggable(Level.FINE) ?
-        new Formatter(new StringBuilder("Colors:")) :
-        null;
+    if (maxColors > 0)
+    {
+      Emotion emo = synState.getStrongestEmotion();
 
-    int[] palette = palettes.getColors(emo);
-    if (random != null)
-      palette = shuffle(palette, random);
+      // Derive color weight in search query from emotional weighting
+      Double weight = max(sqrt(emo.getWeight()) * 0.5, 0.1) / maxColors;
 
-    for (int c: palette) {
-      if (opts.size() >= maxColors)
-        break;
-      ChromatikColor cc = new ChromatikColor(c);
-      if (opts.put(cc, weight) == null && fmt != null)
+      // Use (up to) maxColors random colors from palette for search query
+      Formatter fmt = null;
+      int[] palette = palettes.getColors(emo);
+      if (random != null)
+        palette = shuffle(palette, random);
+
+      for (int c : palette)
       {
-        fmt.format(" #%06x (%s) at %.0f%%,",
-          cc.value, cc.groupName, weight * 100);
+        if (opts.size() >= maxColors)
+          break;
+        ChromatikColor cc = new ChromatikColor(c);
+        if (opts.put(cc, weight) == null)
+        {
+          if (logger.isLoggable(Level.FINE))
+          {
+            if (fmt == null)
+            {
+              //noinspection resource,IOResourceOpenedButNotSafelyClosed
+              fmt = new Formatter(new StringBuilder("Colors:"));
+            }
+            fmt.format(" #%06x (%s) at %.0f%%,",
+              cc.value, cc.groupName, weight * 100);
+          }
+        }
       }
-    }
 
-    if (fmt != null) {
-      StringBuilder sb = (StringBuilder) fmt.out();
-      sb.setLength(sb.length() - 1);
-      logger.log(Level.FINE, sb.toString());
+      if (fmt != null)
+      {
+        StringBuilder sb = (StringBuilder) fmt.out();
+        logger.fine(sb.substring(0, sb.length() - 1));
+      }
     }
 
     return opts;
