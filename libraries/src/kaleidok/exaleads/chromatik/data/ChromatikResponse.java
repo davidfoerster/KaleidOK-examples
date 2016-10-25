@@ -41,30 +41,23 @@ public class ChromatikResponse implements Serializable
   }
 
 
-  public static class Deserializer implements JsonDeserializer<ChromatikResponse>
+  public static ChromatikResponse deserialize( JsonElement jsonElement, Type type,
+    JsonDeserializationContext context )
+    throws JsonParseException
   {
-    public static final Deserializer INSTANCE = new Deserializer();
+    assert type instanceof Class && ChromatikResponse.class.isAssignableFrom((Class<?>) type) :
+      type.getTypeName() + " is no subclass of " + ChromatikResponse.class.getCanonicalName();
 
-    protected Deserializer() { }
-
-    @Override
-    public ChromatikResponse deserialize( JsonElement jsonElement, Type type,
-      JsonDeserializationContext context ) throws JsonParseException
-    {
-      assert type instanceof Class && ChromatikResponse.class.isAssignableFrom((Class<?>) type) :
-        type.getTypeName() + " is no subclass of " + ChromatikResponse.class.getCanonicalName();
-
-      JsonArray a = jsonElement.getAsJsonArray();
-      ChromatikResponse response = new ChromatikResponse();
-      response.hits = a.get(0).getAsInt();
-      final Result[] results =
-        new Result[a.size() - 1];
-      for (int i = 0; i < results.length; i++) {
-        results[i] =
-          context.deserialize(a.get(i + 1), Result.class);
-      }
-      response.results = results;
-      return response;
+    JsonArray a = jsonElement.getAsJsonArray();
+    ChromatikResponse response = new ChromatikResponse();
+    response.hits = a.get(0).getAsInt();
+    final Result[] results =
+      new Result[a.size() - 1];
+    for (int i = 0; i < results.length; i++) {
+      results[i] =
+        context.deserialize(a.get(i + 1), Result.class);
     }
+    response.results = results;
+    return response;
   }
 }

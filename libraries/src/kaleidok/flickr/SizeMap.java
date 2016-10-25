@@ -20,27 +20,22 @@ public class SizeMap extends TreeMap<Size.Label, Size>
   public boolean canblog, canprint, candownload;
 
 
-  public static class Deserializer extends FlickrResponseDeserializer<SizeMap>
+  public static SizeMap deserialize( JsonElement jsonElement, Type type,
+    JsonDeserializationContext context )
+    throws JsonParseException
   {
-    public static final Deserializer INSTANCE = new Deserializer();
+    assert type instanceof Class && SizeMap.class.isAssignableFrom((Class<?>) type);
 
-    protected Deserializer() { }
+    JsonObject o = FlickrBase.unwrap(jsonElement, "sizes");
+    Size[] a = context.deserialize(o.get("size"), Size[].class);
+    SizeMap sizes = new SizeMap();
+    sizes.canblog = o.getAsJsonPrimitive("canblog").getAsInt() != 0;
+    sizes.canprint = o.getAsJsonPrimitive("canprint").getAsInt() != 0;
+    sizes.candownload = o.getAsJsonPrimitive("candownload").getAsInt() != 0;
 
-    @Override
-    public SizeMap deserialize( JsonElement jsonElement, Type type,
-      JsonDeserializationContext context ) throws JsonParseException
-    {
-      JsonObject o = unwrap(jsonElement, "sizes");
-      Size[] a = context.deserialize(o.get("size"), Size[].class);
-      SizeMap sizes = new SizeMap();
-      sizes.canblog = o.getAsJsonPrimitive("canblog").getAsInt() != 0;
-      sizes.canprint = o.getAsJsonPrimitive("canprint").getAsInt() != 0;
-      sizes.candownload = o.getAsJsonPrimitive("candownload").getAsInt() != 0;
+    for (Size s: a)
+      sizes.put(s.label, s);
 
-      for (Size s: a)
-        sizes.put(s.label, s);
-
-      return sizes;
-    }
+    return sizes;
   }
 }

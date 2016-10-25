@@ -1,10 +1,10 @@
 package kaleidok.flickr;
 
 import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
+import kaleidok.util.Strings;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -40,63 +40,19 @@ public class Size implements Serializable
     Original;
 
 
-    public static Label parse( String s )
+    public static Label deserialize( JsonElement jsonElement, Type type,
+      JsonDeserializationContext context )
+      throws JsonParseException
     {
-      StringBuilder transformed = null;
-      int p, offset = 0;
-      while ((p = s.indexOf(' ', offset)) >= 0)
+      assert type instanceof Class && Label.class.isAssignableFrom((Class<?>) type);
+      try
       {
-        if (p + 1 >= s.length())
-          throw new IllegalArgumentException(s);
-
-        if (transformed == null)
-          transformed = new StringBuilder(s.length() - 1);
-
-        char c = s.charAt(p + 1);
-        switch (Character.getType(c))
-        {
-        case Character.LOWERCASE_LETTER:
-          c = toUpperCase(c);
-          // fall through
-
-        case Character.UPPERCASE_LETTER:
-        case Character.DECIMAL_DIGIT_NUMBER:
-          transformed.append(s, offset, p).append(c);
-          break;
-
-        default:
-          throw new IllegalArgumentException(s);
-        }
-        offset = p + 2;
+        return valueOf(
+          Strings.toCamelCase(jsonElement.getAsString()).toString());
       }
-      return valueOf(
-        (transformed != null) ?
-          transformed.append(s, offset, s.length()).toString() :
-          s);
-    }
-
-
-    private static char toUpperCase( char c )
-    {
-      return (char)(c & ~('A' ^ 'a'));
-    }
-
-
-    public static class Deserializer implements JsonDeserializer<Label>
-    {
-      public static Deserializer INSTANCE = new Deserializer();
-
-      protected Deserializer() { }
-
-      @Override
-      public Label deserialize( JsonElement jsonElement, Type type,
-        JsonDeserializationContext context ) throws JsonParseException
+      catch (IllegalArgumentException | ClassCastException | IllegalStateException ex)
       {
-        try {
-          return parse(jsonElement.getAsString());
-        } catch (IllegalArgumentException ex) {
-          throw new JsonParseException(ex);
-        }
+        throw new JsonParseException(ex);
       }
     }
   }
