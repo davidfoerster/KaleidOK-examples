@@ -174,23 +174,8 @@ public class ChromatikQuery implements Serializable, Cloneable
 
   public Callable<ChromatikResponse> asCallable()
   {
-    return new ChromatikResponseCallable(getUrl());
-  }
-
-  private static class ChromatikResponseCallable implements Callable<ChromatikResponse>
-  {
-    private final URL url;
-
-    public ChromatikResponseCallable( URL url )
-    {
-      this.url = url;
-    }
-
-    @Override
-    public ChromatikResponse call() throws IOException
-    {
-      return fetch(url);
-    }
+    final URL url = getUrl();
+    return () -> fetch(url);
   }
 
 
