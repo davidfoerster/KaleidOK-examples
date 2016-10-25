@@ -229,6 +229,7 @@ public class Kaleidoscope extends ExtPApplet
   {
     Stream<Stream<? extends PropertyPreferencesAdapter<?,?>>> s = Stream.of(
       getSTT().getPreferenceAdapters(),
+      getChromasthetiationService().getPreferenceAdapters(),
       getLayers().stream().flatMap(ImageLayer::getPreferenceAdapters),
       getFrameRateDisplay().getPreferenceAdapters());
 

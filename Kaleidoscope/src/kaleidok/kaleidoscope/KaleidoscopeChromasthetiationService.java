@@ -5,6 +5,8 @@ import kaleidok.exaleads.chromatik.Chromasthetiator;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.flickr.FlickrAsync;
 import kaleidok.image.filter.Parser;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.processing.image.PImages;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.util.concurrent.GroupedThreadFactory;
@@ -41,13 +43,14 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 public final class KaleidoscopeChromasthetiationService
-  extends ChromasthetiationService
+  extends ChromasthetiationService implements PreferenceBean
 {
   @SuppressWarnings("HardcodedLineSeparator")
   private static final Pattern KEY_SEPARATOR_PATTERN =
@@ -115,8 +118,8 @@ public final class KaleidoscopeChromasthetiationService
       Chromasthetiator.class.getPackage().getName() + ".maxkeywords");
     if (sMaxKeyWords != null)
     {
-      chromasthetiationService.getChromasthetiator().maxKeywords =
-        Integer.parseInt(sMaxKeyWords);
+      chromasthetiationService.getChromasthetiator()
+        .setMaxKeywords(Integer.parseInt(sMaxKeyWords));
     }
 
     return chromasthetiationService;
@@ -211,8 +214,19 @@ public final class KaleidoscopeChromasthetiationService
   {
     if (chromasthetiator == null)
     {
-      chromasthetiator = new Chromasthetiator<>();
+      chromasthetiator = new Chromasthetiator<FlickrAsync>()
+        {
+          @Override
+          public Object getParent()
+          {
+            return KaleidoscopeChromasthetiationService.this;
+          }
+        };
+
       chromasthetiator.setFlickrApi(flickr);
+
+      chromasthetiator.getPreferenceAdapters()
+        .forEach(PropertyPreferencesAdapter::load);
     }
     return chromasthetiator;
   }
@@ -228,6 +242,28 @@ public final class KaleidoscopeChromasthetiationService
     submit(text, getChromasthetiator().clone(),
       null, chromasthetiationCallback, imageQueueCompletionCallback,
       parent.getLayers().size());
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return "Chromasthetiation service";
+  }
+
+
+  @Override
+  public Object getParent()
+  {
+    return parent;
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return getChromasthetiator().getPreferenceAdapters();
   }
 
 

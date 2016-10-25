@@ -1,11 +1,21 @@
 package kaleidok.exaleads.chromatik;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.flickr.SizeMap;
+import kaleidok.javafx.beans.property.AspectedIntegerProperty;
+import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
+import kaleidok.javafx.beans.property.adapter.preference.IntegerPropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
 
@@ -14,6 +24,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
@@ -21,26 +32,17 @@ import static kaleidok.util.Arrays.shuffle;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
-public class Chromasthetiator<F extends Flickr> implements Cloneable
+public class Chromasthetiator<F extends Flickr>
+  implements Cloneable, PreferenceBean
 {
   static final Logger logger =
     Logger.getLogger(ChromasthetiationService.class.getPackage().getName());
 
-  // Configuration:
-  /**
-   * Maximum amount of colors to use in the query to Chromatik
-   */
-  public int maxColors = 2;
+  private IntegerProperty maxColors;
 
-  /**
-   * Maximum amount of keywords to select from affect words, if no search terms
-   * are specified in {@link ChromatikQuery#keywords}.
-   */
-  public int maxKeywords = 0;
+  private IntegerProperty maxKeywords;
 
   public static int EXPECTED_NEUTRAL_RESULT_COUNT = 10000;
-
-  // other instance attributes:
 
   public ChromatikQuery chromatikQuery;
 
@@ -51,8 +53,29 @@ public class Chromasthetiator<F extends Flickr> implements Cloneable
   protected F flickr;
 
 
+  private Chromasthetiator( int maxColors, int maxKeywords )
+  {
+    AspectedIntegerProperty maxColorsProp =
+      new AspectedIntegerProperty(this, "max. colors", maxColors);
+    maxColorsProp.addAspect(BoundedIntegerTag.INSTANCE,
+      new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
+    maxColorsProp.addAspect(PropertyPreferencesAdapterTag.getInstance(),
+      new IntegerPropertyPreferencesAdapter<>(maxColorsProp, Chromasthetiator.class));
+    this.maxColors = maxColorsProp;
+
+    AspectedIntegerProperty maxKeywordsProp =
+      new AspectedIntegerProperty(this, "max. keywords", maxKeywords);
+    maxKeywordsProp.addAspect(BoundedIntegerTag.INSTANCE,
+      new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
+    maxKeywordsProp.addAspect(PropertyPreferencesAdapterTag.getInstance(),
+      new IntegerPropertyPreferencesAdapter<>(maxKeywordsProp, Chromasthetiator.class));
+    this.maxKeywords = maxKeywordsProp;
+  }
+
+
   public Chromasthetiator()
   {
+    this(2, 0);
     try {
       synesthetiator = new SynesthetiatorEmotion();
     } catch (IOException ex) {
@@ -60,6 +83,35 @@ public class Chromasthetiator<F extends Flickr> implements Cloneable
     }
     palettes = new SynesketchPalette("standard");
     chromatikQuery = new ChromatikQuery(10, null, null);
+  }
+
+
+  /**
+   * Maximum amount of colors to use in the query to Chromatik
+   */
+  public IntegerProperty maxColorsProperty()
+  {
+    return maxColors;
+  }
+
+
+  /**
+   * Maximum amount of keywords to select from affect words, if no search terms
+   * are specified in {@link ChromatikQuery#keywords}.
+   */
+  public IntegerProperty maxKeywordsProperty()
+  {
+    return maxKeywords;
+  }
+
+  public int getMaxKeywords()
+  {
+    return maxKeywords.get();
+  }
+
+  public void setMaxKeywords( int n )
+  {
+    maxKeywords.set(n);
   }
 
 
@@ -104,7 +156,7 @@ public class Chromasthetiator<F extends Flickr> implements Cloneable
       if (emo.getType() != Emotion.NEUTRAL)
       {
         keywords = String.join(" ", findStrongestAffectWords(
-          synState.getAffectWords(), maxKeywords));
+          synState.getAffectWords(), maxKeywords.get()));
         logger.log(Level.FINE, "Selected keywords: {0}", keywords);
       }
     }
@@ -119,6 +171,7 @@ public class Chromasthetiator<F extends Flickr> implements Cloneable
     if (opts == null)
       opts = new HashMap<>();
 
+    int maxColors = this.maxColors.get();
     if (maxColors > 0)
     {
       Emotion emo = synState.getStrongestEmotion();
@@ -176,6 +229,7 @@ public class Chromasthetiator<F extends Flickr> implements Cloneable
   }
 
 
+  @SuppressWarnings("CloneCallsConstructors")
   @Override
   public Chromasthetiator<F> clone()
   {
@@ -190,10 +244,45 @@ public class Chromasthetiator<F extends Flickr> implements Cloneable
       throw new InternalError(ex);
     }
 
+    clone.maxColors = new SimpleIntegerProperty(
+      clone, clone.maxColors.getName(), clone.maxColors.get());
+    clone.maxKeywords = new SimpleIntegerProperty(
+      clone, clone.maxKeywords.getName(), clone.maxKeywords.get());
     if (clone.chromatikQuery != null)
       clone.chromatikQuery = clone.chromatikQuery.clone();
 
     return clone;
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return "Chromasthetiator";
+  }
+
+
+  @Override
+  public Object getParent()
+  {
+    return null;
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+  return
+    (maxColors instanceof AspectedReadOnlyProperty &&
+      maxKeywords instanceof AspectedReadOnlyProperty)
+    ?
+      Stream.of(
+        ((AspectedReadOnlyProperty<?>) maxColors).getAspect(
+          PropertyPreferencesAdapterTag.getWritableInstance()),
+        ((AspectedReadOnlyProperty<?>) maxKeywords).getAspect(
+          PropertyPreferencesAdapterTag.getWritableInstance())) :
+      Stream.empty();
   }
 
 
