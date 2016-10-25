@@ -147,7 +147,7 @@ public class ChromasthetiationService
       this.imageCallback = imageCallback;
       photoQueue =
         new BoundedCompletionQueue<>(maxCount,
-          chromasthetiator.chromatikQuery.nHits);
+          chromasthetiator.chromatikQuery.getNHits());
       if (imageQueueCompletionCallback != null)
       {
         photoQueue.completionCallback =
@@ -179,15 +179,15 @@ public class ChromasthetiationService
       logger.log(Level.FINE, "Synesthetiation result:\n{0}", emoState);
 
       ChromatikQuery chromatikQuery = chromasthetiator.chromatikQuery;
-      chromatikQuery.keywords = chromasthetiator.getQueryKeywords(emoState);
+      chromatikQuery.setKeywords(chromasthetiator.getQueryKeywords(emoState));
 
       Random textRandom = new Random(emoState.getText().hashCode());
       chromatikQuery.opts =
         chromasthetiator.getQueryOptions(
           emoState, chromatikQuery.opts, textRandom);
 
-      int queryStart = chromatikQuery.start;
-      if (chromatikQuery.keywords.isEmpty() &&
+      int queryStart = chromatikQuery.getStart();
+      if (chromatikQuery.getKeywords().isEmpty() &&
         emoState.getStrongestEmotion().getType() == Emotion.NEUTRAL)
       {
         textRandom.setSeed(emoState.getText().hashCode());
@@ -195,7 +195,7 @@ public class ChromasthetiationService
           EXPECTED_NEUTRAL_RESULT_COUNT, textRandom);
       }
       runChromatikQuery(emoState);
-      chromatikQuery.start = queryStart;
+      chromatikQuery.setStart(queryStart);
     }
 
 
@@ -224,7 +224,7 @@ public class ChromasthetiationService
       logger.log(Level.FINE, "Chromatik found {0} results", response.hits);
 
       if (response.results.length == 0 &&
-        !chromasthetiator.chromatikQuery.keywords.isEmpty())
+        !chromasthetiator.chromatikQuery.getKeywords().isEmpty())
       {
         removeLastKeyword();
         runChromatikQuery(o.getRight());
@@ -401,9 +401,12 @@ public class ChromasthetiationService
        * Due to sorting, the last keyword has simultaneously the weakest
        * emotional weight.
        */
-      String keywords = chromasthetiator.chromatikQuery.keywords;
+      String keywords = chromasthetiator.chromatikQuery.getKeywords();
       int p = keywords.lastIndexOf(' ');
-      chromasthetiator.chromatikQuery.keywords = (p > 0) ? keywords.substring(0, p) : "";
+      while (p > 0 && keywords.charAt(p - 1) == ' ')
+        p--;
+      chromasthetiator.chromatikQuery.setKeywords(
+        (p > 0) ? keywords.substring(0, p) : "");
     }
   }
 }

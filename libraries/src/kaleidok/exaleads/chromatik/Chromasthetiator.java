@@ -125,13 +125,13 @@ public class Chromasthetiator<F extends Flickr>
   {
     EmotionalState emoState = synesthetiator.synesthetiseDirect(text);
     ChromatikQuery chromatikQuery = this.chromatikQuery;
-    chromatikQuery.keywords = getQueryKeywords(emoState);
+    chromatikQuery.setKeywords(getQueryKeywords(emoState));
 
     Random textRandom = new Random(text.hashCode());
     getQueryOptions(emoState, chromatikQuery.opts, textRandom);
 
-    int queryStart = chromatikQuery.start;
-    if (chromatikQuery.keywords.isEmpty() &&
+    int queryStart = chromatikQuery.getStart();
+    if (chromatikQuery.getKeywords().isEmpty() &&
       emoState.getStrongestEmotion().getType() == Emotion.NEUTRAL)
     {
       textRandom.setSeed(text.hashCode());
@@ -140,7 +140,7 @@ public class Chromasthetiator<F extends Flickr>
     }
 
     ChromatikResponse queryResult = chromatikQuery.getResult();
-    chromatikQuery.start = queryStart;
+    chromatikQuery.setStart(queryStart);
     addFlickrPhotos(queryResult);
 
     return queryResult;
@@ -149,7 +149,7 @@ public class Chromasthetiator<F extends Flickr>
 
   protected String getQueryKeywords( EmotionalState synState )
   {
-    String keywords = chromatikQuery.keywords;
+    String keywords = chromatikQuery.getKeywords();
     if (keywords.isEmpty())
     {
       Emotion emo = synState.getStrongestEmotion();

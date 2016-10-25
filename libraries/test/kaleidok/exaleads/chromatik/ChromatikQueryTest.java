@@ -64,7 +64,7 @@ public class ChromatikQueryTest
   public void testGetQueryString1()
   {
     ChromatikQuery q = new ChromatikQuery();
-    q.start = 42;
+    q.setStart(42);
     Map<String, String> p = getParams(q);
 
     assertEquals("42", p.get("start"));

@@ -33,22 +33,22 @@ public class ChromatikQuery implements Serializable, Cloneable
   /**
    * The start index of the requested section of the result set
    */
-  public int start = 0;
+  private int start = 0;
 
   /**
    * Maximum result set section size
    */
-  public int nHits;
+  private int nHits;
 
   /**
    * Search keywords (if any) separated by spaces
    */
-  public String keywords;
+  private String keywords;
 
   /**
    * The protocol, host, and path component of the query URL
    */
-  public URI baseUri;
+  private URI baseUri;
 
   /**
    * Search option map. Possible option keys include "saturation", "darkness",
@@ -65,6 +65,7 @@ public class ChromatikQuery implements Serializable, Cloneable
     TypeAdapterManager.registerTypeAdapter(
       ChromatikResponse.class, ChromatikResponse.Deserializer.INSTANCE);
   }
+
 
   /**
    * Constructs a query object with the default result set size and no
@@ -108,8 +109,9 @@ public class ChromatikQuery implements Serializable, Cloneable
       return false;
 
     ChromatikQuery ocq = (ChromatikQuery) o;
-    return start == ocq.start && nHits == ocq.nHits &&
-      keywords.equals(ocq.keywords) && baseUri.equals(ocq.baseUri) &&
+    return getStart() == ocq.getStart() && getNHits() == ocq.getNHits() &&
+      java.util.Objects.equals(getKeywords(), ocq.getKeywords()) &&
+      java.util.Objects.equals(getBaseUri(), ocq.getBaseUri()) &&
       opts.equals(ocq.opts);
   }
 
@@ -118,7 +120,8 @@ public class ChromatikQuery implements Serializable, Cloneable
   public int hashCode()
   {
     return Objects.hashCode(Objects.hashCode(Objects.hashCode(Objects.hashCode(
-      Integer.hashCode(start), nHits), keywords), baseUri), opts);
+      Integer.hashCode(getStart()), getNHits()), getKeywords()), getBaseUri()),
+      opts);
   }
 
 
@@ -206,11 +209,11 @@ public class ChromatikQuery implements Serializable, Cloneable
 
   private URIBuilder buildUri()
   {
-    URIBuilder ub = new URIBuilder(baseUri)
-      .addParameter(QUERY_START, Integer.toString(start))
-      .addParameter(QUERY_NHITS, Integer.toString(nHits));
+    URIBuilder ub = new URIBuilder(getBaseUri())
+      .addParameter(QUERY_START, Integer.toString(getStart()))
+      .addParameter(QUERY_NHITS, Integer.toString(getNHits()));
 
-    String searchQuery = keywords;
+    String searchQuery = getKeywords();
     if (!opts.isEmpty())
     {
       StringBuilder sb = new StringBuilder(1 << 8);
@@ -316,8 +319,9 @@ public class ChromatikQuery implements Serializable, Cloneable
 
   public void randomizeRequestedSubset( int expectedResultCount, Random random )
   {
+    int nHits = getNHits();
     if (expectedResultCount > nHits)
-      start = random.nextInt(expectedResultCount - nHits + 1);
+      setStart(random.nextInt(expectedResultCount - nHits + 1));
   }
 
 
@@ -339,6 +343,50 @@ public class ChromatikQuery implements Serializable, Cloneable
   public String toString()
   {
     return buildUri().toString();
+  }
+
+
+  public int getStart()
+  {
+    return start;
+  }
+
+  public void setStart( int start )
+  {
+    this.start = start;
+  }
+
+
+  public int getNHits()
+  {
+    return nHits;
+  }
+
+  public void setNHits( int nHits )
+  {
+    this.nHits = nHits;
+  }
+
+
+  public String getKeywords()
+  {
+    return keywords;
+  }
+
+  public void setKeywords( String keywords )
+  {
+    this.keywords = (keywords != null) ? keywords : "";
+  }
+
+
+  public URI getBaseUri()
+  {
+    return baseUri;
+  }
+
+  public void setBaseUri( URI baseUri )
+  {
+    this.baseUri = requireNonNull(baseUri);
   }
 
 
