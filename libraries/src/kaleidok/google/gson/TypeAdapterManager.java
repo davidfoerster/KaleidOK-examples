@@ -5,6 +5,7 @@ import com.google.gson.*;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 public final class TypeAdapterManager
@@ -12,7 +13,29 @@ public final class TypeAdapterManager
   private TypeAdapterManager() { }
 
 
-  public static void registerTypeAdapter( Type type, Object typeAdapter )
+  public static void registerTypeAdapter( Type type,
+    JsonDeserializer<?> typeAdapter )
+  {
+    TypeAdapterMap.INSTANCE.put(type, typeAdapter);
+  }
+
+
+  public static void registerTypeAdapter( Type type,
+    JsonSerializer<?> typeAdapter )
+  {
+    TypeAdapterMap.INSTANCE.put(type, typeAdapter);
+  }
+
+
+  public static void registerTypeAdapter( Type type,
+    TypeAdapter<?> typeAdapter )
+  {
+    TypeAdapterMap.INSTANCE.put(type, typeAdapter);
+  }
+
+
+  public static void registerTypeAdapter( Type type,
+    InstanceCreator<?> typeAdapter )
   {
     TypeAdapterMap.INSTANCE.put(type, typeAdapter);
   }
@@ -56,37 +79,38 @@ public final class TypeAdapterManager
     }
 
 
-    public Object put( Type key, Object value )
+    public Object put( Type key, JsonDeserializer<?> value )
     {
-      if (key == null)
-        throw new NullPointerException();
-      if (!isTypeAdapterClass(value.getClass())) {
-        throw new IllegalArgumentException(
-          "Illegal type adapter class: " + value.getClass().getName());
-      }
-
-      synchronized (this)
-      {
-        Object prev = map.put(key, value);
-        if (prev != value)
-          gson = null;
-        return prev;
-      }
+      return put(key, (Object) value);
     }
 
 
-    private static final Class<?>[] typeAdapterClasses = {
-        JsonDeserializer.class, JsonSerializer.class,
-        TypeAdapter.class, InstanceCreator.class
-      };
-
-    public static boolean isTypeAdapterClass( Class<?> clazz )
+    public Object put( Type key, JsonSerializer<?> value )
     {
-      for (Class<?> tac : typeAdapterClasses) {
-        if (tac.isAssignableFrom(clazz))
-          return true;
-      }
-      return false;
+      return put(key, (Object) value);
+    }
+
+
+    public Object put( Type key, TypeAdapter<?> value )
+    {
+      return put(key, (Object) value);
+    }
+
+
+    public Object put( Type key, InstanceCreator<?> value )
+    {
+      return put(key, (Object) value);
+    }
+
+
+    private synchronized Object put( Type key, Object value )
+    {
+      Object prev = map.put(
+        Objects.requireNonNull(key, "key"),
+        Objects.requireNonNull(value, "value"));
+      if (!Objects.equals(prev, value))
+        gson = null;
+      return prev;
     }
   }
 }

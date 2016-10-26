@@ -1,6 +1,5 @@
 package kaleidok.flickr;
 
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -27,9 +26,9 @@ class FlickrBase
     }
 
     TypeAdapterManager.registerTypeAdapter(
-      SizeMap.class, (JsonDeserializer<SizeMap>) SizeMap::deserialize);
+      SizeMap.class, SizeMap::deserialize);
     TypeAdapterManager.registerTypeAdapter(
-      Size.Label.class, (JsonDeserializer<Size.Label>) Size.Label::deserialize);
+      Size.Label.class, Size.Label::deserialize);
   }
 
 
