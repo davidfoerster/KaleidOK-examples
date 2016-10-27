@@ -2,6 +2,7 @@ package kaleidok.kaleidoscope;
 
 import kaleidok.exaleads.chromatik.ChromasthetiationService;
 import kaleidok.exaleads.chromatik.Chromasthetiator;
+import kaleidok.exaleads.chromatik.PropertyChromasthetiator;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.flickr.FlickrAsync;
 import kaleidok.image.filter.Parser;
@@ -63,7 +64,7 @@ public final class KaleidoscopeChromasthetiationService
 
   private final Kaleidoscope parent;
 
-  private Chromasthetiator<FlickrAsync> chromasthetiator;
+  private PropertyChromasthetiator<FlickrAsync> chromasthetiator;
 
   private final ChromasthetiationCallback chromasthetiationCallback =
     new ChromasthetiationCallback();
@@ -210,11 +211,11 @@ public final class KaleidoscopeChromasthetiationService
   }
 
 
-  private Chromasthetiator<FlickrAsync> getChromasthetiator()
+  PropertyChromasthetiator<FlickrAsync> getChromasthetiator()
   {
     if (chromasthetiator == null)
     {
-      chromasthetiator = new Chromasthetiator<FlickrAsync>()
+      chromasthetiator = new PropertyChromasthetiator<FlickrAsync>()
         {
           @Override
           public Object getParent()
@@ -223,8 +224,8 @@ public final class KaleidoscopeChromasthetiationService
           }
         };
 
+      chromasthetiator.getChromatikQuery().setNHits(10);
       chromasthetiator.setFlickrApi(flickr);
-
       chromasthetiator.getPreferenceAdapters()
         .forEach(PropertyPreferencesAdapter::load);
     }
@@ -239,7 +240,7 @@ public final class KaleidoscopeChromasthetiationService
         (photos) -> this.imageQueueCompletionCallback.accept(text, photos) :
         null;
 
-    submit(text, getChromasthetiator().clone(),
+    submit(text, getChromasthetiator().toSimple(),
       null, chromasthetiationCallback, imageQueueCompletionCallback,
       parent.getLayers().size());
   }

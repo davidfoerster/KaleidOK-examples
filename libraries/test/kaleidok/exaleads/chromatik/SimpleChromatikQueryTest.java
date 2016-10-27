@@ -11,9 +11,9 @@ import static org.junit.Assert.*;
 
 
 @SuppressWarnings("DynamicRegexReplaceableByCompiledPattern")
-public class ChromatikQueryTest
+public class SimpleChromatikQueryTest
 {
-  private static Map<String, String> getParams( ChromatikQuery q )
+  private static Map<String, String> getParams( SimpleChromatikQuery q )
   {
     return Parsers.getQueryMap(q.getUri(), URLEncoding.DEFAULT_CHARSET);
   }
@@ -63,7 +63,7 @@ public class ChromatikQueryTest
   @Test
   public void testGetQueryString1()
   {
-    ChromatikQuery q = new ChromatikQuery();
+    SimpleChromatikQuery q = new SimpleChromatikQuery();
     q.setStart(42);
     Map<String, String> p = getParams(q);
 
@@ -78,7 +78,7 @@ public class ChromatikQueryTest
   public void testGetQueryString2()
   {
     String keywords = "foo bar";
-    Map<String, String> p = getParams(new ChromatikQuery(10, keywords, null));
+    Map<String, String> p = getParams(new SimpleChromatikQuery(10, keywords, null));
 
     assertEquals("0", p.get("start"));
     assertEquals("10", p.get("nhits"));
@@ -91,7 +91,7 @@ public class ChromatikQueryTest
   @Test
   public void testGetQueryString3()
   {
-    Map<String, String> p = getParams(new ChromatikQuery(10, null, 0xe51919));
+    Map<String, String> p = getParams(new SimpleChromatikQuery(10, null, 0xe51919));
 
     assertEquals("0", p.get("start"));
     assertEquals("10", p.get("nhits"));
@@ -105,7 +105,7 @@ public class ChromatikQueryTest
   public void testGetQueryString4()
   {
     String keywords = "foo bar";
-    Map<String, String> p = getParams(new ChromatikQuery(10, keywords, 0xe51919));
+    Map<String, String> p = getParams(new SimpleChromatikQuery(10, keywords, 0xe51919));
 
     assertEquals("0", p.get("start"));
     assertEquals("10", p.get("nhits"));
@@ -118,10 +118,10 @@ public class ChromatikQueryTest
   @Test
   public void testGetQueryString5()
   {
-    ChromatikQuery q = new ChromatikQuery(10, null, null) {{
-        opts.put(new ChromatikColor(0xe51919), 0.07);
-        opts.put(new ChromatikColor(0xebeb52), 0.23);
-        opts.put(new ChromatikColor(0x1313ac), 0.42);
+    SimpleChromatikQuery q = new SimpleChromatikQuery(10, null, null) {{
+        optionMap.put(new ChromatikColor(0xe51919), 0.07);
+        optionMap.put(new ChromatikColor(0xebeb52), 0.23);
+        optionMap.put(new ChromatikColor(0x1313ac), 0.42);
       }};
     Map<String, String> p = getParams(q);
 
@@ -145,9 +145,9 @@ public class ChromatikQueryTest
   @Test
   public void testGetQueryString6()
   {
-    ChromatikQuery q = new ChromatikQuery(10, null, null) {{
-        opts.put(new ChromatikColor(0xe51919), 0.07);
-        opts.put(new ChromatikColor(0xac1313), 0.23);
+    SimpleChromatikQuery q = new SimpleChromatikQuery(10, null, null) {{
+        optionMap.put(new ChromatikColor(0xe51919), 0.07);
+        optionMap.put(new ChromatikColor(0xac1313), 0.23);
       }};
     Map<String, String> p = getParams(q);
 

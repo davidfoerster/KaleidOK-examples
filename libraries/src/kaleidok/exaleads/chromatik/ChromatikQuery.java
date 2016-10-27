@@ -2,8 +2,8 @@ package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
-import kaleidok.http.JsonHttpConnection;
 import kaleidok.google.gson.TypeAdapterManager;
+import kaleidok.http.JsonHttpConnection;
 import kaleidok.util.Objects;
 import kaleidok.util.Strings;
 import org.apache.http.client.utils.URIBuilder;
@@ -23,32 +23,14 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 
 
-/**
- * Holds all the parameters to build a Chromatik image search query.
- */
-public class ChromatikQuery implements Serializable, Cloneable
+public abstract class ChromatikQuery
 {
-  private static final long serialVersionUID = -4020430402877695173L;
+  static
+  {
+    TypeAdapterManager.registerTypeAdapter(
+      ChromatikResponse.class, ChromatikResponse::deserialize);
+  }
 
-  /**
-   * The start index of the requested section of the result set
-   */
-  private int start = 0;
-
-  /**
-   * Maximum result set section size
-   */
-  private int nHits;
-
-  /**
-   * Search keywords (if any) separated by spaces
-   */
-  private String keywords;
-
-  /**
-   * The protocol, host, and path component of the query URL
-   */
-  private URI baseUri;
 
   /**
    * Search option map. Possible option keys include "saturation", "darkness",
@@ -58,45 +40,31 @@ public class ChromatikQuery implements Serializable, Cloneable
    * object and use it as the key to the option entry. The value is the
    * weight of that color as a {@link Number} object between 0 and 1.
    */
-  public Map<Serializable, Serializable> opts = new HashMap<>();
+  public Map<Serializable, Serializable> optionMap;
 
 
-  static {
-    TypeAdapterManager.registerTypeAdapter(
-      ChromatikResponse.class, ChromatikResponse.Deserializer.INSTANCE);
+  protected ChromatikQuery()
+  {
+    this(new HashMap<>());
   }
 
 
-  /**
-   * Constructs a query object with the default result set size and no
-   * keywords.
-   */
-  public ChromatikQuery()
+  protected ChromatikQuery( int[] colors )
   {
-    this(QUERY_NHITS_DEFAULT, null, (int[]) null);
-  }
-
-
-  /**
-   * Constructs a query object with preset parameters.
-   *
-   * @param nHits  Result set size
-   * @param keywords  Query keywords
-   * @param colors  RGB color values to search for; the weight is the inverse
-   *   of the amount of colors
-   */
-  public ChromatikQuery( int nHits, String keywords, int... colors )
-  {
-    this.nHits = nHits;
-    this.keywords = (keywords != null) ? keywords : "";
-    this.baseUri = DEFAULT_URI;
+    this();
 
     if (colors != null && colors.length != 0)
     {
       Double weight = Math.min(1.0 / colors.length, MAX_COLOR_WEIGHT);
       for (int c: colors)
-        opts.put(new ChromatikColor(c), weight);
+        optionMap.put(new ChromatikColor(c), weight);
     }
+  }
+
+
+  protected ChromatikQuery( Map<Serializable, Serializable> optionMap )
+  {
+    this.optionMap = optionMap;
   }
 
 
@@ -112,7 +80,7 @@ public class ChromatikQuery implements Serializable, Cloneable
     return getStart() == ocq.getStart() && getNHits() == ocq.getNHits() &&
       java.util.Objects.equals(getKeywords(), ocq.getKeywords()) &&
       java.util.Objects.equals(getBaseUri(), ocq.getBaseUri()) &&
-      opts.equals(ocq.opts);
+      optionMap.equals(ocq.optionMap);
   }
 
 
@@ -121,39 +89,16 @@ public class ChromatikQuery implements Serializable, Cloneable
   {
     return Objects.hashCode(Objects.hashCode(Objects.hashCode(Objects.hashCode(
       Integer.hashCode(getStart()), getNHits()), getKeywords()), getBaseUri()),
-      opts);
+      optionMap);
   }
 
 
-  @SuppressWarnings({ "unchecked", "CloneCallsConstructors" })
-  @Override
-  public ChromatikQuery clone()
+  protected static ChromatikResponse fetch( URL url ) throws IOException
   {
-    ChromatikQuery other;
-    try
+    try (JsonHttpConnection con = JsonHttpConnection.openURL(url))
     {
-      other = (ChromatikQuery) super.clone();
+      return con.get(ChromatikResponse.class, TypeAdapterManager.getGson());
     }
-    catch (CloneNotSupportedException ex)
-    {
-      throw new InternalError(ex);
-    }
-    if (other.opts != null)
-    {
-      Map<Serializable, Serializable> optsClone = null;
-      if (other.opts instanceof Cloneable) try
-      {
-        //noinspection OverlyStrongTypeCast
-        optsClone = Objects.clone(
-          (Cloneable & Map<Serializable, Serializable>) other.opts);
-      }
-      catch (CloneNotSupportedException ignored)
-      {
-        // leave the null reference to invoke the fall-back behaviour
-      }
-      other.opts = (optsClone != null) ? optsClone : new HashMap<>(other.opts);
-    }
-    return other;
   }
 
 
@@ -164,14 +109,6 @@ public class ChromatikQuery implements Serializable, Cloneable
   public ChromatikResponse getResult() throws IOException
   {
     return fetch(getUrl());
-  }
-
-  protected static ChromatikResponse fetch( URL url ) throws IOException
-  {
-    try (JsonHttpConnection con = JsonHttpConnection.openURL(url))
-    {
-      return con.get(ChromatikResponse.class, TypeAdapterManager.getGson());
-    }
   }
 
 
@@ -197,6 +134,7 @@ public class ChromatikQuery implements Serializable, Cloneable
     }
   }
 
+
   public URI getUri()
   {
     try {
@@ -214,13 +152,13 @@ public class ChromatikQuery implements Serializable, Cloneable
       .addParameter(QUERY_NHITS, Integer.toString(getNHits()));
 
     String searchQuery = getKeywords();
-    if (!opts.isEmpty())
+    if (!optionMap.isEmpty())
     {
       StringBuilder sb = new StringBuilder(1 << 8);
       sb.append(searchQuery);
       buildColorSubquery(sb);
 
-      for (Map.Entry<?, ?> o: opts.entrySet())
+      for (Map.Entry<?, ?> o: optionMap.entrySet())
       {
         if (!(o.getKey() instanceof ChromatikColor))
         {
@@ -245,17 +183,9 @@ public class ChromatikQuery implements Serializable, Cloneable
   }
 
 
-  private static boolean assertValidChars( CharSequence s, char c )
-  {
-    assert s.toString().indexOf(c) < 0 :
-      String.format("\"%s\" contains delimiter character '%c'", s, c);
-    return true;
-  }
-
-
   private StringBuilder buildColorSubquery( StringBuilder sb )
   {
-    Map<ChromatikColor, Number> colors = opts.entrySet().stream()
+    Map<ChromatikColor, Number> colors = optionMap.entrySet().stream()
       .filter((o) -> o.getKey() instanceof ChromatikColor)
       .collect(Collectors.toMap(
         (o) -> (ChromatikColor) o.getKey(),
@@ -317,11 +247,11 @@ public class ChromatikQuery implements Serializable, Cloneable
   }
 
 
-  public void randomizeRequestedSubset( int expectedResultCount, Random random )
+  private static boolean assertValidChars( CharSequence s, char c )
   {
-    int nHits = getNHits();
-    if (expectedResultCount > nHits)
-      setStart(random.nextInt(expectedResultCount - nHits + 1));
+    assert s.toString().indexOf(c) < 0 :
+      String.format("\"%s\" contains delimiter character '%c'", s, c);
+    return true;
   }
 
 
@@ -329,8 +259,16 @@ public class ChromatikQuery implements Serializable, Cloneable
   {
     return
       (o == null) ? null :
-      (o instanceof CharSequence) ? (CharSequence) o :
-        o.toString();
+        (o instanceof CharSequence) ? (CharSequence) o :
+          o.toString();
+  }
+
+
+  public void randomizeRequestedSubset( int expectedResultCount, Random random )
+  {
+    int nHits = getNHits();
+    if (expectedResultCount > nHits)
+      setStart(random.nextInt(expectedResultCount - nHits + 1));
   }
 
 
@@ -346,71 +284,47 @@ public class ChromatikQuery implements Serializable, Cloneable
   }
 
 
-  public int getStart()
+  public abstract int getStart();
+
+  public abstract void setStart( int start );
+
+
+  public abstract int getNHits();
+
+  public abstract void setNHits( int nHits );
+
+
+  public abstract String getKeywords();
+
+  public abstract void setKeywords( String keywords );
+
+
+  public abstract URI getBaseUri();
+
+  public abstract void setBaseUri( URI baseUri );
+
+
+  public abstract ChromatikQuery toSimple();
+
+
+  protected Map<Serializable, Serializable> copyOptionMap()
   {
-    return start;
-  }
+    if (optionMap == null)
+      return null;
 
-  public void setStart( int start )
-  {
-    this.start = start;
-  }
-
-
-  public int getNHits()
-  {
-    return nHits;
-  }
-
-  public void setNHits( int nHits )
-  {
-    this.nHits = nHits;
-  }
-
-
-  public String getKeywords()
-  {
-    return keywords;
-  }
-
-  public void setKeywords( String keywords )
-  {
-    this.keywords = (keywords != null) ? keywords : "";
-  }
-
-
-  public URI getBaseUri()
-  {
-    return baseUri;
-  }
-
-  public void setBaseUri( URI baseUri )
-  {
-    this.baseUri = requireNonNull(baseUri);
-  }
-
-
-  @SuppressWarnings("SpellCheckingInspection")
-  private static final String
-    QUERY_START = "start",
-    QUERY_NHITS = "nhits",
-    QUERY_QUERY = "q";
-
-  @SuppressWarnings("SpellCheckingInspection")
-  private static final char
-    QUERY_OPT_NAMEDELIM = ':',
-    QUERY_OPT_VALUEDELIM = '/';
-
-
-  public static final URI DEFAULT_URI;
-  static {
-    try {
-      //noinspection SpellCheckingInspection
-      DEFAULT_URI =
-        new URI("http", "chromatik.labs.exalead.com", "/searchphotos", null);
-    } catch (URISyntaxException ex) {
-      throw new AssertionError(ex);
+    Map<Serializable, Serializable> optsClone = null;
+    if (optionMap instanceof Cloneable) try
+    {
+      //noinspection OverlyStrongTypeCast
+      optsClone = Objects.clone(
+        (Cloneable & Map<Serializable, Serializable>) optionMap);
     }
+    catch (CloneNotSupportedException ignored)
+    {
+      // leave the null reference to invoke the fall-back behaviour
+    }
+
+    return (optsClone != null) ? optsClone : new HashMap<>(optionMap);
   }
 
 
@@ -426,9 +340,35 @@ public class ChromatikQuery implements Serializable, Cloneable
     QUERY_OPT_DARKNESS_DARK = "Dark",
     QUERY_OPT_RIGHTS = "rights";
 
-
   @SuppressWarnings("SpellCheckingInspection")
   public static final int QUERY_NHITS_DEFAULT = 40;
 
   public static final float MAX_COLOR_WEIGHT = 0.25f;
+
+  @SuppressWarnings("SpellCheckingInspection")
+  private static final String
+    QUERY_START = "start",
+    QUERY_NHITS = "nhits",
+    QUERY_QUERY = "q";
+
+  @SuppressWarnings("SpellCheckingInspection")
+  private static final char
+    QUERY_OPT_NAMEDELIM = ':',
+    QUERY_OPT_VALUEDELIM = '/';
+
+  public static final URI DEFAULT_URI;
+
+  static
+  {
+    try
+    {
+      //noinspection SpellCheckingInspection
+      DEFAULT_URI =
+        new URI("http", "chromatik.labs.exalead.com", "/searchphotos", null);
+    }
+    catch (URISyntaxException ex)
+    {
+      throw new AssertionError(ex);
+    }
+  }
 }

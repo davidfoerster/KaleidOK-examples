@@ -1,21 +1,11 @@
 package kaleidok.exaleads.chromatik;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.flickr.SizeMap;
-import kaleidok.javafx.beans.property.AspectedIntegerProperty;
-import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
-import kaleidok.javafx.beans.property.adapter.preference.IntegerPropertyPreferencesAdapter;
-import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
-import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
-import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
-import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
 
@@ -24,7 +14,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
@@ -32,19 +21,13 @@ import static kaleidok.util.Arrays.shuffle;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
-public class Chromasthetiator<F extends Flickr>
-  implements Cloneable, PreferenceBean
+public abstract class Chromasthetiator<F extends Flickr>
 {
   static final Logger logger =
     Logger.getLogger(ChromasthetiationService.class.getPackage().getName());
 
-  private IntegerProperty maxColors;
-
-  private IntegerProperty maxKeywords;
-
   public static int EXPECTED_NEUTRAL_RESULT_COUNT = 10000;
 
-  public ChromatikQuery chromatikQuery;
 
   protected SynesthetiatorEmotion synesthetiator;
 
@@ -53,66 +36,38 @@ public class Chromasthetiator<F extends Flickr>
   protected F flickr;
 
 
-  private Chromasthetiator( int maxColors, int maxKeywords )
+  protected Chromasthetiator()
   {
-    AspectedIntegerProperty maxColorsProp =
-      new AspectedIntegerProperty(this, "max. colors", maxColors);
-    maxColorsProp.addAspect(BoundedIntegerTag.INSTANCE,
-      new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
-    maxColorsProp.addAspect(PropertyPreferencesAdapterTag.getInstance(),
-      new IntegerPropertyPreferencesAdapter<>(maxColorsProp, Chromasthetiator.class));
-    this.maxColors = maxColorsProp;
-
-    AspectedIntegerProperty maxKeywordsProp =
-      new AspectedIntegerProperty(this, "max. keywords", maxKeywords);
-    maxKeywordsProp.addAspect(BoundedIntegerTag.INSTANCE,
-      new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
-    maxKeywordsProp.addAspect(PropertyPreferencesAdapterTag.getInstance(),
-      new IntegerPropertyPreferencesAdapter<>(maxKeywordsProp, Chromasthetiator.class));
-    this.maxKeywords = maxKeywordsProp;
-  }
-
-
-  public Chromasthetiator()
-  {
-    this(2, 0);
     try {
       synesthetiator = new SynesthetiatorEmotion();
     } catch (IOException ex) {
       throw new Error(ex);
     }
     palettes = new SynesketchPalette("standard");
-    chromatikQuery = new ChromatikQuery(10, null, null);
   }
 
 
-  /**
-   * Maximum amount of colors to use in the query to Chromatik
-   */
-  public IntegerProperty maxColorsProperty()
+  protected Chromasthetiator( Chromasthetiator<? extends F> other )
   {
-    return maxColors;
+    synesthetiator = other.synesthetiator;
+    palettes = other.palettes;
+    flickr = other.flickr;
   }
 
 
-  /**
-   * Maximum amount of keywords to select from affect words, if no search terms
-   * are specified in {@link ChromatikQuery#keywords}.
-   */
-  public IntegerProperty maxKeywordsProperty()
-  {
-    return maxKeywords;
-  }
+  public abstract int getMaxColors();
 
-  public int getMaxKeywords()
-  {
-    return maxKeywords.get();
-  }
+  public abstract void setMaxColors( int maxColors );
 
-  public void setMaxKeywords( int n )
-  {
-    maxKeywords.set(n);
-  }
+
+  public abstract int getMaxKeywords();
+
+  public abstract void setMaxKeywords( int n );
+
+
+  public abstract ChromatikQuery getChromatikQuery();
+
+  public abstract void setChromatikQuery( ChromatikQuery chromatikQuery );
 
 
   public void setFlickrApi( F flickr )
@@ -121,14 +76,17 @@ public class Chromasthetiator<F extends Flickr>
   }
 
 
+  public abstract Chromasthetiator<F> toSimple();
+
+
   public ChromatikResponse query( String text ) throws IOException
   {
     EmotionalState emoState = synesthetiator.synesthetiseDirect(text);
-    ChromatikQuery chromatikQuery = this.chromatikQuery;
+    ChromatikQuery chromatikQuery = getChromatikQuery();
     chromatikQuery.setKeywords(getQueryKeywords(emoState));
 
     Random textRandom = new Random(text.hashCode());
-    getQueryOptions(emoState, chromatikQuery.opts, textRandom);
+    getQueryOptions(emoState, chromatikQuery.optionMap, textRandom);
 
     int queryStart = chromatikQuery.getStart();
     if (chromatikQuery.getKeywords().isEmpty() &&
@@ -149,14 +107,14 @@ public class Chromasthetiator<F extends Flickr>
 
   protected String getQueryKeywords( EmotionalState synState )
   {
-    String keywords = chromatikQuery.getKeywords();
+    String keywords = getChromatikQuery().getKeywords();
     if (keywords.isEmpty())
     {
       Emotion emo = synState.getStrongestEmotion();
       if (emo.getType() != Emotion.NEUTRAL)
       {
         keywords = String.join(" ", findStrongestAffectWords(
-          synState.getAffectWords(), maxKeywords.get()));
+          synState.getAffectWords(), getMaxKeywords()));
         logger.log(Level.FINE, "Selected keywords: {0}", keywords);
       }
     }
@@ -171,7 +129,7 @@ public class Chromasthetiator<F extends Flickr>
     if (opts == null)
       opts = new HashMap<>();
 
-    int maxColors = this.maxColors.get();
+    int maxColors = getMaxColors();
     if (maxColors > 0)
     {
       Emotion emo = synState.getStrongestEmotion();
@@ -226,63 +184,6 @@ public class Chromasthetiator<F extends Flickr>
       imgInfo.flickrPhoto =
         FlickrPhoto.fromChromatikResponseResult(flickr, imgInfo);
     }
-  }
-
-
-  @SuppressWarnings("CloneCallsConstructors")
-  @Override
-  public Chromasthetiator<F> clone()
-  {
-    Chromasthetiator<F> clone;
-    try
-    {
-      //noinspection unchecked
-      clone = (Chromasthetiator<F>) super.clone();
-    }
-    catch (CloneNotSupportedException ex)
-    {
-      throw new InternalError(ex);
-    }
-
-    clone.maxColors = new SimpleIntegerProperty(
-      clone, clone.maxColors.getName(), clone.maxColors.get());
-    clone.maxKeywords = new SimpleIntegerProperty(
-      clone, clone.maxKeywords.getName(), clone.maxKeywords.get());
-    if (clone.chromatikQuery != null)
-      clone.chromatikQuery = clone.chromatikQuery.clone();
-
-    return clone;
-  }
-
-
-  @Override
-  public String getName()
-  {
-    return "Chromasthetiator";
-  }
-
-
-  @Override
-  public Object getParent()
-  {
-    return null;
-  }
-
-
-  @Override
-  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
-  getPreferenceAdapters()
-  {
-  return
-    (maxColors instanceof AspectedReadOnlyProperty &&
-      maxKeywords instanceof AspectedReadOnlyProperty)
-    ?
-      Stream.of(
-        ((AspectedReadOnlyProperty<?>) maxColors).getAspect(
-          PropertyPreferencesAdapterTag.getWritableInstance()),
-        ((AspectedReadOnlyProperty<?>) maxKeywords).getAspect(
-          PropertyPreferencesAdapterTag.getWritableInstance())) :
-      Stream.empty();
   }
 
 
