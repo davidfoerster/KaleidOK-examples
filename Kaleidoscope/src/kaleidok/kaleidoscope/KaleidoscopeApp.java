@@ -7,6 +7,7 @@ import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Toggle;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import kaleidok.exaleads.chromatik.PropertyChromatikQuery;
 import kaleidok.javafx.stage.Icons;
 import kaleidok.javafx.stage.Windows;
 import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
@@ -214,6 +215,12 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
             .submit(((TextInputControl) ev.getSource()).getText());
           ev.consume();
         });
+
+      PropertyChromatikQuery chromatikQuery = (PropertyChromatikQuery)
+        getSketch().getChromasthetiationService().getChromasthetiator()
+          .getChromatikQuery();
+      controls.getKeywordField().textProperty().bindBidirectional(
+        chromatikQuery.keywordProperty());
 
       controls.getRecordingButton().setOnAction((ev) -> {
           getSketch().getSTT().setRecorderStatus(
