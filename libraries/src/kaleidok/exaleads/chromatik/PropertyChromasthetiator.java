@@ -12,6 +12,7 @@ import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdap
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 
@@ -149,8 +150,11 @@ public class PropertyChromasthetiator<F extends Flickr> extends Chromasthetiator
     ChromatikQuery chromatikQuery = getChromatikQuery();
     if (chromatikQuery instanceof PropertyChromatikQuery)
     {
-      s = Stream.concat(s,
-        ((PropertyChromatikQuery) chromatikQuery).getPreferenceAdapters());
+      s =
+        Stream.of(
+          s, ((PropertyChromatikQuery) chromatikQuery).getPreferenceAdapters(),
+          flickr.getPreferenceAdapters())
+        .flatMap(Function.identity());
     }
 
     return s;

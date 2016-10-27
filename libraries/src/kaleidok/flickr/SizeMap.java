@@ -26,7 +26,7 @@ public class SizeMap extends TreeMap<Size.Label, Size>
   {
     assert type instanceof Class && SizeMap.class.isAssignableFrom((Class<?>) type);
 
-    JsonObject o = FlickrBase.unwrap(jsonElement, "sizes");
+    JsonObject o = Flickr.unwrap(jsonElement, "sizes");
     Size[] a = context.deserialize(o.get("size"), Size[].class);
     SizeMap sizes = new SizeMap();
     sizes.canblog = o.getAsJsonPrimitive("canblog").getAsInt() != 0;

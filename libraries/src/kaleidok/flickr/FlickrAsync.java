@@ -4,10 +4,8 @@ import com.google.gson.JsonParseException;
 import kaleidok.util.concurrent.NestedFutureCallback;
 import kaleidok.http.async.JsonAsync;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.concurrent.FutureCallback;
 
-import java.net.URI;
 import java.util.concurrent.Future;
 
 
@@ -19,20 +17,6 @@ public class FlickrAsync extends Flickr
   public FlickrAsync( JsonAsync async )
   {
     this.async = async;
-  }
-
-
-  @Override
-  protected synchronized void initQuery( URI base, String apiKey, String apiSecret )
-  {
-    super.initQuery(base, apiKey, apiSecret);
-  }
-
-
-  @Override
-  protected synchronized URIBuilder copyUriBuilder()
-  {
-    return super.copyUriBuilder();
   }
 
 

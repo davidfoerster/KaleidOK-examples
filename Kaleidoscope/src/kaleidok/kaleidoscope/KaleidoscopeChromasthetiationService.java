@@ -131,7 +131,7 @@ public final class KaleidoscopeChromasthetiationService
   {
     String sKey = parent.parseStringOrFile(
       parent.getParameterMap().get("com.flickr.api.key"), '@');
-    if (sKey != null)
+    if (sKey != null && !sKey.isEmpty())
     {
       String[] aKey = KEY_SEPARATOR_PATTERN.split(sKey, 2);
       if (aKey.length == 2)
