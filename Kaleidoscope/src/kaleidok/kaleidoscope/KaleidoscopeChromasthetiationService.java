@@ -5,7 +5,7 @@ import kaleidok.exaleads.chromatik.Chromasthetiator;
 import kaleidok.exaleads.chromatik.PropertyChromasthetiator;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.flickr.FlickrAsync;
-import kaleidok.image.filter.Parser;
+import kaleidok.image.filter.RGBImageFilterFormat;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.processing.image.PImages;
@@ -32,7 +32,11 @@ import java.awt.Image;
 import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -324,23 +328,27 @@ public final class KaleidoscopeChromasthetiationService
     {
       if (neutralFilter == null)
       {
-        @SuppressWarnings("TooBroadScope")
+        RGBImageFilter filter = null;
         String
           paramName =
             parent.getClass().getPackage().getName() +
               ".images.filter.neutral",
           filterStr = parent.getParameterMap().get(paramName);
-        try
+        if (filterStr != null)
         {
-          neutralFilter = Optional.ofNullable(
-            (filterStr != null) ? Parser.parseFilter(filterStr) : null);
+          ParsePosition pos = new ParsePosition(0);
+          filter =
+            new RGBImageFilterFormat(NumberFormat.getNumberInstance(Locale.ROOT))
+              .parseObject(filterStr, pos);
+          if (filter == null)
+          {
+            logThrown(logger, Level.WARNING, "{0} ignored",
+              new ParseException("Illegal image filter value",
+                pos.getErrorIndex()),
+              paramName);
+          }
         }
-        catch (IllegalArgumentException | UnsupportedOperationException ex)
-        {
-          logThrown(logger, Level.WARNING,
-            "{0} ignored: illegal image filter value", ex, paramName);
-          neutralFilter = Optional.empty();
-        }
+        neutralFilter = Optional.ofNullable(filter);
       }
       return neutralFilter.orElse(null);
     }
