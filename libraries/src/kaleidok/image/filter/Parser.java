@@ -1,7 +1,5 @@
 package kaleidok.image.filter;
 
-import kaleidok.util.function.BinaryFloatFunction;
-
 import java.awt.image.RGBImageFilter;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -12,7 +10,7 @@ import java.util.stream.DoubleStream;
 public final class Parser
 {
   public static final Pattern IMAGE_FILTER_SPEC_PATTERN = Pattern.compile(
-    "^(?<operator>[*/+-]?)\\s*(?<colormodel>\\w+)\\s*\\(\\s*(?<args>[^\\s,)]+(?:\\s*,\\s*[^\\s,)]+)*)\\s*\\)",
+    "(?<operator>[*/^+-]?)\\s*(?<colormodel>\\w+)\\s*\\(\\s*(?<args>[^\\s,)]+(?:\\s*,\\s*[^\\s,)]+)*)\\s*\\)",
     Pattern.CASE_INSENSITIVE);
 
   public static final Pattern ARGUMENT_DELIMITER_PATTERN = Pattern.compile("\\s*,\\s*");
@@ -41,31 +39,15 @@ public final class Parser
 
     int operatorStart = m.start("operator"),
       operatorLen = m.end("operator") - operatorStart;
-    char operatorChar =
-      (operatorLen == 1) ? s.charAt(operatorStart) :
-      (operatorLen == 0) ? '+' :
-        '\0';
-    BinaryFloatFunction operator;
-    switch (operatorChar)
+    char operatorChar = (operatorLen != 0) ? s.charAt(operatorStart) : '+';
+    HSBAdjustFilter.FilterMode filterMode;
+    try
     {
-    case '+':
-      operator = (a, b) -> a + b;
-      break;
-
-    case '-':
-      operator = (a, b) -> a - b;
-      break;
-
-    case '*':
-      operator = (a, b) -> a * b;
-      break;
-
-    case '/':
-      operator = (a, b) -> a / b;
-      break;
-
-    default:
-      throw new AssertionError("Unexpected operator");
+      filterMode = HSBAdjustFilter.FilterMode.fromSymbol(operatorChar);
+    }
+    catch (IllegalArgumentException ex)
+    {
+      throw new AssertionError("Unexpected operator", ex);
     }
 
     //noinspection SpellCheckingInspection
@@ -75,7 +57,7 @@ public final class Parser
     case "hsb":
       checkArgumentCount(3, args.length, colorModel);
       return new HSBAdjustFilter(
-        (float) args[0], (float) args[1], (float) args[2], operator);
+        (float) args[0], (float) args[1], (float) args[2], filterMode);
 
     case "rgb":
     default:
