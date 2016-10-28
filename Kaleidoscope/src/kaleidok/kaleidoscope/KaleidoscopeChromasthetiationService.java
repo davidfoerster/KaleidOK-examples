@@ -35,9 +35,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -201,13 +201,14 @@ public final class KaleidoscopeChromasthetiationService
     int threadPoolSize = DefaultValueParser.parseInt(
       parameters.get(
         ChromasthetiationService.class.getCanonicalName() + ".threads"),
-      ChromasthetiationService.DEFAULT_THREAD_POOL_SIZE);
+      DEFAULT_THREAD_POOL_SIZE);
+    threadPoolSize = (threadPoolSize != 0) ?
+      Math.max(threadPoolSize, 1) :
+      Integer.MAX_VALUE;
 
-    ThreadFactory threadFactory =
-      new GroupedThreadFactory("Chromasthetiation", true);
-    return (threadPoolSize == 0) ?
-      Executors.newCachedThreadPool(threadFactory) :
-      Executors.newFixedThreadPool(threadPoolSize, threadFactory);
+    return new ThreadPoolExecutor(0, threadPoolSize, 30, TimeUnit.SECONDS,
+      new ArrayBlockingQueue<>(1 << 6),
+      new GroupedThreadFactory("Chromasthetiation", true));
   }
 
 
