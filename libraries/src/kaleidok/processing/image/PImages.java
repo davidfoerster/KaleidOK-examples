@@ -55,6 +55,9 @@ public final class PImages
         IMAGE_TYPE_PREFERENCE_ORDER, type.getBufferedImageType());
       if (priority != INDEX_NOT_FOUND && priority < bestPriority)
       {
+        if (priority == 0)
+          return type;
+
         bestPriority = priority;
         bestType = type;
       }
@@ -186,6 +189,8 @@ public final class PImages
   }
 
 
+  public static final int RGB_MASK = (1 << (3 * Byte.SIZE)) - 1;
+
   @SuppressWarnings("AssignmentToForLoopParameter")
   public static PImage filter( PImage src, PImage dst, RGBImageFilter filter )
   {
@@ -208,7 +213,7 @@ public final class PImages
       for (int x = 0; x < width; x++, i++)
       {
         int px = spx[i];
-        dpx[i] = filter.filterRGB(x, y, px & 0x00ffffff) | (px & 0xff000000);
+        dpx[i] = filter.filterRGB(x, y, px & RGB_MASK) | (px & ~RGB_MASK);
       }
     }
 

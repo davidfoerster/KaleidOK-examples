@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -131,16 +132,13 @@ public final class KaleidoscopeChromasthetiationService
   {
     String sKey = parent.parseStringOrFile(
       parent.getParameterMap().get("com.flickr.api.key"), '@');
-    if (sKey != null && !sKey.isEmpty())
-    {
-      String[] aKey = KEY_SEPARATOR_PATTERN.split(sKey, 2);
-      if (aKey.length == 2)
-        return aKey;
-
-      throw new IllegalArgumentException(
-        "Malformed Flickr API key: " + sKey);
-    }
-    return null;
+    if (sKey == null || sKey.isEmpty())
+      return null;
+    Matcher m = KEY_SEPARATOR_PATTERN.matcher(sKey);
+    if (!m.find())
+      throw new IllegalArgumentException("Malformed Flickr API key: " + sKey);
+    return new String[]{
+      sKey.substring(0, m.start()), sKey.substring(m.end()) };
   }
 
 
@@ -171,9 +169,8 @@ public final class KaleidoscopeChromasthetiationService
           .setSharedCache(false)
           .setAllow303Caching(true)
           .setHeuristicCachingEnabled(true)
-          .setHeuristicCoefficient(0.5f)
+          .setHeuristicCoefficient(1)
           .setHeuristicDefaultLifetime(TimeUnit.DAYS.toSeconds(28))
-          .setAsynchronousWorkersCore(0)
           .build());
 
       try
