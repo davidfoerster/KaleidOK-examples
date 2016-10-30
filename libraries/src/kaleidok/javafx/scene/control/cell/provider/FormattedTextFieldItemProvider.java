@@ -14,6 +14,7 @@ import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
+import kaleidok.util.function.Functions;
 
 import java.util.Objects;
 
@@ -87,23 +88,8 @@ public class FormattedTextFieldItemProvider<T>
     }
     catch (final RuntimeException ex)
     {
-      Platform.runLater(() -> {
-        Throwable cause = ex;
-        String msg;
-        do
-        {
-          msg = cause.getLocalizedMessage();
-          if (msg != null && !msg.isEmpty())
-            break;
-          cause = cause.getCause();
-        }
-        while (cause != null);
-
-        if (msg == null || msg.isEmpty())
-          msg = "Invalid value (" + ex.getClass().getSimpleName() + ')';
-        showTooltip(textField, msg);
-      });
-
+      final String msg = getExceptionMessage(ex);
+      Platform.runLater(() -> showTooltip(textField, msg));
       newValue = null;
     }
 
@@ -138,12 +124,31 @@ public class FormattedTextFieldItemProvider<T>
   private static void showTooltip( Node anchor, String message )
   {
     Tooltip tooltip = (Tooltip) anchor.getProperties()
-      .computeIfAbsent(TOOLTIP_KEY, (k) -> new Tooltip());
+      .computeIfAbsent(TOOLTIP_KEY, Functions.ignoreArg(Tooltip::new));
     tooltip.setText(message);
     if (!tooltip.isShowing())
     {
       Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
       tooltip.show(anchor, b.getMinX(), b.getMaxY() + 5);
     }
+  }
+
+
+  private static String getExceptionMessage( Exception ex )
+  {
+    Throwable cause = ex;
+    do
+    {
+      String msg = cause.getLocalizedMessage();
+      if (msg != null && !msg.isEmpty())
+        return msg;
+      cause = cause.getCause();
+    }
+    while (cause != null);
+
+    String name = ex.getClass().getSimpleName();
+    if (name.isEmpty())
+      name = ex.getClass().getName();
+    return "Invalid value (" + name + ')';
   }
 }
