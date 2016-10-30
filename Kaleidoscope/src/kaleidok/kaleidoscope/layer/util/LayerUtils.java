@@ -4,7 +4,8 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedDoubleProperty;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
-import kaleidok.javafx.util.converter.NumberStringConverterBase;
+import kaleidok.javafx.util.converter.CachingFormattedStringConverter;
+import kaleidok.javafx.util.converter.DoubleNumberStringConverter;
 import kaleidok.text.Numbers;
 
 import java.text.DecimalFormat;
@@ -25,10 +26,10 @@ public final class LayerUtils
 
     if (fmt == null)
     {
-      if (converter instanceof NumberStringConverterBase)
+      if (converter instanceof CachingFormattedStringConverter)
       {
-        NumberStringConverterBase<Double> nsc =
-          (NumberStringConverterBase<Double>) converter;
+        CachingFormattedStringConverter<Double, ? extends NumberFormat> nsc =
+          (CachingFormattedStringConverter<Double, ? extends NumberFormat>) converter;
         fmt = nsc.getFormat();
         nsc.resetCaches();
       }
@@ -41,10 +42,10 @@ public final class LayerUtils
     Numbers.adjustFractionalDigits(fmt, property.get(),
       svf.getMin(), svf.getMax(), svf.getAmountToStepBy());
 
-    if (!(converter instanceof NumberStringConverterBase))
+    if (!(converter instanceof CachingFormattedStringConverter))
     {
       svf.setConverter(
-        new NumberStringConverterBase.DoubleNumberStringConverter(fmt));
+        new DoubleNumberStringConverter(fmt));
     }
 
     return property;
