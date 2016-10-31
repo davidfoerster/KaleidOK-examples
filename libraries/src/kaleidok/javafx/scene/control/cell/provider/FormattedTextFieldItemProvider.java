@@ -5,11 +5,12 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.event.ActionEvent;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
-import javafx.scene.control.Cell;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeTableCell;
 import javafx.util.StringConverter;
+import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
 import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
@@ -35,34 +36,27 @@ public class FormattedTextFieldItemProvider<T>
   }
 
 
-  private static final String STRING_CONVERTER_KEY =
-    FormattedTextFieldItemProvider.class.getName() + '.' + StringConverter.class.getSimpleName();
-
-
   @Override
   protected EditorNodeInfo<TextField, T> callTypeChecked(
     DynamicEditableTreeItem<T, TextField> item )
   {
     TextField textField = new TextField();
-    StringConverter<T> converter = getAspect(item);
-    textField.getProperties().put(STRING_CONVERTER_KEY, converter);
     textField.setOnAction(FormattedTextFieldItemProvider::handleActionEvent);
-
     textField.parentProperty().addListener((obs, oldValue, newValue) -> {
         if (oldValue != null && newValue == null)
           removeTooltip((Node) ((ReadOnlyProperty<?>) obs).getBean());
       });
 
     return EditorNodeInfo.of(textField,
-      FormattedTextFieldItemProvider::handleValueChange, converter);
+      FormattedTextFieldItemProvider::handleValueChange, getAspect(item));
   }
 
 
-  @SuppressWarnings("unchecked")
   private static <T> StringConverter<T> getStringConverter(
-    TextInputControl textField )
+    TreeTableCell<? extends AspectedReadOnlyProperty<T>, ?> cell )
   {
-    return (StringConverter<T>) textField.getProperties().get(STRING_CONVERTER_KEY);
+    return StringConverterAspectTag.<T>getInstance().of(
+      cell.getTreeTableRow().getTreeItem().getValue());
   }
 
 
@@ -70,17 +64,22 @@ public class FormattedTextFieldItemProvider<T>
     EditableTreeTableCell<T, TextField> cell, T value )
   {
     TextField textField = cell.getEditorNode();
-    textField.setText(
-      (value != null) ?
-        getStringConverter(textField).toString(value) :
-        "");
+    //noinspection unchecked,RedundantCast
+    textField.setText(getStringConverter(
+        (TreeTableCell<? extends AspectedReadOnlyProperty<T>, ?>)
+          (TreeTableCell<?,?>) cell)
+      .toString(value));
   }
 
 
   private static <T> void handleActionEvent( ActionEvent ev )
   {
     final TextInputControl textField = (TextInputControl) ev.getSource();
-    StringConverter<T> converter = getStringConverter(textField);
+    @SuppressWarnings("unchecked")
+    TreeTableCell<? extends AspectedReadOnlyProperty<T>, T> cell =
+      (TreeTableCell<? extends AspectedReadOnlyProperty<T>, T>)
+        textField.getParent();
+    StringConverter<T> converter = getStringConverter(cell);
     T newValue;
     try
     {
@@ -96,11 +95,7 @@ public class FormattedTextFieldItemProvider<T>
     if (newValue != null)
     {
       removeTooltip(textField);
-
-      @SuppressWarnings("unchecked")
-      Cell<T> cell = (Cell<T>) textField.getParent();
       T oldValue = cell.isEmpty() ? null : cell.getItem();
-
       if (!Objects.equals(oldValue, newValue))
         cell.commitEdit(newValue);
     }
