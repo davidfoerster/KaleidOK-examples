@@ -132,12 +132,39 @@ public class HSBAdjustFilter extends HSBImageFilter
 
 
   @Override
+  public boolean isNeutral()
+  {
+    if (filterMode instanceof FilterMode)
+    {
+      switch ((FilterMode) filterMode)
+      {
+      case ADD:
+      case SUBTRACT:
+        return saturation == 0 && brightness == 0 && normalizeHue(hue) == 0;
+
+      case MULTIPLY:
+      case DIVIDE:
+      case POWER:
+        return saturation == 1 && brightness == 1 && hue == 1;
+      }
+    }
+    return false;
+  }
+
+
+  @Override
   public float[] filterHSB( int x, int y, float[] hsb )
   {
     BinaryFloatFunction filterMode = this.filterMode;
-    hsb[0] = filterMode.applyAsFloat(hsb[0], hue) % (float)(Math.PI * 2);
+    hsb[0] = normalizeHue(filterMode.applyAsFloat(hsb[0], hue));
     hsb[1] = clamp(filterMode.applyAsFloat(hsb[1], saturation), 0, 1);
     hsb[2] = clamp(filterMode.applyAsFloat(hsb[2], brightness), 0, 1);
     return hsb;
+  }
+
+
+  private static float normalizeHue( float hue )
+  {
+    return hue % (float)(Math.PI * 2);
   }
 }

@@ -7,6 +7,7 @@ import kaleidok.exaleads.chromatik.Chromasthetiator;
 import kaleidok.exaleads.chromatik.PropertyChromasthetiator;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.flickr.FlickrAsync;
+import kaleidok.image.filter.HSBImageFilter;
 import kaleidok.image.filter.RGBImageFilterFormat;
 import kaleidok.javafx.beans.property.AspectedObjectProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
@@ -351,8 +352,13 @@ public final class KaleidoscopeChromasthetiationService
       if (emoState.getStrongestEmotion().getType() == Emotion.NEUTRAL)
       {
         RGBImageFilter filter = getNeutralFilter();
-        if (filter != null)
-          pImage = PImages.filter(pImage, pImage, (RGBImageFilter) filter.clone());
+        if (filter != null &&
+          !(filter instanceof HSBImageFilter &&
+            ((HSBImageFilter) filter).isNeutral()))
+        {
+          pImage =
+            PImages.filter(pImage, pImage, (RGBImageFilter) filter.clone());
+        }
       }
       PImageFuture fImage = PImageFuture.from(pImage);
 
