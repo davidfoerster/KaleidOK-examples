@@ -1,6 +1,8 @@
 package kaleidok.kaleidoscope.layer;
 
-import javafx.beans.property.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedIntegerProperty;
 import kaleidok.javafx.beans.property.PropertyUtils;
@@ -112,25 +114,37 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
 
   public PImage getCurrentImage()
   {
-    PImageFuture nextFuture = nextImage.getAndSet(null);
-    if (nextFuture != null)
+    PImageFuture nextFuture = getNextAvailableImage();
+    if (nextFuture != null && !nextFuture.isCancelled()) try
     {
-      if (!nextFuture.isDone())
-      {
-        nextImage.compareAndSet(null, nextFuture);
-      }
-      else if (!nextFuture.isCancelled()) try
-      {
-        PImage next = nextFuture.get();
-        if (next != null && next.width > 0 && next.height > 0)
-          setCurrentImage(next);
-      }
-      catch (InterruptedException | ExecutionException ex)
-      {
-        logFutureImageException(nextFuture, ex);
-      }
+      PImage next = nextFuture.get();
+      if (next != null && next.width > 0 && next.height > 0)
+        setCurrentImage(next);
+    }
+    catch (InterruptedException ex)
+    {
+      logFutureImageException(nextFuture, ex);
+    }
+    catch (ExecutionException ex)
+    {
+      logFutureImageException(nextFuture, ex.getCause());
     }
     return currentImage.image;
+  }
+
+
+  private PImageFuture getNextAvailableImage()
+  {
+    PImageFuture nextFuture;
+    do
+    {
+      nextFuture = nextImage.get();
+      if (nextFuture == null || !nextFuture.isDone())
+        return null;
+    }
+    while (!nextImage.compareAndSet(nextFuture, null));
+
+    return nextFuture;
   }
 
 
@@ -149,13 +163,9 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
 
   private static void logFutureImageException( PImageFuture f, Throwable t )
   {
-    if (t instanceof ExecutionException)
-      t = t.getCause();
-
     LoggingUtils.logThrown(
       Logger.getLogger(f.getClass().getCanonicalName()), Level.WARNING,
       "Couldn't construct image from: {0}", t, f);
-
   }
 
 
