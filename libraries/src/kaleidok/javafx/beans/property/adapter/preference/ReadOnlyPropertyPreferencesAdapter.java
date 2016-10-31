@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static kaleidok.util.Objects.requireNonNull;
+import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
 public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyProperty<? extends T>>
@@ -169,7 +170,18 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
         new Object[]{ preferences.absolutePath(), key, property.getValue() });
     }
 
-    doSave();
+    try
+    {
+      doSave();
+    }
+    catch (RuntimeException ex)
+    {
+      if (logger != null)
+      {
+        logThrown(logger, Level.WARNING, "Couldn't save preference {0}/{1}", ex,
+          new Object[]{ preferences.absolutePath(), key });
+      }
+    }
   }
 
 

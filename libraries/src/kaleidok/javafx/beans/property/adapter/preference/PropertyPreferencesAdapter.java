@@ -9,6 +9,8 @@ import java.util.logging.Level;
 import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
 
+import static kaleidok.util.logging.LoggingUtils.logThrown;
+
 
 public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
   extends ReadOnlyPropertyPreferencesAdapter<T, P>
@@ -43,14 +45,29 @@ public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
   {
     String value = preferences.get(key, null);
     if (value != null)
-      doLoad(value);
+    {
+      try
+      {
+        doLoad(value);
+      }
+      catch (RuntimeException ex)
+      {
+        if (logger != null)
+        {
+          logThrown(logger, Level.WARNING,
+            "Error loading preference value {0}/{1}: {2}", ex,
+            new Object[]{ preferences.absolutePath(), key, value });
+        }
+        value = null;
+      }
+    }
 
     if (logger != null && logger.isLoggable(LOG_LEVEL))
     {
       logger.log(LOG_LEVEL,
         (value != null) ?
           "Loaded preference value {0}/{1} = \"{2}\"" :
-          "Loaded preference value {0}/{1} but there was no entry",
+          "Loaded preference value {0}/{1} but there was no valid entry",
         new Object[]{ preferences.absolutePath(), key, property.getValue() });
     }
   }
