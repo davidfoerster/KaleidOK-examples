@@ -1,13 +1,20 @@
 package kaleidok.kaleidoscope;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.util.StringConverter;
 import kaleidok.exaleads.chromatik.ChromasthetiationService;
 import kaleidok.exaleads.chromatik.Chromasthetiator;
 import kaleidok.exaleads.chromatik.PropertyChromasthetiator;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.flickr.FlickrAsync;
 import kaleidok.image.filter.RGBImageFilterFormat;
+import kaleidok.javafx.beans.property.AspectedObjectProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.adapter.preference.StringConversionPropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
+import kaleidok.javafx.util.converter.CachingFormattedStringConverter;
 import kaleidok.processing.image.PImages;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.util.concurrent.GroupedThreadFactory;
@@ -33,12 +40,9 @@ import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.ParsePosition;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -76,12 +80,24 @@ public final class KaleidoscopeChromasthetiationService
 
   public BiConsumer<String, Collection<? super Photo>> imageQueueCompletionCallback = null;
 
+  private final AspectedObjectProperty<RGBImageFilter> neutralFilter;
+
 
   private KaleidoscopeChromasthetiationService( Kaleidoscope parent,
     ExecutorService executor, Executor httpExecutor )
   {
     super(executor, Async.newInstance().use(executor).use(httpExecutor));
     this.parent = parent;
+
+    neutralFilter = new AspectedObjectProperty<>(this, "neutral image filter");
+    StringConverter<RGBImageFilter> filterConverter =
+      new CachingFormattedStringConverter<>(new RGBImageFilterFormat(
+        NumberFormat.getNumberInstance(Locale.ROOT)));
+    neutralFilter.addAspect(StringConverterAspectTag.getInstance(),
+      filterConverter);
+    neutralFilter.addAspect(PropertyPreferencesAdapterTag.getInstance(),
+      new StringConversionPropertyPreferencesAdapter<>(neutralFilter, filterConverter));
+    loadDefaultNeutralFilter();
   }
 
 
@@ -235,6 +251,50 @@ public final class KaleidoscopeChromasthetiationService
   }
 
 
+  private void loadDefaultNeutralFilter()
+  {
+    neutralFilter
+      .getAspect(PropertyPreferencesAdapterTag.getWritableInstance())
+      .load();
+    if (neutralFilter.get() != null)
+      return;
+
+    String
+      paramName =
+        parent.getClass().getPackage().getName() +
+          ".images.filter.neutral",
+      filterStr = parent.getParameterMap().get(paramName);
+
+    if (filterStr != null && !filterStr.isEmpty()) try
+    {
+      neutralFilter.set(
+        neutralFilter.getAspect(StringConverterAspectTag.getInstance())
+          .fromString(filterStr));
+    }
+    catch (RuntimeException ex)
+    {
+      logThrown(logger, Level.WARNING,
+        "Illegal image filter value; {0} ignored.", ex, paramName);
+    }
+  }
+
+
+  public ObjectProperty<RGBImageFilter> neutralFilterProperty()
+  {
+    return neutralFilter;
+  }
+
+  public void setNeutralFilter( RGBImageFilter filter )
+  {
+    neutralFilter.set(filter);
+  }
+
+  public RGBImageFilter getNeutralFilter()
+  {
+    return neutralFilter.get();
+  }
+
+
   public void submit( final String text )
   {
     Consumer<Collection<? super Photo>> imageQueueCompletionCallback =
@@ -266,7 +326,10 @@ public final class KaleidoscopeChromasthetiationService
   public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    return getChromasthetiator().getPreferenceAdapters();
+    return Stream.concat(
+      getChromasthetiator().getPreferenceAdapters(),
+      Stream.of(neutralFilter.getAspect(
+        PropertyPreferencesAdapterTag.getWritableInstance())));
   }
 
 
@@ -274,8 +337,6 @@ public final class KaleidoscopeChromasthetiationService
     extends AbstractFutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>>
   {
     private final AtomicInteger imageListIndex = new AtomicInteger(0);
-
-    private Optional<RGBImageFilter> neutralFilter = null;
 
 
     @Override
@@ -321,36 +382,6 @@ public final class KaleidoscopeChromasthetiationService
         }
       }
       super.failed(ex);
-    }
-
-
-    private RGBImageFilter getNeutralFilter()
-    {
-      if (neutralFilter == null)
-      {
-        RGBImageFilter filter = null;
-        String
-          paramName =
-            parent.getClass().getPackage().getName() +
-              ".images.filter.neutral",
-          filterStr = parent.getParameterMap().get(paramName);
-        if (filterStr != null)
-        {
-          ParsePosition pos = new ParsePosition(0);
-          filter =
-            new RGBImageFilterFormat(NumberFormat.getNumberInstance(Locale.ROOT))
-              .parseObject(filterStr, pos);
-          if (filter == null)
-          {
-            logThrown(logger, Level.WARNING, "{0} ignored",
-              new ParseException("Illegal image filter value",
-                pos.getErrorIndex()),
-              paramName);
-          }
-        }
-        neutralFilter = Optional.ofNullable(filter);
-      }
-      return neutralFilter.orElse(null);
     }
   }
 }
