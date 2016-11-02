@@ -24,7 +24,6 @@ import kaleidok.flickr.Photo;
 import kaleidok.http.cache.DiskLruHttpCacheStorage;
 import kaleidok.http.cache.ExecutorSchedulingStrategy;
 import kaleidok.io.platform.PlatformPaths;
-import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.prefs.DefaultValueParser;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.fluent.Async;
@@ -360,11 +359,10 @@ public final class KaleidoscopeChromasthetiationService
             PImages.filter(pImage, pImage, (RGBImageFilter) filter.clone());
         }
       }
-      PImageFuture fImage = PImageFuture.from(pImage);
 
       LayerManager layers = parent.getLayers();
       int idx = imageListIndex.getAndIncrement() % layers.size();
-      layers.get(idx).setNextImage(fImage);
+      layers.get(idx).setNextImage(pImage);
     }
 
 

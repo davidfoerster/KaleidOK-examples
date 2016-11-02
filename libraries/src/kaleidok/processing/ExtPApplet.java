@@ -18,7 +18,7 @@ import kaleidok.processing.event.KeyEventSupport;
 import kaleidok.processing.event.KeyStroke;
 import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
-import kaleidok.processing.image.PImageFuture;
+import kaleidok.processing.image.PImageFutures;
 import kaleidok.util.Arrays;
 import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Threads;
@@ -43,11 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
@@ -324,7 +320,7 @@ public class ExtPApplet extends PApplet
   }
 
 
-  public PImageFuture getImageFuture( String path )
+  public Future<PImage> getImageFuture( String path )
   {
     URL url = this.getClass().getResource(path);
     if (url == null) {
@@ -338,9 +334,9 @@ public class ExtPApplet extends PApplet
   }
 
 
-  public PImageFuture getImageFuture( URL url )
+  public Future<PImage> getImageFuture( URL url )
   {
-    return thread(PImageFuture.from(url));
+    return thread(PImageFutures.from(url));
   }
 
 

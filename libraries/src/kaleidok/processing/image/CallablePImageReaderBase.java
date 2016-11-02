@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -144,9 +145,13 @@ public class CallablePImageReaderBase implements Callable<PImage>
   }
 
 
-  public PImageFuture asFuture()
+  private PImageFutureTask future = null;
+
+  public synchronized RunnableFuture<PImage> asFuture()
   {
-    return new PImageFutureTask();
+    if (future == null)
+      future = new PImageFutureTask();
+    return future;
   }
 
 
@@ -171,8 +176,7 @@ public class CallablePImageReaderBase implements Callable<PImage>
   }
 
 
-  protected class PImageFutureTask
-    extends FutureTask<PImage> implements PImageFuture
+  protected class PImageFutureTask extends FutureTask<PImage>
   {
     protected PImageFutureTask()
     {

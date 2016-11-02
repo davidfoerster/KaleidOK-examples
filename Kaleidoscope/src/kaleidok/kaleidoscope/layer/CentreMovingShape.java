@@ -7,13 +7,13 @@ import kaleidok.javafx.beans.property.AspectedDoubleProperty;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
 import kaleidok.processing.ExtPApplet;
-import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.CyclingList;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import static java.lang.Math.pow;
 import static kaleidok.kaleidoscope.layer.util.LayerUtils.adjustFormat;
@@ -28,7 +28,7 @@ import static kaleidok.util.Math.mapNormalized;
  */
 public class CentreMovingShape extends CircularImageLayer
 {
-  private final CyclingList<PImageFuture> images;
+  private final CyclingList<? extends Future<PImage>> images;
 
   private VolumeLevelProcessor volumeLevelProcessor;
 
@@ -39,7 +39,8 @@ public class CentreMovingShape extends CircularImageLayer
   protected final AspectedDoubleProperty exponent;
 
 
-  public CentreMovingShape( ExtPApplet parent, List<PImageFuture> images,
+  public CentreMovingShape( ExtPApplet parent,
+    List<? extends Future<PImage>> images,
     int segmentCount, double innerRadius, double outerRadius,
     VolumeLevelProcessor volumeLevelProcessor )
   {
@@ -49,8 +50,9 @@ public class CentreMovingShape extends CircularImageLayer
 
 
   private CentreMovingShape( ExtPApplet parent,
-    CyclingList<PImageFuture> images, int segmentCount, double innerRadius,
-    double outerRadius, VolumeLevelProcessor volumeLevelProcessor )
+    CyclingList<? extends Future<PImage>> images,
+    int segmentCount, double innerRadius, double outerRadius,
+    VolumeLevelProcessor volumeLevelProcessor )
   {
     super(parent, segmentCount);
     this.innerRadius.set(innerRadius);

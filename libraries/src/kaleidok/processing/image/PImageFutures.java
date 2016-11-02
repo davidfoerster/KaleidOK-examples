@@ -1,5 +1,6 @@
 package kaleidok.processing.image;
 
+import kaleidok.util.concurrent.ImmediateFuture;
 import processing.core.PImage;
 
 import java.awt.Image;
@@ -7,41 +8,41 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 
 import static kaleidok.processing.image.PImages.IMAGE_TYPE_PREFERENCE_ORDER;
 
 
-public interface PImageFuture
-  extends RunnableFuture<PImage>
+public final class PImageFutures
 {
-  PImageFuture EMPTY = new ImmediatePImageFuture(null);
+  private PImageFutures() { }
 
 
-  static PImageFuture from( PImage img )
+  public static RunnableFuture<PImage> from( PImage img )
   {
-    return (img != null) ? new ImmediatePImageFuture(img) : EMPTY;
+    return ImmediateFuture.of(img);
   }
 
 
-  static PImageFuture from( final Image img )
+  public static RunnableFuture<PImage> from( final Image img )
   {
     return
       (img instanceof BufferedImage &&
        ((BufferedImage) img).getType() == IMAGE_TYPE_PREFERENCE_ORDER[0])
       ?
-        new ImmediatePImageFuture(new PImage(img)) :
-        new SimplePImageFutureTask(() -> PImages.from(img), img);
+        ImmediateFuture.of(new PImage(img)) :
+        new FutureTask<>(() -> PImages.from(img));
   }
 
 
-  static PImageFuture from( File f )
+  public static RunnableFuture<PImage> from( File f )
   {
     return new CallablePImageFileReader(f).asFuture();
   }
 
 
-  static PImageFuture from( URL url )
+  public static RunnableFuture<PImage> from( URL url )
   {
     if ("file".equals(url.getProtocol())) try
     {

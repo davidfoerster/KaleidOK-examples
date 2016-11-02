@@ -6,9 +6,9 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.kaleidoscope.layer.*;
-import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.Arrays;
 import kaleidok.util.Strings;
+import kaleidok.util.concurrent.ImmediateFuture;
 import kaleidok.util.prefs.PropertyLoader;
 import org.apache.commons.io.FilenameUtils;
 import processing.core.PImage;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -39,7 +40,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
 
   private final List<ImageLayer> layers;
 
-  public List<PImageFuture> images; // list to hold input images
+  public List<Future<PImage>> images; // list to hold input images
 
   private SpectrogramLayer spectrogramLayer;
   private OuterMovingShape outerMovingShape;
@@ -195,7 +196,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
   BackgroundLayer getBackgroundLayer()
   {
     if (backgroundLayer == null) {
-      final List<PImageFuture> images = getImages();
+      final List<Future<PImage>> images = getImages();
       backgroundLayer = new BackgroundLayer(parent);
       if (!images.isEmpty()) {
         backgroundLayer.setNextImage(
@@ -206,7 +207,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
   }
 
 
-  public List<PImageFuture> getImages()
+  public List<Future<PImage>> getImages()
   {
     if (images == null)
     {
@@ -221,7 +222,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
             (FilenameUtils.getPrefixLength(s) == 0 && !Strings.looksLikeUrl(s)) ? "/images/".concat(s) : s))
           .collect(Collectors.toList());
       if (images.isEmpty())
-        images.add(PImageFuture.EMPTY);
+        images.add(ImmediateFuture.empty());
       int imageCount = images.size();
       for (int i = images.size(); i < MIN_IMAGES; i++)
         images.add(images.get(i % imageCount));
@@ -232,7 +233,7 @@ public class LayerManager implements List<ImageLayer>, Runnable
 
   public void waitForImages()
   {
-    for (PImageFuture futureImg: getImages()) {
+    for (Future<PImage> futureImg: getImages()) {
       try {
         PImage img;
         while (true) {

@@ -10,16 +10,22 @@ public class ImmediateFuture<V> implements RunnableFuture<V>
 
 
   @SuppressWarnings("unchecked")
-  public static <V> ImmediateFuture<V> getEmpty()
+  public static <V> ImmediateFuture<V> empty()
   {
     return (ImmediateFuture<V>) EMPTY;
+  }
+
+
+  public static <V> ImmediateFuture<V> of( V value )
+  {
+    return (value != null) ? new ImmediateFuture<>(value) : empty();
   }
 
 
   private final V value;
 
 
-  public ImmediateFuture( V value )
+  protected ImmediateFuture( V value )
   {
     this.value = value;
   }

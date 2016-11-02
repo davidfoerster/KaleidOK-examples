@@ -13,6 +13,7 @@ import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.image.PImageFuture;
+import kaleidok.util.concurrent.ImmediateFuture;
 import kaleidok.util.logging.LoggingUtils;
 import kaleidok.util.SynchronizedFormat;
 import processing.core.PImage;
@@ -21,6 +22,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +37,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
 
   protected final AspectedIntegerProperty wireframe;
 
-  private final AtomicReference<PImageFuture> nextImage =
+  private final AtomicReference<Future<PImage>> nextImage =
     new AtomicReference<>();
 
   private CurrentImage currentImage = CurrentImage.NULL_IMAGE;
@@ -101,14 +103,19 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   }
 
 
-  public PImageFuture getNextImage()
+  public Future<PImage> getNextImage()
   {
     return nextImage.get();
   }
 
-  public void setNextImage( PImageFuture img )
+  public void setNextImage( Future<PImage> img )
   {
     nextImage.set(img);
+  }
+
+  public void setNextImage( PImage img )
+  {
+    setNextImage(ImmediateFuture.of(img));
   }
 
 
@@ -161,7 +168,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   }
 
 
-  private static void logFutureImageException( PImageFuture f, Throwable t )
+  private static void logFutureImageException( Future<PImage> f, Throwable t )
   {
     LoggingUtils.logThrown(
       Logger.getLogger(f.getClass().getCanonicalName()), Level.WARNING,
