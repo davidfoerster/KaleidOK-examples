@@ -17,7 +17,7 @@ public class BackgroundLayer extends ImageLayer
   public void run()
   {
     PImage bgImage;
-    if (wireframe.get() <= 0 && (bgImage = getCurrentImage()) != null)
+    if (wireframe.get() <= 0 && (bgImage = updateAndGetCurrentImage()) != null)
     {
       // background image
       final ExtPApplet parent = this.parent;

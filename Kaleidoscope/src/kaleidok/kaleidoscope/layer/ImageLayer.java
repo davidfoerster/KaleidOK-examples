@@ -12,15 +12,13 @@ import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.processing.ExtPApplet;
-import kaleidok.processing.image.PImageFuture;
 import kaleidok.util.concurrent.ImmediateFuture;
+import kaleidok.util.function.ChangeListener;
 import kaleidok.util.logging.LoggingUtils;
-import kaleidok.util.SynchronizedFormat;
 import processing.core.PImage;
 
-import java.text.MessageFormat;
-import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,7 +40,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
 
   private CurrentImage currentImage = CurrentImage.NULL_IMAGE;
 
-  private final SynchronizedFormat screenshotPathPattern = new SynchronizedFormat();
+  public ChangeListener<? super ImageLayer, ? super PImage> imageChangeCallback;
 
 
   protected ImageLayer( ExtPApplet parent )
@@ -119,30 +117,47 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   }
 
 
-  public PImage getCurrentImage()
+  /**
+   * Updates and retrieves the current image for this layer. If the
+   * {@link Future} returned by {@link #getNextImage()} is
+   * {@link Future#isDone() done} and, its wrapped value is used as the
+   * new
+   * current image and the next image is reset as if calling
+   * {@link #setNextImage(Future) setNextImage(null)}.
+   * <p>
+   * {@link Future#isCancelled() Cancelled} futures are skipped silently.
+   * <p>
+   * This method is supposed to be called from the renderer thread only.
+   *
+   * @return The current image for this layer.
+   */
+  protected PImage updateAndGetCurrentImage()
   {
-    PImageFuture nextFuture = getNextAvailableImage();
-    if (nextFuture != null && !nextFuture.isCancelled()) try
+    Optional<PImage> oNext = getNextAvailableImage();
+    if (oNext != null)
     {
-      PImage next = nextFuture.get();
-      if (next != null && next.width > 0 && next.height > 0)
-        setCurrentImage(next);
-    }
-    catch (InterruptedException ex)
-    {
-      logFutureImageException(nextFuture, ex);
-    }
-    catch (ExecutionException ex)
-    {
-      logFutureImageException(nextFuture, ex.getCause());
+      PImage next = oNext.orElse(null),
+        previous = currentImage.image;
+      if (next != null && (next.width <= 0 || next.height <= 0))
+        next = null;
+      if (next != previous)
+      {
+        assert parent.isDrawingThread();
+        this.currentImage = CurrentImage.newInstance(next);
+
+        ChangeListener<? super ImageLayer, ? super PImage> callback =
+          this.imageChangeCallback;
+        if (callback != null)
+          callback.notifyChange(this, previous, next);
+      }
     }
     return currentImage.image;
   }
 
 
-  private PImageFuture getNextAvailableImage()
+  private Optional<PImage> getNextAvailableImage()
   {
-    PImageFuture nextFuture;
+    Future<PImage> nextFuture;
     do
     {
       nextFuture = nextImage.get();
@@ -151,20 +166,22 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
     }
     while (!nextImage.compareAndSet(nextFuture, null));
 
-    return nextFuture;
-  }
-
-
-  public void setCurrentImage( PImage image )
-  {
-    if (image != null)
+    if (!nextFuture.isCancelled())
     {
-      // don't save screenshots of the initial images
-      PImage currentImage = this.currentImage.image;
-      if (currentImage != null && currentImage != image)
-        saveScreenshot();
+      try
+      {
+        return Optional.ofNullable(nextFuture.get());
+      }
+      catch (InterruptedException ex)
+      {
+        logFutureImageException(nextFuture, ex);
+      }
+      catch (ExecutionException ex)
+      {
+        logFutureImageException(nextFuture, ex.getCause());
+      }
     }
-    this.currentImage = CurrentImage.newInstance(image);
+    return null;
   }
 
 
@@ -215,32 +232,6 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
       }
 
       this.image = image;
-    }
-  }
-
-
-  private void saveScreenshot()
-  {
-    if (screenshotPathPattern.hasUnderlying())
-    {
-      String pathName;
-      synchronized (screenshotPathPattern)
-      {
-        if (!screenshotPathPattern.hasUnderlying())
-          return;
-        pathName = screenshotPathPattern.format(
-          new Object[]{ new Date(), parent.frameCount }, null);
-      }
-      parent.save(pathName, true);
-    }
-  }
-
-
-  public void setScreenshotPathPattern( MessageFormat format )
-  {
-    synchronized (screenshotPathPattern)
-    {
-      screenshotPathPattern.setUnderlying(format);
     }
   }
 

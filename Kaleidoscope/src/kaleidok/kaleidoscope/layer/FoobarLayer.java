@@ -164,9 +164,12 @@ public class FoobarLayer extends CircularImageLayer
     parent.strokeWeight(parent.g.strokeWeight / outerRadius);
     parent.beginShape(PConstants.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
     PImage img;
-    if (wireframe <= 0 && (img = getCurrentImage()) != null) {
+    if (wireframe <= 0 && (img = updateAndGetCurrentImage()) != null)
+    {
       parent.texture(img); // set the texture to use
-    } else {
+    }
+    else
+    {
       parent.noFill();
     }
 

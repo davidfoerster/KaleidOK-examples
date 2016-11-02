@@ -142,11 +142,14 @@ public class SpectrogramLayer extends CircularImageLayer
     parent.scale(outerRadius);
 
     PImage img;
-    if (wireframe <= 0 && (img = getCurrentImage()) != null) {
+    if (wireframe <= 0 && (img = updateAndGetCurrentImage()) != null)
+    {
       parent.noStroke();
       parent.beginShape(PConstants.TRIANGLE_STRIP); // input the shapeMode in the beginShape() call
       parent.texture(img); // set the texture to use
-    } else {
+    }
+    else
+    {
       parent.noFill();
       parent.stroke(0, 255, 0);
       parent.strokeWeight(parent.g.strokeWeight * 0.5f / outerRadius);

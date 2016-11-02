@@ -28,6 +28,7 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
 import processing.core.PSurface;
+import processing.opengl.PGraphicsOpenGL;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.IOException;
@@ -697,5 +698,12 @@ public class ExtPApplet extends PApplet
       }
     }
     return null;
+  }
+
+
+  public boolean isDrawingThread()
+  {
+    checkRendererSupported("isDrawingThread", true);
+    return ((PGraphicsOpenGL) g).pgl.threadIsCurrent();
   }
 }

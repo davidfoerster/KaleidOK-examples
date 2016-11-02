@@ -65,10 +65,13 @@ public class OuterMovingShape extends CircularImageLayer
 
     parent.beginShape(PConstants.TRIANGLE_FAN); // input the shapeMode in the beginShape() call
     PImage img;
-    if (wireframe <= 0 && (img = getCurrentImage()) != null) {
+    if (wireframe <= 0 && (img = updateAndGetCurrentImage()) != null)
+    {
       parent.texture(img); // set the texture to use
       parent.noStroke(); // turn off stroke
-    } else {
+    }
+    else
+    {
       parent.noFill();
       parent.stroke(128);
       parent.strokeWeight(parent.g.strokeWeight * 0.5f / outerRadius);

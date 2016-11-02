@@ -6,13 +6,17 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.kaleidoscope.layer.*;
+import kaleidok.text.FormatUtils;
 import kaleidok.util.Arrays;
 import kaleidok.util.Strings;
+import kaleidok.util.SynchronizedFormat;
 import kaleidok.util.concurrent.ImmediateFuture;
+import kaleidok.util.function.ChangeListener;
 import kaleidok.util.prefs.PropertyLoader;
 import org.apache.commons.io.FilenameUtils;
 import processing.core.PImage;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -30,7 +34,7 @@ import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
-public class LayerManager implements List<ImageLayer>, Runnable
+public final class LayerManager implements List<ImageLayer>, Runnable
 {
   private static final int MIN_IMAGES = 5;
 
@@ -48,6 +52,9 @@ public class LayerManager implements List<ImageLayer>, Runnable
   private CentreMovingShape centreLayer;
   private BackgroundLayer backgroundLayer;
 
+  private final SynchronizedFormat screenshotPathPattern =
+    new SynchronizedFormat();
+
 
   LayerManager( Kaleidoscope parent )
   {
@@ -60,18 +67,68 @@ public class LayerManager implements List<ImageLayer>, Runnable
       getFoobarLayer(),
       getCentreLayer()));
 
-    applyLayerProperties();
+    initScreenshotPattern();
+    initLayerProperties();
 
     layers.forEach(ImageLayer::init);
   }
 
 
-  private int applyLayerProperties()
+  private void initScreenshotPattern()
   {
-    final MessageFormat screenshotPathPattern = getScreenshotPathPattern();
-    this.forEach((l) ->
-      l.setScreenshotPathPattern(screenshotPathPattern));
+    String sPattern = parent.getParameterMap().get(
+      parent.getClass().getPackage().getName() + ".screenshots.pattern");
+    if (sPattern != null && !sPattern.isEmpty())
+    {
+      MessageFormat fmt =
+        FormatUtils.verifyFormatThrowing(MessageFormat::new, sPattern,
+          new Object[]{ new Date(0), 0 }, LayerManager::verifyScreenshotPath,
+          (ex, o) -> logThrown(logger, Level.WARNING,
+              "Invalid screenshot path pattern: {0}", ex, o));
 
+      if (fmt != null)
+        setScreenshotPathPattern(fmt);
+    }
+
+    final ChangeListener<Object, Object> screenshotCallback =
+      ( owner, oldValue, newValue ) -> {
+        if (oldValue != null)
+          saveScreenshot();
+      };
+    this.forEach(
+      (l) -> l.imageChangeCallback = screenshotCallback);
+  }
+
+
+  private static boolean verifyScreenshotPath( CharSequence filename )
+  {
+    if (filename.length() == 0)
+      return false;
+
+    File f = new File(filename.toString());
+    if (!f.isAbsolute())
+      throw new IllegalArgumentException("Path must be absolute");
+
+    String msg;
+    if (f.isDirectory())
+    {
+      msg = "a directory";
+    }
+    else
+    {
+      f = f.getParentFile();
+      if (f.isDirectory() ? f.canWrite() : f.mkdirs())
+        return true;
+      msg = "inaccessible";
+    }
+
+    throw new IllegalArgumentException(new IOException(
+      String.format("\"%s\" is %s", f.getPath(), msg)));
+  }
+
+
+  private int initLayerProperties()
+  {
     final Map<String, String> propertyEntries = loadLayerProperties();
     Stream<String> appliedEntries = getPreferenceAdapters()
       .map((pa) -> new AbstractMap.SimpleEntry<>(
@@ -132,11 +189,19 @@ public class LayerManager implements List<ImageLayer>, Runnable
   }
 
 
-  private MessageFormat getScreenshotPathPattern()
+  public void setScreenshotPathPattern( MessageFormat format )
   {
-    String pattern = parent.getParameterMap().get(
-      parent.getClass().getPackage().getName() + ".screenshots.pattern");
-    return (pattern != null) ? new MessageFormat(pattern) : null;
+    screenshotPathPattern.setUnderlying(format);
+  }
+
+
+  private void saveScreenshot()
+  {
+    String pathName =
+      screenshotPathPattern.format(
+        new Object[]{ new Date(), parent.frameCount }, null);
+    if (pathName != null)
+      parent.save(pathName, true);
   }
 
 
