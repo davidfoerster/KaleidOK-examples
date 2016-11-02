@@ -45,8 +45,11 @@ public class SynchronizedFormat extends Format
 
   public synchronized String format( Object obj, FieldPosition pos )
   {
-    if (buffer == null)
+    if (buffer == null) {
       buffer = new StringBuffer();
+    } else {
+      buffer.setLength(0);
+    }
 
     return format(obj, buffer, pos).toString();
   }
