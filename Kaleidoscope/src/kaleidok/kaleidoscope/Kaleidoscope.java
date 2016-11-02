@@ -2,7 +2,6 @@ package kaleidok.kaleidoscope;
 
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
-import kaleidok.kaleidoscope.layer.ImageLayer;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.processing.ProcessingSketchApplication;
@@ -230,7 +229,7 @@ public class Kaleidoscope extends ExtPApplet
     Stream<Stream<? extends PropertyPreferencesAdapter<?,?>>> s = Stream.of(
       getSTT().getPreferenceAdapters(),
       getChromasthetiationService().getPreferenceAdapters(),
-      getLayers().stream().flatMap(ImageLayer::getPreferenceAdapters),
+      getLayers().getPreferenceAdapters(),
       getFrameRateDisplay().getPreferenceAdapters());
 
     return s.flatMap(Function.identity());

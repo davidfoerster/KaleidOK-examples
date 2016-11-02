@@ -3,8 +3,13 @@ package kaleidok.kaleidoscope;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.StringProperty;
+import kaleidok.javafx.beans.property.AspectedStringProperty;
 import kaleidok.javafx.beans.property.PropertyUtils;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.kaleidoscope.layer.*;
 import kaleidok.text.FormatUtils;
 import kaleidok.util.Arrays;
@@ -34,7 +39,8 @@ import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
-public final class LayerManager implements List<ImageLayer>, Runnable
+public final class LayerManager
+  implements List<ImageLayer>, Runnable, PreferenceBean
 {
   private static final int MIN_IMAGES = 5;
 
@@ -52,13 +58,20 @@ public final class LayerManager implements List<ImageLayer>, Runnable
   private CentreMovingShape centreLayer;
   private BackgroundLayer backgroundLayer;
 
-  private final SynchronizedFormat screenshotPathPattern =
-    new SynchronizedFormat();
+  private final AspectedStringProperty screenshotPathFormatString;
+
+  private final ScreenshotPathFormatBinding screenshotPathFormat;
 
 
   LayerManager( Kaleidoscope parent )
   {
     this.parent = parent;
+
+    screenshotPathFormatString =
+      new AspectedStringProperty(this, "screenshot path pattern");
+    screenshotPathFormatString.addAspect(
+      PropertyPreferencesAdapterTag.getInstance());
+    screenshotPathFormat = new ScreenshotPathFormatBinding(this);
 
     layers = new ArrayList<>(Arrays.asImmutableList(
       getBackgroundLayer(),
@@ -67,32 +80,23 @@ public final class LayerManager implements List<ImageLayer>, Runnable
       getFoobarLayer(),
       getCentreLayer()));
 
-    initScreenshotPattern();
+    initScreenshotFormat();
     initLayerProperties();
 
     layers.forEach(ImageLayer::init);
   }
 
 
-  private void initScreenshotPattern()
+  private void initScreenshotFormat()
   {
-    String sPattern = parent.getParameterMap().get(
+    String formatString = parent.getParameterMap().get(
       parent.getClass().getPackage().getName() + ".screenshots.pattern");
-    if (sPattern != null && !sPattern.isEmpty())
-    {
-      MessageFormat fmt =
-        FormatUtils.verifyFormatThrowing(MessageFormat::new, sPattern,
-          new Object[]{ new Date(0), 0 }, LayerManager::verifyScreenshotPath,
-          (ex, o) -> logThrown(logger, Level.WARNING,
-              "Invalid screenshot path pattern: {0}", ex, o));
-
-      if (fmt != null)
-        setScreenshotPathPattern(fmt);
-    }
+    if (formatString != null && !formatString.isEmpty())
+      screenshotPathFormatString.set(formatString);
 
     final ChangeListener<Object, Object> screenshotCallback =
       ( owner, oldValue, newValue ) -> {
-        if (oldValue != null)
+        if (oldValue != null)  // skip the initial image
           saveScreenshot();
       };
     this.forEach(
@@ -100,37 +104,10 @@ public final class LayerManager implements List<ImageLayer>, Runnable
   }
 
 
-  private static boolean verifyScreenshotPath( CharSequence filename )
-  {
-    if (filename.length() == 0)
-      return false;
-
-    File f = new File(filename.toString());
-    if (!f.isAbsolute())
-      throw new IllegalArgumentException("Path must be absolute");
-
-    String msg;
-    if (f.isDirectory())
-    {
-      msg = "a directory";
-    }
-    else
-    {
-      f = f.getParentFile();
-      if (f.isDirectory() ? f.canWrite() : f.mkdirs())
-        return true;
-      msg = "inaccessible";
-    }
-
-    throw new IllegalArgumentException(new IOException(
-      String.format("\"%s\" is %s", f.getPath(), msg)));
-  }
-
-
   private int initLayerProperties()
   {
     final Map<String, String> propertyEntries = loadLayerProperties();
-    Stream<String> appliedEntries = getPreferenceAdapters()
+    Stream<String> appliedEntries = getLayerPreferenceAdapters()
       .map((pa) -> new AbstractMap.SimpleEntry<>(
         PropertyUtils.applyProperty(
           propertyEntries, "kaleidok.kaleidoscope.layer", pa.property),
@@ -182,24 +159,58 @@ public final class LayerManager implements List<ImageLayer>, Runnable
   }
 
 
-  private Stream<? extends PropertyPreferencesAdapter<?,?>>
+  @Override
+  public String getName()
+  {
+    return "Layers";
+  }
+
+
+  @Override
+  public Object getParent()
+  {
+    return parent;
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?,?>>
   getPreferenceAdapters()
+  {
+    return Stream.concat(
+      Stream.of(screenshotPathFormatString.getAspect(
+        PropertyPreferencesAdapterTag.getWritableInstance())),
+      getLayerPreferenceAdapters());
+  }
+
+
+  private Stream<? extends PropertyPreferencesAdapter<?,?>>
+  getLayerPreferenceAdapters()
   {
     return this.stream().flatMap(ImageLayer::getPreferenceAdapters);
   }
 
 
-  public void setScreenshotPathPattern( MessageFormat format )
+  public StringProperty screenshotPathFormatStringProperty()
   {
-    screenshotPathPattern.setUnderlying(format);
+    return screenshotPathFormatString;
+  }
+
+  public String getScreenshotPathFormatString()
+  {
+    return screenshotPathFormatString.get();
+  }
+
+  public void setScreenshotPathFormatString( String fmt )
+  {
+    screenshotPathFormatString.set(fmt);
   }
 
 
   private void saveScreenshot()
   {
     String pathName =
-      screenshotPathPattern.format(
-        new Object[]{ new Date(), parent.frameCount }, null);
+      screenshotPathFormat.format(new Date(), parent.frameCount);
     if (pathName != null)
       parent.save(pathName, true);
   }
@@ -367,6 +378,77 @@ public final class LayerManager implements List<ImageLayer>, Runnable
     return !layerProperties.isEmpty() ?
       PropertyLoader.toMap(layerProperties, null) :
       Collections.emptyMap();
+  }
+
+
+  private static final class ScreenshotPathFormatBinding
+    extends ObjectBinding<MessageFormat>
+  {
+    private final LayerManager layerManager;
+
+    private final SynchronizedFormat format = new SynchronizedFormat();
+
+
+    private ScreenshotPathFormatBinding( LayerManager layerManager )
+    {
+      this.layerManager = layerManager;
+      onInvalidating();
+      bind(layerManager.screenshotPathFormatStringProperty());
+    }
+
+
+    @Override
+    protected MessageFormat computeValue()
+    {
+      String s = layerManager.getScreenshotPathFormatString();
+      if (s != null)
+      {
+        s = s.trim();
+        if (!s.isEmpty())
+        {
+          return
+            FormatUtils.verifyFormatThrowing(MessageFormat::new, s, TEST_ARGS,
+              ScreenshotPathFormatBinding::verifyPath, null);
+        }
+      }
+      return null;
+    }
+
+
+    @Override
+    public void dispose()
+    {
+      unbind(layerManager.screenshotPathFormatStringProperty());
+    }
+
+
+    private static final Object[] TEST_ARGS = { new Date(0), 0 };
+
+
+    private static boolean verifyPath( CharSequence filename )
+    {
+      if (filename.length() == 0)
+        return false;
+
+      File f = new File(filename.toString());
+      if (!f.isAbsolute())
+        throw new IllegalArgumentException("Path must be absolute");
+
+      return true;
+    }
+
+
+    @Override
+    protected void onInvalidating()
+    {
+      format.setUnderlying(get());
+    }
+
+
+    public String format( Object... args )
+    {
+      return format.format(args, null);
+    }
   }
 
 
