@@ -601,14 +601,14 @@ public class ExtPApplet extends PApplet
     {
       String msgFormat =
         "The following operation is currently not supported for the %s " +
-          "renderer: %s.%n";
+          "renderer: %s";
       Object[] msgParams = { renderer, operationDescription };
       if (doThrow)
       {
         throw new UnsupportedOperationException(
           String.format(msgFormat, msgParams));
       }
-      System.err.format(msgFormat, msgParams);
+      System.err.format(msgFormat, msgParams).println();
     }
 
     return supported;
