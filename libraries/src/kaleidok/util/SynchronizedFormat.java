@@ -9,7 +9,8 @@ public class SynchronizedFormat extends Format
 {
   private static final long serialVersionUID = -3031855448890951779L;
 
-  private volatile Format underlying;
+  @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
+  private Format underlying;
 
   private StringBuffer buffer = null;
 
@@ -22,18 +23,13 @@ public class SynchronizedFormat extends Format
 
   public SynchronizedFormat( Format format )
   {
-    doSetUnderlying(format);
+    underlying = format;
   }
 
 
-  public void setUnderlying( Format format )
+  public synchronized void setUnderlying( Format format )
   {
-    doSetUnderlying(format);
-  }
-
-  private void doSetUnderlying( Format format )
-  {
-    this.underlying = (format != null) ? (Format) format.clone() : null;
+    underlying = format;
   }
 
 
@@ -45,6 +41,9 @@ public class SynchronizedFormat extends Format
 
   public synchronized String format( Object obj, FieldPosition pos )
   {
+    if (underlying == null)
+      return null;
+
     if (buffer == null) {
       buffer = new StringBuffer();
     } else {
@@ -59,14 +58,14 @@ public class SynchronizedFormat extends Format
   public synchronized StringBuffer format( Object obj, StringBuffer toAppendTo,
     FieldPosition pos )
   {
-    return underlying.format(obj, toAppendTo, pos);
+    return (underlying != null) ? underlying.format(obj, toAppendTo, pos) : null;
   }
 
 
   @Override
   public synchronized Object parseObject( String source, ParsePosition pos )
   {
-    return underlying.parseObject(source, pos);
+    return (underlying != null) ? underlying.parseObject(source, pos) : null;
   }
 
 
