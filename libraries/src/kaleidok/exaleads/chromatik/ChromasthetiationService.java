@@ -4,7 +4,6 @@ import kaleidok.exaleads.chromatik.Chromasthetiator.FlickrPhoto;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.http.responsehandler.PImageBaseResponseHandler;
 import kaleidok.util.Threads;
-import kaleidok.util.concurrent.GroupedThreadFactory;
 import kaleidok.flickr.*;
 import kaleidok.util.concurrent.NestedFutureCallback;
 import kaleidok.util.containers.BoundedCompletionQueue;
@@ -72,12 +71,6 @@ public class ChromasthetiationService
   public void shutdown()
   {
     executor.shutdown();
-  }
-
-
-  private static ThreadFactory createThreadFactory()
-  {
-    return new GroupedThreadFactory("Chromasthetiation", true);
   }
 
 

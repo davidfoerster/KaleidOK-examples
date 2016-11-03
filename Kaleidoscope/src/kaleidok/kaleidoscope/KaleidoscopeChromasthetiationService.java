@@ -225,7 +225,7 @@ public final class KaleidoscopeChromasthetiationService
 
     return new ThreadPoolExecutor(0, threadPoolSize, 30, TimeUnit.SECONDS,
       new ArrayBlockingQueue<>(1 << 6),
-      new GroupedThreadFactory("Chromasthetiation", true));
+      new GroupedThreadFactory("Chromasthetiation", false, true));
   }
 
 

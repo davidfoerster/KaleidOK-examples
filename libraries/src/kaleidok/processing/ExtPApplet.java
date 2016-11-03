@@ -108,7 +108,7 @@ public class ExtPApplet extends PApplet
     executorService = new ThreadPoolExecutor(
       0, 16, 60, TimeUnit.SECONDS, new SynchronousQueue<>(),
       new GroupedThreadFactory(
-        getClass().getSimpleName() + " worker pool", true));
+        getClass().getSimpleName() + " worker pool", false, true));
   }
 
 

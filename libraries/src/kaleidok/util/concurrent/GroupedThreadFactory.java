@@ -8,6 +8,8 @@ public class GroupedThreadFactory implements ThreadFactory
 {
   public final ThreadGroup group;
 
+  public boolean daemonizeThreads;
+
   private final AtomicInteger idCounter = new AtomicInteger(0);
 
 
@@ -16,10 +18,12 @@ public class GroupedThreadFactory implements ThreadFactory
     this.group = group;
   }
 
-  public GroupedThreadFactory( String groupName, boolean daemon )
+  public GroupedThreadFactory( String groupName, boolean daemonizeGroup,
+    boolean daemonizeThreads )
   {
     this(new ThreadGroup(groupName));
-    group.setDaemon(daemon);
+    group.setDaemon(daemonizeGroup);
+    this.daemonizeThreads = daemonizeThreads;
   }
 
 
@@ -28,7 +32,7 @@ public class GroupedThreadFactory implements ThreadFactory
   {
     Thread thread = new Thread(group, r,
       group.getName() + '-' + idCounter.incrementAndGet());
-    thread.setDaemon(group.isDaemon());
+    thread.setDaemon(daemonizeThreads);
     return thread;
   }
 }
