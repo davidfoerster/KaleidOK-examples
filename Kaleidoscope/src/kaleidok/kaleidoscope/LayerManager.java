@@ -3,18 +3,16 @@ package kaleidok.kaleidoscope;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.StringProperty;
 import kaleidok.javafx.beans.property.AspectedStringProperty;
 import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.binding.MessageFormatBinding;
 import kaleidok.kaleidoscope.layer.*;
-import kaleidok.text.FormatUtils;
 import kaleidok.util.Arrays;
 import kaleidok.util.Strings;
-import kaleidok.util.SynchronizedFormat;
 import kaleidok.util.concurrent.ImmediateFuture;
 import kaleidok.util.function.ChangeListener;
 import kaleidok.util.prefs.PropertyLoader;
@@ -23,7 +21,6 @@ import processing.core.PImage;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -60,7 +57,7 @@ public final class LayerManager
 
   private final AspectedStringProperty screenshotPathFormatString;
 
-  private final ScreenshotPathFormatBinding screenshotPathFormat;
+  private final MessageFormatBinding screenshotPathFormat;
 
 
   LayerManager( Kaleidoscope parent )
@@ -68,10 +65,13 @@ public final class LayerManager
     this.parent = parent;
 
     screenshotPathFormatString =
-      new AspectedStringProperty(this, "screenshot path pattern");
+      new AspectedStringProperty(this, "screenshot path format");
     screenshotPathFormatString.addAspect(
       PropertyPreferencesAdapterTag.getInstance());
-    screenshotPathFormat = new ScreenshotPathFormatBinding(this);
+    screenshotPathFormat =
+      new MessageFormatBinding(screenshotPathFormatString);
+    screenshotPathFormat.resultVerifier = LayerManager::verifyScreenshotPath;
+    screenshotPathFormat.testArgs = new Object[]{ new Date(0), 0 };
 
     layers = new ArrayList<>(Arrays.asImmutableList(
       getBackgroundLayer(),
@@ -209,10 +209,13 @@ public final class LayerManager
 
   private void saveScreenshot()
   {
-    String pathName =
-      screenshotPathFormat.format(new Date(), parent.frameCount);
-    if (pathName != null)
-      parent.save(pathName, true);
+    if (screenshotPathFormat.isAvailable())
+    {
+      String pathName =
+        screenshotPathFormat.format(new Date(), parent.frameCount);
+      if (pathName != null)
+        parent.save(pathName, true);
+    }
   }
 
 
@@ -381,74 +384,16 @@ public final class LayerManager
   }
 
 
-  private static final class ScreenshotPathFormatBinding
-    extends ObjectBinding<MessageFormat>
+  private static boolean verifyScreenshotPath( CharSequence filename )
   {
-    private final LayerManager layerManager;
+    if (filename.length() == 0)
+      return false;
 
-    private final SynchronizedFormat format = new SynchronizedFormat();
+    File f = new File(filename.toString());
+    if (!f.isAbsolute())
+      throw new IllegalArgumentException("Path must be absolute");
 
-
-    private ScreenshotPathFormatBinding( LayerManager layerManager )
-    {
-      this.layerManager = layerManager;
-      onInvalidating();
-      bind(layerManager.screenshotPathFormatStringProperty());
-    }
-
-
-    @Override
-    protected MessageFormat computeValue()
-    {
-      String s = layerManager.getScreenshotPathFormatString();
-      if (s != null)
-      {
-        s = s.trim();
-        if (!s.isEmpty())
-        {
-          return
-            FormatUtils.verifyFormatThrowing(MessageFormat::new, s, TEST_ARGS,
-              ScreenshotPathFormatBinding::verifyPath, null);
-        }
-      }
-      return null;
-    }
-
-
-    @Override
-    public void dispose()
-    {
-      unbind(layerManager.screenshotPathFormatStringProperty());
-    }
-
-
-    private static final Object[] TEST_ARGS = { new Date(0), 0 };
-
-
-    private static boolean verifyPath( CharSequence filename )
-    {
-      if (filename.length() == 0)
-        return false;
-
-      File f = new File(filename.toString());
-      if (!f.isAbsolute())
-        throw new IllegalArgumentException("Path must be absolute");
-
-      return true;
-    }
-
-
-    @Override
-    protected void onInvalidating()
-    {
-      format.setUnderlying(get());
-    }
-
-
-    public String format( Object... args )
-    {
-      return format.format(args, null);
-    }
+    return true;
   }
 
 
