@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import kaleidok.http.requesthandler.MockRequestHandlerBase;
 import kaleidok.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
+import kaleidok.text.IMessageFormat;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -15,7 +16,6 @@ import java.net.HttpURLConnection;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.Format;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -256,8 +256,12 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
   protected Path createTempFile()
     throws IOException
   {
-    Format logfilePattern = stt.logfilePattern;
-    if (logfilePattern == null)
+    IMessageFormat logfilePathFormat = stt.getLogfilePathFormat();
+    if (!logfilePathFormat.isAvailable())
+      return null;
+
+    String fn = logfilePathFormat.format(new Date());
+    if (fn == null)
       return null;
 
     Path tempDir = MockSpeechToTextHandler.tempDir.get();
@@ -291,7 +295,6 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       }
     }
 
-    String fn = logfilePattern.format(new Date());
     int p = FilenameUtils.indexOfExtension(fn);
     return Files.createTempFile(tempDir,
       (p >= 0) ? fn.substring(0, p) : fn,

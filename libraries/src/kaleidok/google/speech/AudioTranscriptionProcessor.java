@@ -168,7 +168,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
     {
       super(stt.service.getServiceUri().toURL(), "audio/x-flac", sampleRate);
       callback = stt.service.resultHandler;
-      logfilePattern = stt.logfilePattern;
+      logfilePathFormat = stt.getLogfilePathFormat();
       outputStream = new FLACStreamOutputStream(getOutputStream());
       encoder.setOutputStream(outputStream);
       encoder.openFLACStream();

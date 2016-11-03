@@ -4,25 +4,31 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableObjectValue;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.google.speech.mock.MockTranscriptionService;
 import kaleidok.javafx.beans.property.AspectedDoubleProperty;
 import kaleidok.javafx.beans.property.AspectedIntegerProperty;
+import kaleidok.javafx.beans.property.AspectedStringProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
+import kaleidok.javafx.beans.property.binding.MessageFormatBinding;
+import kaleidok.text.IMessageFormat;
 import kaleidok.util.Timer;
 import org.apache.http.concurrent.FutureCallback;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.net.URI;
-import java.text.Format;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +67,9 @@ public class STT implements PreferenceBean
 
   private final ChangeEvent changeEvent = new ChangeEvent(this);
 
-  public Format logfilePattern = null;
+  private final AspectedStringProperty logfilePathFormatString;
+
+  private final MessageFormatBinding logfilePathFormat;
 
 
   static final Logger logger = Logger.getLogger(STT.class.getPackage().getName());
@@ -80,6 +88,13 @@ public class STT implements PreferenceBean
       new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
     intervalSequenceCountMax.addAspect(
       PropertyPreferencesAdapterTag.getInstance());
+
+    logfilePathFormatString =
+      new AspectedStringProperty(this, "log file path format");
+    logfilePathFormatString.addAspect(
+      PropertyPreferencesAdapterTag.getInstance());
+    logfilePathFormat = new MessageFormatBinding(logfilePathFormatString);
+    logfilePathFormat.testArgs = new Object[]{ new Date(0) };
   }
 
 
@@ -146,6 +161,33 @@ public class STT implements PreferenceBean
   public void setIntervalSequenceCountMax( int n )
   {
     intervalSequenceCountMaxProperty().set(n);
+  }
+
+
+  public StringProperty logfilePathFormatStringProperty()
+  {
+    return logfilePathFormatString;
+  }
+
+  public String getLogfilePathFormatString()
+  {
+    return logfilePathFormatString.get();
+  }
+
+  public void setLogfilePathFormatString( String format )
+  {
+    logfilePathFormatString.set(format);
+  }
+
+
+  public ObservableObjectValue<MessageFormat> logfilePathFormatProperty()
+  {
+    return logfilePathFormat;
+  }
+
+  public IMessageFormat getLogfilePathFormat()
+  {
+    return logfilePathFormat.asReadOnlyFormat();
   }
 
 
@@ -335,6 +377,8 @@ public class STT implements PreferenceBean
         maxTranscriptionInterval.getAspect(
           PropertyPreferencesAdapterTag.getWritableInstance()),
         intervalSequenceCountMax.getAspect(
+          PropertyPreferencesAdapterTag.getWritableInstance()),
+        logfilePathFormatString.getAspect(
           PropertyPreferencesAdapterTag.getWritableInstance())));
   }
 }

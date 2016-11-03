@@ -7,21 +7,19 @@ import com.google.gson.stream.JsonToken;
 import kaleidok.http.JsonHttpConnection;
 import kaleidok.google.gson.TypeAdapterManager;
 import kaleidok.io.platform.PlatformPaths;
+import kaleidok.text.IMessageFormat;
 import kaleidok.util.Threads;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.http.concurrent.FutureCallback;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.*;
-import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -69,33 +67,7 @@ public class Transcription implements Runnable
   }
 
 
-  public static final Constructor<? extends Format>
-    DEFAULT_LOGFILE_PATTERN_FORMAT;
-
-  @SuppressWarnings("unused")
-  public static final String
-    DEFAULT_LOGFILE_PATTERN = "yyyy-MM-dd_HH:mm:ss.SSS.'flac'";
-
-  static {
-    try {
-      DEFAULT_LOGFILE_PATTERN_FORMAT =
-        SimpleDateFormat.class.getConstructor(String.class);
-    } catch (NoSuchMethodException ex) {
-      throw new AssertionError(ex);
-    }
-  }
-
-  public static Format buildLogfileFormat(
-    Constructor<? extends Format> formatConstructor, String formatString )
-    throws ReflectiveOperationException
-  {
-    if (formatConstructor == null)
-      formatConstructor = DEFAULT_LOGFILE_PATTERN_FORMAT;
-    return formatConstructor.newInstance(formatString);
-  }
-
-
-  public Format logfilePattern = null;
+  public IMessageFormat logfilePathFormat;
 
 
   private static final OpenOption[] logfileOpenOptions = {
@@ -104,13 +76,16 @@ public class Transcription implements Runnable
 
   private OutputStream openLogOutputStream() throws IOException
   {
-    Format logfilePattern = this.logfilePattern;
-    if (logfilePattern == null)
+    if (!logfilePathFormat.isAvailable())
+      return null;
+
+    String pathName = logfilePathFormat.format(new Date());
+    if (pathName == null)
       return null;
 
     Path path =
       PlatformPaths.getDataDir(this.getClass().getPackage().getName())
-        .resolve(logfilePattern.format(new Date()));
+        .resolve(pathName);
     logger.log(Level.FINE, "Recorded speech will be written to \"{0}\"", path);
     return new BufferedOutputStream(
       Files.newOutputStream(path, logfileOpenOptions));

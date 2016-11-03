@@ -4,7 +4,6 @@ import javafx.beans.property.BooleanProperty;
 import kaleidok.google.speech.RecorderIcon;
 import kaleidok.google.speech.STT;
 import kaleidok.google.speech.SttResponse;
-import kaleidok.google.speech.Transcription;
 import kaleidok.javafx.beans.property.AspectedBooleanProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
@@ -13,14 +12,13 @@ import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.processing.Plugin;
 import processing.event.KeyEvent;
 
-import java.lang.reflect.InvocationTargetException;
-import java.text.Format;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 
 public final class SttManager extends Plugin<Kaleidoscope>
@@ -52,21 +50,19 @@ public final class SttManager extends Plugin<Kaleidoscope>
       PropertyPreferencesAdapterTag.getInstance());
 
     getPreferenceAdapters().forEach(PropertyPreferencesAdapter::load);
+    initLogfilePathFormat();
   }
 
 
-  private Format getLogfilePattern()
+  private void initLogfilePathFormat()
   {
-    String logFilePattern = p.getParameterMap().get(
-      stt.getClass().getCanonicalName() + ".log.pattern");
-    try {
-      return (logFilePattern != null) ?
-        Transcription.buildLogfileFormat(null, logFilePattern) : null;
-    } catch (ReflectiveOperationException ex) {
-      throw new IllegalArgumentException(
-        "Cannot parse log file pattern: " + logFilePattern,
-        (ex instanceof InvocationTargetException) ? ex.getCause() : ex);
-    }
+    if (isNotEmpty(stt.getLogfilePathFormatString()))
+      return;
+
+    String s = p.getParameterMap().get(
+      stt.getClass().getName() + ".log.pattern");
+    if (isNotEmpty(s))
+      stt.setLogfilePathFormatString(s);
   }
 
 
