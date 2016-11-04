@@ -43,7 +43,7 @@ public class EditableTreeTableCell<T, N extends Node>
     updateNodeInfo(getTreeTableView().getTreeItem(i));
     super.updateIndex(i);
     if (isAlwaysEditing())
-      startEdit();
+      startEdit2(false);
   }
 
 
@@ -116,11 +116,11 @@ public class EditableTreeTableCell<T, N extends Node>
   @Override
   public void startEdit()
   {
-    startEdit2();
+    startEdit2(true);
   }
 
 
-  private boolean startEdit2()
+  private boolean startEdit2( boolean requestFocus )
   {
     if (!isEditing() && isEditableInherited())
     {
@@ -133,7 +133,8 @@ public class EditableTreeTableCell<T, N extends Node>
           setText(null);
           updateEditorValue(getItem(), isEmpty());
           setGraphic(node);
-          node.requestFocus();
+          if (requestFocus)
+            node.requestFocus();
           return true;
         }
       }
