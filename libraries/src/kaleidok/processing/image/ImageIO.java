@@ -81,7 +81,7 @@ public final class ImageIO
     int width, int height, int[] pixels, int offset ) throws IOException
   {
     if (fc == null)
-      throw new NullPointerException(FileChannel.class.getSimpleName());
+      throw new NullPointerException("file channel");
     checkBounds(width, height, pixels, offset);
 
     long fileSize =
