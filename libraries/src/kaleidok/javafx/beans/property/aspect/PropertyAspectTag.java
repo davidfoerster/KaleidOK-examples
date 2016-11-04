@@ -8,6 +8,8 @@ import java.lang.reflect.Type;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static kaleidok.util.AssertionUtils.fastAssert;
+
 
 public class PropertyAspectTag<A, T>
 {
@@ -41,14 +43,18 @@ public class PropertyAspectTag<A, T>
       Reflection.getTypeArguments(getClass(), baseClass);
     @SuppressWarnings("NonConstantStringShouldBeStringBuffer")
     String s = baseClass.getSimpleName();
+    fastAssert(!s.isEmpty());
 
     if (typeArguments != null && typeArguments.length != 0)
     {
-      s += '<' +
-        Stream.of(typeArguments)
-          .map((t) -> ((Class<?>) t).getSimpleName())
-          .collect(Collectors.joining(", ")) +
-        '>';
+      Stream<String> typeArgumentNames = Stream.of(typeArguments)
+        .map((t) -> {
+            String n = ((Class<?>) t).getSimpleName();
+            fastAssert(!n.isEmpty());
+            return n;
+          });
+
+      s += '<' + typeArgumentNames.collect(Collectors.joining(", ")) + '>';
     }
 
     return s;
