@@ -5,8 +5,6 @@ import com.sun.net.httpserver.HttpExchange;
 import kaleidok.http.requesthandler.MockRequestHandlerBase;
 import kaleidok.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
-import kaleidok.text.IMessageFormat;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
@@ -15,7 +13,10 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -37,6 +38,8 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
 
   final STT stt;
 
+  private volatile MockTranscriptionService transcriptionService;
+
 
   public MockSpeechToTextHandler( STT stt )
   {
@@ -44,9 +47,22 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
   }
 
 
+  synchronized void setTranscriptionService(
+    MockTranscriptionService transcriptionService )
+  {
+    if (this.transcriptionService != null)
+      throw new IllegalStateException("Transcription service is already set");
+
+    this.transcriptionService = transcriptionService;
+  }
+
+
   @Override
   protected void doHandle( HttpExchange t ) throws IOException
   {
+    if (transcriptionService == null)
+      throw new IllegalStateException("Transcription service wasn't set");
+
     String contextPath = t.getHttpContext().getPath(),
       uriPath = t.getRequestURI().getPath(),
       pathWithinContext = uriPath.substring(contextPath.length());
@@ -115,7 +131,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     fastAssert(flacBuffer.length > 86,
       "Transmitted data only seems to contain FLAC header");
 
-    Path tmpFilePath = createTempFile();
+    Path tmpFilePath = createFlacLogFile();
     if (tmpFilePath != null) {
       try (OutputStream os = Files.newOutputStream(tmpFilePath)) {
         os.write(flacBuffer);
@@ -252,18 +268,30 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
 
   private static final AtomicReference<Path> tempDir = new AtomicReference<>();
 
-  protected Path createTempFile()
-    throws IOException
+  @SuppressWarnings("SpellCheckingInspection")
+  private static final DateFormat logfileNameFormat =
+    new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS-", Locale.ROOT);
+
+
+  protected Path createFlacLogFile() throws IOException
   {
-    IMessageFormat logfilePathFormat = stt.getLogfilePathFormat();
-    if (!logfilePathFormat.isAvailable())
+    if (!transcriptionService.isLogAudioData())
       return null;
 
-    String fn = logfilePathFormat.format(new Date());
-    if (fn == null)
-      return null;
+    String fn;
+    synchronized (logfileNameFormat)
+    {
+      fn = logfileNameFormat.format(new Date());
+    }
 
+    return Files.createTempFile(getTempDir(), fn, ".flac", NO_ATTRIBUTES);
+  }
+
+
+  protected static Path getTempDir() throws IOException
+  {
     Path tempDir = MockSpeechToTextHandler.tempDir.get();
+
     if (tempDir == null)
     {
       tempDir =
@@ -290,11 +318,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       }
     }
 
-    int p = FilenameUtils.indexOfExtension(fn);
-    return Files.createTempFile(tempDir,
-      (p >= 0) ? fn.substring(0, p) : fn,
-      (p >= 0) ? fn.substring(p) : ".flac",
-      kaleidok.io.Files.NO_ATTRIBUTES);
+    return tempDir;
   }
 
 

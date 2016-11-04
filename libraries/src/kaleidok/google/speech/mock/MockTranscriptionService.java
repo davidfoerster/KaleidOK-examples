@@ -1,13 +1,16 @@
 package kaleidok.google.speech.mock;
 
 import com.sun.net.httpserver.HttpContext;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import kaleidok.google.speech.STT;
 import kaleidok.google.speech.SttResponse;
 import com.sun.net.httpserver.HttpServer;
 import kaleidok.google.speech.TranscriptionService;
 import kaleidok.google.speech.TranscriptionServiceBase;
+import kaleidok.javafx.beans.property.AspectedBooleanProperty;
 import kaleidok.javafx.beans.property.AspectedObjectProperty;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.adapter.preference.StringConversionPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.util.converter.UriStringConverter;
@@ -22,6 +25,7 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static kaleidok.google.speech.TranscriptionService.DEFAULT_API_BASE;
 
@@ -33,6 +37,8 @@ public class MockTranscriptionService extends TranscriptionServiceBase
 
 
   private final HttpContext context;
+
+  private final AspectedBooleanProperty logAudioData;
 
 
   public static MockTranscriptionService newInstance( String accessKey,
@@ -64,6 +70,9 @@ public class MockTranscriptionService extends TranscriptionServiceBase
   {
     super(uriFromContext(context), accessKey, resultHandler);
 
+    logAudioData = new AspectedBooleanProperty(this, "log audio data", false);
+    logAudioData.addAspect(PropertyPreferencesAdapterTag.getInstance());
+
     this.apiBase.addAspect(PropertyPreferencesAdapterTag.getInstance(),
       new ApiBaseDebugPropertyPreferencesAdapter(this.apiBase));
 
@@ -72,8 +81,10 @@ public class MockTranscriptionService extends TranscriptionServiceBase
         "speech transcription is performed by {1}",
       new Object[]{ accessKey, getClass().getName() });
 
-    context.getServer().start();
     this.context = context;
+    ((MockSpeechToTextHandler) this.context.getHandler())
+      .setTranscriptionService(this);
+    this.context.getServer().start();
   }
 
 
@@ -107,6 +118,33 @@ public class MockTranscriptionService extends TranscriptionServiceBase
           "implementation and therefore read-only.",
         new Object[]{ this.apiBase.getName(), apiBase });
     }
+  }
+
+
+  public BooleanProperty logAudioDataProperty()
+  {
+    return logAudioData;
+  }
+
+  public boolean isLogAudioData()
+  {
+    return logAudioData.get();
+  }
+
+  public void setLogAudioData( boolean logAudioData )
+  {
+    this.logAudioData.set(logAudioData);
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return Stream.concat(
+      super.getPreferenceAdapters(),
+      Stream.of(logAudioData.getAspect(
+        PropertyPreferencesAdapterTag.getWritableInstance())));
   }
 
 
