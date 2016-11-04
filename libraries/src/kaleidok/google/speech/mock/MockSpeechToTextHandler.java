@@ -126,7 +126,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
 
     double duration = testFlacFile(flacBuffer, sampleRate);
     if (!Double.isNaN(duration)) {
-      fastAssert(duration <= stt.getMaxTranscriptionInterval() * 1e-9,
+      fastAssert(duration <= stt.getMaxTranscriptionInterval(),
         "FLAC stream duration exceeds maximum transcription interval");
     } else {
       logger.finest("Couldn't determine duration of the submitted audio record");
