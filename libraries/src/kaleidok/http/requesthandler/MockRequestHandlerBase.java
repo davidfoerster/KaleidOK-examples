@@ -23,7 +23,7 @@ public abstract class MockRequestHandlerBase implements HttpHandler
 {
   public static final String
     CONTENT_TYPE = "Content-Type",
-    CONTENT_LENGTH = "content-length";
+    CONTENT_LENGTH = "Content-Length";
 
 
   @SuppressWarnings({ "OverlyBroadCatchBlock", "ProhibitedExceptionCaught", "ErrorNotRethrown" })

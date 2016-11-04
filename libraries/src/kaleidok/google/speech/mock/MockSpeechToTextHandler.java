@@ -13,7 +13,6 @@ import org.apache.http.entity.ContentType;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
@@ -24,6 +23,7 @@ import java.util.logging.Logger;
 import java.util.regex.*;
 
 import static kaleidok.http.util.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.io.Files.NO_ATTRIBUTES;
 import static kaleidok.util.AssertionUtils.fastAssert;
 import static kaleidok.util.AssertionUtils.fastAssertFmt;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
@@ -133,6 +133,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     }
 
     byte[] transcriptionResult = normalTranscriptionResult;
+    fastAssert(transcriptionResult.length != 0);
     setContentType(t, ContentType.APPLICATION_JSON);
     t.sendResponseHeaders(HttpURLConnection.HTTP_OK, transcriptionResult.length);
     try (OutputStream out = t.getResponseBody()) {
@@ -268,15 +269,11 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     if (tempDir == null)
     {
       tempDir =
-        PlatformPaths.getTempDir().resolve(this.getClass().getCanonicalName());
+        PlatformPaths.getTempDir()
+          .resolve(MockTranscriptionService.class.getName());
       try
       {
-        Files.createDirectory(tempDir);
-      }
-      catch (FileAlreadyExistsException ex)
-      {
-        if (!Files.isDirectory(tempDir))
-          throw ex;
+        Files.createDirectory(tempDir, NO_ATTRIBUTES);
       }
       finally
       {
@@ -318,7 +315,9 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
         "\"final\":true" +
         "}]," +
         "\"result_index\":0}\n"
-      ).getBytes(DEFAULT_CHARSET),
+      ).getBytes(ContentType.APPLICATION_JSON.getCharset()),
+
     emptyTranscriptionResult =
-      "{\"result\":[]}".getBytes(DEFAULT_CHARSET);
+      "{\"result\":[]}"
+        .getBytes(ContentType.APPLICATION_JSON.getCharset());
 }
