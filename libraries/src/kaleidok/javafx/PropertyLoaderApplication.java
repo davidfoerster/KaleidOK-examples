@@ -1,6 +1,7 @@
 package kaleidok.javafx;
 
 import javafx.application.Application;
+import kaleidok.util.Reflection;
 import kaleidok.util.containers.LowercaseStringMap;
 import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.logging.LoggingUtils;
@@ -69,7 +70,8 @@ public abstract class PropertyLoaderApplication extends Application
   protected Properties loadProperties() throws IOException
   {
     Properties prop = new Properties();
-    String defaultPropPath = getClass().getSimpleName() + ".properties";
+    String defaultPropPath =
+      Reflection.getAnonymousClassSimpleName(getClass()) + ".properties";
     boolean hasDefaultProperties =
       PropertyLoader.load(prop, null, getClass(), defaultPropPath) > 0;
 

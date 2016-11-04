@@ -20,6 +20,7 @@ import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFutures;
 import kaleidok.util.Arrays;
+import kaleidok.util.Reflection;
 import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
@@ -91,7 +92,7 @@ public class ExtPApplet extends PApplet
 
 
   protected final String PREF_GEOMETRY =
-    getClass().getSimpleName() + ".geometry.";
+    Reflection.getAnonymousClassSimpleName(getClass()) + ".geometry.";
 
 
   public ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
@@ -108,7 +109,8 @@ public class ExtPApplet extends PApplet
     executorService = new ThreadPoolExecutor(
       0, 16, 60, TimeUnit.SECONDS, new SynchronousQueue<>(),
       new GroupedThreadFactory(
-        getClass().getSimpleName() + " worker pool", false, true));
+        Reflection.getAnonymousClassSimpleName(getClass()) + " worker pool",
+        false, true));
   }
 
 

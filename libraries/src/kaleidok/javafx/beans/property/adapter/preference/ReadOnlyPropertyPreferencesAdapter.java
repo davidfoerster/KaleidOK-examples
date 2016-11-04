@@ -2,6 +2,7 @@ package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ReadOnlyProperty;
+import kaleidok.util.Reflection;
 import kaleidok.util.logging.LoggingUtils;
 import kaleidok.util.prefs.PreferenceUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -109,7 +110,7 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
     String prefix, boolean useDefaultPrefix )
   {
     if (requireNonNull(prefix, useDefaultPrefix, "prefix") == null)
-      prefix = beanClass.getSimpleName();
+      prefix = Reflection.getAnonymousClassSimpleName(beanClass);
 
     assert prefix.isEmpty() || !NON_WORD_SEQUENCE.matcher(prefix).find() :
       "Weird preference key prefix encountered: " + StringEscapeUtils.escapeJava(prefix);

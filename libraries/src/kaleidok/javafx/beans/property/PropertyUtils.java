@@ -6,6 +6,7 @@ import javafx.beans.value.*;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
+import kaleidok.util.Reflection;
 import kaleidok.util.Strings;
 import kaleidok.util.prefs.DefaultValueParser;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +41,9 @@ public final class PropertyUtils
 
   private static String getFallbackName( Object o, String name )
   {
-    return (name != null) ? name : o.getClass().getSimpleName();
+    return (name != null) ?
+      name :
+      Reflection.getAnonymousClassSimpleName(o.getClass());
   }
 
 

@@ -11,6 +11,7 @@ import kaleidok.javafx.PropertyLoaderApplication;
 import kaleidok.javafx.geometry.Rectangles;
 import kaleidok.javafx.stage.Screens;
 import kaleidok.javafx.stage.Windows;
+import kaleidok.util.Reflection;
 import kaleidok.util.prefs.PreferenceUtils;
 import processing.core.PApplet;
 
@@ -90,7 +91,8 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 
   private void parseAndSetConfig( Stage stage )
   {
-    Windows.loadPosition(stage, preferences, getClass().getSimpleName());
+    Windows.loadPosition(stage, preferences,
+      Reflection.getAnonymousClassSimpleName(getClass()));
   }
 
 
@@ -121,7 +123,10 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   {
     Stage stage = this.stage;
     if (stage != null && !stage.isFullScreen())
-      Windows.saveGeometry(stage, preferences, getClass().getSimpleName());
+    {
+      Windows.saveGeometry(stage, preferences,
+        Reflection.getAnonymousClassSimpleName(getClass()));
+    }
   }
 
 

@@ -1,5 +1,6 @@
 package kaleidok.processing;
 
+import kaleidok.util.Reflection;
 import processing.core.PApplet;
 
 import java.lang.reflect.Constructor;
@@ -67,7 +68,8 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
           .filter((s) -> !"--fullscreen".equals(s))
           .toArray((l) -> new String[l + 1]) :
         new String[1];
-    extArgs[extArgs.length - 1] = sketch.getClass().getSimpleName();
+    extArgs[extArgs.length - 1] =
+      Reflection.getAnonymousClassSimpleName(sketch.getClass());
     PApplet.runSketch(extArgs, sketch);
     return sketch;
   }

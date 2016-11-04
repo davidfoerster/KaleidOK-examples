@@ -12,6 +12,7 @@ import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.processing.ExtPApplet;
+import kaleidok.util.Reflection;
 import kaleidok.util.concurrent.ImmediateFuture;
 import kaleidok.util.function.ChangeListener;
 import kaleidok.util.logging.LoggingUtils;
@@ -63,7 +64,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   private static String getDefaultName( Class<? extends ImageLayer> clazz )
   {
     String layerSuffix = "Layer",
-      className = clazz.getSimpleName();
+      className = Reflection.getAnonymousClassSimpleName(clazz);
     return className.endsWith(layerSuffix) ?
       className.substring(
         0, className.length() - layerSuffix.length()) :
