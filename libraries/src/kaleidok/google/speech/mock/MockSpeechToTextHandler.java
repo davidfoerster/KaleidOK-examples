@@ -85,9 +85,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     fastAssert(q.size() == 3, "Superfluous request parameters");
 
     ContentType contentType =
-      ContentType.parse(t.getRequestHeaders().getFirst(CONTENT_TYPE));
-    fastAssert("audio/x-flac".equals(contentType.getMimeType()),
-      "Invalid request content-type: " + contentType.getMimeType());
+      getContentType(t.getRequestHeaders(), "audio/x-flac");
     double sampleRate;
     try
     {
