@@ -19,6 +19,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
 import java.util.Locale;
@@ -26,6 +27,7 @@ import java.util.logging.Level;
 
 import static kaleidok.google.speech.STT.logger;
 import static kaleidok.http.HttpConnection.ConnectionState.CONNECTED;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
 
 
 public class Transcription implements Runnable
@@ -83,9 +85,14 @@ public class Transcription implements Runnable
     if (pathName == null)
       return null;
 
-    Path path =
-      PlatformPaths.getDataDir(this.getClass().getPackage().getName())
-        .resolve(pathName);
+    Path path = Paths.get(pathName, EMPTY_STRING_ARRAY);
+    if (!path.isAbsolute())
+    {
+      path =
+        PlatformPaths.getDataDir(this.getClass().getPackage().getName())
+          .resolve(path);
+    }
+
     logger.log(Level.FINE, "Recorded speech will be written to \"{0}\"", path);
     return new BufferedOutputStream(
       Files.newOutputStream(path, logfileOpenOptions));
