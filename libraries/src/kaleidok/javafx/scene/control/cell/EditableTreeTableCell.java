@@ -1,5 +1,6 @@
 package kaleidok.javafx.scene.control.cell;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
@@ -149,7 +150,9 @@ public class EditableTreeTableCell<T, N extends Node>
 
     if (isAlwaysEditing())
     {
-      updateItem(newValue, false);
+      //noinspection OverlyStrongTypeCast
+      ((Property<T>) getTreeTableRow().getTreeItem().getValue())
+        .setValue(newValue);
     }
     else
     {
