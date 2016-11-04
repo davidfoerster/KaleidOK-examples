@@ -38,8 +38,15 @@ public final class SttManager extends Plugin<Kaleidoscope>
     Map<String, String> params = sketch.getParameterMap();
     stt = new STT(new SttResponseHandler(),
       sketch.parseStringOrFile(
-        params.get("com.google.developer.api.key"), '@'));
-    stt.logfilePattern = getLogfilePattern();
+        params.get("com.google.developer.api.key"), '@'))
+      {
+        @Override
+        public Object getParent()
+        {
+          return SttManager.this;
+        }
+      };
+
     sketch.getAudioProcessingManager().getAudioDispatcher()
       .addAudioProcessor(stt.getAudioProcessor());
     recorderIcon = new RecorderIcon(sketch, stt.statusProperty(), 0);
@@ -153,7 +160,7 @@ public final class SttManager extends Plugin<Kaleidoscope>
   @Override
   public String getName()
   {
-    return stt.getName();
+    return "Speech-to-Text Manager";
   }
 
 
