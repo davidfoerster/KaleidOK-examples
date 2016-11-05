@@ -22,6 +22,7 @@ import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileReader;
+import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -86,7 +87,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
         bufferOverlap = getAudioBufferOverlap();
 
       Runnable dispatcherRunnable = null;
-      try {
+      try
+      {
         if (audioSource == null)
         {
           @SuppressWarnings("SpellCheckingInspection")
@@ -117,8 +119,14 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
           audioDispatcher = new AudioDispatcher(ais, bufferSize, bufferOverlap);
           dispatcherRunnable = initAudioPlayer(audioDispatcher, dispatcherRunnable);
         }
-      } catch (IOException | UnsupportedAudioFileException | LineUnavailableException | JsonParseException ex) {
+      }
+      catch (JsonParseException ex)
+      {
         throw new Error(ex);
+      }
+      catch (IOException | UnsupportedAudioFileException | LineUnavailableException ex)
+      {
+        throw new IOError(ex);
       }
 
       audioDispatcher.addAudioProcessor(getVolumeLevelProcessor());
