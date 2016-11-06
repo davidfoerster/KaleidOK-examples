@@ -13,12 +13,16 @@ import com.jogamp.newt.event.WindowListener;
 import com.jogamp.newt.event.WindowUpdateEvent;
 import com.jogamp.opengl.GLAutoDrawable;
 import javafx.application.HostServices;
+import javafx.beans.property.DoubleProperty;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.newt.WindowSupport;
 import kaleidok.processing.event.KeyEventSupport;
 import kaleidok.processing.event.KeyStroke;
 import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFutures;
+import kaleidok.processing.support.FrameRateSwitcherProperty;
 import kaleidok.util.Arrays;
 import kaleidok.util.Reflection;
 import kaleidok.util.prefs.DefaultValueParser;
@@ -48,6 +52,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
+import java.util.stream.Stream;
 
 import static kaleidok.util.prefs.PreferenceUtils.getInt;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
@@ -94,10 +99,17 @@ public class ExtPApplet extends PApplet
   protected final String PREF_GEOMETRY =
     Reflection.getAnonymousClassSimpleName(getClass()) + ".geometry.";
 
+  private final FrameRateSwitcherProperty targetFrameRate;
+
 
   public ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
   {
     this.parent = parent;
+
+    targetFrameRate = new FrameRateSwitcherProperty(this);
+    targetFrameRate
+      .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
+      .load();
   }
 
 
@@ -217,12 +229,18 @@ public class ExtPApplet extends PApplet
 
 
   @Override
+  @OverridingMethodsMustInvokeSuper
   public void setup()
   {
-    Map<String, String> params = getParameterMap();
-    String sFrameRate = params.get("framerate");
-    if (sFrameRate != null)
-      frameRate(Float.parseFloat(sFrameRate));
+    targetFrameRate.setup();
+  }
+
+
+  @Override
+  public void frameRate( float fps )
+  {
+    super.frameRate(fps);
+    setTargetFrameRate(fps);
   }
 
 
@@ -707,5 +725,29 @@ public class ExtPApplet extends PApplet
   {
     checkRendererSupported("isDrawingThread", true);
     return ((PGraphicsOpenGL) g).pgl.threadIsCurrent();
+  }
+
+
+  public DoubleProperty targetFrameRateProperty()
+  {
+    return targetFrameRate;
+  }
+
+  public float getTargetFrameRate()
+  {
+    return (float) targetFrameRate.get();
+  }
+
+  public void setTargetFrameRate( float fps )
+  {
+    targetFrameRate.set(fps);
+  }
+
+
+  protected Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return Stream.of(targetFrameRate.getAspect(
+      PropertyPreferencesAdapterTag.getWritableInstance()));
   }
 }

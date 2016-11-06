@@ -15,6 +15,10 @@ public final class Math
 {
   private Math() { }
 
+
+  public static final int FLOAT_NAN_INT_BITS = 0x7fc00000;
+
+
   public static float sumOfSquares( float[] a )
   {
     return (a.length != 0) ? sumOfSquares_noBoundsCheck(a, 0, a.length) : 0;

@@ -228,7 +228,8 @@ public class Kaleidoscope extends ExtPApplet
 
 
   @Override
-  public Stream<? extends PropertyPreferencesAdapter<?, ?>> getPreferenceAdapters()
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
   {
     Stream<Stream<? extends PropertyPreferencesAdapter<?,?>>> s = Stream.of(
       getSTT().getPreferenceAdapters(),
@@ -236,6 +237,8 @@ public class Kaleidoscope extends ExtPApplet
       getLayers().getPreferenceAdapters(),
       getFrameRateDisplay().getPreferenceAdapters());
 
-    return s.flatMap(Function.identity());
+    return Stream.concat(
+      s.flatMap(Function.identity()),
+      super.getPreferenceAdapters());
   }
 }
