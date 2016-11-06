@@ -30,7 +30,8 @@ public class SpectrogramLayer extends CircularImageLayer
 
   private final MinimFFTProcessor avgSpectrum;
 
-  // TODO: Convert to local field or remove entirely?
+  // Keep this field around to prevent the garbage collection on the weak reference of the binding.
+  @SuppressWarnings("FieldCanBeLocal")
   private final SpectrumBandsPerOctaveBinding bandsPerOctaveBinding;
 
   /**
