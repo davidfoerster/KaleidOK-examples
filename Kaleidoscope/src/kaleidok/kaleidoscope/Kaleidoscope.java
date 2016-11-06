@@ -144,7 +144,11 @@ public class Kaleidoscope extends ExtPApplet
   public synchronized FrameRateDisplay getFrameRateDisplay()
   {
     if (frameRateDisplay == null)
+    {
       frameRateDisplay = new FrameRateDisplay(this, 0);
+      frameRateDisplay.getPreferenceAdapters()
+        .forEach(PropertyPreferencesAdapter::load);
+    }
     return frameRateDisplay;
   }
 
