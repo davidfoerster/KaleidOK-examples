@@ -89,12 +89,20 @@ public class FoobarLayer extends CircularImageLayer
         bind(innerOffset, scaleFactor);
       }
 
+
       @Override
       protected float computeValue()
       {
         float innerOffset = FoobarLayer.this.innerOffset.floatValue();
         return innerOffset +
           (1 - innerOffset) * (1 - (float) scaleFactor.get());
+      }
+
+
+      @Override
+      public void dispose()
+      {
+        unbind(innerOffset, scaleFactor);
       }
     };
 
