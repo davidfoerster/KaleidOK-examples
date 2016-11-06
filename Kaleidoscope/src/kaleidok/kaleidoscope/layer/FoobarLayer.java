@@ -9,6 +9,7 @@ import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
+import sun.misc.FloatConsts;
 
 import static kaleidok.util.Math.mapNormalized;
 
@@ -113,6 +114,11 @@ public class FoobarLayer extends CircularImageLayer
     };
 
 
+  private static final float
+    RUNTIME_TO_NOISE_RATIO1 = 4e-4f,
+    RUNTIME_TO_NOISE_RATIO2 = 2 * RUNTIME_TO_NOISE_RATIO1;
+
+
   @Override
   public void run()
   {
@@ -124,9 +130,13 @@ public class FoobarLayer extends CircularImageLayer
       innerOffset = this.innerOffset.floatValue(),
       outerOffset = this.outerOffset.get(),
       innerScale = this.innerScale.get(),
-      outerScale = 1 - outerOffset,
-      fc1 = parent.frameCount * 0.01f,
-      fc2 = parent.frameCount * 0.02f;
+      outerScale = 1 - outerOffset;
+
+    final float
+      // Wrap around the run time every ~1.1 h but preserve noise precision after that time
+      runTime = parent.millis() & (FloatConsts.SIGNIF_BIT_MASK >>> 1),
+      fc1 = runTime * RUNTIME_TO_NOISE_RATIO1,
+      fc2 = runTime * RUNTIME_TO_NOISE_RATIO2;
 
     if (wireframe >= 2)
     {
