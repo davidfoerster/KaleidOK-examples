@@ -191,7 +191,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
   public synchronized int getAudioBufferOverlap()
   {
-    if (audioBufferOverlap <= 0)
+    if (audioBufferOverlap < 0)
     {
       int bufferSize = getAudioBufferSize();
       String param =
