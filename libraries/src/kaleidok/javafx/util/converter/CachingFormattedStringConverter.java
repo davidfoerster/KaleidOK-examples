@@ -54,10 +54,13 @@ public class CachingFormattedStringConverter<T, F extends Format>
   @Override
   public T fromString( String source )
   {
-    if (source == null || source.isEmpty())
+    if (source == null)
       return null;
 
     source = source.trim();
+    if (source.isEmpty())
+      return null;
+
     if (source.equals(fromStringCachedString))
       return fromStringCachedValue;
 
