@@ -1,8 +1,6 @@
 package kaleidok.javafx.scene.control.cell;
 
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.util.Callback;
 
@@ -14,16 +12,16 @@ public class DynamicEditableTreeItem<T, N extends Node>
     extends Callback<DynamicEditableTreeItem<?, ?>, EditorNodeInfo<N, T>>
   { }
 
-  public final ObjectProperty<TreeItemProvider<T,N>> cellNodeFactory;
+  private TreeItemProvider<T,N> cellNodeFactory;
 
   private EditorNodeInfo<N, T> editorNodeInfo = null;
 
 
-  public DynamicEditableTreeItem( ReadOnlyProperty<T> value, TreeItemProvider<T, N> treeItemProvider )
+  public DynamicEditableTreeItem( ReadOnlyProperty<T> value,
+    TreeItemProvider<T, N> treeItemProvider )
   {
     super(value);
-    this.cellNodeFactory = new SimpleObjectProperty<>(
-      this, "cell node provider", treeItemProvider);
+    this.cellNodeFactory = treeItemProvider;
   }
 
 
@@ -32,10 +30,26 @@ public class DynamicEditableTreeItem<T, N extends Node>
   {
     if (editorNodeInfo == null)
     {
-      TreeItemProvider<T, N> treeItemProvider = this.cellNodeFactory.get();
+      TreeItemProvider<T, N> treeItemProvider = cellNodeFactory;
       editorNodeInfo =
         (treeItemProvider != null) ? treeItemProvider.call(this) : null;
     }
     return editorNodeInfo;
+  }
+
+
+  public TreeItemProvider<T, N> getCellNodeFactory()
+  {
+    return cellNodeFactory;
+  }
+
+  public void setCellNodeFactory(
+    TreeItemProvider<T, N> cellNodeFactory )
+  {
+    if (editorNodeInfo == null)
+      this.cellNodeFactory = cellNodeFactory;
+
+    throw new IllegalStateException(
+      "The current cell node factory was already used successfully");
   }
 }
