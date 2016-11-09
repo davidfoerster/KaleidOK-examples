@@ -39,7 +39,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   public static int DEFAULT_AUDIO_SAMPLERATE = 32000;
   public static int DEFAULT_AUDIO_BUFFERSIZE = 1 << 12;
 
-  private int audioBufferSize = 0, audioBufferOverlap = 0;
+  private int audioBufferSize = 0, audioBufferOverlap = -1;
   private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
 
@@ -54,7 +54,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
 
   @Override
-  public void dispose()
+  public synchronized void dispose()
   {
     if (audioDispatcher != null)
       audioDispatcher.stop();
@@ -63,21 +63,21 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
-  AudioDispatcher getAudioDispatcher()
+  synchronized AudioDispatcher getAudioDispatcher()
   {
     initAudioDispatcher();
     return audioDispatcher;
   }
 
 
-  Thread getAudioDispatcherThread()
+  synchronized Thread getAudioDispatcherThread()
   {
     initAudioDispatcher();
     return audioDispatcherThread;
   }
 
 
-  private void initAudioDispatcher()
+  private synchronized void initAudioDispatcher()
   {
     if (audioDispatcher == null)
     {
@@ -108,11 +108,10 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
           if (audioSource.endsWith(".json")) {
             replayAction = new ReplayAction(p, audioSource);
             ais = replayAction.audioInputStream;
-            dispatcherRunnable = () ->
-            {
-              replayAction.doReplayItem(0);
-              audioDispatcher.run();
-            };
+            dispatcherRunnable = () -> {
+                getReplayAction().doReplayItem(0);
+                getAudioDispatcher().run();
+              };
           } else {
             ais = new ContinuousAudioInputStream(audioSource);
           }
@@ -173,7 +172,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
-  public int getAudioBufferSize()
+  public synchronized int getAudioBufferSize()
   {
     if (audioBufferSize <= 0)
     {
@@ -190,7 +189,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
-  public int getAudioBufferOverlap()
+  public synchronized int getAudioBufferOverlap()
   {
     if (audioBufferOverlap <= 0)
     {
@@ -226,6 +225,13 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
 
   private ReplayAction replayAction = null;
+
+
+  private synchronized ReplayAction getReplayAction()
+  {
+    initAudioDispatcher();
+    return replayAction;
+  }
 
 
   public static final class ReplayAction extends Plugin<Kaleidoscope>
