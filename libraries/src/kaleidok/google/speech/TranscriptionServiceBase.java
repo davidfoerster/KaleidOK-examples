@@ -1,17 +1,14 @@
 package kaleidok.google.speech;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableStringValue;
-import javafx.beans.value.ObservableValue;
 import kaleidok.javafx.beans.property.AspectedObjectProperty;
 import kaleidok.javafx.beans.property.AspectedStringProperty;
-import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
-import kaleidok.javafx.beans.property.adapter.preference.StringPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.util.converter.UriStringConverter;
@@ -39,7 +36,7 @@ public abstract class TranscriptionServiceBase implements PreferenceBean
 
   protected final AspectedStringProperty language;
 
-  private final ServiceUrlBinding serviceUrl;
+  private final ObjectBinding<URI> serviceUrl;
 
   public FutureCallback<SttResponse> resultHandler;
 
@@ -68,8 +65,8 @@ public abstract class TranscriptionServiceBase implements PreferenceBean
     language.addAspect(PropertyPreferencesAdapterTag.getInstance());
 
     this.resultHandler = resultHandler;
-    this.serviceUrl =
-      new ServiceUrlBinding(this.apiBase, this.accessKey, language);
+    this.serviceUrl = Bindings.createObjectBinding(
+      this::computeServiceUrl, this.apiBase, this.accessKey, language);
   }
 
 
@@ -171,61 +168,32 @@ public abstract class TranscriptionServiceBase implements PreferenceBean
   }
 
 
-  private static final class ServiceUrlBinding extends ObjectBinding<URI>
+  private static final String
+    URL_SPEC_PREFIX = "recognize?output=json&lang=",
+    URL_SPEC_KEY_BIT = "&key=";
+
+
+  private URI computeServiceUrl()
   {
-    private final ObservableValue<URI> apiBase;
+    URI apiBase =
+      Objects.requireNonNull(this.apiBase.getValue(), "API base");
+    String
+      language = Objects.requireNonNull(this.language.get(), "language"),
+      accessKey = Objects.requireNonNull(this.accessKey.get(), "access key");
 
-    private final ObservableStringValue accessKey;
+    StringBuilder urlSpec = new StringBuilder(
+      URL_SPEC_PREFIX.length() + language.length() +
+        URL_SPEC_KEY_BIT.length() + accessKey.length());
+    appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
+    appendEncoded(accessKey, urlSpec.append(URL_SPEC_KEY_BIT));
 
-    private final ObservableStringValue language;
-
-
-    private ServiceUrlBinding( ObservableValue<URI> apiBase,
-      ObservableStringValue accessKey, ObservableStringValue language )
+    try
     {
-      bind(apiBase, accessKey, language);
-
-      this.apiBase = apiBase;
-      this.accessKey = accessKey;
-      this.language = language;
+      return apiBase.resolve(urlSpec.toString());
     }
-
-
-    private static final String
-      URL_SPEC_PREFIX = "recognize?output=json&lang=",
-      URL_SPEC_KEY_BIT = "&key=";
-
-
-    @Override
-    protected URI computeValue()
+    catch (IllegalArgumentException ex)
     {
-      URI apiBase =
-        Objects.requireNonNull(this.apiBase.getValue(), "API base");
-      String
-        language = Objects.requireNonNull(this.language.get(), "language"),
-        accessKey = Objects.requireNonNull(this.accessKey.get(), "access key");
-
-      StringBuilder urlSpec = new StringBuilder(
-        URL_SPEC_PREFIX.length() + language.length() +
-          URL_SPEC_KEY_BIT.length() + accessKey.length());
-      appendEncoded(language, urlSpec.append(URL_SPEC_PREFIX));
-      appendEncoded(accessKey, urlSpec.append(URL_SPEC_KEY_BIT));
-
-      try
-      {
-        return apiBase.resolve(urlSpec.toString());
-      }
-      catch (IllegalArgumentException ex)
-      {
-        throw new AssertionError(ex);
-      }
-    }
-
-
-    @Override
-    public void dispose()
-    {
-      unbind(apiBase, accessKey, language);
+      throw new AssertionError(ex);
     }
   }
 }
