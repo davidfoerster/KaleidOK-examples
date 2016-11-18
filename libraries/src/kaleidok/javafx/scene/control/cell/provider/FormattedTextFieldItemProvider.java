@@ -19,6 +19,8 @@ import kaleidok.util.function.Functions;
 
 import java.util.Objects;
 
+import static kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider.findParentCell;
+
 
 public class FormattedTextFieldItemProvider<T>
   extends AspectedTreeItemProvider<T, TextField, StringConverter<T>, StringConverterAspectTag<T>>
@@ -76,9 +78,9 @@ public class FormattedTextFieldItemProvider<T>
   {
     final TextInputControl textField = (TextInputControl) ev.getSource();
     @SuppressWarnings("unchecked")
-    TreeTableCell<? extends AspectedReadOnlyProperty<T>, T> cell =
-      (TreeTableCell<? extends AspectedReadOnlyProperty<T>, T>)
-        textField.getParent();
+    EditableTreeTableCell<T, ?> cell =
+      (EditableTreeTableCell<T, ?>)
+        Objects.requireNonNull(findParentCell(textField));
     StringConverter<T> converter = getStringConverter(cell);
     T newValue;
     try

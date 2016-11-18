@@ -18,6 +18,8 @@ import kaleidok.util.Math;
 
 import java.util.Objects;
 
+import static kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider.findParentCell;
+
 
 public abstract class SpinnerItemProvider<T extends Number>
   extends FilteredTreeItemProvider<Number, Spinner<T>>
@@ -95,7 +97,8 @@ public abstract class SpinnerItemProvider<T extends Number>
     T newValue = spinner.getValue();
 
     @SuppressWarnings("unchecked")
-    Cell<T> cell = (Cell<T>) spinner.getParent();
+    Cell<T> cell = (Cell<T>)
+      Objects.requireNonNull(findParentCell(spinner.getParent()));
     T oldValue = cell.isEmpty() ? null : cell.getItem();
 
     if (!Objects.equals(oldValue, newValue))

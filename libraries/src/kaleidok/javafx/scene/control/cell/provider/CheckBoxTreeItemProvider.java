@@ -7,6 +7,10 @@ import javafx.scene.control.CheckBox;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 
+import java.util.Objects;
+
+import static kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider.findParentCell;
+
 
 public class CheckBoxTreeItemProvider
   extends FilteredTreeItemProvider<Boolean, CheckBox>
@@ -34,7 +38,9 @@ public class CheckBoxTreeItemProvider
   {
     CheckBox checkBox = (CheckBox) ev.getSource();
     //noinspection unchecked
-    ((Cell<Boolean>) checkBox.getParent()).commitEdit(checkBox.isSelected());
+    Cell<Boolean> cell = (Cell<Boolean>)
+      Objects.requireNonNull(findParentCell(checkBox));
+    cell.commitEdit(checkBox.isSelected());
     ev.consume();
   }
 }

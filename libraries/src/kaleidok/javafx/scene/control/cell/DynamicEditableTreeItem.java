@@ -10,7 +10,18 @@ public class DynamicEditableTreeItem<T, N extends Node>
 {
   public interface TreeItemProvider<T, N extends Node>
     extends Callback<DynamicEditableTreeItem<?, ?>, EditorNodeInfo<N, T>>
-  { }
+  {
+    static EditableTreeTableCell<?,?> findParentCell( Node node )
+    {
+      for (; node != null; node = node.getParent())
+      {
+        if (node instanceof EditableTreeTableCell)
+          return (EditableTreeTableCell<?,?>) node;
+      }
+      return null;
+    }
+  }
+
 
   private TreeItemProvider<T,N> cellNodeFactory;
 

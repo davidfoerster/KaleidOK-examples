@@ -7,6 +7,10 @@ import javafx.scene.control.TextField;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 
+import java.util.Objects;
+
+import static kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider.findParentCell;
+
 
 public class TextFieldItemProvider extends FilteredTreeItemProvider<String, TextField>
 {
@@ -34,7 +38,8 @@ public class TextFieldItemProvider extends FilteredTreeItemProvider<String, Text
   {
     TextField textField = (TextField) ev.getSource();
     @SuppressWarnings("unchecked")
-    Cell<String> cell = (Cell<String>) textField.getParent();
+    Cell<String> cell = (Cell<String>)
+      Objects.requireNonNull(findParentCell(textField));
     String oldValue = cell.isEmpty() ? null : cell.getItem();
     CharSequence newValue = textField.getCharacters();
     if (oldValue == null || !oldValue.contentEquals(newValue))
