@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
 
 import static kaleidok.kaleidoscope.KaleidoscopeApp.iconDir;
-import static kaleidok.util.logging.LoggingUtils.logThrown;
+import static kaleidok.util.logging.LoggingUtils.logAssertion;
 
 
 public class KaleidoscopeControls extends BorderPane
@@ -74,15 +74,8 @@ public class KaleidoscopeControls extends BorderPane
     Image img = new Image(url, false);
     if (img.isError())
     {
-      if (KaleidoscopeControls.class.desiredAssertionStatus())
-      {
-        throw new AssertionError(
-          "Couldn't load icon: " + url, img.getException());
-      }
-
-      logThrown(logger, Level.WARNING,
-        "Couldn't load icon: {0}",
-        img.getException(), url);
+      logAssertion(KaleidoscopeControls.class, logger, Level.WARNING,
+        "Couldn't load icon: {0}", img.getException(), url);
     }
     return img;
   }

@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
@@ -95,5 +96,24 @@ public final class LoggingUtils
       (clazz.isPrimitive() || clazz.isArray() || clazz == void.class) ?
         Logger.getAnonymousLogger() :
         Logger.getLogger(Reflection.getTopLevelClass(clazz).getName());
+  }
+
+
+  public static void logAssertion( Class<?> assertionClass, Logger logger,
+    Level level, String msg, Throwable ex, Object... params )
+  {
+    if (ex != null)
+    {
+      logThrown(logger, level, msg, ex, params);
+    }
+    else
+    {
+      logger.log(level, msg, params);
+    }
+
+    if (assertionClass.desiredAssertionStatus())
+    {
+      throw new AssertionError(MessageFormat.format(msg, params), ex);
+    }
   }
 }
