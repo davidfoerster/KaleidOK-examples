@@ -98,6 +98,9 @@ public final class Objects
 
   public static String objectToString( Object obj )
   {
+    if (obj == null)
+      return String.valueOf((Object) null);
+
     String className = obj.getClass().getName();
     int classNameLength = className.length();
     char[] s = new char[classNameLength + (Integer.BYTES * 2 + 1)];
