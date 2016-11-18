@@ -64,9 +64,14 @@ public class KaleidoscopeControls extends BorderPane
   }
 
 
-  private static Image loadIcon( String url )
+  static Image loadIcon( String url )
   {
-    Image img = new Image(url, false);
+    return loadIcon(url, false);
+  }
+
+  static Image loadIcon( String url, boolean backgroundLoading )
+  {
+    Image img = new Image(url, backgroundLoading);
     if (img.isError())
     {
       logAssertion(KaleidoscopeControls.class, logger, Level.WARNING,
