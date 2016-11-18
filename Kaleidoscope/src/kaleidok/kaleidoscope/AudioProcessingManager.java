@@ -161,7 +161,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       audioDispatcher.addAudioProcessor(getVolumeLevelProcessor());
       audioDispatcher.addAudioProcessor(getFftProcessor());
 
-      Kaleidoscope.logger.config(audioDispatcher.getFormat().toString());
+      logger.config(audioDispatcher.getFormat().toString());
       initAudioDispatcherThread(dispatcherRunnable);
     }
   }
@@ -229,7 +229,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       int bufferOverlap = DefaultValueParser.parseInt(
         p.getParameterMap().get(param), bufferSize / 2);
       if (bufferOverlap < 0 || bufferOverlap >= bufferSize)
-        throw new AssertionError(param + " must be positive and less than buffersize");
+        throw new AssertionError(param + " must be positive and less than buffer size");
       if (!isPowerOfTwo(bufferOverlap))
         throw new AssertionError(param + " must be a power of 2");
       audioBufferOverlap = bufferOverlap;
@@ -373,7 +373,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       timer = new Timer(0, this);
       timer.setRepeats(false);
 
-      Kaleidoscope.logger.log(Level.CONFIG,
+      logger.log(Level.CONFIG,
         "Replaying recorded interaction \"{0}\"", replayList.name);
     }
 
@@ -461,7 +461,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       MultiAudioInputStream ais = audioInputStream;
       int idx = ais.getCurrentIdx() + 1;
       if (idx >= ais.streams.size()) {
-        Kaleidoscope.logger.info("Last replay item has been finished");
+        logger.info("Last replay item has been finished");
         return;
       }
 
@@ -477,7 +477,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       try {
         audioInputStream.setCurrentIdx(idx);
       } catch (IOException ex) {
-        Kaleidoscope.logger.log(Level.SEVERE, "Couldn't skip to next replay item", ex);
+        logger.log(Level.SEVERE, "Couldn't skip to next replay item", ex);
         return;
       }
       this.idx = idx;
@@ -497,7 +497,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       timer.setInitialDelay((int)(streamLength * 1e3));
       timer.start();
 
-      Kaleidoscope.logger.log(Level.FINE,
+      logger.log(Level.FINE,
         "Playing back audio file {0} of {1}",
         new Object[]{ais.getCurrentIdx() + 1, ais.streams.size()});
     }
