@@ -5,6 +5,8 @@ import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import com.google.gson.JsonParseException;
+import javafx.beans.property.IntegerProperty;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.audio.ContinuousAudioInputStream;
 import kaleidok.audio.DummyAudioPlayer;
 import kaleidok.audio.MultiAudioInputStream;
@@ -12,6 +14,13 @@ import kaleidok.audio.OffThreadAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.google.gson.TypeAdapterManager;
+import kaleidok.javafx.beans.property.AspectedIntegerProperty;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
+import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.RestartRequiredTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
+import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
 import kaleidok.util.prefs.DefaultValueParser;
 import processing.event.KeyEvent;
@@ -29,6 +38,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
@@ -36,8 +46,10 @@ import static kaleidok.util.Math.isPowerOfTwo;
 
 
 public class AudioProcessingManager extends Plugin<Kaleidoscope>
+  implements PreferenceBean
 {
-  public static int DEFAULT_AUDIO_SAMPLERATE = 32000;
+  private static int DEFAULT_AUDIO_SAMPLERATE = 32000;
+
   public static int DEFAULT_AUDIO_BUFFERSIZE = 1 << 12;
 
   private int audioBufferSize = 0, audioBufferOverlap = -1;
@@ -47,10 +59,25 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   private VolumeLevelProcessor volumeLevelProcessor;
   private MinimFFTProcessor fftProcessor;
 
+  private final AspectedIntegerProperty audioSampleRate;
+
 
   AudioProcessingManager( Kaleidoscope sketch )
   {
     super(sketch);
+
+    audioSampleRate =
+      new AspectedIntegerProperty(this, "audio sample rate",
+        loadAudioSampleRate(sketch));
+    IntegerSpinnerValueFactory bounds =
+      new IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
+    bounds.setAmountToStepBy(1000);
+    // TODO: format with SI prefixes
+    audioSampleRate.addAspect(BoundedIntegerTag.INSTANCE, bounds);
+    audioSampleRate
+      .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
+      .load();
+    audioSampleRate.addAspect(RestartRequiredTag.getInstance());
   }
 
 
@@ -59,6 +86,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   {
     if (audioDispatcher != null)
       audioDispatcher.stop();
+
+    getPreferenceAdapters().forEach(PropertyPreferencesAdapter::save);
 
     super.dispose();
   }
@@ -78,12 +107,19 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
+  private synchronized boolean isAudioDispatcherInitialized()
+  {
+    return audioDispatcher != null;
+  }
+
+
   private synchronized void initAudioDispatcher()
   {
     if (audioDispatcher == null)
     {
-      String paramBase = p.getClass().getPackage().getName() + ".audio.";
-      String audioSource = p.getParameterMap().get(paramBase + "input");
+      String audioSource =
+        p.getParameterMap().get(
+          p.getClass().getPackage().getName() + ".audio.input");
       int bufferSize = getAudioBufferSize(),
         bufferOverlap = getAudioBufferOverlap();
 
@@ -92,15 +128,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       {
         if (audioSource == null)
         {
-          @SuppressWarnings("SpellCheckingInspection")
-          String param = paramBase + "samplerate";
-          int sampleRate = DefaultValueParser.parseInt(
-            p.getParameterMap().get(param), DEFAULT_AUDIO_SAMPLERATE);
-          if (sampleRate <= 0)
-            throw new AssertionError(param + " must be positive");
-
           audioDispatcher =
-            fromDefaultMicrophone(sampleRate, bufferSize, bufferOverlap);
+            fromDefaultMicrophone(audioSampleRate.get(), bufferSize, bufferOverlap);
           dispatcherRunnable = audioDispatcher;
         }
         else
@@ -209,6 +238,55 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
+  public IntegerProperty sampleRateProperty()
+  {
+    return audioSampleRate;
+  }
+
+  public float getSampleRate()
+  {
+    return isAudioDispatcherInitialized() ?
+      getAudioDispatcher().getFormat().getSampleRate() :
+      audioSampleRate.get();
+  }
+
+  public synchronized void setSampleRate( int sampleRate )
+  {
+    checkCanChangeSamplingParameters();
+    audioSampleRate.set(sampleRate);
+  }
+
+
+  private static int loadAudioSampleRate( ExtPApplet p )
+  {
+    @SuppressWarnings("SpellCheckingInspection")
+    String param = p.getClass().getPackage().getName() + ".audio.samplerate";
+    String strSampleRate = p.getParameterMap().get(param);
+    if (strSampleRate != null && !strSampleRate.isEmpty())
+    {
+      int sampleRate = Integer.parseInt(strSampleRate);
+      if (sampleRate > 0)
+        return sampleRate;
+
+      logger.log(Level.WARNING,
+        "Ignoring property entry {0}: Sampling rate {1} isn't positive",
+        new Object[]{ param, sampleRate });
+    }
+    return getDefaultAudioSampleRate();
+  }
+
+
+  private void checkCanChangeSamplingParameters()
+  {
+    if (isAudioDispatcherInitialized())
+    {
+      throw new IllegalStateException(
+        "Cannot change sampling parameters after audio dispatcher " +
+          "initialization");
+    }
+  }
+
+
   VolumeLevelProcessor getVolumeLevelProcessor()
   {
     if (volumeLevelProcessor == null)
@@ -232,6 +310,36 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   {
     initAudioDispatcher();
     return replayAction;
+  }
+
+
+  @Override
+  public String getName()
+  {
+    return "Audio processing manager";
+  }
+
+
+  @Override
+  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return Stream.of(audioSampleRate.getAspect(
+      PropertyPreferencesAdapterTag.getWritableInstance()));
+  }
+
+
+  public static int getDefaultAudioSampleRate()
+  {
+    return DEFAULT_AUDIO_SAMPLERATE;
+  }
+
+  public static void setDefaultAudioSampleRate( int defaultAudioSampleRate )
+  {
+    if (defaultAudioSampleRate <= 0)
+      throw new IllegalArgumentException("Sampling rate must be positive");
+
+    DEFAULT_AUDIO_SAMPLERATE = defaultAudioSampleRate;
   }
 
 

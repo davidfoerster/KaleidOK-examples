@@ -235,7 +235,8 @@ public class Kaleidoscope extends ExtPApplet
       getSTT().getPreferenceAdapters(),
       getChromasthetiationService().getPreferenceAdapters(),
       getLayers().getPreferenceAdapters(),
-      getFrameRateDisplay().getPreferenceAdapters());
+      getFrameRateDisplay().getPreferenceAdapters(),
+      getAudioProcessingManager().getPreferenceAdapters());
 
     return Stream.concat(
       s.flatMap(Function.identity()),
