@@ -5,7 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Cell;
 import javafx.scene.control.TextField;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
-import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
+import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
 
 import java.util.Objects;
 

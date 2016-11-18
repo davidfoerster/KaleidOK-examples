@@ -4,112 +4,64 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
-import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
 
 import java.util.function.BiConsumer;
 
 
 public class EditableTreeTableCell<T, N extends Node>
-  extends TreeTableCell<ReadOnlyProperty<T>, T>
+  extends NodeInfoTreeTableCell<T, T, N>
 {
-  private EditorNodeInfo<N, T> nodeInfo = null;
-
-
-  private void updateNodeInfo( TreeItem<ReadOnlyProperty<T>> item )
+  @Override
+  protected EditorNodeInfo<N, T> updateNodeInfo(
+    TreeItem<ReadOnlyProperty<T>> newItem, EditorNodeInfo<N, T> oldNodeInfo,
+    EditorNodeInfo<N, T> newNodeInfo )
   {
-    if (item instanceof EditableTreeItem && isEditableInherited())
-    {
-      EditorNodeInfo<N, T> nodeInfo =
-        ((EditableTreeItem<T, N>) item).getEditorNodeInfo();
-      if (nodeInfo != null)
-      {
-        if (!nodeInfo.isEmpty())
-        {
-          this.nodeInfo = nodeInfo;
-          return;
-        }
+    if (!isEditableInherited())
+      return null;
 
-        setEditable(false);
-      }
-    }
-    this.nodeInfo = null;
+    if (newNodeInfo != null && newNodeInfo.isEmpty())
+      setEditable(false);
+
+    return newNodeInfo;
   }
 
 
   @Override
   public void updateIndex( int i )
   {
-    updateNodeInfo(getTreeTableView().getTreeItem(i));
     super.updateIndex(i);
     if (isAlwaysEditing())
       startEdit2(false);
   }
 
 
-  public N getEditorNode()
+  private void updateEditorValue( T item )
   {
-    EditorNodeInfo<N, ?> nodeInfo = this.nodeInfo;
-    return (nodeInfo != null) ? nodeInfo.node : null;
-  }
-
-
-  private boolean isAlwaysEditing()
-  {
-    EditorNodeInfo<N, ?> nodeInfo = this.nodeInfo;
-    return nodeInfo != null && nodeInfo.alwaysEditing;
-  }
-
-
-  private BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T>
-  getValueChangeListener()
-  {
-    EditorNodeInfo<N, T> nodeInfo = this.nodeInfo;
-    return (nodeInfo != null) ? nodeInfo.valueChange : null;
-  }
-
-
-  private void updateEditorValue( T item, boolean empty )
-  {
-    if (!empty)
-    {
-      BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> changeListener =
-        getValueChangeListener();
-      if (changeListener != null)
-        changeListener.accept(this, item);
-    }
-  }
-
-
-  private String itemToString( T item, boolean empty )
-  {
-    if (item == null || empty)
-      return null;
-
-    EditorNodeInfo<?, T> nodeInfo = this.nodeInfo;
-    return (nodeInfo != null && nodeInfo.converter != null) ?
-      nodeInfo.converter.toString(item) :
-      item.toString();
-  }
-
-
-  public boolean isEditableInherited()
-  {
-    return isEditable() &&
-      getTableColumn().isEditable() &&
-      getTreeTableView().isEditable();
+    BiConsumer<? super EditableTreeTableCell<? super T, N>, ? super T> changeListener =
+      getValueChangeListener();
+    if (changeListener != null)
+      changeListener.accept(this, item);
   }
 
 
   @Override
   protected void updateItem( T item, boolean empty )
   {
-    super.updateItem(item, empty);
-    updateEditorValue(item, empty);
+    if (item == getItem())
+      return;
 
-    boolean editing = isEditing();
+    super.updateItem(item, empty);
+
+    if (!empty)
+      updateEditorValue(item);
+    updateGraphics(item, empty, isEditing());
+  }
+
+
+  private void updateGraphics( T item, boolean empty, boolean editing )
+  {
     setText(!editing ? itemToString(item, empty) : null);
-    setGraphic((editing && !empty) ? getEditorNode() : null);
+    setGraphic(!empty ? getGraphicsNode(editing) : null);
   }
 
 
@@ -124,17 +76,23 @@ public class EditableTreeTableCell<T, N extends Node>
   {
     if (!isEditing() && isEditableInherited())
     {
-      Node node = getEditorNode();
-      if (node != null)
+      Node graphicsNode = getGraphicsNode(true);
+      if (graphicsNode != null)
       {
         super.startEdit();
         if (isEditing())
         {
           setText(null);
-          updateEditorValue(getItem(), isEmpty());
-          setGraphic(node);
+          updateEditorValue(getItem());
+          setGraphic(graphicsNode);
+
           if (requestFocus)
-            node.requestFocus();
+          {
+            Node editorNode = getEditorNode();
+            if (editorNode != null)
+              editorNode.requestFocus();
+          }
+
           return true;
         }
       }
@@ -171,8 +129,7 @@ public class EditableTreeTableCell<T, N extends Node>
     if (!isAlwaysEditing())
     {
       super.cancelEdit();
-      setText(itemToString(getItem(), isEmpty()));
-      setGraphic(null);
+      updateGraphics(getItem(), isEmpty(), false);
     }
   }
 }

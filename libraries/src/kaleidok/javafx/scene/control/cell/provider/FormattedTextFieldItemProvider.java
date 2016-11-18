@@ -13,7 +13,7 @@ import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
 import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
-import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
+import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
 import kaleidok.util.function.Functions;
 

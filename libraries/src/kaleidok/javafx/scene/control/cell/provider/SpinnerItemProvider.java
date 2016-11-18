@@ -13,7 +13,7 @@ import kaleidok.javafx.beans.property.AspectedProperty;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedValueTag;
 import kaleidok.javafx.event.EventUtils;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
-import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
+import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
 import kaleidok.util.Math;
 
 import java.util.Objects;

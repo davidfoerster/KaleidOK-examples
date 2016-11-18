@@ -3,7 +3,7 @@ package kaleidok.javafx.scene.control.cell.provider;
 import javafx.scene.Node;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider;
-import kaleidok.javafx.scene.control.cell.EditableTreeItem.EditorNodeInfo;
+import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
 
 import java.util.*;
 import java.util.function.Consumer;
