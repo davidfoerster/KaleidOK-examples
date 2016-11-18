@@ -5,6 +5,7 @@ import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider;
 import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -15,6 +16,22 @@ import java.util.stream.Stream;
 public class MultiTreeItemProvider<T, N extends Node>
   implements TreeItemProvider<T, N>, List<TreeItemProvider<T, N>>
 {
+  public interface TreeItemEditorHook<T, N extends Node>
+    extends TreeItemProvider<T, N>
+  {
+    @Override
+    default EditorNodeInfo<N, T> call( DynamicEditableTreeItem<?, ?> param )
+    {
+      return null;
+    }
+
+
+    @Nonnull EditorNodeInfo<N, T> modify(
+      @Nonnull DynamicEditableTreeItem<?, ?> treeItem,
+      @Nonnull EditorNodeInfo<N, T> nodeInfo );
+  }
+
+
   private final List<TreeItemProvider<T, N>> underlying;
 
 
@@ -36,10 +53,25 @@ public class MultiTreeItemProvider<T, N extends Node>
   @Override
   public EditorNodeInfo<N, T> call( final DynamicEditableTreeItem<?, ?> item )
   {
-    return this.stream()
+    EditorNodeInfo<N, T> result = this.stream()
       .map((cnf) -> cnf.call(item))
       .filter(Objects::nonNull)
       .findFirst().orElse(null);
+
+    if (result != null && !result.isEmpty())
+    {
+      for (TreeItemProvider<T, N> cb: this)
+      {
+        if (cb instanceof TreeItemEditorHook)
+        {
+          result = ((TreeItemEditorHook<T, N>) cb).modify(item, result);
+          if (result.isEmpty())
+            break;
+        }
+      }
+    }
+
+    return result;
   }
 
 
