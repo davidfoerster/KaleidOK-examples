@@ -8,7 +8,6 @@ import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeTableCell;
 import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
 import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
@@ -55,22 +54,17 @@ public class FormattedTextFieldItemProvider<T>
 
 
   private static <T> StringConverter<T> getStringConverter(
-    TreeTableCell<? extends AspectedReadOnlyProperty<T>, ?> cell )
+    EditableTreeTableCell<T, ?> cell )
   {
     return StringConverterAspectTag.<T>getInstance().of(
-      cell.getTreeTableRow().getTreeItem().getValue());
+      (AspectedReadOnlyProperty<T>) cell.getTreeTableRow().getTreeItem().getValue());
   }
 
 
   private static <T> void handleValueChange(
     EditableTreeTableCell<T, TextField> cell, T value )
   {
-    TextField textField = cell.getEditorNode();
-    //noinspection unchecked,RedundantCast
-    textField.setText(getStringConverter(
-        (TreeTableCell<? extends AspectedReadOnlyProperty<T>, ?>)
-          (TreeTableCell<?,?>) cell)
-      .toString(value));
+    cell.getEditorNode().setText(getStringConverter(cell).toString(value));
   }
 
 
