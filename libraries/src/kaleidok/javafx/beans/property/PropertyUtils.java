@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.lang.reflect.Modifier.FINAL;
+import static java.lang.reflect.Modifier.STATIC;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 
 
@@ -56,7 +58,7 @@ public final class PropertyUtils
     Stream<Property<?>> fieldProps =
       Stream.of(bean.getClass().getFields())
         .filter(( f ) ->
-          !Modifier.isStatic(f.getModifiers()) &&
+          (f.getModifiers() & (STATIC | FINAL)) == 0 &&
             Property.class.isAssignableFrom(f.getType()))
         .map(( f ) -> {
             try {
