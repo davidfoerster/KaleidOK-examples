@@ -1,6 +1,6 @@
 package kaleidok.kaleidoscope.controls;
 
-import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.effect.ColorAdjust;
@@ -47,11 +47,6 @@ public class KaleidoscopeControls extends BorderPane
   }
 
 
-  private static final String
-    START_RECORDING = "Start recording",
-    STOP_RECORDING = "Stop recording";
-
-
   public ToggleButton getRecordingButton()
   {
     if (recordingButton == null)
@@ -59,11 +54,11 @@ public class KaleidoscopeControls extends BorderPane
       recordingButton = makeRoundToggleButton(
         "Record", loadIcon(iconDir + "start.png"),
         loadIcon(iconDir + "stop.png"));
-      recordingButton.setTooltip(new Tooltip(START_RECORDING));
-      recordingButton.selectedProperty().addListener(
-        (obs, oldValue, newValue) ->
-          ((Control) ((ReadOnlyProperty<?>) obs).getBean()).getTooltip()
-            .setText(newValue ? STOP_RECORDING : START_RECORDING));
+      Tooltip tooltip = new Tooltip();
+      tooltip.textProperty().bind(
+        Bindings.when(recordingButton.selectedProperty())
+          .then("Start recording").otherwise("Stop recording"));
+      recordingButton.setTooltip(tooltip);
     }
     return recordingButton;
   }
@@ -86,7 +81,7 @@ public class KaleidoscopeControls extends BorderPane
   {
     ImageView buttonGraphics =
       (!unselectedImage.isError() && !selectedImage.isError()) ?
-        new ImageView(unselectedImage) :
+        new ImageView() :
         null;
     ToggleButton button = new ToggleButton(text, buttonGraphics);
     if (buttonGraphics != null)
@@ -104,12 +99,9 @@ public class KaleidoscopeControls extends BorderPane
           .max().getAsDouble();
       button.setShape(new Circle(diameter * 0.5));
       button.setPickOnBounds(false);
-
-      button.selectedProperty().addListener(
-        (obs, oldValue, newValue) ->
-          ((ImageView) ((Labeled) ((ReadOnlyProperty<?>) obs).getBean())
-            .getGraphic()).setImage(
-              newValue ? selectedImage : unselectedImage));
+      buttonGraphics.imageProperty().bind(
+        Bindings.when(button.selectedProperty())
+          .then(selectedImage).otherwise(unselectedImage));
     }
     else
     {
@@ -180,12 +172,10 @@ public class KaleidoscopeControls extends BorderPane
           ContentDisplay.GRAPHIC_ONLY);
         configurationWindowButton.setPadding(new Insets(2.5));
 
-        final ColorAdjust selectedEffect =
-          new ColorAdjust(0, 0, -0.25, 0);
-        configurationWindowButton.selectedProperty().addListener(
-          (obs, oldSelected, newSelected) ->
-            configurationWindowButton.getGraphic()
-              .setEffect(newSelected ? selectedEffect : null));
+        configurationWindowButton.getGraphic().effectProperty().bind(
+          Bindings.when(configurationWindowButton.selectedProperty())
+            .then(new ColorAdjust(0, 0, -0.25, 0))
+            .otherwise((ColorAdjust) null));
       }
       configurationWindowButton.setTooltip(
         new Tooltip("Toggle configuration window"));
