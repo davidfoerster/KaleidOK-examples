@@ -18,6 +18,7 @@ import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
 import kaleidok.javafx.scene.control.cell.provider.*;
+import kaleidok.javafx.util.Callbacks;
 import kaleidok.util.Arrays;
 
 import java.util.Collection;
@@ -77,8 +78,7 @@ public class KaleidoscopeConfigurationEditor
         TreeItem<ReadOnlyProperty<Object>> item = cdf.getValue();
         return item.isLeaf() ? item.getValue() : null;
       });
-    valueCol.setCellFactory(
-      (col) -> new EditableTreeTableCell<>());
+    valueCol.setCellFactory(Callbacks.ignoreArg(EditableTreeTableCell::new));
     columns.add(valueCol);
 
     setSortMode(TreeSortMode.ALL_DESCENDANTS);
