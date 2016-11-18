@@ -14,9 +14,12 @@ import kaleidok.javafx.beans.property.SimpleReadOnlyStringProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag.DefaultLevelOfDetailComparator;
+import kaleidok.javafx.beans.property.aspect.RestartRequiredTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
+import kaleidok.javafx.scene.control.cell.NotificationTreeTableCell;
+import kaleidok.javafx.scene.control.cell.provider.hook.NotificationTreeItemEditorHook;
 import kaleidok.javafx.scene.control.cell.provider.*;
 import kaleidok.javafx.util.Callbacks;
 import kaleidok.util.Arrays;
@@ -31,6 +34,9 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static kaleidok.kaleidoscope.KaleidoscopeApp.iconDir;
+import static kaleidok.kaleidoscope.controls.KaleidoscopeControls.loadIcon;
 
 
 public class KaleidoscopeConfigurationEditor
@@ -67,6 +73,7 @@ public class KaleidoscopeConfigurationEditor
           (ObservableStringValue) p :
           makeSectionRootProperty("property name", p.getBean(), p.getName());
       });
+    nameCol.setCellFactory(Callbacks.ignoreArg(NotificationTreeTableCell::new));
     columns.add(nameCol);
 
     TreeTableColumn<ReadOnlyProperty<Object>, Object> valueCol =
@@ -112,9 +119,12 @@ public class KaleidoscopeConfigurationEditor
         (List<? extends TreeItemProvider<Object, Node>>) (List<? extends TreeItemProvider<?,?>>)
         Arrays.asImmutableList(
           new CheckBoxTreeItemProvider(),
-          new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>(),
           new FormattedTextFieldItemProvider<>(),
-          new TextFieldItemProvider()));
+          new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>(),
+          new TextFieldItemProvider(),
+          new NotificationTreeItemEditorHook<>(
+            RestartRequiredTag.getInstance(), "Restart required to apply change",
+            loadIcon(iconDir + "dialog-warning.png", true))));
     }
 
 

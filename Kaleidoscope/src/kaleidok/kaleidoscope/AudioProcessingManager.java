@@ -31,6 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.logging.Level;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
+import static kaleidok.kaleidoscope.Kaleidoscope.logger;
 import static kaleidok.util.Math.isPowerOfTwo;
 
 
