@@ -120,6 +120,7 @@ public class KaleidoscopeConfigurationEditor
         Arrays.asImmutableList(
           new CheckBoxTreeItemProvider(),
           new FormattedTextFieldItemProvider<>(),
+          new SpinnerItemProvider.SteppingIntegerValueSpinnerItemProvider(),
           new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>(),
           new TextFieldItemProvider(),
           new NotificationTreeItemEditorHook<>(

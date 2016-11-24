@@ -8,8 +8,10 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedProperty;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedValueTag;
 import kaleidok.javafx.event.EventUtils;
+import kaleidok.javafx.scene.control.cell.SteppingIntegerSpinnerValueFactory;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
 import kaleidok.util.Math;
@@ -65,6 +67,26 @@ public abstract class SpinnerItemProvider<T extends Number>
       AspectedProperty<Number> property )
     {
       return property.getAspect(BoundedValueTag.getInstance());
+    }
+  }
+
+
+  public static class SteppingIntegerValueSpinnerItemProvider
+    extends BoundedValueSpinnerItemProvider<Integer>
+  {
+    @Override
+    public boolean isApplicable( DynamicEditableTreeItem<?, ?> item )
+    {
+      return BoundedIntegerTag.getIntegerInstance().ofAny(item.getValue()) instanceof SteppingIntegerSpinnerValueFactory;
+    }
+
+
+    @Override
+    protected Spinner<Integer> makeSpinner( SpinnerValueFactory<Integer> valueFactory )
+    {
+      Spinner<Integer> spinner = new Spinner<>();
+      ((SteppingIntegerSpinnerValueFactory) valueFactory).addTo(spinner);
+      return spinner;
     }
   }
 
