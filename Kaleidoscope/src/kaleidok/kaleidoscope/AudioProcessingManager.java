@@ -20,6 +20,8 @@ import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdap
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.RestartRequiredTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
+import kaleidok.javafx.scene.control.cell.SteppingIntegerSpinnerValueFactory;
+import kaleidok.javafx.scene.control.cell.SteppingIntegerSpinnerValueFactory.BinaryLogarithmStepFunction;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
 import kaleidok.util.prefs.DefaultValueParser;
@@ -50,9 +52,9 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 {
   private static int DEFAULT_AUDIO_SAMPLERATE = 32000;
 
-  public static int DEFAULT_AUDIO_BUFFERSIZE = 1 << 12;
+  private static int DEFAULT_AUDIO_BUFFERSIZE = 1 << 12;
 
-  private int audioBufferSize = 0, audioBufferOverlap = -1;
+  private int dispatcherBufferSize = 0, audioBufferOverlap = -1;
   private AudioDispatcher audioDispatcher;
   private Thread audioDispatcherThread;
 
@@ -60,6 +62,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   private MinimFFTProcessor fftProcessor;
 
   private final AspectedIntegerProperty audioSampleRate;
+
+  private final AspectedIntegerProperty audioBufferSize;
 
 
   AudioProcessingManager( Kaleidoscope sketch )
@@ -78,6 +82,20 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
       .load();
     audioSampleRate.addAspect(RestartRequiredTag.getInstance());
+
+    audioBufferSize =
+      new AspectedIntegerProperty(this, "audio buffer size",
+        loadAudioBufferSize(sketch));
+    bounds =
+      new SteppingIntegerSpinnerValueFactory(1,
+        BinaryLogarithmStepFunction.INSTANCE.coerceToStep(Integer.MAX_VALUE),
+        BinaryLogarithmStepFunction.INSTANCE);
+    // TODO: use formatter with conversion to buffer period with current sampling rate
+    audioBufferSize.addAspect(BoundedIntegerTag.getIntegerInstance(), bounds);
+    audioBufferSize
+      .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
+      .load();
+    audioBufferSize.addAspect(RestartRequiredTag.getInstance());
   }
 
 
@@ -120,16 +138,16 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       String audioSource =
         p.getParameterMap().get(
           p.getClass().getPackage().getName() + ".audio.input");
-      int bufferSize = getAudioBufferSize(),
-        bufferOverlap = getAudioBufferOverlap();
+      dispatcherBufferSize = getDispatcherBufferSize();
+      int bufferOverlap = getAudioBufferOverlap();
 
       Runnable dispatcherRunnable = null;
       try
       {
         if (audioSource == null)
         {
-          audioDispatcher =
-            fromDefaultMicrophone(audioSampleRate.get(), bufferSize, bufferOverlap);
+          audioDispatcher = fromDefaultMicrophone(
+            audioSampleRate.get(), dispatcherBufferSize, bufferOverlap);
           dispatcherRunnable = audioDispatcher;
         }
         else
@@ -145,8 +163,10 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
           } else {
             ais = new ContinuousAudioInputStream(audioSource);
           }
-          audioDispatcher = new AudioDispatcher(ais, bufferSize, bufferOverlap);
-          dispatcherRunnable = initAudioPlayer(audioDispatcher, dispatcherRunnable);
+          audioDispatcher =
+            new AudioDispatcher(ais, dispatcherBufferSize, bufferOverlap);
+          dispatcherRunnable =
+            initAudioPlayer(audioDispatcher, dispatcherRunnable);
         }
       }
       catch (JsonParseException ex)
@@ -178,7 +198,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     {
       OffThreadAudioPlayer player = new OffThreadAudioPlayer(
         JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
-        getAudioBufferSize() - getAudioBufferOverlap());
+        getDispatcherBufferSize() - getAudioBufferOverlap());
       player.offThread.start();
       audioDispatcher.addAudioProcessor(player);
     }
@@ -202,20 +222,43 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
-  public synchronized int getAudioBufferSize()
+  public IntegerProperty audioBufferSizeProperty()
   {
-    if (audioBufferSize <= 0)
-    {
-      @SuppressWarnings("SpellCheckingInspection")
-      String param =
-        p.getClass().getPackage().getName() + ".audio.buffersize";
-      int bufferSize = DefaultValueParser.parseInt(
-        p.getParameterMap().get(param), DEFAULT_AUDIO_BUFFERSIZE);
-      if (bufferSize <= 0 || !isPowerOfTwo(bufferSize))
-        throw new AssertionError(param + " must be a power of 2");
-      audioBufferSize = bufferSize;
-    }
     return audioBufferSize;
+  }
+
+  public synchronized int getDispatcherBufferSize()
+  {
+    return isAudioDispatcherInitialized() ?
+      dispatcherBufferSize :
+      audioBufferSize.get();
+  }
+
+  public synchronized void setDispatcherBufferSize( int bufferSize )
+  {
+    checkCanChangeSamplingParameters();
+    audioBufferSize.set(verifyAudioBufferSize(bufferSize));
+  }
+
+
+  private static int loadAudioBufferSize( ExtPApplet p )
+  {
+    @SuppressWarnings("SpellCheckingInspection")
+    String param =
+      p.getClass().getPackage().getName() + ".audio.buffersize";
+    String strBufferSize = p.getParameterMap().get(param);
+    if (strBufferSize != null && !strBufferSize.isEmpty())
+    {
+      int bufferSize = Integer.parseInt(strBufferSize);
+      if (bufferSize > 0 && isPowerOfTwo(bufferSize))
+        return bufferSize;
+
+      logger.log(Level.WARNING,
+        "Ignoring property entry {0}: Buffer size {1} is no positive " +
+          "power of 2",
+        new Object[]{ param, bufferSize });
+    }
+    return getDefaultAudioBufferSize();
   }
 
 
@@ -223,7 +266,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   {
     if (audioBufferOverlap < 0)
     {
-      int bufferSize = getAudioBufferSize();
+      int bufferSize = getDispatcherBufferSize();
       String param =
         p.getClass().getPackage().getName() + ".audio.overlap";
       int bufferOverlap = DefaultValueParser.parseInt(
@@ -298,7 +341,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   MinimFFTProcessor getFftProcessor()
   {
     if (fftProcessor == null)
-      fftProcessor = new MinimFFTProcessor(getAudioBufferSize());
+      fftProcessor = new MinimFFTProcessor(getDispatcherBufferSize());
     return fftProcessor;
   }
 
@@ -324,8 +367,11 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    return Stream.of(audioSampleRate.getAspect(
-      PropertyPreferencesAdapterTag.getWritableInstance()));
+    return Stream.of(
+      audioSampleRate.getAspect(
+        PropertyPreferencesAdapterTag.getWritableInstance()),
+      audioBufferSize.getAspect(
+        PropertyPreferencesAdapterTag.getWritableInstance()));
   }
 
 
@@ -340,6 +386,26 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       throw new IllegalArgumentException("Sampling rate must be positive");
 
     DEFAULT_AUDIO_SAMPLERATE = defaultAudioSampleRate;
+  }
+
+
+  public static int getDefaultAudioBufferSize()
+  {
+    return DEFAULT_AUDIO_BUFFERSIZE;
+  }
+
+  public static void setDefaultAudioBufferSize( int defaultAudioBufferSize )
+  {
+    DEFAULT_AUDIO_BUFFERSIZE = verifyAudioBufferSize(defaultAudioBufferSize);
+  }
+
+  private static int verifyAudioBufferSize( int bufferSize )
+  {
+    if (bufferSize > 0 && isPowerOfTwo(bufferSize))
+      return bufferSize;
+
+    throw new IllegalArgumentException(
+      "Audio buffer size must be a positive power of 2");
   }
 
 
