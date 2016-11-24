@@ -1,6 +1,6 @@
 package kaleidok.javafx.event;
 
-import javafx.beans.property.Property;
+import javafx.beans.value.WritableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
@@ -24,14 +24,14 @@ public final class EventUtils
 
 
   public static <E extends Event> void chain(
-    Property<EventHandler<E>> actionProperty, EventHandler<E> second )
+    WritableValue<EventHandler<E>> actionProperty, EventHandler<E> second )
   {
     actionProperty.setValue(chain(actionProperty.getValue(), second));
   }
 
 
   public static <E extends Event> void chain( EventHandler<E> first,
-    Property<EventHandler<E>> actionProperty )
+    WritableValue<EventHandler<E>> actionProperty )
   {
     actionProperty.setValue(chain(first, actionProperty.getValue()));
   }
