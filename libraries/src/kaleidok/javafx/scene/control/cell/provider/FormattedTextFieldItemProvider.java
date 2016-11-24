@@ -14,7 +14,6 @@ import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
-import kaleidok.util.function.Functions;
 
 import java.util.Objects;
 
@@ -84,7 +83,7 @@ public class FormattedTextFieldItemProvider<T>
     catch (final RuntimeException ex)
     {
       final String msg = getExceptionMessage(ex);
-      Platform.runLater(() -> showTooltip(textField, msg));
+      showTooltip(textField, msg);
       newValue = null;
     }
 
@@ -113,15 +112,18 @@ public class FormattedTextFieldItemProvider<T>
   }
 
 
-  private static void showTooltip( Node anchor, String message )
+  private static void showTooltip( final Node anchor, String message )
   {
-    Tooltip tooltip = (Tooltip) anchor.getProperties()
-      .computeIfAbsent(TOOLTIP_KEY, Functions.ignoreArg(Tooltip::new));
+    final Tooltip tooltip = (Tooltip) anchor.getProperties()
+      .computeIfAbsent(TOOLTIP_KEY, (k) -> new Tooltip());
     tooltip.setText(message);
     if (!tooltip.isShowing())
     {
-      Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
-      tooltip.show(anchor, b.getMinX(), b.getMaxY() + 5);
+      Platform.runLater(() ->
+      {
+        Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
+        tooltip.show(anchor, b.getMinX(), b.getMaxY() + 5);
+      });
     }
   }
 
