@@ -99,11 +99,11 @@ public final class Math
   }
 
 
-  public static final double LN2 = log(2), LN2_INV = 1 / LN2;
+  public static final double LN2 = 0.69314718055994528622;
 
   public static double log2( double x )
   {
-    return log(x) * LN2_INV;
+    return log(x) * (1 / LN2);
   }
 
 
