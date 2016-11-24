@@ -1,7 +1,5 @@
 package kaleidok.javafx.scene.control.cell.provider;
 
-import javafx.beans.property.ReadOnlyProperty;
-import javafx.beans.value.ObservableNumberValue;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.Cell;
@@ -28,8 +26,14 @@ public abstract class SpinnerItemProvider<T extends Number>
   protected EditorNodeInfo<Spinner<T>, Number> callTypeChecked(
     DynamicEditableTreeItem<Number, Spinner<T>> item )
   {
-    SpinnerValueFactory<T> svf = getValueFactory(item.getValue());
+    SpinnerValueFactory<T> svf =
+      getValueFactory((AspectedProperty<Number>) item.getValue());
     Spinner<T> spinner = makeSpinner(svf);
+    spinner.setEditable(true);
+    spinner.setOnScroll(SpinnerItemProvider::handleScrollEvent);
+    EventUtils.chain(spinner.getEditor().onActionProperty(),
+      SpinnerItemProvider::handleActionEvent);
+
     //noinspection unchecked
     return EditorNodeInfo.of(spinner, null,
       (StringConverter<Number>) svf.getConverter());
@@ -38,16 +42,12 @@ public abstract class SpinnerItemProvider<T extends Number>
 
   protected Spinner<T> makeSpinner( SpinnerValueFactory<T> valueFactory )
   {
-    Spinner<T> spinner = new Spinner<>(valueFactory);
-    spinner.setEditable(true);
-    spinner.setOnScroll(SpinnerItemProvider::handleScrollEvent);
-    EventUtils.chain(spinner.getEditor().onActionProperty(),
-      SpinnerItemProvider::handleActionEvent);
-    return spinner;
+    return new Spinner<>(valueFactory);
   }
 
 
-  protected abstract SpinnerValueFactory<T> getValueFactory( ReadOnlyProperty<Number> property );
+  protected abstract SpinnerValueFactory<T> getValueFactory(
+    AspectedProperty<Number> property );
 
 
   public static class BoundedValueSpinnerItemProvider<T extends Number>
@@ -56,22 +56,15 @@ public abstract class SpinnerItemProvider<T extends Number>
     @Override
     public boolean isApplicable( DynamicEditableTreeItem<?, ?> item )
     {
-      ReadOnlyProperty<?> value = item.getValue();
-      //noinspection OverlyStrongTypeCast,unchecked
-      return
-        value instanceof ObservableNumberValue &&
-        value instanceof AspectedProperty &&
-          ((AspectedProperty<Number>) value)
-            .getAspect(BoundedValueTag.getInstance()) != null;
+      return BoundedValueTag.getInstance().ofAny(item.getValue()) != null;
     }
 
 
     @Override
     protected SpinnerValueFactory<T> getValueFactory(
-      ReadOnlyProperty<Number> property )
+      AspectedProperty<Number> property )
     {
-      //noinspection OverlyStrongTypeCast
-      return ((AspectedProperty<Number>) property).getAspect(BoundedValueTag.getInstance());
+      return property.getAspect(BoundedValueTag.getInstance());
     }
   }
 
