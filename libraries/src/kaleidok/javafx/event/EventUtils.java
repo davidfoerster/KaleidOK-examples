@@ -18,7 +18,8 @@ public final class EventUtils
       (second == null) ? first :
         (EventHandler<E>) ev -> {
           first.handle(ev);
-          second.handle(ev);
+          if (!ev.isConsumed())
+            second.handle(ev);
         };
   }
 
