@@ -100,9 +100,9 @@ public abstract class SpinnerItemProvider<T extends Number>
     Cell<T> cell = (Cell<T>)
       Objects.requireNonNull(findParentCell(spinner.getParent()));
     T oldValue = cell.isEmpty() ? null : cell.getItem();
-
-    if (!Objects.equals(oldValue, newValue))
-      cell.commitEdit(newValue);
+    if (Objects.equals(oldValue, newValue))
+      newValue = oldValue;
+    cell.commitEdit(newValue);
 
     ev.consume();
   }

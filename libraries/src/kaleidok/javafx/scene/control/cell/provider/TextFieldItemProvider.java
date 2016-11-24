@@ -42,8 +42,9 @@ public class TextFieldItemProvider extends FilteredTreeItemProvider<String, Text
       Objects.requireNonNull(findParentCell(textField));
     String oldValue = cell.isEmpty() ? null : cell.getItem();
     CharSequence newValue = textField.getCharacters();
-    if (oldValue == null || !oldValue.contentEquals(newValue))
-      cell.commitEdit(newValue.toString());
+    if (oldValue != null && !oldValue.contentEquals(newValue))
+      newValue = oldValue;
+    cell.commitEdit(newValue.toString());
 
     ev.consume();
   }

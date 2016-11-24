@@ -47,13 +47,11 @@ public class EditableTreeTableCell<T, N extends Node>
   @Override
   protected void updateItem( T item, boolean empty )
   {
-    if (item == getItem())
-      return;
-
     super.updateItem(item, empty);
 
     if (!empty)
       updateEditorValue(item);
+
     updateGraphics(item, empty, isEditing());
   }
 

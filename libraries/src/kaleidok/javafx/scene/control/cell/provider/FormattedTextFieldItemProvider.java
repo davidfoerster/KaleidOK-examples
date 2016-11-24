@@ -92,8 +92,9 @@ public class FormattedTextFieldItemProvider<T>
     {
       removeTooltip(textField);
       T oldValue = cell.isEmpty() ? null : cell.getItem();
-      if (!Objects.equals(oldValue, newValue))
-        cell.commitEdit(newValue);
+      if (Objects.equals(oldValue, newValue))
+        newValue = oldValue;
+      cell.commitEdit(newValue);
     }
 
     ev.consume();
