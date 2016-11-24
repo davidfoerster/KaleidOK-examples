@@ -63,26 +63,26 @@ public abstract class CircularImageLayer extends ImageLayer
     innerRadius = new AspectedDoubleProperty(this, "inner radius", 0.25);
     innerRadius.addAspect(LevelOfDetailTag.getInstance()).set(5);
     innerRadius
-      .addAspect(BoundedDoubleTag.INSTANCE, new DoubleSpinnerValueFactory(0, 1))
+      .addAspect(BoundedDoubleTag.getDoubleInstance(), new DoubleSpinnerValueFactory(0, 1))
       .setAmountToStepBy(0.025);
     innerRadius.addAspect(PropertyPreferencesAdapterTag.getInstance());
 
     outerRadius = new AspectedDoubleProperty(this, "outer radius", 0.50);
     outerRadius.addAspect(LevelOfDetailTag.getInstance()).set(5);
     outerRadius
-      .addAspect(BoundedDoubleTag.INSTANCE, new DoubleSpinnerValueFactory(0, 1))
+      .addAspect(BoundedDoubleTag.getDoubleInstance(), new DoubleSpinnerValueFactory(0, 1))
       .setAmountToStepBy(0.025);
     outerRadius.addAspect(PropertyPreferencesAdapterTag.getInstance());
 
     scaleFactor = new AspectedDoubleProperty(this, "scale factor", 1);
     scaleFactor
-      .addAspect(BoundedDoubleTag.INSTANCE, BoundedDoubleTag.floatBounds())
+      .addAspect(BoundedDoubleTag.getDoubleInstance(), BoundedDoubleTag.floatBounds())
       .setAmountToStepBy(0.01);
     scaleFactor.addAspect(PropertyPreferencesAdapterTag.getInstance());
 
     this.segmentCount =
       new AspectedIntegerProperty(this, "segment count", segmentCount);
-    this.segmentCount.addAspect(BoundedIntegerTag.INSTANCE,
+    this.segmentCount.addAspect(BoundedIntegerTag.getIntegerInstance(),
       new IntegerSpinnerValueFactory(
         MIN_SEGMENTS, MAX_SEGMENTS / segmentMultiplier));
     this.segmentCount.addAspect(LevelOfDetailTag.getInstance()).set(10);

@@ -64,7 +64,7 @@ public class CentreMovingShape extends CircularImageLayer
 
     exponent = new AspectedDoubleProperty(this, "exponent", 0.5);
     exponent
-      .addAspect(BoundedDoubleTag.INSTANCE, new DoubleSpinnerValueFactory(0, 4))
+      .addAspect(BoundedDoubleTag.getDoubleInstance(), new DoubleSpinnerValueFactory(0, 4))
       .setAmountToStepBy(0.05);
     exponent.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }

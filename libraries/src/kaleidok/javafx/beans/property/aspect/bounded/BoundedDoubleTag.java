@@ -2,21 +2,30 @@ package kaleidok.javafx.beans.property.aspect.bounded;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.Property;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
 
 
-public class BoundedDoubleTag
-  extends BoundedValueTag<Double, DoubleSpinnerValueFactory>
+public class BoundedDoubleTag<SVF extends SpinnerValueFactory<Double>>
+  extends BoundedValueTag<Double, SVF>
 {
-  public static final BoundedDoubleTag INSTANCE = new BoundedDoubleTag();
+  private static final BoundedDoubleTag<?> INSTANCE = new BoundedDoubleTag<>();
+
+
+  @SuppressWarnings("unchecked")
+  public static <SVF extends SpinnerValueFactory<Double>>
+  BoundedDoubleTag<SVF> getDoubleInstance()
+  {
+    return (BoundedDoubleTag<SVF>) INSTANCE;
+  }
 
 
   protected BoundedDoubleTag() { }
 
 
   @Override
-  public DoubleSpinnerValueFactory setup( DoubleSpinnerValueFactory svf,
+  public SVF setup( SVF svf,
     AspectedReadOnlyProperty<? extends Number> property )
   {
     svf.setValue((Double) property.getValue());

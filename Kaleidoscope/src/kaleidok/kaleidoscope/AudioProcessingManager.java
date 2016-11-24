@@ -73,7 +73,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       new IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
     bounds.setAmountToStepBy(1000);
     // TODO: format with SI prefixes
-    audioSampleRate.addAspect(BoundedIntegerTag.INSTANCE, bounds);
+    audioSampleRate.addAspect(BoundedIntegerTag.getIntegerInstance(), bounds);
     audioSampleRate
       .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
       .load();

@@ -29,7 +29,7 @@ public class FrameRateSwitcherProperty extends AspectedDoubleProperty
     DoubleSpinnerValueFactory bounds =
       new DoubleSpinnerValueFactory(0, Float.MAX_VALUE);
     bounds.setAmountToStepBy(5);
-    addAspect(BoundedDoubleTag.INSTANCE, bounds);
+    addAspect(BoundedDoubleTag.getDoubleInstance(), bounds);
 
     this.applet = applet;
   }

@@ -50,7 +50,7 @@ public class RecorderIcon extends Plugin<PApplet> implements PreferenceBean
     this.enabled =
       new AspectedIntegerProperty(this, "enabled",
         clamp(enabled, bounds.getMin(), bounds.getMax()));
-    this.enabled.addAspect(BoundedIntegerTag.INSTANCE, bounds);
+    this.enabled.addAspect(BoundedIntegerTag.getIntegerInstance(), bounds);
     this.enabled.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 

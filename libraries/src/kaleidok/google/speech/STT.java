@@ -84,7 +84,7 @@ public class STT implements PreferenceBean
 
     intervalSequenceCountMax = new AspectedIntegerProperty(
       this, "max. automatic sequential recordings", 1);
-    intervalSequenceCountMax.addAspect(BoundedIntegerTag.INSTANCE,
+    intervalSequenceCountMax.addAspect(BoundedIntegerTag.getIntegerInstance(),
       new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
     intervalSequenceCountMax.addAspect(
       PropertyPreferencesAdapterTag.getInstance());
@@ -283,7 +283,7 @@ public class STT implements PreferenceBean
         DoubleSpinnerValueFactory bounds =
           new DoubleSpinnerValueFactory(0, Double.MAX_VALUE);
         bounds.setAmountToStepBy(0.5);
-        addAspect(BoundedDoubleTag.INSTANCE, bounds);
+        addAspect(BoundedDoubleTag.getDoubleInstance(), bounds);
         addAspect(PropertyPreferencesAdapterTag.getInstance());
 
         invalidated();

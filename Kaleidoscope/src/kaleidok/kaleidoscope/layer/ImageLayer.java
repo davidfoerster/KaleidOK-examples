@@ -51,7 +51,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
       this, "name", getDefaultName(getClass()));
 
     wireframe = new AspectedIntegerProperty(this, "wireframe", 0);
-    wireframe.addAspect(BoundedIntegerTag.INSTANCE,
+    wireframe.addAspect(BoundedIntegerTag.getIntegerInstance(),
       new IntegerSpinnerValueFactory(0, 5));
     wireframe.addAspect(LevelOfDetailTag.getInstance()).set(100);
     wireframe.addAspect(PropertyPreferencesAdapterTag.getInstance());

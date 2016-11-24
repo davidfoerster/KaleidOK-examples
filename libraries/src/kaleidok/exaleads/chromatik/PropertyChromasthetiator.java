@@ -30,14 +30,14 @@ public class PropertyChromasthetiator<F extends Flickr> extends Chromasthetiator
   {
     maxColors =
       new AspectedIntegerProperty(this, "max. colors", 2);
-    maxColors.addAspect(BoundedIntegerTag.INSTANCE,
+    maxColors.addAspect(BoundedIntegerTag.getIntegerInstance(),
       new IntegerSpinnerValueFactory(0, 16));
     maxColors.addAspect(PropertyPreferencesAdapterTag.getInstance(),
       new IntegerPropertyPreferencesAdapter<>(maxColors, Chromasthetiator.class));
 
     maxKeywords =
       new AspectedIntegerProperty(this, "max. keywords", 0);
-    maxKeywords.addAspect(BoundedIntegerTag.INSTANCE,
+    maxKeywords.addAspect(BoundedIntegerTag.getIntegerInstance(),
       new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE));
     maxKeywords.addAspect(PropertyPreferencesAdapterTag.getInstance(),
       new IntegerPropertyPreferencesAdapter<>(maxKeywords, Chromasthetiator.class));

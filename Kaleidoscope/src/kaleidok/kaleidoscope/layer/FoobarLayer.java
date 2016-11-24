@@ -58,7 +58,7 @@ public class FoobarLayer extends CircularImageLayer
     DecimalFormat fmt = (DecimalFormat) NumberFormat.getNumberInstance();
     fmt.setMultiplier(1000);
     bounds.setConverter(new CachingFormattedStringConverter<>(fmt));
-    p.addAspect(BoundedDoubleTag.INSTANCE, bounds);
+    p.addAspect(BoundedDoubleTag.getDoubleInstance(), bounds);
     p.addAspect(PropertyPreferencesAdapterTag.getInstance());
     return p;
   }

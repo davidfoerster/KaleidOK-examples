@@ -21,7 +21,7 @@ public final class LayerUtils
     AspectedDoubleProperty property, NumberFormat fmt )
   {
     DoubleSpinnerValueFactory svf =
-      property.getAspect(BoundedDoubleTag.INSTANCE);
+      property.getAspect(BoundedDoubleTag.getDoubleInstance());
     StringConverter<Double> converter = svf.getConverter();
 
     if (fmt == null)

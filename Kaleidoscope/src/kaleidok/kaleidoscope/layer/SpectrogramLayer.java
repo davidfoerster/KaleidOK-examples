@@ -48,7 +48,8 @@ public class SpectrogramLayer extends CircularImageLayer
     super(parent, segmentCount, SEGMENT_MULTIPLIER);
     this.innerRadius.set(innerRadius);
     this.outerRadius.set(outerRadius);
-    this.scaleFactor.getAspect(BoundedDoubleTag.INSTANCE)
+    this.scaleFactor
+      .getAspect(BoundedDoubleTag.<DoubleSpinnerValueFactory>getDoubleInstance())
       .setAmountToStepBy(0.0025);
 
     avgSpectrum = spectrum;
@@ -58,7 +59,7 @@ public class SpectrogramLayer extends CircularImageLayer
 
     exponent = new AspectedDoubleProperty(this, "exponent", 1.125);
     exponent
-      .addAspect(BoundedDoubleTag.INSTANCE, new DoubleSpinnerValueFactory(0, 4))
+      .addAspect(BoundedDoubleTag.getDoubleInstance(), new DoubleSpinnerValueFactory(0, 4))
       .setAmountToStepBy(0.05);
     exponent.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }

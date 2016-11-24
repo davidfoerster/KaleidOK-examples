@@ -48,7 +48,7 @@ public class PropertyChromatikQuery extends ChromatikQuery
     IntegerSpinnerValueFactory startBounds =
       new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
     startBounds.setAmountToStepBy(10);
-    start.addAspect(BoundedIntegerTag.INSTANCE, startBounds);
+    start.addAspect(BoundedIntegerTag.getIntegerInstance(), startBounds);
     start.addAspect(PropertyPreferencesAdapterTag.getInstance(),
       new IntegerPropertyPreferencesAdapter<>(start, ChromatikQuery.class));
 
@@ -56,7 +56,7 @@ public class PropertyChromatikQuery extends ChromatikQuery
     IntegerSpinnerValueFactory nHitsBounds =
       new IntegerSpinnerValueFactory(1, 200);
     nHitsBounds.setAmountToStepBy(10);
-    this.nHits.addAspect(BoundedIntegerTag.INSTANCE, nHitsBounds);
+    this.nHits.addAspect(BoundedIntegerTag.getIntegerInstance(), nHitsBounds);
     this.nHits.addAspect(PropertyPreferencesAdapterTag.getInstance(),
       new IntegerPropertyPreferencesAdapter<>(this.nHits, ChromatikQuery.class));
 

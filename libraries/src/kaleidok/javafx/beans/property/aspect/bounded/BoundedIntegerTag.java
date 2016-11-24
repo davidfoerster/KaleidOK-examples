@@ -2,21 +2,30 @@ package kaleidok.javafx.beans.property.aspect.bounded;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
 
 
-public class BoundedIntegerTag
-  extends BoundedValueTag<Integer, IntegerSpinnerValueFactory>
+public class BoundedIntegerTag<SVF extends SpinnerValueFactory<Integer>>
+  extends BoundedValueTag<Integer, SVF>
 {
-  public static final BoundedIntegerTag INSTANCE = new BoundedIntegerTag();
+  private static final BoundedIntegerTag<?> INSTANCE = new BoundedIntegerTag<>();
+
+
+  @SuppressWarnings("unchecked")
+  public static <SVF extends SpinnerValueFactory<Integer>>
+  BoundedIntegerTag<SVF> getIntegerInstance()
+  {
+    return (BoundedIntegerTag<SVF>) INSTANCE;
+  }
 
 
   protected BoundedIntegerTag() { }
 
 
   @Override
-  public IntegerSpinnerValueFactory setup( IntegerSpinnerValueFactory svf,
+  public SVF setup( SVF svf,
     AspectedReadOnlyProperty<? extends Number> property )
   {
     svf.setValue((Integer) property.getValue());
