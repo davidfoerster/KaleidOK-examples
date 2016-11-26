@@ -76,7 +76,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     super(sketch);
 
     audioSampleRate =
-      new AspectedIntegerProperty(this, "audio sample rate",
+      new AspectedIntegerProperty(this, "sample rate",
         loadAudioSampleRate(sketch));
     IntegerSpinnerValueFactory bounds =
       new IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
@@ -91,7 +91,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       .disarm();
 
     audioBufferSize =
-      new AspectedIntegerProperty(this, "audio buffer size",
+      new AspectedIntegerProperty(this, "buffer size",
         loadAudioBufferSize(sketch));
     bounds =
       new SteppingIntegerSpinnerValueFactory(1,
@@ -107,7 +107,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       .disarm();
 
     audioBufferOverlap =
-      new AspectedIntegerProperty(this, "audio buffer overlap",
+      new AspectedIntegerProperty(this, "buffer overlap",
         loadAudioBufferOverlap(sketch, audioBufferSize.get()));
     bounds =
       new SteppingIntegerSpinnerValueFactory(0, Integer.MAX_VALUE,
