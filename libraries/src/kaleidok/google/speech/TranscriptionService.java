@@ -15,7 +15,8 @@ public class TranscriptionService extends TranscriptionServiceBase
   static
   {
     try {
-      DEFAULT_API_BASE = new URI("https://www.google.com/speech-api/v2/");
+      DEFAULT_API_BASE =
+        new URI("https", "www.google.com", "/speech-api/v2/", null);
     } catch (URISyntaxException ex) {
       throw new AssertionError(ex);
     }
