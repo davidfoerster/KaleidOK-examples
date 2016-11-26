@@ -54,7 +54,7 @@ public final class RestartRequiredTag<T>
       this.observable = observable;
       referenceValue =
         new SimpleObjectProperty<>(this,
-          "reference value for restart required binding",
+          "reference value for restart-required binding",
           observable.getValue());
 
       bind(observable, referenceValue);
