@@ -296,4 +296,12 @@ public final class Strings
     }
     return true;
   }
+
+
+  public static boolean endsWith( String haystack, String needle,
+    boolean ignoreCase )
+  {
+    return haystack.regionMatches(ignoreCase,
+      haystack.length() - needle.length(), needle, 0, needle.length());
+  }
 }

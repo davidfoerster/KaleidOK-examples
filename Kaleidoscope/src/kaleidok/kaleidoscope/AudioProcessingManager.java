@@ -24,6 +24,7 @@ import kaleidok.javafx.scene.control.cell.SteppingIntegerSpinnerValueFactory;
 import kaleidok.javafx.scene.control.cell.SteppingIntegerSpinnerValueFactory.BinaryLogarithmStepFunction;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
+import kaleidok.util.Strings;
 import kaleidok.util.prefs.DefaultValueParser;
 import processing.event.KeyEvent;
 
@@ -186,14 +187,17 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
         else
         {
           TarsosDSPAudioInputStream ais;
-          if (audioSource.endsWith(".json")) {
+          if (Strings.endsWith(audioSource, ".json", true))
+          {
             replayAction = new ReplayAction(p, audioSource);
             ais = replayAction.audioInputStream;
             dispatcherRunnable = () -> {
                 getReplayAction().doReplayItem(0);
                 getAudioDispatcher().run();
               };
-          } else {
+          }
+          else
+          {
             ais = new ContinuousAudioInputStream(audioSource);
           }
           audioDispatcher =
