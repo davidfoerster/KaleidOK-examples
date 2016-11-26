@@ -31,14 +31,20 @@ public class OffThreadAudioPlayer implements AudioProcessor
   {
     this.format = format;
 
-    Pipe pipe = Pipe.open();
-    this.out = pipe.sink();
-
-    DataLine.Info info = new DataLine.Info(SourceDataLine.class, format, bufferSize);
-    SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+    @SuppressWarnings("resource")
+    final SourceDataLine line =
+      (SourceDataLine) AudioSystem.getLine(
+        new DataLine.Info(SourceDataLine.class, format, bufferSize));
     line.open();
 
-    offThread = new AudioPlayerThread(pipe.source(), line);
+    Pipe pipe = Pipe.open();
+    this.out = pipe.sink();
+    @SuppressWarnings("resource")
+    final ReadableByteChannel in = pipe.source();
+
+    offThread =
+      new Thread(() -> runAudioPlayer(in, line),
+        OffThreadAudioPlayer.class.getSimpleName());
   }
 
 
@@ -75,30 +81,16 @@ public class OffThreadAudioPlayer implements AudioProcessor
   }
 
 
-  private static class AudioPlayerThread extends Thread
+  private static void runAudioPlayer( final ReadableByteChannel in,
+    final SourceDataLine line )
   {
-    private final SourceDataLine line;
+    final byte[] aBuf = new byte[line.getBufferSize()];
+    final ByteBuffer bBuf = ByteBuffer.wrap(aBuf);
 
-    private final ReadableByteChannel in;
-
-
-    public AudioPlayerThread( ReadableByteChannel in, SourceDataLine line )
+    line.start();
+    try
     {
-      super(OffThreadAudioPlayer.class.getSimpleName());
-      this.line = line;
-      this.in = in;
-    }
-
-
-    @Override
-    public void run()
-    {
-      final SourceDataLine line = this.line;
-      final byte[] aBuf = new byte[line.getBufferSize()];
-      final ByteBuffer bBuf = ByteBuffer.wrap(aBuf);
-
-      line.start();
-      try (final ReadableByteChannel in = this.in)
+      try
       {
         int read;
         while ((read = in.read(bBuf)) >= 0)
@@ -110,7 +102,8 @@ public class OffThreadAudioPlayer implements AudioProcessor
             if (n <= 0)
             {
               throw new AssertionError(
-                line + "#write(...) returned a non-positive value " + n);
+                line.getClass().getName() +
+                  "#write(...) returned a non-positive value " + n);
             }
             written += n;
           }
@@ -119,14 +112,18 @@ public class OffThreadAudioPlayer implements AudioProcessor
         line.drain();
         line.stop();
       }
-      catch (IOException ex)
-      {
-        handleUncaught(ex);
-      }
       finally
       {
-        line.close();
+        in.close();
       }
+    }
+    catch (IOException ex)
+    {
+      handleUncaught(ex);
+    }
+    finally
+    {
+      line.close();
     }
   }
 }
