@@ -17,6 +17,7 @@ import kaleidok.google.gson.TypeAdapterManager;
 import kaleidok.javafx.beans.property.AspectedIntegerProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.RestartRequiredTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
@@ -83,6 +84,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     bounds.setAmountToStepBy(1000);
     // TODO: format with SI prefixes
     audioSampleRate.addAspect(BoundedIntegerTag.getIntegerInstance(), bounds);
+    audioSampleRate.addAspect(LevelOfDetailTag.getInstance()).set(200);
     audioSampleRate
       .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
       .load();
@@ -99,6 +101,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
         BinaryLogarithmStepFunction.INSTANCE);
     // TODO: use formatter with conversion to buffer period with current sampling rate
     audioBufferSize.addAspect(BoundedIntegerTag.getIntegerInstance(), bounds);
+    audioBufferSize.addAspect(LevelOfDetailTag.getInstance()).set(1000);
     audioBufferSize
       .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
       .load();
@@ -116,6 +119,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     // TODO: use formatter with conversion to buffer period with current sampling rate
     audioBufferOverlap.addAspect(
       BoundedIntegerTag.getIntegerInstance(), bounds);
+    audioBufferOverlap.addAspect(LevelOfDetailTag.getInstance()).set(1001);
     audioBufferOverlap
       .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
       .load();
