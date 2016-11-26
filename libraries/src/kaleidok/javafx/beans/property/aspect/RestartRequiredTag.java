@@ -1,12 +1,16 @@
 package kaleidok.javafx.beans.property.aspect;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.*;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
+
+import java.util.Objects;
 
 
 public final class RestartRequiredTag<T>
-  extends InstantiatingPropertyAspectTag<ObservableBooleanValue, T>
+  extends InstantiatingPropertyAspectTag<RestartRequiredTag.RestartRequiredBinding<T>, T>
 {
   private static final RestartRequiredTag<?> INSTANCE =
     new RestartRequiredTag<>();
@@ -23,7 +27,7 @@ public final class RestartRequiredTag<T>
 
 
   @Override
-  public ObservableBooleanValue setup( ObservableBooleanValue aspect,
+  public RestartRequiredBinding<T> setup( RestartRequiredBinding<T> aspect,
     AspectedReadOnlyProperty<? extends T> property )
   {
     return (aspect != null) ? aspect : setup(property);
@@ -31,29 +35,74 @@ public final class RestartRequiredTag<T>
 
 
   @Override
-  public ObservableBooleanValue setup(
+  public RestartRequiredBinding<T> setup(
     final AspectedReadOnlyProperty<? extends T> property )
   {
-    if (property instanceof ObservableObjectValue)
+    return new RestartRequiredBinding<>(property);
+  }
+
+
+  public static class RestartRequiredBinding<T> extends BooleanBinding
+  {
+    private final ObservableValue<? extends T> observable;
+
+    private final ObjectProperty<T> referenceValue;
+
+
+    public RestartRequiredBinding( ObservableValue<? extends T> observable )
     {
-      return Bindings.notEqual(
-        (ObservableObjectValue<?>) property, property.getValue());
-    }
-    if (property instanceof ObservableNumberValue)
-    {
-      ObservableNumberValue p2 = (ObservableNumberValue) property;
-      if (p2 instanceof ObservableDoubleValue ||
-        p2 instanceof ObservableFloatValue)
-      {
-        return Bindings.notEqual(p2, p2.doubleValue(), 0);
-      }
-      if (p2 instanceof ObservableIntegerValue ||
-        p2 instanceof ObservableLongValue)
-      {
-        return Bindings.notEqual(p2, p2.longValue());
-      }
+      this.observable = observable;
+      referenceValue =
+        new SimpleObjectProperty<>(this,
+          "reference value for restart required binding",
+          observable.getValue());
+
+      bind(observable, referenceValue);
     }
 
-    throw new UnsupportedOperationException(property.getClass().getName());
+
+    @Override
+    public void dispose()
+    {
+      unbind(observable, referenceValue);
+    }
+
+
+    public ObjectProperty<T> referenceValueProperty()
+    {
+      return referenceValue;
+    }
+
+    public T getReferenceValue()
+    {
+      return referenceValue.get();
+    }
+
+    public void setReferenceValue( T referenceValue )
+    {
+      this.referenceValue.unbind();
+      this.referenceValue.set(referenceValue);
+    }
+
+
+    public void disarm()
+    {
+      this.referenceValue.bind(observable);
+    }
+
+
+    public T updateReferenceValue()
+    {
+      T value = observable.getValue();
+      setReferenceValue(value);
+      return value;
+    }
+
+
+    @Override
+    protected boolean computeValue()
+    {
+      return !Objects.equals(referenceValue.getValue(), observable.getValue());
+    }
   }
 }

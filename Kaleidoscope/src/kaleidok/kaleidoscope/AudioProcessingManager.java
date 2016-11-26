@@ -81,7 +81,9 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     audioSampleRate
       .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
       .load();
-    audioSampleRate.addAspect(RestartRequiredTag.getInstance());
+    audioSampleRate
+      .addAspect(RestartRequiredTag.getInstance())
+      .disarm();
 
     audioBufferSize =
       new AspectedIntegerProperty(this, "audio buffer size",
@@ -95,7 +97,9 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     audioBufferSize
       .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
       .load();
-    audioBufferSize.addAspect(RestartRequiredTag.getInstance());
+    audioBufferSize
+      .addAspect(RestartRequiredTag.getInstance())
+      .disarm();
   }
 
 
@@ -138,16 +142,22 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       String audioSource =
         p.getParameterMap().get(
           p.getClass().getPackage().getName() + ".audio.input");
-      dispatcherBufferSize = getDispatcherBufferSize();
-      int bufferOverlap = getAudioBufferOverlap();
+      int
+        sampleRate =
+          audioSampleRate.getAspect(RestartRequiredTag.getInstance())
+            .updateReferenceValue().intValue(),
+        bufferSize =
+          audioBufferSize.getAspect(RestartRequiredTag.getInstance())
+            .updateReferenceValue().intValue(),
+        bufferOverlap = getAudioBufferOverlap();
 
       Runnable dispatcherRunnable = null;
       try
       {
         if (audioSource == null)
         {
-          audioDispatcher = fromDefaultMicrophone(
-            audioSampleRate.get(), dispatcherBufferSize, bufferOverlap);
+          audioDispatcher =
+            fromDefaultMicrophone(sampleRate, bufferSize, bufferOverlap);
           dispatcherRunnable = audioDispatcher;
         }
         else
@@ -164,7 +174,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
             ais = new ContinuousAudioInputStream(audioSource);
           }
           audioDispatcher =
-            new AudioDispatcher(ais, dispatcherBufferSize, bufferOverlap);
+            new AudioDispatcher(ais, bufferSize, bufferOverlap);
           dispatcherRunnable =
             initAudioPlayer(audioDispatcher, dispatcherRunnable);
         }
@@ -227,11 +237,11 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     return audioBufferSize;
   }
 
-  public synchronized int getDispatcherBufferSize()
+  public int getDispatcherBufferSize()
   {
-    return isAudioDispatcherInitialized() ?
-      dispatcherBufferSize :
-      audioBufferSize.get();
+    return
+      audioBufferSize.getAspect(RestartRequiredTag.getInstance())
+        .getReferenceValue().intValue();
   }
 
   public synchronized void setDispatcherBufferSize( int bufferSize )
@@ -286,11 +296,11 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     return audioSampleRate;
   }
 
-  public float getSampleRate()
+  public int getDispatcherSampleRate()
   {
-    return isAudioDispatcherInitialized() ?
-      getAudioDispatcher().getFormat().getSampleRate() :
-      audioSampleRate.get();
+    return
+      audioSampleRate.getAspect(RestartRequiredTag.getInstance())
+        .getReferenceValue().intValue();
   }
 
   public synchronized void setSampleRate( int sampleRate )
