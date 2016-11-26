@@ -5,6 +5,7 @@ import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import com.google.gson.JsonParseException;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.audio.ContinuousAudioInputStream;
@@ -14,6 +15,7 @@ import kaleidok.audio.OffThreadAudioPlayer;
 import kaleidok.audio.processor.MinimFFTProcessor;
 import kaleidok.audio.processor.VolumeLevelProcessor;
 import kaleidok.google.gson.TypeAdapterManager;
+import kaleidok.javafx.beans.property.AspectedBooleanProperty;
 import kaleidok.javafx.beans.property.AspectedIntegerProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
@@ -26,7 +28,6 @@ import kaleidok.javafx.scene.control.cell.SteppingIntegerSpinnerValueFactory.Bin
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
 import kaleidok.util.Strings;
-import kaleidok.util.prefs.DefaultValueParser;
 import processing.event.KeyEvent;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -70,6 +71,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   private final AspectedIntegerProperty audioBufferSize;
 
   private final AspectedIntegerProperty audioBufferOverlap;
+
+  private final AspectedBooleanProperty audioPlaybackEnabled;
 
 
   AudioProcessingManager( Kaleidoscope sketch )
@@ -124,6 +127,16 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
       .load();
     audioBufferOverlap
+      .addAspect(RestartRequiredTag.getInstance())
+      .disarm();
+
+    audioPlaybackEnabled =
+      new AspectedBooleanProperty(this, "enable playback", false);
+    audioPlaybackEnabled.addAspect(LevelOfDetailTag.getInstance()).set(100);
+    audioPlaybackEnabled
+      .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
+      .load();
+    audioPlaybackEnabled
       .addAspect(RestartRequiredTag.getInstance())
       .disarm();
   }
@@ -232,10 +245,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     Runnable chained )
     throws LineUnavailableException, IOException
   {
-    if (DefaultValueParser.parseBoolean(
-      p.getParameterMap().get(
-        p.getClass().getPackage().getName() + ".audio.input.play"),
-      false))
+    if (audioPlaybackEnabled
+      .getAspect(RestartRequiredTag.getInstance()).updateReferenceValue())
     {
       OffThreadAudioPlayer player = new OffThreadAudioPlayer(
         JVMAudioInputStream.toAudioFormat(audioDispatcher.getFormat()),
@@ -261,6 +272,25 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       audioDispatcherThread.setDaemon(true);
       audioDispatcherThread.setPriority(Thread.NORM_PRIORITY + 1);
     }
+  }
+
+
+  public BooleanProperty audioPlaybackEnabledProperty()
+  {
+    return audioPlaybackEnabled;
+  }
+
+  public boolean isAudioPlaybackEnabled()
+  {
+    return
+      audioPlaybackEnabled.getAspect(RestartRequiredTag.getInstance())
+        .getReferenceValue();
+  }
+
+  public synchronized void setAudioPlaybackEnabled( boolean enabled )
+  {
+    checkCanChangeSamplingParameters();
+    audioPlaybackEnabled.set(enabled);
   }
 
 
@@ -442,13 +472,11 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    return Stream.of(
-      audioSampleRate.getAspect(
-        PropertyPreferencesAdapterTag.getWritableInstance()),
-      audioBufferSize.getAspect(
-        PropertyPreferencesAdapterTag.getWritableInstance()),
-      audioBufferOverlap.getAspect(
-        PropertyPreferencesAdapterTag.getWritableInstance()));
+    return
+      Stream.of(
+        audioSampleRate, audioBufferSize, audioBufferOverlap,
+        audioPlaybackEnabled)
+      .map(PropertyPreferencesAdapterTag.getWritableInstance()::ofAny);
   }
 
 
