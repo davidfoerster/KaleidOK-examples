@@ -1,8 +1,6 @@
 package kaleidok.javafx.beans.property.adapter.preference;
 
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -102,23 +100,5 @@ public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
       preferences.removePreferenceChangeListener(autoLoadListener);
       autoLoadListener = null;
     }
-  }
-
-
-  private ReadOnlyBooleanWrapper restartRequired = null;
-
-  protected ReadOnlyBooleanProperty restartRequiredProperty()
-  {
-    if (restartRequired == null)
-    {
-      restartRequired = new ReadOnlyBooleanWrapper(
-        this, "restart required", false);
-    }
-    return restartRequired.getReadOnlyProperty();
-  }
-
-  protected boolean isRestartRequired()
-  {
-    return restartRequired != null && restartRequired.get();
   }
 }
