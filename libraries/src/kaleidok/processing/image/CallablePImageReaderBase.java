@@ -10,6 +10,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
@@ -30,8 +31,8 @@ public class CallablePImageReaderBase implements Callable<PImage>
 
     public Resources( ImageInputStream sourceStream, ImageReader imageReader )
     {
-      this.sourceStream = sourceStream;
-      this.imageReader = imageReader;
+      this.sourceStream = Objects.requireNonNull(sourceStream);
+      this.imageReader = Objects.requireNonNull(imageReader);
     }
   }
 
@@ -50,31 +51,45 @@ public class CallablePImageReaderBase implements Callable<PImage>
   }
 
 
-  public CallablePImageReaderBase( ImageInputStream sourceStream )
+  public static CallablePImageReaderBase getInstance(
+    ImageInputStream sourceStream )
   {
-    this(sourceStream,
-      PImages.getFirstImageReader(ImageIO.getImageReaders(sourceStream)));
+    CallablePImageReaderBase instance = new CallablePImageReaderBase();
+    instance.initFrom(sourceStream, null, null);
+    return instance;
+  }
+
+
+  public static CallablePImageReaderBase getInstance( InputStream is )
+    throws IOException
+  {
+    return getInstance(ImageIO.createImageInputStream(is));
+  }
+
+
+  private IllegalStateException getAlreadyInitializedException()
+  {
+    return new IllegalStateException(
+      this + " instance has already been initialized");
+  }
+
+
+  protected final void checkInitializable() throws IllegalStateException
+  {
+    if (resources.get() != null)
+      throw getAlreadyInitializedException();
   }
 
 
   protected final void initFrom( ImageInputStream sourceStream,
     ImageReader imageReader )
+    throws IllegalStateException
   {
     if (!resources.compareAndSet(
       null, new Resources(sourceStream, imageReader)))
     {
-      throw new IllegalStateException(
-        this + " instance has already been initialized");
+      throw getAlreadyInitializedException();
     }
-
-    if (sourceStream == null || imageReader == null)
-      throw new NullPointerException();
-  }
-
-
-  public CallablePImageReaderBase( InputStream is ) throws IOException
-  {
-    this(ImageIO.createImageInputStream(is));
   }
 
 
@@ -82,7 +97,7 @@ public class CallablePImageReaderBase implements Callable<PImage>
 
 
   @Override
-  public PImage call() throws IOException
+  public PImage call() throws IOException, IllegalStateException
   {
     prepare();
 
@@ -107,20 +122,21 @@ public class CallablePImageReaderBase implements Callable<PImage>
   protected void dispose()
   {
     Resources res = this.resources.getAndSet(null);
-    if (res != null) try
-    {
-      res.sourceStream.close();
-    }
-    catch (IOException ex)
-    {
-      LoggingUtils.logThrown(
-        Logger.getLogger(getClass().getName()), Level.WARNING,
-        "Error while closing image source stream {0}",
-        ex, res.sourceStream);
-    }
-    finally
+    if (res != null)
     {
       res.imageReader.dispose();
+
+      try
+      {
+        res.sourceStream.close();
+      }
+      catch (IOException ex)
+      {
+        LoggingUtils.logThrown(
+          Logger.getLogger(getClass().getName()), Level.WARNING,
+          "Error while closing image source stream {0}",
+          ex, res.sourceStream);
+      }
     }
   }
 
@@ -157,8 +173,22 @@ public class CallablePImageReaderBase implements Callable<PImage>
 
   protected void initFrom( ImageInputStream iis, String mimeType,
     String fileExtension )
+    throws IllegalStateException
   {
-    initFrom(iis, PImages.getSuitableReader(iis, mimeType, fileExtension));
+    checkInitializable();
+
+    ImageReader imageReader = Objects.requireNonNull(
+      PImages.getSuitableReader(Objects.requireNonNull(iis), mimeType, fileExtension));
+    try
+    {
+      initFrom(iis, imageReader);
+      imageReader = null;
+    }
+    finally
+    {
+      if (imageReader != null)
+        imageReader.dispose();
+    }
   }
 
 

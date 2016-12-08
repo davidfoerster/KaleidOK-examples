@@ -24,8 +24,10 @@ public class CallablePImageUrlReader extends AbstractCallablePImageReader<URL>
 
 
   @Override
-  protected void initFromSource() throws IOException
+  protected void initFromSource() throws IOException, IllegalStateException
   {
+    checkInitializable();
+
     URLConnection con = source.openConnection();
     con.setDoInput(true);
     con.setDoOutput(false);
@@ -35,9 +37,7 @@ public class CallablePImageUrlReader extends AbstractCallablePImageReader<URL>
       http.setRequestProperty("Accept", IMAGE_MIMETYPE_MAP.toString());
     con.connect();
 
-    InputStream is = null;
-    ImageInputStream iis = null;
-    try
+    try (InputStream is = con.getInputStream())
     {
       String fileExtension =
         FilenameUtils.getExtension(con.getURL().getPath());
@@ -53,28 +53,15 @@ public class CallablePImageUrlReader extends AbstractCallablePImageReader<URL>
           contentEncoding = null;
       }
 
-      is =
-        Parsers.DECODERS.getDecodedStream(contentEncoding,
-          con.getInputStream());
-      iis = ImageIO.createImageInputStream(is);
-      is = null;
-
-      initFrom(iis, mimeType, fileExtension);
-      iis = null;
+      try (InputStream decodedIs =
+        Parsers.DECODERS.getDecodedStream(contentEncoding, is))
+      {
+        try (ImageInputStream iis =
+          ImageIO.createImageInputStream(decodedIs))
+        {
+          initFrom(iis, mimeType, fileExtension);
+        }
+      }
     }
-    finally
-    {
-      if (iis != null)
-        iis.close();
-      if (is != null)
-        is.close();
-    }
-  }
-
-
-  @Override
-  protected void dispose()
-  {
-    super.dispose();
   }
 }

@@ -2,8 +2,6 @@ package kaleidok.processing.image;
 
 import org.apache.commons.io.FilenameUtils;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
@@ -23,23 +21,18 @@ public class CallablePImageFileReader
   protected void initFromSource()
     throws IOException, IllegalArgumentException
   {
-    ImageReader imageReader =
-      PImages.getFirstImageReader(ImageIO.getImageReadersBySuffix(
-        FilenameUtils.getExtension(source.getPath())));
-    ImageInputStream iis = null;
+    checkInitializable();
+
+    ImageInputStream iis = new FileImageInputStream(source);
     try
     {
-      iis = new FileImageInputStream(source);
-      initFrom(iis, imageReader);
+      initFrom(iis, null, FilenameUtils.getExtension(source.getPath()));
       iis = null;
-      imageReader = null;
     }
     finally
     {
       if (iis != null)
         iis.close();
-      if (imageReader != null)
-        imageReader.dispose();
     }
   }
 }

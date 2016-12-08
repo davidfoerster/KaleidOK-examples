@@ -114,7 +114,7 @@ public final class PImages
     else
     {
       imageReader =
-        (fileExtension != null) ?
+        (fileExtension != null && !fileExtension.isEmpty()) ?
           getFirstImageReader(
             ImageIO.getImageReadersBySuffix(fileExtension), null) :
           null;

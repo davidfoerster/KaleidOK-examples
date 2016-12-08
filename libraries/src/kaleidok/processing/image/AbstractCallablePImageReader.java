@@ -1,6 +1,7 @@
 package kaleidok.processing.image;
 
 import java.io.IOException;
+import java.util.Objects;
 
 
 public abstract class AbstractCallablePImageReader<S> extends CallablePImageReaderBase
@@ -10,7 +11,7 @@ public abstract class AbstractCallablePImageReader<S> extends CallablePImageRead
 
   protected AbstractCallablePImageReader( S source )
   {
-    this.source = source;
+    this.source = Objects.requireNonNull(source);
   }
 
 
