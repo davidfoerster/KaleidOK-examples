@@ -121,11 +121,13 @@ public final class Parsers
   public static final ContentType EMPTY_CONTENT_TYPE = ContentType.create(null);
 
 
-  public static final DecoderMap DECODERS =
-    new DecoderMap(6) {{
-      put(null, (Constructor<? extends FilterInputStream>) null);
-      put("deflate", InflaterInputStream.class);
-      put("gzip", GZIPInputStream.class);
-      freeze();
-    }};
+  public static final DecoderMap DECODERS;
+  static
+  {
+    DecoderMap d = DECODERS = new DecoderMap(6);
+    d.put(null, (Constructor<? extends FilterInputStream>) null);
+    d.put("deflate", InflaterInputStream.class);
+    d.put("gzip", GZIPInputStream.class);
+    d.freeze();
+  }
 }

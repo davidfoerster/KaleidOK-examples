@@ -98,8 +98,8 @@ public final class LayerManager
         if (oldValue != null)  // skip the initial image
           saveScreenshot();
       };
-    this.forEach(
-      (l) -> l.imageChangeCallback = screenshotCallback);
+    for (ImageLayer l: this)
+      l.imageChangeCallback = screenshotCallback;
   }
 
 

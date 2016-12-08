@@ -1,5 +1,7 @@
 package kaleidok.util;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.regex.*;
 
 import static java.lang.Math.abs;
@@ -271,7 +273,7 @@ public final class Strings
         (matcher, input, sb) -> {
           int start1 = matcher.start(1), end1 = matcher.end(1);
           if (start1 == end1)
-            return "";
+            return ArrayUtils.EMPTY_CHAR_ARRAY;
           fastAssert(start1 + 1 == end1);
           char c = input.charAt(start1);
           return (matcher.start() != 0) ? Character.toUpperCase(c) : c;

@@ -82,8 +82,7 @@ public class FormattedTextFieldItemProvider<T>
     }
     catch (final RuntimeException ex)
     {
-      final String msg = getExceptionMessage(ex);
-      showTooltip(textField, msg);
+      showTooltip(textField, getExceptionMessage(ex));
       newValue = null;
     }
 
