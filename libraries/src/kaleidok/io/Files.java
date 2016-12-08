@@ -5,8 +5,8 @@ import kaleidok.util.Arrays;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collection;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -20,7 +20,7 @@ public final class Files
   public static final LinkOption[] FOLLOW_LINKS = {};
 
 
-  public static final List<PosixFilePermission> posixFilePermissions =
+  public static final Collection<PosixFilePermission> posixFilePermissions =
     Arrays.asImmutableList(PosixFilePermission.values());
 
 
