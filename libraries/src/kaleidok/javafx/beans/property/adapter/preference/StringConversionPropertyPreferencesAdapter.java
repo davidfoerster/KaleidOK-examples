@@ -116,8 +116,14 @@ public class StringConversionPropertyPreferencesAdapter<T, P extends Property<T>
   @Override
   protected void doSave()
   {
-    T value = property.getValue();
-    if (value != null)
-      preferences.put(key, converter.toString(value));
+    String sValue = converter.toString(property.getValue());
+    if (sValue != null)
+    {
+      preferences.put(key, sValue);
+    }
+    else
+    {
+      preferences.remove(key);
+    }
   }
 }
