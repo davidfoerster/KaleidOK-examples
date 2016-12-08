@@ -2,13 +2,13 @@ package kaleidok.kaleidoscope;
 
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.processing.ProcessingSketchApplication;
 import processing.event.KeyEvent;
 
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -228,18 +228,15 @@ public class Kaleidoscope extends ExtPApplet
 
 
   @Override
-  public Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  public Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    Stream<Stream<? extends PropertyPreferencesAdapter<?,?>>> s = Stream.of(
-      getSTT().getPreferenceAdapters(),
-      getChromasthetiationService().getPreferenceAdapters(),
-      getLayers().getPreferenceAdapters(),
-      getFrameRateDisplay().getPreferenceAdapters(),
-      getAudioProcessingManager().getPreferenceAdapters());
+    Stream<PreferenceBean> preferenceBeans = Stream.of(
+      getSTT(), getChromasthetiationService(), getLayers(),
+      getFrameRateDisplay(), getAudioProcessingManager());
 
     return Stream.concat(
-      s.flatMap(Function.identity()),
+      PreferenceBean.getPreferenceAdapters(preferenceBeans),
       super.getPreferenceAdapters());
   }
 }

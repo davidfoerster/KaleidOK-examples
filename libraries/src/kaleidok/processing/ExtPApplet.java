@@ -14,7 +14,7 @@ import com.jogamp.newt.event.WindowUpdateEvent;
 import com.jogamp.opengl.GLAutoDrawable;
 import javafx.application.HostServices;
 import javafx.beans.property.DoubleProperty;
-import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.newt.WindowSupport;
 import kaleidok.processing.event.KeyEventSupport;
@@ -744,7 +744,7 @@ public class ExtPApplet extends PApplet
   }
 
 
-  protected Stream<? extends PropertyPreferencesAdapter<?, ?>>
+  protected Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
     return Stream.of(targetFrameRate.getAspect(
