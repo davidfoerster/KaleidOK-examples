@@ -243,8 +243,7 @@ public final class LayerManager
       audioDispatcher.addAudioProcessor(new PitchProcessor(
         PitchEstimationAlgorithm.FFT_YIN,
         audioDispatcher.getFormat().getSampleRate(),
-        apm.getDispatcherBufferSize(),
-        outerMovingShape.pitchDetectionHandler));
+        apm.getDispatcherBufferSize(), outerMovingShape));
     }
     return outerMovingShape;
   }

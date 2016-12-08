@@ -4,7 +4,6 @@ import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
-import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -27,8 +26,11 @@ import static processing.core.PApplet.map;
  * @see PitchProcessor
  */
 public class OuterMovingShape extends CircularImageLayer
+  implements PitchDetectionHandler
 {
-  private double angle = 0, step = 0;
+  private double angle = 0;
+
+  private volatile double step = 0;
 
 
   public OuterMovingShape( ExtPApplet parent, int segmentCount, double radius )
@@ -53,7 +55,9 @@ public class OuterMovingShape extends CircularImageLayer
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.scale(outerRadius);
 
-    if (step != 0) {
+    double step = this.step;
+    if (step != 0)
+    {
       /*
        * Set the angle of the total rotation, with "step" as the rotation since
        * the last drawn frame. For numerical stability we wrap around the angle
@@ -87,22 +91,13 @@ public class OuterMovingShape extends CircularImageLayer
   }
 
 
-  /**
-   * The pitch detection handler of this shape
-   * @see PitchProcessor#PitchProcessor(PitchEstimationAlgorithm, float, int, PitchDetectionHandler)
-   */
-  @SuppressWarnings("Convert2Lambda")
-  public final PitchDetectionHandler pitchDetectionHandler =
-    new PitchDetectionHandler()
-    {
-      @Override
-      public void handlePitch( PitchDetectionResult pitchDetectionResult,
-        AudioEvent audioEvent )
-      {
-        step = pitchDetectionResult.isPitched() ?
-          toRadians(map(
-            (float) log(pitchDetectionResult.getPitch()), 3f, 7f, -3f, 3f)) :
-          0;
-      }
-    };
+  @Override
+  public void handlePitch( PitchDetectionResult pitchDetectionResult,
+    AudioEvent audioEvent )
+  {
+    step = pitchDetectionResult.isPitched() ?
+      toRadians(map(
+        (float) log(pitchDetectionResult.getPitch()), 3f, 7f, -3f, 3f)) :
+      0;
+  }
 }
