@@ -161,7 +161,8 @@ public final class Arrays
       }
       //noinspection SuspiciousSystemArraycopy
       System.arraycopy(src, 0, dst, 0, src.length);
-      java.util.Arrays.fill(dst, src.length, dst.length, null);
+      if (dst.length > src.length)
+        dst[src.length] = null;
       return dst;
     }
   }
