@@ -22,8 +22,8 @@ import kaleidok.javafx.scene.control.cell.NotificationTreeTableCell;
 import kaleidok.javafx.scene.control.cell.provider.hook.NotificationTreeItemEditorHook;
 import kaleidok.javafx.scene.control.cell.provider.*;
 import kaleidok.javafx.util.Callbacks;
-import kaleidok.util.Arrays;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
@@ -117,7 +117,7 @@ public class KaleidoscopeConfigurationEditor
       //noinspection unchecked,RedundantCast
       super(
         (List<? extends TreeItemProvider<Object, Node>>) (List<? extends TreeItemProvider<?,?>>)
-        Arrays.asImmutableList(
+        Arrays.asList(
           new CheckBoxTreeItemProvider(),
           new FormattedTextFieldItemProvider<>(),
           new SpinnerItemProvider.SteppingIntegerValueSpinnerItemProvider(),

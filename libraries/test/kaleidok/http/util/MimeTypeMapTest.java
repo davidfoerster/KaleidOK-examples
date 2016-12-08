@@ -1,9 +1,9 @@
 package kaleidok.http.util;
 
-import kaleidok.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import static kaleidok.http.util.MimeTypeMap.WILDCARD;
@@ -40,7 +40,7 @@ public class MimeTypeMapTest
   public void testToString()
   {
     Collection<String> strAccept =
-      Arrays.asImmutableList(m.toString().split("\\s*,\\s*"));
+      Arrays.asList(m.toString().split("\\s*,\\s*"));
     assertEquals(m.size(), strAccept.size());
     assertContains(strAccept, WILDCARD + ";q=0.5");
     assertContains(strAccept, "text/*");

@@ -11,7 +11,6 @@ import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdap
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.binding.MessageFormatBinding;
 import kaleidok.kaleidoscope.layer.*;
-import kaleidok.util.Arrays;
 import kaleidok.util.Strings;
 import kaleidok.util.concurrent.ImmediateFuture;
 import kaleidok.util.function.ChangeListener;
@@ -73,7 +72,7 @@ public final class LayerManager
     screenshotPathFormat.resultVerifier = LayerManager::verifyScreenshotPath;
     screenshotPathFormat.testArgs = new Object[]{ new Date(0), 0 };
 
-    layers = new ArrayList<>(Arrays.asImmutableList(
+    layers = new ArrayList<>(Arrays.asList(
       getBackgroundLayer(),
       getSpectrogramLayer(),
       getOuterMovingShape(),

@@ -5,7 +5,8 @@ import com.jogamp.nativewindow.util.PointImmutable;
 import com.jogamp.nativewindow.util.Rectangle;
 import com.jogamp.newt.MonitorDevice;
 import com.jogamp.newt.Window;
-import kaleidok.util.Arrays;
+
+import java.util.Collections;
 
 
 public final class WindowSupport
@@ -25,7 +26,7 @@ public final class WindowSupport
     else
     {
       newFullscreenState =
-        w.setFullscreen(Arrays.asImmutableList(getMainMonitor(w)));
+        w.setFullscreen(Collections.singletonList(getMainMonitor(w)));
     }
     return newFullscreenState;
   }
