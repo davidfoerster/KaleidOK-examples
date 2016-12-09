@@ -29,6 +29,7 @@ import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
@@ -298,11 +299,15 @@ public final class LayerManager
           .map(( s ) -> parent.getImageFuture(
             (FilenameUtils.getPrefixLength(s) == 0 && !Strings.looksLikeUrl(s)) ? "/images/".concat(s) : s))
           .collect(Collectors.toList());
-      if (images.isEmpty())
-        images.add(ImmediateFuture.empty());
-      int imageCount = images.size();
-      for (int i = images.size(); i < MIN_IMAGES; i++)
-        images.add(images.get(i % imageCount));
+
+      if (images.size() < MIN_IMAGES)
+      {
+        images.addAll(images.isEmpty() ?
+          Collections.nCopies(MIN_IMAGES, ImmediateFuture.empty()) :
+          IntStream.range(images.size(), MIN_IMAGES)
+            .mapToObj((i) -> images.get(i % images.size()))
+            .collect(Collectors.toList()));
+      }
     }
     return images;
   }
