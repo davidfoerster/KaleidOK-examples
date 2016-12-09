@@ -33,13 +33,6 @@ public interface PreferenceBean
   }
 
 
-  static void saveAndFlush( Stream<? extends PreferenceBean> prefBeans )
-  {
-    ReadOnlyPropertyPreferencesAdapter.saveAndFlush(
-      getPreferenceAdapters(prefBeans));
-  }
-
-
   static <P extends Property<String>> StringPropertyPreferencesAdapter<P>
   of( P stringProperty )
   {
