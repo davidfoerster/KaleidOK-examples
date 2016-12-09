@@ -66,8 +66,9 @@ public final class LayerManager
 
     screenshotPathFormatString =
       new AspectedStringProperty(this, "screenshot path format");
-    screenshotPathFormatString.addAspect(
-      PropertyPreferencesAdapterTag.getInstance());
+    screenshotPathFormatString
+      .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
+      .load();
     screenshotPathFormat =
       new MessageFormatBinding(screenshotPathFormatString);
     screenshotPathFormat.resultVerifier = LayerManager::verifyScreenshotPath;
@@ -89,10 +90,13 @@ public final class LayerManager
 
   private void initScreenshotFormat()
   {
-    String formatString = parent.getParameterMap().get(
-      parent.getClass().getPackage().getName() + ".screenshots.pattern");
-    if (formatString != null && !formatString.isEmpty())
-      screenshotPathFormatString.set(formatString);
+    if (screenshotPathFormatString.get() == null)
+    {
+      String formatString = parent.getParameterMap().get(
+        parent.getClass().getPackage().getName() + ".screenshots.pattern");
+      if (formatString != null && !formatString.isEmpty())
+        screenshotPathFormatString.set(formatString);
+    }
 
     final ChangeListener<Object, Object> screenshotCallback =
       ( owner, oldValue, newValue ) -> {
