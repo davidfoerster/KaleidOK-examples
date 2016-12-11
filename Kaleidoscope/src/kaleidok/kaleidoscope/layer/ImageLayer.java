@@ -190,7 +190,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   {
     LoggingUtils.logThrown(
       Logger.getLogger(f.getClass().getCanonicalName()), Level.WARNING,
-      "Couldn't construct image from: {0}", t, f);
+      "Couldn''t construct image from: {0}", t, f);
   }
 
 

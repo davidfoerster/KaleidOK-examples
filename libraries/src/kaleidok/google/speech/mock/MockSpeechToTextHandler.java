@@ -143,7 +143,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       fastAssert(duration <= stt.getMaxTranscriptionInterval(),
         "FLAC stream duration exceeds maximum transcription interval");
     } else {
-      logger.finest("Couldn't determine duration of the submitted audio record");
+      logger.finest("Couldn''t determine duration of the submitted audio record");
     }
 
     byte[] transcriptionResult = normalTranscriptionResult;
@@ -191,7 +191,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     catch (IOException ex)
     {
       logger.log(Level.WARNING,
-        "Your system configuration doesn't permit the validation of submitted audio data",
+        "Your system configuration doesn''t permit the validation of submitted audio data",
         ex);
       return Double.NaN;
     }

@@ -202,7 +202,7 @@ public final class KaleidoscopeChromasthetiationService
       {
         // use default cache storage
         logThrown(logger, Level.WARNING,
-          "Couldn't set up an HTTP cache in \"{0}\"",
+          "Couldn''t set up an HTTP cache in \"{0}\"",
           ex, cacheDir);
       }
 

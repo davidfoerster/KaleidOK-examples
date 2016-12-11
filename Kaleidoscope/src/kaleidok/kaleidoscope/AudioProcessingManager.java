@@ -417,7 +417,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
         return sampleRate;
 
       logger.log(Level.WARNING,
-        "Ignoring property entry {0}: Sampling rate {1} isn't positive",
+        "Ignoring property entry {0}: Sampling rate {1} isn''t positive",
         new Object[]{ param, sampleRate });
     }
     return getDefaultAudioSampleRate();
@@ -648,7 +648,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       try {
         audioInputStream.setCurrentIdx(idx);
       } catch (IOException ex) {
-        logger.log(Level.SEVERE, "Couldn't skip to next replay item", ex);
+        logger.log(Level.SEVERE, "Couldn''t skip to next replay item", ex);
         return;
       }
       this.idx = idx;

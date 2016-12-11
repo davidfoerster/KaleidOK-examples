@@ -352,7 +352,7 @@ public class ChromasthetiationService
       {
         logThrown(logger,
           (ex instanceof IOException) ? Level.SEVERE : Level.FINER,
-          "Couldn't download {0}",
+          "Couldn''t download {0}",
           ex, getPhoto().getLargestImageSize().source);
 
         imageCallback.failed(ex);

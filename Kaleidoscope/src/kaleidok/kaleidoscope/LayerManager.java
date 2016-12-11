@@ -382,7 +382,7 @@ public final class LayerManager
     catch (IOException ex)
     {
       logThrown(logger, Level.SEVERE,
-        "Couldn't load layer properties file \"{0}\"; using defaults", ex,
+        "Couldn''t load layer properties file \"{0}\"; using defaults", ex,
         propFn);
     }
     return !layerProperties.isEmpty() ?

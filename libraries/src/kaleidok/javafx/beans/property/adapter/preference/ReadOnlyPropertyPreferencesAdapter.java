@@ -179,7 +179,7 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
     {
       if (logger != null)
       {
-        logThrown(logger, Level.WARNING, "Couldn't save preference {0}/{1}", ex,
+        logThrown(logger, Level.WARNING, "Couldn''t save preference {0}/{1}", ex,
           new Object[]{ preferences.absolutePath(), key });
       }
     }
