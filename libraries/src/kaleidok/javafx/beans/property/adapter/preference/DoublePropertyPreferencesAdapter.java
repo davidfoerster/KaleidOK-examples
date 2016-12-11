@@ -36,9 +36,10 @@ public class DoublePropertyPreferencesAdapter<P extends DoubleProperty>
 
 
   @Override
-  protected void doLoad( @Nonnull String value )
+  protected boolean doLoad( @Nonnull String value )
   {
     property.set(Double.parseDouble(value));
+    return true;
   }
 
 

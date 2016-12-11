@@ -168,17 +168,22 @@ public class MockTranscriptionService extends TranscriptionServiceBase
 
 
     @Override
-    public void load()
+    public boolean load()
     {
       String sValue = preferences.get(key, null);
       if (sValue != null)
       {
         URI value = converter.fromString(sValue);
-        super.logger.log(Level.CONFIG,
-          "Simulate loading {0}/{1} into \"{2}\": {3} ({4})",
-          new Object[]{ preferences.absolutePath(), key,
-            property.getName(), value, value.getClass().getName() });
+        if (value != null)
+        {
+          super.logger.log(Level.CONFIG,
+            "Simulate loading {0}/{1} into \"{2}\": {3} ({4})",
+            new Object[]{ preferences.absolutePath(), key,
+              property.getName(), value, value.getClass().getName() });
+          return true;
+        }
       }
+      return false;
     }
 
 

@@ -36,9 +36,10 @@ public class LongPropertyPreferencesAdapter<P extends LongProperty>
 
 
   @Override
-  protected void doLoad( @Nonnull String value )
+  protected boolean doLoad( @Nonnull String value )
   {
     property.set(Long.parseLong(value));
+    return true;
   }
 
 

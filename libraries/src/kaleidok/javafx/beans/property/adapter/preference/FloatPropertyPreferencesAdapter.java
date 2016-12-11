@@ -36,9 +36,10 @@ public class FloatPropertyPreferencesAdapter<P extends FloatProperty>
 
 
   @Override
-  protected void doLoad( @Nonnull String value )
+  protected boolean doLoad( @Nonnull String value )
   {
     property.set(Float.parseFloat(value));
+    return true;
   }
 
 

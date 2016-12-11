@@ -36,9 +36,10 @@ public class StringPropertyPreferencesAdapter<P extends Property<String>>
 
 
   @Override
-  protected void doLoad( @Nonnull String value )
+  protected boolean doLoad( @Nonnull String value )
   {
     property.setValue(value);
+    return true;
   }
 
 

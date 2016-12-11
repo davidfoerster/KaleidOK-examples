@@ -105,11 +105,13 @@ public class StringConversionPropertyPreferencesAdapter<T, P extends Property<T>
 
 
   @Override
-  protected void doLoad( @Nonnull String sValue )
+  protected boolean doLoad( @Nonnull String sValue )
   {
     T value = converter.fromString(sValue);
-    if (value != null)
+    boolean performLoad = value != null;
+    if (performLoad)
       property.setValue(value);
+    return performLoad;
   }
 
 

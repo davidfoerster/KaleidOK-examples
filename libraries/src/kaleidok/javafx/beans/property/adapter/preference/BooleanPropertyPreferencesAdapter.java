@@ -36,9 +36,10 @@ public class BooleanPropertyPreferencesAdapter<P extends BooleanProperty>
 
 
   @Override
-  protected void doLoad( @Nonnull String value )
+  protected boolean doLoad( @Nonnull String value )
   {
     property.set(Boolean.parseBoolean(value));
+    return true;
   }
 
 

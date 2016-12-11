@@ -39,14 +39,16 @@ public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
   }
 
 
-  public void load()
+  public boolean load()
   {
+    boolean loadPerformed = false;
+
     String value = preferences.get(key, null);
     if (value != null)
     {
       try
       {
-        doLoad(value);
+        loadPerformed = doLoad(value);
       }
       catch (RuntimeException ex)
       {
@@ -68,10 +70,12 @@ public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
           "Loaded preference value {0}/{1} but there was no valid entry",
         new Object[]{ preferences.absolutePath(), key, property.getValue() });
     }
+
+    return loadPerformed;
   }
 
 
-  protected abstract void doLoad( @Nonnull String value );
+  protected abstract boolean doLoad( @Nonnull String value );
 
 
   private volatile PreferenceChangeListener autoLoadListener = null;

@@ -36,9 +36,10 @@ public class IntegerPropertyPreferencesAdapter<P extends IntegerProperty>
 
 
   @Override
-  protected void doLoad( @Nonnull String value )
+  protected boolean doLoad( @Nonnull String value )
   {
     property.set(Integer.parseInt(value));
+    return true;
   }
 
 
