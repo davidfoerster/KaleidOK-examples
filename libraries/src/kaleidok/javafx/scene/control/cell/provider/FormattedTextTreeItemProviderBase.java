@@ -2,9 +2,11 @@ package kaleidok.javafx.scene.control.cell.provider;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Tooltip;
@@ -12,7 +14,6 @@ import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
 import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
-import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
 
 import java.util.Objects;
@@ -20,39 +21,33 @@ import java.util.Objects;
 import static kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider.findParentCell;
 
 
-public class FormattedTextFieldItemProvider<T>
-  extends AspectedTreeItemProvider<T, TextField, StringConverter<T>, StringConverterAspectTag<T>>
+public abstract class FormattedTextTreeItemProviderBase<T, N extends Node>
+  extends AspectedTreeItemProvider<T, N, StringConverter<T>, StringConverterAspectTag<T>>
 {
-  public FormattedTextFieldItemProvider()
+  private static final String TOOLTIP_KEY =
+    "kaleidok.javafx.scene.control.cell.provider.FormattedTextTreeItemProvider.tooltip";
+
+
+  protected FormattedTextTreeItemProviderBase()
   {
     super(StringConverterAspectTag.getInstance());
   }
 
 
-  @Override
-  public boolean isApplicable( DynamicEditableTreeItem<?, ?> item )
-  {
-    return super.isApplicable(item) && item.getValue().getValue() != null;
-  }
-
-
-  @Override
-  protected EditorNodeInfo<TextField, T> callTypeChecked(
-    DynamicEditableTreeItem<T, TextField> item )
+  protected TextField makeTextField(
+    @SuppressWarnings("unused") DynamicEditableTreeItem<T, N> item )
   {
     TextField textField = new TextField();
-    textField.setOnAction(FormattedTextFieldItemProvider::handleActionEvent);
-    textField.parentProperty().addListener((obs, oldValue, newValue) -> {
-        if (oldValue != null && newValue == null)
-          removeTooltip((Node) ((ReadOnlyProperty<?>) obs).getBean());
-      });
-
-    return EditorNodeInfo.of(textField,
-      FormattedTextFieldItemProvider::handleValueChange, getAspect(item));
+    textField.setEditable(true);
+    textField.setOnAction(
+      FormattedTextTreeItemProviderBase::handleActionEvent);
+    textField.parentProperty().addListener(
+      FormattedTextTreeItemProviderBase::handleEditorParentChange);
+    return textField;
   }
 
 
-  private static <T> StringConverter<T> getStringConverter(
+  protected static <T> StringConverter<T> getStringConverter(
     EditableTreeTableCell<T, ?> cell )
   {
     return StringConverterAspectTag.<T>getInstance().of(
@@ -60,14 +55,14 @@ public class FormattedTextFieldItemProvider<T>
   }
 
 
-  private static <T> void handleValueChange(
+  protected static <T> void handleValueChange(
     EditableTreeTableCell<T, TextField> cell, T value )
   {
     cell.getEditorNode().setText(getStringConverter(cell).toString(value));
   }
 
 
-  private static <T> void handleActionEvent( ActionEvent ev )
+  protected static <T> void handleActionEvent( ActionEvent ev )
   {
     final TextInputControl textField = (TextInputControl) ev.getSource();
     @SuppressWarnings("unchecked")
@@ -99,11 +94,15 @@ public class FormattedTextFieldItemProvider<T>
   }
 
 
-  private static final String TOOLTIP_KEY =
-    FormattedTextFieldItemProvider.class.getName() + '.' + Tooltip.class.getSimpleName();
+  protected static void handleEditorParentChange( ObservableValue<? extends Parent> obs,
+    Parent oldValue, Parent newValue )
+  {
+    if (oldValue != null && newValue == null)
+      removeTooltip((Node) ((ReadOnlyProperty<?>) obs).getBean());
+  }
 
 
-  private static void removeTooltip( Node anchor )
+  protected static void removeTooltip( Node anchor )
   {
     Tooltip tooltip = (Tooltip) anchor.getProperties().remove(TOOLTIP_KEY);
     if (tooltip != null)
@@ -111,7 +110,7 @@ public class FormattedTextFieldItemProvider<T>
   }
 
 
-  private static void showTooltip( final Node anchor, String message )
+  protected static void showTooltip( final Node anchor, String message )
   {
     final Tooltip tooltip = (Tooltip) anchor.getProperties()
       .computeIfAbsent(TOOLTIP_KEY, (k) -> new Tooltip());
@@ -121,23 +120,21 @@ public class FormattedTextFieldItemProvider<T>
       Platform.runLater(() ->
       {
         Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
+        // TODO: Choose a smarter tooltip location based on the available screen space
         tooltip.show(anchor, b.getMinX(), b.getMaxY() + 5);
       });
     }
   }
 
 
-  private static String getExceptionMessage( Exception ex )
+  protected static String getExceptionMessage( Exception ex )
   {
-    Throwable cause = ex;
-    do
+    for (Throwable cause = ex; cause != null; cause = cause.getCause())
     {
       String msg = cause.getLocalizedMessage();
       if (msg != null && !msg.isEmpty())
         return msg;
-      cause = cause.getCause();
     }
-    while (cause != null);
 
     String name = ex.getClass().getSimpleName();
     if (name.isEmpty())
