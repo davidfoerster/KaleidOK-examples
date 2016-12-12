@@ -49,4 +49,12 @@ public class AspectedListProperty<E> extends ReadOnlyListWrapper<E>
   {
     return AspectHelper.addAspect(this, aspectMap, tag, aspect);
   }
+
+
+  public ObservableList<E> existingListFinisher( List<E> newValue )
+  {
+    ObservableList<E> destinationValue = get();
+    destinationValue.setAll(newValue);
+    return destinationValue;
+  }
 }

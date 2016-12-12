@@ -3,19 +3,26 @@ package kaleidok.kaleidoscope;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import kaleidok.javafx.beans.property.AspectedListProperty;
 import kaleidok.javafx.beans.property.AspectedStringProperty;
 import kaleidok.javafx.beans.property.PropertyUtils;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.adapter.preference.StringConversionPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.beans.property.binding.MessageFormatBinding;
+import kaleidok.javafx.util.converter.CollectionStringConverter;
 import kaleidok.kaleidoscope.layer.*;
-import kaleidok.util.Strings;
 import kaleidok.util.concurrent.ImmediateFuture;
 import kaleidok.util.function.ChangeListener;
 import kaleidok.util.prefs.PropertyLoader;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import processing.core.PImage;
 
 import java.io.File;
@@ -24,15 +31,17 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
+import static kaleidok.util.Strings.looksLikeUrl;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
@@ -40,8 +49,6 @@ public final class LayerManager
   implements List<ImageLayer>, Runnable, PreferenceBean
 {
   private static final int MIN_IMAGES = 5;
-
-  private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
   private final Kaleidoscope parent;
 
@@ -55,6 +62,8 @@ public final class LayerManager
   private CentreMovingShape centreLayer;
   private BackgroundLayer backgroundLayer;
 
+  private final AspectedListProperty<String> initialImagePaths;
+
   private final AspectedStringProperty screenshotPathFormatString;
 
   private final MessageFormatBinding screenshotPathFormat;
@@ -63,6 +72,9 @@ public final class LayerManager
   LayerManager( Kaleidoscope parent )
   {
     this.parent = parent;
+
+    initialImagePaths = makeInitialImagePathsProperty(this);
+    initInitialImagePaths();
 
     screenshotPathFormatString =
       new AspectedStringProperty(this, "screenshot path format");
@@ -85,6 +97,26 @@ public final class LayerManager
     initLayerProperties();
 
     layers.forEach(ImageLayer::init);
+  }
+
+
+  private void initInitialImagePaths()
+  {
+    PropertyPreferencesAdapter<?,?> ppa =
+      initialImagePaths.getAspect(
+        PropertyPreferencesAdapterTag.getWritableInstance());
+    if (!ppa.load())
+    {
+      String imagePaths = parent.getParameterMap()
+        .getOrDefault(
+          parent.getClass().getPackage().getName() + ".images.initial", "")
+        .trim();
+      if (!imagePaths.isEmpty())
+      {
+        //noinspection DynamicRegexReplaceableByCompiledPattern
+        initialImagePaths.setAll(imagePaths.split("\\s+"));
+      }
+    }
   }
 
 
@@ -182,8 +214,11 @@ public final class LayerManager
   getPreferenceAdapters()
   {
     return Stream.concat(
-      Stream.of(screenshotPathFormatString.getAspect(
-        PropertyPreferencesAdapterTag.getWritableInstance())),
+      Stream.of(
+        initialImagePaths.getAspect(
+          PropertyPreferencesAdapterTag.getWritableInstance()),
+        screenshotPathFormatString.getAspect(
+          PropertyPreferencesAdapterTag.getWritableInstance())),
       getLayerPreferenceAdapters());
   }
 
@@ -289,20 +324,39 @@ public final class LayerManager
   }
 
 
+  public ListProperty<String> initialImagePathsProperty()
+  {
+    return initialImagePaths;
+  }
+
+  public ObservableList<String> getInitialImagePaths()
+  {
+    return initialImagePaths.get();
+  }
+
+  public void setInitialImagePaths( ObservableList<String> initialImagePaths )
+  {
+    this.initialImagePaths.set(initialImagePaths);
+  }
+
+
   public List<Future<PImage>> getImages()
   {
     if (images == null)
     {
-      String imagesParam = parent.getParameterMap().get(
-        parent.getClass().getPackage().getName() + ".images.initial");
-      //noinspection CallToStringConcatCanBeReplacedByOperator
-      images = (imagesParam == null || imagesParam.isEmpty()) ?
-        new ArrayList<>(MIN_IMAGES) :
-        WHITESPACE_PATTERN.splitAsStream(imagesParam)
-          .filter(( s ) -> !s.isEmpty())
-          .map(( s ) -> parent.getImageFuture(
-            (FilenameUtils.getPrefixLength(s) == 0 && !Strings.looksLikeUrl(s)) ? "/images/".concat(s) : s))
-          .collect(Collectors.toList());
+      // TODO: Resolve duplicate images
+      List<String> imagePaths = getInitialImagePaths();
+      final List<Future<PImage>> images = this.images =
+        (imagePaths == null || imagePaths.isEmpty()) ?
+          new ArrayList<>(MIN_IMAGES) :
+          imagePaths.stream()
+            .filter(StringUtils::isNotEmpty)
+            .map((s) ->
+              (FilenameUtils.getPrefixLength(s) == 0 && !looksLikeUrl(s)) ?
+                "/images/" + s :
+                s)
+            .map(parent::getImageFuture)
+            .collect(Collectors.toList());
 
       if (images.size() < MIN_IMAGES)
       {
@@ -583,5 +637,64 @@ public final class LayerManager
   public void forEach( Consumer<? super ImageLayer> action )
   {
     layers.forEach(action);
+  }
+
+
+  // ============ various utility and initializer methods ============
+
+
+  private static IllegalArgumentException verifyInitialImagePaths(
+    Collection<? extends CharSequence> paragraphs )
+  {
+    return
+      (paragraphs.isEmpty() || paragraphs.stream().allMatch(StringUtils::isBlank)) ?
+        new IllegalArgumentException(
+          "The initial image list shouldn't be empty") :
+        null;
+  }
+
+
+  private static <C extends Collection<? extends CharSequence>> C
+  verifyInitialImagePathsFinisher( C collection )
+  {
+    IllegalArgumentException ex = verifyInitialImagePaths(collection);
+    if (ex != null)
+      throw ex;
+    return collection;
+  }
+
+
+  private static AspectedListProperty<String> makeInitialImagePathsProperty(
+    Object bean )
+  {
+    AspectedListProperty<String> initialImagePaths =
+      new AspectedListProperty<>(bean, "initial images",
+        FXCollections.observableArrayList());
+
+    // Construct some subsequently used functors
+    Collector<String, ?, List<String>> verifyingListCollector =
+      Collectors.collectingAndThen(
+        Collectors.toList(), LayerManager::verifyInitialImagePathsFinisher);
+    Function<List<String>, ObservableList<String>> existingListFinisher =
+      initialImagePaths::existingListFinisher;
+
+    // Set StringConverter
+    CollectionStringConverter<String, ObservableList<String>> converter =
+      CollectionStringConverter.getInstance(":",
+        Collectors.collectingAndThen(
+          verifyingListCollector, existingListFinisher));
+    converter.paragraphVerifier = LayerManager::verifyInitialImagePaths;
+    initialImagePaths.addAspect(
+      StringConverterAspectTag.getInstance(), converter);
+
+    // Set PropertyPreferencesAdapter
+    initialImagePaths
+      .addAspect(PropertyPreferencesAdapterTag.getWritableInstance(),
+        new StringConversionPropertyPreferencesAdapter<>(initialImagePaths,
+          CollectionStringConverter.getInstance("\0",
+            Collectors.collectingAndThen(
+              Collectors.toList(), existingListFinisher))));
+
+    return initialImagePaths;
   }
 }
