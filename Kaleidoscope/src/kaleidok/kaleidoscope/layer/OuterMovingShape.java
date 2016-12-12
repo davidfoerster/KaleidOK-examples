@@ -4,14 +4,20 @@ import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ObservableDoubleValue;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import kaleidok.javafx.beans.property.AspectedDoubleProperty;
+import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
 import kaleidok.processing.ExtPApplet;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
 
-import static java.lang.Math.log;
-import static java.lang.Math.toRadians;
-import static processing.core.PApplet.map;
+import static kaleidok.util.Math.map;
 
 
 /**
@@ -20,23 +26,129 @@ import static processing.core.PApplet.map;
  * <pre>
  * v = (a * log(pitchFrequency) + b) / frameRate
  * </pre>
- * Where {@code a} and {@code b} are some suitable (currently hard-coded)
- * values and {@code v} is the angular velocity.
+ * Where {@code a} and {@code b} are some suitable values and {@code v} is the
+ * angular velocity.
  *
  * @see PitchProcessor
  */
 public class OuterMovingShape extends CircularImageLayer
-  implements PitchDetectionHandler
 {
-  private double angle = 0;
+  private final AspectedDoubleProperty
+    pitchToAngleMapMinPitch,
+    pitchToAngleMapMaxPitch,
+    pitchToAngleMapMinAngle,
+    pitchToAngleMapMaxAngle;
 
-  private volatile double step = 0;
+  private final AngleStepSizeBinding angleStepSizeBinding;
+
+  private double angle = 0;
 
 
   public OuterMovingShape( ExtPApplet parent, int segmentCount, double radius )
   {
     super(parent, segmentCount);
     this.outerRadius.set(radius);
+
+    AspectedDoubleProperty[] pitchToAngleMapProperties = {
+      pitchToAngleMapMinPitch =
+        makePitchToAngleMapProperty("min. pitch", 3),
+      pitchToAngleMapMaxPitch =
+        makePitchToAngleMapProperty("max. pitch", 7),
+      pitchToAngleMapMinAngle =
+        makePitchToAngleMapProperty("min. angle", -3),
+      pitchToAngleMapMaxAngle =
+        makePitchToAngleMapProperty("max. angle", 3),
+    };
+    for (int i = pitchToAngleMapProperties.length - 1; i >= 0; i--)
+    {
+      pitchToAngleMapProperties[i]
+        .addAspect(LevelOfDetailTag.getInstance()).set(i + 1);
+    }
+
+    angleStepSizeBinding = new AngleStepSizeBinding(pitchToAngleMapProperties);
+  }
+
+
+  private AspectedDoubleProperty makePitchToAngleMapProperty( String name,
+    double initialValue )
+  {
+    AspectedDoubleProperty prop =
+      new AspectedDoubleProperty(this, "pitch-to-angle map " + name, initialValue);
+    DoubleSpinnerValueFactory svf = new DoubleSpinnerValueFactory(-1000, 1000);
+    svf.setAmountToStepBy(0.25);
+    prop.addAspect(BoundedDoubleTag.getDoubleInstance(), svf);
+    prop.addAspect(PropertyPreferencesAdapterTag.getInstance());
+    return prop;
+  }
+
+
+  public PitchDetectionHandler getPitchDetectionHandler()
+  {
+    return angleStepSizeBinding;
+  }
+
+
+  public DoubleProperty pitchToAngleMapMinPitchProperty()
+  {
+    return pitchToAngleMapMinPitch;
+  }
+
+  public double getPitchToAngleMapMinPitch()
+  {
+    return pitchToAngleMapMinPitch.get();
+  }
+
+  public void setPitchToAngleMapMinPitch( double value )
+  {
+    pitchToAngleMapMaxPitch.set(value);
+  }
+
+
+  public DoubleProperty pitchToAngleMapMaxPitchProperty()
+  {
+    return pitchToAngleMapMaxPitch;
+  }
+
+  public double getPitchToAngleMapMaxPitch()
+  {
+    return pitchToAngleMapMaxPitch.get();
+  }
+
+  public void setPitchToAngleMapMaxPitch( double value )
+  {
+    pitchToAngleMapMaxPitch.set(value);
+  }
+
+
+  public DoubleProperty pitchToAngleMapMinAngleProperty()
+  {
+    return pitchToAngleMapMinAngle;
+  }
+
+  public double getPitchToAngleMapMinAngle()
+  {
+    return pitchToAngleMapMinAngle.get();
+  }
+
+  public void setPitchToAngleMapMinAngle( double value )
+  {
+    pitchToAngleMapMaxAngle.set(value);
+  }
+
+
+  public DoubleProperty pitchToAngleMapMaxAngleProperty()
+  {
+    return pitchToAngleMapMaxAngle;
+  }
+
+  public double getPitchToAngleMapMaxAngle()
+  {
+    return pitchToAngleMapMaxAngle.get();
+  }
+
+  public void setPitchToAngleMapMaxAngle( double value )
+  {
+    pitchToAngleMapMaxAngle.set(value);
   }
 
 
@@ -55,7 +167,7 @@ public class OuterMovingShape extends CircularImageLayer
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.scale(outerRadius);
 
-    double step = this.step;
+    double step = angleStepSizeBinding.get();
     if (step != 0)
     {
       /*
@@ -91,13 +203,49 @@ public class OuterMovingShape extends CircularImageLayer
   }
 
 
-  @Override
-  public void handlePitch( PitchDetectionResult pitchDetectionResult,
-    AudioEvent audioEvent )
+  private static class AngleStepSizeBinding extends DoubleBinding
+    implements PitchDetectionHandler
   {
-    step = pitchDetectionResult.isPitched() ?
-      toRadians(map(
-        (float) log(pitchDetectionResult.getPitch()), 3f, 7f, -3f, 3f)) :
-      0;
+    private final ObservableDoubleValue[] bounds;
+
+    private volatile double pitchValue = Double.NaN;
+
+
+    public AngleStepSizeBinding( ObservableDoubleValue[] bounds )
+    {
+      bind(bounds);
+      this.bounds = bounds;
+    }
+
+
+    @Override
+    public void dispose()
+    {
+      unbind(bounds);
+    }
+
+
+    @Override
+    protected double computeValue()
+    {
+      double pitchValue = this.pitchValue;
+      return !Double.isNaN(pitchValue) ?
+        Math.toRadians(map(Math.log(pitchValue),
+          bounds[0].get(), bounds[1].get(), bounds[2].get(), bounds[3].get())) :
+        0;
+    }
+
+
+    @Override
+    public void handlePitch( PitchDetectionResult pitchDetectionResult,
+      AudioEvent audioEvent )
+    {
+      pitchValue =
+        pitchDetectionResult.isPitched() ?
+          pitchDetectionResult.getPitch() :
+          Double.NaN;
+
+      invalidate();
+    }
   }
 }
