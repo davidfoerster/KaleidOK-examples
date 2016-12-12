@@ -12,6 +12,7 @@ import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.event.WindowListener;
 import com.jogamp.newt.event.WindowUpdateEvent;
 import com.jogamp.opengl.GLAutoDrawable;
+import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.beans.property.DoubleProperty;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
@@ -105,6 +106,7 @@ public class ExtPApplet extends PApplet
   public ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
   {
     this.parent = parent;
+    documentBase = getDocumentBase(getClass(), parent);
 
     targetFrameRate = new FrameRateSwitcherProperty(this);
     targetFrameRate
@@ -315,29 +317,37 @@ public class ExtPApplet extends PApplet
   }
 
 
-  private URL documentBase = null;
+  private final URL documentBase;
+
 
   public URL getDocumentBase()
   {
-    if (documentBase == null) try
+    return documentBase;
+  }
+
+
+  private static URL getDocumentBase( Class<?> codeLocationReference,
+    Application parent )
+  {
+    // Work around for https://bugs.openjdk.java.net/browse/JDK-8160464
+    HostServices services =
+      !System.getProperty("javafx.runtime.version", "").startsWith("8.") ?
+        parent.getHostServices() :
+        null;
+    try
     {
-      HostServices services = parent.getHostServices();
-      if (!services.getCodeBase().isEmpty())
-      {
-        documentBase = new URL(services.getDocumentBase());
-      }
-      else
-      {
-        URL codeBase =
-          this.getClass().getProtectionDomain().getCodeSource().getLocation();
-        documentBase = new URL(codeBase, codeBase.getPath() + "data/");
-      }
+      return
+        (services != null && !services.getCodeBase().isEmpty()) ?
+          new URL(services.getDocumentBase()) :
+          new URL(
+            codeLocationReference
+              .getProtectionDomain().getCodeSource().getLocation(),
+            "data/");
     }
     catch (MalformedURLException ex)
     {
-      throw new InternalError(ex);
+      throw new InternalError("Invalid code or document base", ex);
     }
-    return documentBase;
   }
 
 
