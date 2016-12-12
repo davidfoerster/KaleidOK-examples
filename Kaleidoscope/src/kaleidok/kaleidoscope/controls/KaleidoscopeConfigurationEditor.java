@@ -119,6 +119,7 @@ public class KaleidoscopeConfigurationEditor
         (List<? extends TreeItemProvider<Object, Node>>) (List<? extends TreeItemProvider<?,?>>)
         Arrays.asList(
           new CheckBoxTreeItemProvider(),
+          new MultiLineTextTreeItemProvider<>(),
           new FormattedTextTreeItemProvider<>(),
           new SpinnerItemProvider.SteppingIntegerValueSpinnerItemProvider(),
           new SpinnerItemProvider.BoundedValueSpinnerItemProvider<>(),
