@@ -344,26 +344,37 @@ public final class LayerManager
   {
     if (images == null)
     {
-      // TODO: Resolve duplicate images
       List<String> imagePaths = getInitialImagePaths();
-      final List<Future<PImage>> images = this.images =
+      imagePaths =
         (imagePaths == null || imagePaths.isEmpty()) ?
-          new ArrayList<>(MIN_IMAGES) :
+          Collections.emptyList() :
           imagePaths.stream()
             .filter(StringUtils::isNotEmpty)
             .map((s) ->
               (FilenameUtils.getPrefixLength(s) == 0 && !looksLikeUrl(s)) ?
                 "/images/" + s :
                 s)
-            .map(parent::getImageFuture)
             .collect(Collectors.toList());
 
-      if (images.size() < MIN_IMAGES)
+      Map<String, Future<PImage>> imageMap =
+        (imagePaths == null || imagePaths.isEmpty()) ?
+          Collections.emptyMap() :
+          imagePaths.stream().distinct().collect(
+            Collectors.toMap(Function.identity(), parent::getImageFuture));
+
+      final List<Future<PImage>> imageList = this.images =
+        (imagePaths == null || imagePaths.isEmpty()) ?
+          new ArrayList<>(MIN_IMAGES) :
+          imagePaths.stream()
+            .map(imageMap::get)
+            .collect(Collectors.toList());
+
+      if (imageList.size() < MIN_IMAGES)
       {
-        images.addAll(images.isEmpty() ?
+        imageList.addAll(imageList.isEmpty() ?
           Collections.nCopies(MIN_IMAGES, ImmediateFuture.empty()) :
-          IntStream.range(images.size(), MIN_IMAGES)
-            .mapToObj((i) -> images.get(i % images.size()))
+          IntStream.range(imageList.size(), MIN_IMAGES)
+            .mapToObj((i) -> imageList.get(i % imageList.size()))
             .collect(Collectors.toList()));
       }
     }
