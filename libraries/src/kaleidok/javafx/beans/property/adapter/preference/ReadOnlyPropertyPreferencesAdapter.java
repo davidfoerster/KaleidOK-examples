@@ -6,6 +6,7 @@ import kaleidok.util.Reflection;
 import kaleidok.util.logging.LoggingUtils;
 import kaleidok.util.prefs.PreferenceUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.text.translate.*;
 
 import javax.annotation.Nonnull;
 import java.text.Normalizer;
@@ -187,6 +188,35 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
 
 
   protected abstract void doSave();
+
+
+  protected static final CharSequenceTranslator ESCAPE =
+    new AggregateTranslator(
+      new LookupTranslator(new String[][]{
+          {"\\", "\\\\"},
+          {"\0", "\\0"}
+        }),
+      new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_ESCAPE()),
+      JavaUnicodeEscaper.outsideOf(32, Character.MAX_CODE_POINT),
+      JavaUnicodeEscaper.between(
+        Character.MIN_SURROGATE, Character.MAX_SURROGATE),
+      JavaUnicodeEscaper.between(0xfffe, 0xffff));
+
+  protected static final CharSequenceTranslator UNESCAPE =
+    StringEscapeUtils.UNESCAPE_JAVA;
+
+
+  protected void put( String value )
+  {
+    if (value != null)
+    {
+      preferences.put(key, ESCAPE.translate(value));
+    }
+    else
+    {
+      preferences.remove(key);
+    }
+  }
 
 
   private volatile InvalidationListener autoSaveListener = null;

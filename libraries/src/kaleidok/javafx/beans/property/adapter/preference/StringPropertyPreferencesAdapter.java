@@ -38,7 +38,7 @@ public class StringPropertyPreferencesAdapter<P extends Property<String>>
   @Override
   protected boolean doLoad( @Nonnull String value )
   {
-    property.setValue(value);
+    property.setValue(UNESCAPE.translate(value));
     return true;
   }
 
@@ -46,14 +46,6 @@ public class StringPropertyPreferencesAdapter<P extends Property<String>>
   @Override
   protected void doSave()
   {
-    String value = property.getValue();
-    if (value != null)
-    {
-      preferences.put(key, value);
-    }
-    else
-    {
-      preferences.remove(key);
-    }
+    put(property.getValue());
   }
 }

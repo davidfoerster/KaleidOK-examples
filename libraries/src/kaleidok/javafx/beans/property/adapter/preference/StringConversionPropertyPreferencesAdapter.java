@@ -107,7 +107,7 @@ public class StringConversionPropertyPreferencesAdapter<T, P extends Property<T>
   @Override
   protected boolean doLoad( @Nonnull String sValue )
   {
-    T value = converter.fromString(sValue);
+    T value = converter.fromString(UNESCAPE.translate(sValue));
     boolean performLoad = value != null;
     if (performLoad)
       property.setValue(value);
@@ -118,14 +118,6 @@ public class StringConversionPropertyPreferencesAdapter<T, P extends Property<T>
   @Override
   protected void doSave()
   {
-    String sValue = converter.toString(property.getValue());
-    if (sValue != null)
-    {
-      preferences.put(key, sValue);
-    }
-    else
-    {
-      preferences.remove(key);
-    }
+    put(converter.toString(property.getValue()));
   }
 }
