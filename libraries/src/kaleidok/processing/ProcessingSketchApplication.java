@@ -8,7 +8,9 @@ import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import kaleidok.javafx.PropertyLoaderApplication;
+import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.geometry.Rectangles;
+import kaleidok.javafx.stage.GeometryPreferences;
 import kaleidok.javafx.stage.Screens;
 import processing.core.PApplet;
 
@@ -16,6 +18,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 
 public abstract class ProcessingSketchApplication<T extends PApplet>
@@ -25,6 +28,9 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 
   private Stage stage = null;
 
+  @SuppressWarnings("StaticFieldReferencedViaSubclass")
+  private final GeometryPreferences geometryPreferences =
+    new GeometryPreferences(this, true, GeometryPreferences.POSITION);
 
 
   @Override
@@ -76,6 +82,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   public void start( Stage stage ) throws Exception
   {
     getSketch().start();
+    geometryPreferences.applyGeometryAndBind(stage);
     stage.setScene(getScene());
     show(stage);
     this.stage = stage;
@@ -96,6 +103,11 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   }
 
 
+  protected Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    return geometryPreferences.getPreferenceAdapters();
+  }
 
 
   public Side placeAroundSketch( Stage stage, double padding,
