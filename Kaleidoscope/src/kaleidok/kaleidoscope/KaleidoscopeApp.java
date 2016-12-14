@@ -9,8 +9,10 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import kaleidok.exaleads.chromatik.PropertyChromatikQuery;
 import kaleidok.javafx.beans.property.AspectedStringProperty;
+import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.HiddenAspectTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.stage.GeometryPreferences;
 import kaleidok.javafx.stage.Icons;
 import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
 import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
@@ -23,8 +25,10 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 
 public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
@@ -33,6 +37,9 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     Logger.getLogger(KaleidoscopeApp.class.getName());
 
   public static final String iconDir = "icons/";
+
+  @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
+  private Stage primaryStage;
 
   private Scene scene;
 
@@ -47,10 +54,14 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   }
 
 
-  @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
   private Stage configurationWindow;
 
   private KaleidoscopeConfigurationEditor configurationEditor;
+
+  @SuppressWarnings("StaticFieldReferencedViaSubclass")
+  private final GeometryPreferences configurationWindowPreferences =
+    new GeometryPreferences(this, KaleidoscopeConfigurationEditor.class, true,
+      GeometryPreferences.ALL);
 
 
   @Override
@@ -65,16 +76,16 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     if (configurationWindow == null)
     {
       KaleidoscopeConfigurationEditor ce = getConfigurationEditor();
-      configurationWindow = new Stage();
-      configurationWindow.setTitle(getSketch().getName() + " configuration");
-      configurationWindow.setWidth(ce.getPrefWidth() + 20);
-      configurationWindow.setScene(new Scene(ce));
-      Windows.loadPosition(configurationWindow,
-        getConfigurationEditorPreferences(),
-        KaleidoscopeConfigurationEditor.class.getSimpleName());
-      configurationWindow.showingProperty().addListener(
+      final Stage cw = configurationWindow = new Stage();
+      cw.setTitle(getSketch().getName() + " configuration");
+      cw.initOwner(primaryStage);
+      cw.setWidth(ce.getPrefWidth() + 20);
+      cw.setScene(new Scene(ce));
+      cw.showingProperty().addListener(
         ( obs, oldValue, newValue ) ->
           getControls().getConfigurationWindowButton().setSelected(newValue));
+      Platform.runLater(() ->
+        configurationWindowPreferences.applyGeometryAndBind(cw));
     }
     return configurationWindow;
   }
@@ -100,7 +111,10 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     if (show)
     {
-      getConfigurationWindow().show();
+       Stage cw = getConfigurationWindow();
+       if (cw.getOwner() == null)
+         cw.initOwner(primaryStage);
+       cw.show();
     }
     else if (configurationWindow != null)
     {
@@ -144,6 +158,10 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     stage.getIcons().addAll(makeIcons());
     stage.setOnCloseRequest((e) -> Platform.runLater(this::stopChildStages));
     super.start(stage);
+    primaryStage = stage;
+
+    if (configurationWindowPreferences.isShowing(false))
+      getConfigurationEditor();
   }
 
 
@@ -156,6 +174,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
     super.show(stage);
 
+    if (configurationWindowPreferences.isShowing(false))
+      setShowConfigurationEditor(true);
   }
 
 
@@ -175,6 +195,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       return;
     childStagesStopped = true;
 
+    //noinspection ConstantConditions
+    configurationWindowPreferences.show.unbind();
     if (configurationWindow != null)
       configurationWindow.close();
   }
@@ -228,5 +250,20 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     AssertionUtils.enableAssertionsOnDebugging();
     launch(KaleidoscopeApp.class, args);
+  }
+
+
+  @Override
+  public Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>
+  getPreferenceAdapters()
+  {
+    Stream<Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>> s = Stream.of(
+      Stream.of(
+        messageFieldText.getAspect(
+          PropertyPreferencesAdapterTag.getInstance())),
+      configurationWindowPreferences.getPreferenceAdapters(),
+      super.getPreferenceAdapters());
+
+    return s.flatMap(Function.identity());
   }
 }
