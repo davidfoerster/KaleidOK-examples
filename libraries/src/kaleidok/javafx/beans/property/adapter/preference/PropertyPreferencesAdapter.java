@@ -39,6 +39,13 @@ public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
   }
 
 
+  @Override
+  public void loadIfWritable()
+  {
+    load();
+  }
+
+
   public boolean load()
   {
     boolean loadPerformed = false;
