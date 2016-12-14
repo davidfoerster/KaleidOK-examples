@@ -2,6 +2,7 @@ package kaleidok.kaleidoscope.controls;
 
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,6 +14,7 @@ import javafx.scene.control.TreeTableView;
 import kaleidok.javafx.beans.property.SimpleReadOnlyStringProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
+import kaleidok.javafx.beans.property.aspect.HiddenAspectTag;
 import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag.DefaultLevelOfDetailComparator;
 import kaleidok.javafx.beans.property.aspect.RestartRequiredTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
@@ -203,9 +205,15 @@ public class KaleidoscopeConfigurationEditor
     Object defaultAnchor )
   {
     Map<Object, ? extends Collection<TreeItem<ReadOnlyProperty<Object>>>> beansToItemsMap =
-      childProperties.collect(Collectors.groupingBy(
-        ReadOnlyProperty::getBean, IdentityHashMap::new,
-        Collectors.mapping(MyTreeItemProvider.INSTANCE, Collectors.toList())));
+      childProperties
+        .filter((p) -> {
+            ObservableBooleanValue hidden =
+              HiddenAspectTag.getInstance().ofAny(p);
+            return hidden == null || !hidden.get();
+          })
+        .collect(Collectors.groupingBy(
+          ReadOnlyProperty::getBean, IdentityHashMap::new,
+          Collectors.mapping(MyTreeItemProvider.INSTANCE, Collectors.toList())));
 
     // Find item for each bean and attach property items to it.
     // If no existing bean item can be found create a new one if there's already a known parent.
