@@ -18,6 +18,7 @@ import javafx.beans.property.DoubleProperty;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.newt.WindowSupport;
+import kaleidok.newt.event.AbstractWindowListener;
 import kaleidok.processing.event.KeyEventSupport;
 import kaleidok.processing.event.KeyStroke;
 import kaleidok.processing.export.ImageSaveSet;
@@ -173,14 +174,25 @@ public class ExtPApplet extends PApplet
   protected PSurface initSurface()
   {
     PSurface surface = super.initSurface();
-    if (parent != null && P3D.equals(sketchRenderer()))
+
+    if (P3D.equals(sketchRenderer()))
     {
-      /*
-       * Invoke parent#exit() instead of PApplet#exit() when closing the sketch
-       * window.
-       */
-      ((Window) surface.getNative()).addWindowListener(
-        0, new ParentApplicationWindowDestructionListener());
+      if (parent != null)
+      {
+        /*
+         * Invoke parent#exit() instead of PApplet#exit() when closing the
+         * sketch window.
+         */
+        ((Window) surface.getNative()).addWindowListener(
+          0, new AbstractWindowListener()
+          {
+            @Override
+            public void windowDestroyNotify( WindowEvent ev )
+            {
+              parent.exit();
+            }
+          });
+      }
     }
 
     Map<String, String> params = getParameterMap();
@@ -642,36 +654,6 @@ public class ExtPApplet extends PApplet
     }
 
     return supported;
-  }
-
-
-  private class ParentApplicationWindowDestructionListener
-    implements WindowListener
-  {
-    @Override
-    public void windowResized( WindowEvent e ) { }
-
-    @Override
-    public void windowMoved( WindowEvent e ) { }
-
-    @Override
-    public void windowDestroyNotify( WindowEvent ev )
-    {
-      parent.exit();
-      ev.setConsumed(true);
-    }
-
-    @Override
-    public void windowDestroyed( WindowEvent e ) { }
-
-    @Override
-    public void windowGainedFocus( WindowEvent e ) { }
-
-    @Override
-    public void windowLostFocus( WindowEvent e ) { }
-
-    @Override
-    public void windowRepaint( WindowUpdateEvent e ) { }
   }
 
 
