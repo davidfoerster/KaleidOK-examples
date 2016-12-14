@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import kaleidok.exaleads.chromatik.PropertyChromatikQuery;
 import kaleidok.javafx.beans.property.AspectedStringProperty;
+import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.HiddenAspectTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 
 
 public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
+  implements PreferenceBean
 {
   static final Logger logger =
     Logger.getLogger(KaleidoscopeApp.class.getName());
@@ -250,6 +252,21 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     AssertionUtils.enableAssertionsOnDebugging();
     launch(KaleidoscopeApp.class, args);
+  }
+
+
+  @Override
+  public String getName()
+  {
+    //noinspection SpellCheckingInspection
+    return "KaleidOK";
+  }
+
+
+  @Override
+  public Object getParent()
+  {
+    return null;
   }
 
 
