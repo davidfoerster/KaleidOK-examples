@@ -60,7 +60,6 @@ import static kaleidok.util.prefs.PreferenceUtils.getInt;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
-import static processing.event.KeyEvent.TYPE;
 
 
 /**
@@ -82,21 +81,11 @@ public class ExtPApplet extends PApplet
 
   private CountDownLatch showSurfaceLatch = new CountDownLatch(1);
 
-  protected final List<List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>>> keyEventHandlers;
-
-  {
-    @SuppressWarnings("unchecked")
-    List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>>[] keyEventHandlers = new List[3];
-    for (int i = keyEventHandlers.length - 1; i >= 0; i--)
-      keyEventHandlers[i] = new ArrayList<>(0);
-
-    final Runnable toggleFullScreenAction = this::toggleFullscreen;
-    keyEventHandlers[TYPE-1].add(new SimpleEntry<>(
-      KeyStroke.fullscreenKeystroke, ( ev ) -> thread(toggleFullScreenAction)));
-
-    this.keyEventHandlers = Arrays.asImmutableList(keyEventHandlers);
-  }
-
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  protected final List<List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>>> keyEventHandlers =
+    Arrays.asImmutableList(
+      Stream.generate(() -> new ArrayList<>(0))
+        .limit(3).toArray(List[]::new));
 
   protected final String PREF_GEOMETRY =
     Reflection.getAnonymousClassSimpleName(getClass()) + ".geometry.";
@@ -177,6 +166,11 @@ public class ExtPApplet extends PApplet
 
     if (P3D.equals(sketchRenderer()))
     {
+      final Runnable toggleFullScreenAction = this::toggleFullscreen;
+      keyEventHandlers.get(processing.event.KeyEvent.TYPE - 1).add(
+        new SimpleEntry<>(KeyStroke.fullscreenKeystroke,
+          (ev) -> thread(toggleFullScreenAction)));
+
       if (parent != null)
       {
         /*
