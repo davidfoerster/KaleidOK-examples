@@ -1,14 +1,10 @@
 package kaleidok.javafx.beans.property.value;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableObjectValue;
 
-import java.util.Objects;
 
-
-public class ConstantObjectValue<T>
-  implements ObservableObjectValue<T>, Cloneable
+public class ConstantObjectValue<T> extends ConstantValueBase<T>
+  implements ObservableObjectValue<T>
 {
   private static final ConstantObjectValue<?> EMPTY =
     new ConstantObjectValue<>(null);
@@ -47,56 +43,5 @@ public class ConstantObjectValue<T>
   public T getValue()
   {
     return value;
-  }
-
-
-  @Override
-  public void addListener( InvalidationListener listener ) { }
-
-  @Override
-  public void removeListener( InvalidationListener listener ) { }
-
-  @Override
-  public void addListener( ChangeListener<? super T> listener ) { }
-
-  @Override
-  public void removeListener( ChangeListener<? super T> listener ) { }
-
-
-  @Override
-  public int hashCode()
-  {
-    return Objects.hashCode(value) ^ 0x0c7c840e;
-  }
-
-
-  @Override
-  public boolean equals( Object obj )
-  {
-    return obj == this ||
-      (obj instanceof ConstantObjectValue &&
-        Objects.equals(this.value, ((ConstantObjectValue<?>) obj).value));
-  }
-
-
-  @Override
-  public String toString()
-  {
-    return ConstantObjectValue.class.getSimpleName() + '[' + value + ']';
-  }
-
-
-  @Override
-  public ConstantObjectValue<T> clone()
-  {
-    try
-    {
-      //noinspection unchecked
-      return (ConstantObjectValue<T>) super.clone();
-    }
-    catch (CloneNotSupportedException ex)
-    {
-      throw new InternalError(ex);
-    }
   }
 }
