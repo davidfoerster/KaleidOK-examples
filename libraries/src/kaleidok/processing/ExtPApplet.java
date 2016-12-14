@@ -27,6 +27,7 @@ import kaleidok.processing.image.PImageFutures;
 import kaleidok.processing.support.FrameRateSwitcherProperty;
 import kaleidok.util.Arrays;
 import kaleidok.util.Reflection;
+import kaleidok.util.Strings;
 import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
@@ -461,7 +462,7 @@ public class ExtPApplet extends PApplet
       {
       case RGB:
       case ARGB:
-        if (filename.endsWith(".bmp"))
+        if (Strings.endsWith(filename, ".bmp", true))
         {
           Path filePath = Paths.get(savePath(filename), EMPTY_STRING_ARRAY);
           try
