@@ -93,7 +93,13 @@ public class ExtPApplet extends PApplet
   private final FrameRateSwitcherProperty targetFrameRate;
 
 
-  public ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
+  protected ExtPApplet()
+  {
+    this(null);
+  }
+
+
+  protected ExtPApplet( ProcessingSketchApplication<? extends ExtPApplet> parent )
   {
     this.parent = parent;
     documentBase = getDocumentBase(getClass(), parent);
@@ -120,11 +126,11 @@ public class ExtPApplet extends PApplet
 
   private void parseAndSetConfig()
   {
-    if (parent.getUnnamedBooleanParameter("fullscreen"))
+    if (parent != null && parent.getUnnamedBooleanParameter("fullscreen"))
     {
       fullScreen(sketchDisplay());
     }
-    else
+    else if (!sketchFullScreen())
     {
       parseAndSetConfigSize();
     }
@@ -319,7 +325,9 @@ public class ExtPApplet extends PApplet
 
   public Map<String, String> getParameterMap()
   {
-    return parent.getNamedParameters();
+    return (parent != null) ?
+      parent.getNamedParameters() :
+      Collections.emptyMap();
   }
 
 
@@ -337,7 +345,9 @@ public class ExtPApplet extends PApplet
   {
     // Work around for https://bugs.openjdk.java.net/browse/JDK-8160464
     HostServices services =
-      !System.getProperty("javafx.runtime.version", "").startsWith("8.") ?
+      (parent != null &&
+        !System.getProperty("javafx.runtime.version", "").startsWith("8."))
+      ?
         parent.getHostServices() :
         null;
     try
