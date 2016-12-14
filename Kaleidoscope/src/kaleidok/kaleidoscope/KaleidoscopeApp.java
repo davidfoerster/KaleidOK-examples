@@ -8,6 +8,9 @@ import javafx.scene.control.Toggle;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import kaleidok.exaleads.chromatik.PropertyChromatikQuery;
+import kaleidok.javafx.beans.property.AspectedStringProperty;
+import kaleidok.javafx.beans.property.aspect.HiddenAspectTag;
+import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.stage.Icons;
 import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
 import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
@@ -34,6 +37,15 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   private Scene scene;
 
   private KaleidoscopeControls controls;
+
+  private final AspectedStringProperty messageFieldText;
+
+  {
+    messageFieldText = new AspectedStringProperty(this, "text");
+    messageFieldText.addAspect(HiddenAspectTag.getInstance());
+    messageFieldText.addAspect(PropertyPreferencesAdapterTag.getInstance());
+  }
+
 
   @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
   private Stage configurationWindow;
@@ -182,6 +194,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       controls = new KaleidoscopeControls();
 
       TextField messageField = controls.getMessageField();
+      messageField.setText(messageFieldText.get());
+      messageFieldText.bind(messageField.textProperty());
       messageField.setOnAction((ev) -> {
           getSketch().getChromasthetiationService()
             .submit(((TextInputControl) ev.getSource()).getText());
