@@ -12,6 +12,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.WritableNumberValue;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.newt.WindowSupport;
@@ -22,6 +23,7 @@ import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
 import kaleidok.processing.image.PImageFutures;
 import kaleidok.processing.support.FrameRateSwitcherProperty;
+import kaleidok.processing.support.GeometryPreferences;
 import kaleidok.util.Arrays;
 import kaleidok.util.Reflection;
 import kaleidok.util.Strings;
@@ -48,6 +50,7 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static kaleidok.util.AssertionUtils.fastAssert;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
@@ -72,6 +75,8 @@ public class ExtPApplet extends PApplet
       Stream.generate(() -> new ArrayList<>(0))
         .limit(3).toArray(List[]::new));
 
+  private final GeometryPreferences geometryPreferences =
+    new GeometryPreferences(this, true);
 
   private final FrameRateSwitcherProperty targetFrameRate;
 
@@ -113,6 +118,7 @@ public class ExtPApplet extends PApplet
     }
     else if (!sketchFullScreen())
     {
+      geometryPreferences.applySize();
     }
 
     Map<String, String> params = getParameterMap();
@@ -164,6 +170,8 @@ public class ExtPApplet extends PApplet
   @OverridingMethodsMustInvokeSuper
   protected void showSurface()
   {
+    geometryPreferences.applyPosition();
+    geometryPreferences.bind();
     showSurfaceLatch.countDown();
     showSurfaceLatch = null;
     super.showSurface();
@@ -581,6 +589,24 @@ public class ExtPApplet extends PApplet
   }
 
 
+  private boolean parseParamIntDimensions( String key, WritableNumberValue... output )
+  {
+    fastAssert(output.length != 0);
+    int[] result = parseParamIntDimensions(key);
+    if (result != null)
+    {
+      if (result.length != output.length)
+      {
+        throw new IllegalArgumentException(
+          output.length + " integers expected in \"" + key + '\"');
+      }
+      for (int i = output.length - 1; i >= 0; i--)
+        output[i].setValue(result[i]);
+    }
+    return result != null;
+  }
+
+
   private static int[] parseIntDimensions( String s )
   {
     return parseIntDimensions(s, ',');
@@ -644,9 +670,36 @@ public class ExtPApplet extends PApplet
 
 
   protected Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>
+  getAppletPreferenceAdapters()
+  {
+    return Stream.<ReadOnlyPropertyPreferencesAdapter<?,?>>concat(
+      geometryPreferences.getPreferenceAdapters(),
+      Stream.of(targetFrameRate.getAspect(
+        PropertyPreferencesAdapterTag.getInstance())));
+  }
+
+
+  protected Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    return Stream.of(targetFrameRate.getAspect(
-      PropertyPreferencesAdapterTag.getWritableInstance()));
+    return getAppletPreferenceAdapters();
+  }
+
+
+  public void loadPreferences()
+  {
+    parseParamIntDimensions("size",
+      geometryPreferences.w, geometryPreferences.h);
+    parseParamIntDimensions("location",
+      geometryPreferences.x, geometryPreferences.y);
+
+    getAppletPreferenceAdapters()
+      .forEach(ReadOnlyPropertyPreferencesAdapter::loadIfWritable);
+  }
+
+
+  public void savePreferences()
+  {
+    ReadOnlyPropertyPreferencesAdapter.saveAndFlush(getPreferenceAdapters());
   }
 }
