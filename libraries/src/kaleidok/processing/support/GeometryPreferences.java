@@ -4,7 +4,7 @@ import com.jogamp.nativewindow.util.RectangleImmutable;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.WindowEvent;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.IntegerBinding;
+import javafx.beans.binding.DoubleBinding;
 import kaleidok.javafx.stage.AbstractGeometryPreferences;
 import kaleidok.newt.event.AbstractWindowListener;
 import processing.core.PApplet;
@@ -92,24 +92,26 @@ public class GeometryPreferences extends AbstractGeometryPreferences<Void>
 
   private final class BindingWindowListener extends AbstractWindowListener
   {
-    private final IntegerBinding xBinding, yBinding, wBinding, hBinding;
+    private final DoubleBinding xBinding, yBinding, wBinding, hBinding;
 
 
     public BindingWindowListener( final Window window )
     {
       this(
-        Bindings.createIntegerBinding(
-          () -> window.getX() + window.getScreen().getX()),
-        Bindings.createIntegerBinding(
-          () -> window.getY() + window.getScreen().getY()),
-        Bindings.createIntegerBinding(window::getWidth),
-        Bindings.createIntegerBinding(window::getHeight));
+        Bindings.createDoubleBinding(
+          () -> (double) (window.getX() + window.getScreen().getX())),
+        Bindings.createDoubleBinding(
+          () -> (double) (window.getY() + window.getScreen().getY())),
+        Bindings.createDoubleBinding(
+          () -> (double) window.getWidth()),
+        Bindings.createDoubleBinding(
+          () -> (double) window.getHeight()));
     }
 
 
     public BindingWindowListener(
-      IntegerBinding xBinding, IntegerBinding yBinding,
-      IntegerBinding wBinding, IntegerBinding hBinding )
+      DoubleBinding xBinding, DoubleBinding yBinding,
+      DoubleBinding wBinding, DoubleBinding hBinding )
     {
       this.xBinding = xBinding;
       this.yBinding = yBinding;
