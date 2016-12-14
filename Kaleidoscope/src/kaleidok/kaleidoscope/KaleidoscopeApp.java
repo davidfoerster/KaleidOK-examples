@@ -70,6 +70,9 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   public void init() throws Exception
   {
     super.init();
+
+    getPreferenceAdapters()
+      .forEach(ReadOnlyPropertyPreferencesAdapter::loadIfWritable);
   }
 
 

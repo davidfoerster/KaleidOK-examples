@@ -55,6 +55,10 @@ public class Kaleidoscope extends ExtPApplet
   {
     size(1000, 1000, P3D);
     smooth(4);
+
+    getAppletPreferenceAdapters()
+      .forEach(ReadOnlyPropertyPreferencesAdapter::loadIfWritable);
+
     super.settings();
   }
 
@@ -80,6 +84,7 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public synchronized void dispose()
   {
+    savePreferences();
 
     if (layers != null)
       layers.dispose();
