@@ -106,36 +106,34 @@ public final class Reflection
   {
     Class<?> clazz = origin;
 
-    int arrayDepth;
-    for (arrayDepth = 0; clazz.isArray(); arrayDepth++)
-      clazz = clazz.getComponentType();
+    int arrayDepth = 0;
+    for (; clazz.isArray(); clazz = clazz.getComponentType())
+      arrayDepth++;
 
     String simpleName = clazz.getSimpleName();
-    if (!simpleName.isEmpty())
-      return getClassOrSimpleName(origin, simpleName, arrayDepth, returnType);
-
-    Class<?> superClass = clazz.getSuperclass();
-    if (superClass == Object.class)
+    if (simpleName.isEmpty())
     {
-      // Looks like it might be an anonymous interface implementation
-      Class<?>[] interfaces = clazz.getInterfaces();
-      if (interfaces.length != 0)
-        superClass = interfaces[0];
-      simpleName = superClass.getSimpleName();
-      fastAssert(!simpleName.isEmpty(), "Anonymous interface");
-    }
-    else
-    {
-      while (superClass != null)
+      Class<?> superClass = clazz.getSuperclass();
+      if (superClass == Object.class)
       {
+        // Looks like it might be an anonymous interface implementation
+        Class<?>[] interfaces = clazz.getInterfaces();
+        if (interfaces.length != 0)
+          superClass = interfaces[0];
         simpleName = superClass.getSimpleName();
-        if (!simpleName.isEmpty())
-          break;
-        superClass = superClass.getSuperclass();
+        fastAssert(!simpleName.isEmpty(), "Anonymous interface");
       }
-      fastAssert(!simpleName.isEmpty(), "Anonymous top-level class");
+      else
+      {
+        for (; superClass != null; superClass = superClass.getSuperclass())
+        {
+          simpleName = superClass.getSimpleName();
+          if (!simpleName.isEmpty())
+            break;
+        }
+        fastAssert(!simpleName.isEmpty(), "Anonymous top-level class");
+      }
     }
-
     return getClassOrSimpleName(origin, simpleName, arrayDepth, returnType);
   }
 
@@ -153,8 +151,6 @@ public final class Reflection
             Array.newInstance(namedClazz, new int[arrayDepth]);
         namedClazz = templateInstance.getClass();
       }
-
-      fastAssert(returnType.isInstance(namedClazz));
       //noinspection unchecked
       return (R) namedClazz;
     }
@@ -173,8 +169,6 @@ public final class Reflection
         }
         simpleName = String.valueOf(a);
       }
-
-      fastAssert(returnType.isInstance(simpleName));
       //noinspection unchecked
       return (R) simpleName;
     }
