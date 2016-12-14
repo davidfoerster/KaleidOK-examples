@@ -626,7 +626,7 @@ public class ExtPApplet extends PApplet
     if (newFullScreenState == currentFullscreenState)
     {
       System.err.format(
-        "Couldn't set fullscreen state to %s on %s.%n",
+        "Couldn't set fullscreen state to %b on %s.%n",
         !currentFullscreenState, w);
     }
     return newFullScreenState;
