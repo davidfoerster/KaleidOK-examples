@@ -9,14 +9,12 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import kaleidok.exaleads.chromatik.PropertyChromatikQuery;
 import kaleidok.javafx.stage.Icons;
-import kaleidok.javafx.stage.Windows;
 import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
 import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.processing.SimplePAppletFactory;
 import kaleidok.util.AssertionUtils;
-import kaleidok.util.prefs.PreferenceUtils;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -24,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 
 public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
@@ -84,19 +81,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
         configurationEditor.getColumns().get(0));
     }
     return configurationEditor;
-  }
-
-
-  private Preferences configurationEditorPreferences;
-
-  private Preferences getConfigurationEditorPreferences()
-  {
-    if (configurationEditorPreferences == null)
-    {
-      configurationEditorPreferences =
-        Preferences.userNodeForPackage(KaleidoscopeConfigurationEditor.class);
-    }
-    return configurationEditorPreferences;
   }
 
 
@@ -160,11 +144,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
     super.show(stage);
 
-    if (getConfigurationEditorPreferences().getBoolean(
-      KaleidoscopeConfigurationEditor.class.getSimpleName() + ".show", false))
-    {
-      getConfigurationWindow().show();
-    }
   }
 
 
@@ -183,11 +162,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     if (childStagesStopped)
       return;
     childStagesStopped = true;
-
-    Stage configurationWindow = this.configurationWindow;
-    getConfigurationEditorPreferences().putBoolean(
-      KaleidoscopeConfigurationEditor.class.getSimpleName() + ".show",
-      configurationWindow != null && configurationWindow.isShowing());
 
     if (configurationWindow != null)
       configurationWindow.close();
@@ -208,8 +182,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       controls = new KaleidoscopeControls();
 
       TextField messageField = controls.getMessageField();
-      messageField.setText(preferences.get(
-        this.getClass().getSimpleName() + ".text", null));
       messageField.setOnAction((ev) -> {
           getSketch().getChromasthetiationService()
             .submit(((TextInputControl) ev.getSource()).getText());
@@ -235,26 +207,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
         });
     }
     return controls;
-  }
-
-
-  @Override
-  protected void doSavePreferences()
-  {
-    String messageText = getControls().getMessageField().getText();
-    if (messageText != null && !messageText.isEmpty())
-      preferences.put(this.getClass().getSimpleName() + ".text", messageText);
-
-    Stage configurationWindow = this.configurationWindow;
-    if (configurationWindow != null)
-    {
-      Preferences pref = getConfigurationEditorPreferences();
-      Windows.saveGeometry(configurationWindow, pref,
-        KaleidoscopeConfigurationEditor.class.getSimpleName());
-      PreferenceUtils.flush(pref);
-    }
-
-    super.doSavePreferences();
   }
 
 

@@ -80,7 +80,6 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public synchronized void dispose()
   {
-    saveAndFlush();
 
     if (layers != null)
       layers.dispose();
@@ -227,16 +226,21 @@ public class Kaleidoscope extends ExtPApplet
   }
 
 
+  private Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>
+  getComponentPreferenceAdapters()
+  {
+    return PreferenceBean.getPreferenceAdapters(Stream.of(
+      getSTT(), getChromasthetiationService(), getLayers(),
+      getFrameRateDisplay(), getAudioProcessingManager()));
+  }
+
+
   @Override
   public Stream<? extends ReadOnlyPropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    Stream<PreferenceBean> preferenceBeans = Stream.of(
-      getSTT(), getChromasthetiationService(), getLayers(),
-      getFrameRateDisplay(), getAudioProcessingManager());
-
     return Stream.concat(
-      PreferenceBean.getPreferenceAdapters(preferenceBeans),
-      super.getPreferenceAdapters());
+      super.getPreferenceAdapters(),
+      getComponentPreferenceAdapters());
   }
 }

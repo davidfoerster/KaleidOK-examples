@@ -10,16 +10,12 @@ import javafx.stage.Stage;
 import kaleidok.javafx.PropertyLoaderApplication;
 import kaleidok.javafx.geometry.Rectangles;
 import kaleidok.javafx.stage.Screens;
-import kaleidok.javafx.stage.Windows;
-import kaleidok.util.Reflection;
-import kaleidok.util.prefs.PreferenceUtils;
 import processing.core.PApplet;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.Map;
-import java.util.prefs.Preferences;
 
 
 public abstract class ProcessingSketchApplication<T extends PApplet>
@@ -29,8 +25,6 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 
   private Stage stage = null;
 
-  protected final Preferences preferences =
-    Preferences.userNodeForPackage(this.getClass());
 
 
   @Override
@@ -82,17 +76,9 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   public void start( Stage stage ) throws Exception
   {
     getSketch().start();
-    parseAndSetConfig(stage);
     stage.setScene(getScene());
     show(stage);
     this.stage = stage;
-  }
-
-
-  private void parseAndSetConfig( Stage stage )
-  {
-    Windows.loadPosition(stage, preferences,
-      Reflection.getAnonymousClassSimpleName(getClass()));
   }
 
 
@@ -104,30 +90,12 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 
 
   @Override
-  @OverridingMethodsMustInvokeSuper
   public void stop() throws Exception
   {
-    savePreferences();
     sketch.exit();
   }
 
 
-  protected final void savePreferences()
-  {
-    doSavePreferences();
-    PreferenceUtils.flush(preferences);
-  }
-
-
-  protected void doSavePreferences()
-  {
-    Stage stage = this.stage;
-    if (stage != null && !stage.isFullScreen())
-    {
-      Windows.saveGeometry(stage, preferences,
-        Reflection.getAnonymousClassSimpleName(getClass()));
-    }
-  }
 
 
   public Side placeAroundSketch( Stage stage, double padding,

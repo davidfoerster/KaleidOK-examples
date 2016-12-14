@@ -5,12 +5,9 @@ import com.jogamp.nativewindow.util.InsetsImmutable;
 import com.jogamp.nativewindow.util.Point;
 import com.jogamp.nativewindow.util.PointImmutable;
 import com.jogamp.nativewindow.util.Rectangle;
-import com.jogamp.nativewindow.util.RectangleImmutable;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowEvent;
-import com.jogamp.newt.event.WindowListener;
-import com.jogamp.newt.event.WindowUpdateEvent;
 import com.jogamp.opengl.GLAutoDrawable;
 import javafx.application.Application;
 import javafx.application.HostServices;
@@ -31,7 +28,6 @@ import kaleidok.util.Strings;
 import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
-import kaleidok.util.prefs.PreferenceUtils;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
@@ -47,17 +43,11 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.OptionalInt;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
-import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
-import static kaleidok.util.prefs.PreferenceUtils.getInt;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
@@ -68,13 +58,7 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
  */
 public class ExtPApplet extends PApplet
 {
-  public static final int MIN_DIMENSION = 50;
-
-
   private ProcessingSketchApplication<? extends ExtPApplet> parent;
-
-  protected final Preferences preferences =
-    Preferences.userNodeForPackage(this.getClass());
 
   public final Set<String> saveFilenames = new ImageSaveSet(this);
 
@@ -88,8 +72,6 @@ public class ExtPApplet extends PApplet
       Stream.generate(() -> new ArrayList<>(0))
         .limit(3).toArray(List[]::new));
 
-  protected final String PREF_GEOMETRY =
-    Reflection.getAnonymousClassSimpleName(getClass()) + ".geometry.";
 
   private final FrameRateSwitcherProperty targetFrameRate;
 
@@ -106,9 +88,7 @@ public class ExtPApplet extends PApplet
     documentBase = getDocumentBase(getClass(), parent);
 
     targetFrameRate = new FrameRateSwitcherProperty(this);
-    targetFrameRate
-      .addAspect(PropertyPreferencesAdapterTag.getWritableInstance())
-      .load();
+    targetFrameRate.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 
 
@@ -133,36 +113,11 @@ public class ExtPApplet extends PApplet
     }
     else if (!sketchFullScreen())
     {
-      parseAndSetConfigSize();
     }
 
     Map<String, String> params = getParameterMap();
     smooth(DefaultValueParser.parseInt(
       params.get(sketchRenderer() + ".smooth"), sketchSmooth()));
-  }
-
-
-  private void parseAndSetConfigSize()
-  {
-    OptionalInt width = getInt(preferences, PREF_GEOMETRY + "width"),
-      height = getInt(preferences, PREF_GEOMETRY + "height");
-    int iWidth = 0, iHeight = 0;
-    if (width.isPresent() && height.isPresent())
-    {
-      iWidth = width.getAsInt();
-      iHeight = height.getAsInt();
-    }
-    else
-    {
-      int[] aSize = parseParamIntDimensions("size");
-      if (aSize != null)
-      {
-        iWidth = aSize[0];
-        iHeight = aSize[1];
-      }
-    }
-    if (iWidth > 0 || iHeight > 0)
-      size(Math.max(iWidth, MIN_DIMENSION), Math.max(iHeight, MIN_DIMENSION));
   }
 
 
@@ -209,37 +164,9 @@ public class ExtPApplet extends PApplet
   @OverridingMethodsMustInvokeSuper
   protected void showSurface()
   {
-    parseAndSetSurfaceLocation();
     showSurfaceLatch.countDown();
     showSurfaceLatch = null;
     super.showSurface();
-  }
-
-
-  private void parseAndSetSurfaceLocation()
-  {
-    if (!P3D.equals(sketchRenderer()))
-      return;
-
-    final Window window = (Window) getSurface().getNative();
-    int[] aLocation = null;
-    OptionalInt left = getInt(preferences, PREF_GEOMETRY + "left"),
-      top = getInt(preferences, PREF_GEOMETRY + "top");
-    if (left.isPresent() && top.isPresent())
-    {
-      int iLeft = left.getAsInt(), iTop = top.getAsInt();
-      RectangleImmutable intersection =
-        window.getScreen().getViewport().intersection(
-          iLeft, iTop, iLeft + this.width, iTop + this.height);
-      if (Math.min(intersection.getWidth(), intersection.getHeight()) >= MIN_DIMENSION)
-        aLocation = new int[]{iLeft, iTop};
-    }
-
-    if (aLocation == null)
-      aLocation = parseParamIntDimensions("location");
-
-    if (aLocation != null)
-      window.setPosition(aLocation[0], aLocation[1]);
   }
 
 
@@ -295,32 +222,7 @@ public class ExtPApplet extends PApplet
     saveFilenames.clear();
     if (executorService != null)
       executorService.shutdownNow();
-    savePreferences();
     super.dispose();
-  }
-
-
-  protected final void savePreferences()
-  {
-    doSavePreferences();
-    PreferenceUtils.flush(preferences);
-  }
-
-
-  protected void doSavePreferences()
-  {
-    if (!sketchFullScreen())
-    {
-      preferences.putInt(PREF_GEOMETRY + "width", width);
-      preferences.putInt(PREF_GEOMETRY + "height", height);
-
-      if (P3D.equals(sketchRenderer()))
-      {
-        PointImmutable l = getSurfaceLocation(savedSurfaceLocation);
-        preferences.putInt(PREF_GEOMETRY + "left", l.getX());
-        preferences.putInt(PREF_GEOMETRY + "top", l.getY());
-      }
-    }
   }
 
 

@@ -27,12 +27,6 @@ public interface PreferenceBean
   }
 
 
-  default void saveAndFlush()
-  {
-    ReadOnlyPropertyPreferencesAdapter.saveAndFlush(getPreferenceAdapters());
-  }
-
-
   static <P extends Property<String>> StringPropertyPreferencesAdapter<P>
   of( P stringProperty )
   {
