@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T>
@@ -15,30 +16,30 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
 
 
   public static <T extends PApplet> SimplePAppletFactory<T> forClass(
-    Class<T> appletClass )
+    Class<T> sketchClass )
     throws IllegalArgumentException
   {
-    return new SimplePAppletFactory<>(appletClass);
+    return new SimplePAppletFactory<>(sketchClass);
   }
 
 
-  public SimplePAppletFactory( Class<? extends T> appletClass )
+  public SimplePAppletFactory( Class<? extends T> sketchClass )
     throws IllegalArgumentException
   {
-    if (!PApplet.class.isAssignableFrom(appletClass))
+    if (!PApplet.class.isAssignableFrom(sketchClass))
     {
       throw new IllegalArgumentException(new ClassCastException(
-        appletClass.getName() + " is no child class of " +
+        sketchClass.getName() + " is no child class of " +
           PApplet.class.getName()));
     }
-    if (Modifier.isAbstract(appletClass.getModifiers()))
+    if (Modifier.isAbstract(sketchClass.getModifiers()))
     {
       throw new IllegalArgumentException(new InstantiationException(
-        appletClass.getCanonicalName() + " is abstract"));
+        sketchClass.getCanonicalName() + " is abstract"));
     }
     try
     {
-      constructor = appletClass.getConstructor(ProcessingSketchApplication.class);
+      constructor = sketchClass.getConstructor(ProcessingSketchApplication.class);
     }
     catch (NoSuchMethodException ex)
     {
@@ -62,14 +63,22 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
       throw new AssertionError(ex);
     }
 
-    String[] extArgs =
-      (args != null && !args.isEmpty()) ?
-        args.stream()
-          .filter((s) -> !"--fullscreen".equals(s))
-          .toArray((l) -> new String[l + 1]) :
-        new String[1];
-    extArgs[extArgs.length - 1] =
+    String sketchName =
       Reflection.getAnonymousClassSimpleName(sketch.getClass());
+    String[] extArgs;
+    if (args != null && !args.isEmpty())
+    {
+      Stream<String> sArgs =
+        args.stream().filter((s) -> !"--fullscreen".equals(s));
+      extArgs =
+        Stream.concat(sArgs, Stream.of(sketchName))
+          .toArray(String[]::new);
+    }
+    else
+    {
+      extArgs = new String[]{ sketchName };
+    }
+
     PApplet.runSketch(extArgs, sketch);
     return sketch;
   }
