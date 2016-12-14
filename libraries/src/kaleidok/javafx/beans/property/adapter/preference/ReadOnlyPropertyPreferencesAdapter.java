@@ -167,9 +167,12 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
   {
     if (logger != null && logger.isLoggable(LOG_LEVEL))
     {
+      Object value = property.getValue();
       logger.log(LOG_LEVEL,
-        "Saving preference value {0}/{1} = \"{2}\"",
-        new Object[]{ preferences.absolutePath(), key, property.getValue() });
+        (value != null) ?
+          "Saving preference value {0}/{1} = \"{2}\"" :
+          "Saving preference value {0}/{1} = null",
+        new Object[]{ preferences.absolutePath(), key, value });
     }
 
     try
