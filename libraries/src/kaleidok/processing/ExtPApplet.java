@@ -64,7 +64,7 @@ import static processing.event.KeyEvent.TYPE;
 
 
 /**
- * This is an intermediary class to "enrich" PApplet.
+ * This is an intermediary class to "enhance" PApplet.
  */
 public class ExtPApplet extends PApplet
 {
@@ -276,7 +276,7 @@ public class ExtPApplet extends PApplet
        * animator thread. Unfortunately that thread isn't flagged as a daemon,
        * so it'll keep running beyond the termination of the animator thread.
        * However, with the follow trick we can send a fake null exception as
-       * signal to that thread which leads to voluntary its termination.
+       * signal to that thread which leads to its voluntary termination.
        */
         ((GLAutoDrawable) getSurface().getNative()).getAnimator()
           .getUncaughtExceptionHandler().uncaughtException(null, null, null);
