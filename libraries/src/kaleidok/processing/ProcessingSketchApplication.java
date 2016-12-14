@@ -26,8 +26,6 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 {
   private T sketch = null;
 
-  private Stage stage = null;
-
   @SuppressWarnings("StaticFieldReferencedViaSubclass")
   private final GeometryPreferences geometryPreferences =
     new GeometryPreferences(this, true, GeometryPreferences.POSITION);
@@ -85,7 +83,6 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     geometryPreferences.applyGeometryAndBind(stage);
     stage.setScene(getScene());
     show(stage);
-    this.stage = stage;
   }
 
 
