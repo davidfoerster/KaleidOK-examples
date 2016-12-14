@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 import static kaleidok.util.Objects.requireNonNull;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
+import static kaleidok.util.prefs.PreferenceUtils.KEY_PART_DELIMITER;
 
 
 public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyProperty<? extends T>>
@@ -134,7 +135,7 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
     String key =
       prefix.isEmpty() ? name :
       name.isEmpty() ? prefix :
-        (prefix + '.' + name);
+        (prefix + KEY_PART_DELIMITER + name);
 
     if (key.isEmpty())
       throw new IllegalArgumentException("empty prefix and property name");
@@ -154,7 +155,8 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
       String className = getClass().getName();
       stringRepresentation = new StringBuilder()
         .append(className,
-          Math.max(className.lastIndexOf('.') + 1, 0), className.length())
+          Math.max(className.lastIndexOf(KEY_PART_DELIMITER) + 1, 0),
+          className.length())
         .append('[').append(preferences.absolutePath()).append('/').append(key)
         .append(" <=> ").append(property).append(']')
         .toString();
