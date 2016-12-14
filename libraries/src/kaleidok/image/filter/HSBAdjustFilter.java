@@ -167,4 +167,12 @@ public class HSBAdjustFilter extends HSBImageFilter
   {
     return hue % (float)(Math.PI * 2);
   }
+
+
+  @Override
+  public String toString()
+  {
+    return getClass().getName() + '[' + filterMode + ' ' + '(' +
+      hue + ',' + ' ' + saturation + ',' + ' ' + brightness + ')' + ']';
+  }
 }
