@@ -9,7 +9,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import kaleidok.javafx.PropertyLoaderApplication;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
-import kaleidok.javafx.geometry.Rectangles;
 import kaleidok.javafx.stage.GeometryPreferences;
 import kaleidok.javafx.stage.Screens;
 import processing.core.PApplet;
@@ -147,8 +146,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     extSketch.awaitShowSurface();
     return
       Screens.placeAround(scene.getWidth(), scene.getHeight(),
-        Rectangles.from(extSketch.getWindowBounds(null)), padding,
-        preferredSides);
+        extSketch.getWindowBounds(), padding, preferredSides);
   }
 
 

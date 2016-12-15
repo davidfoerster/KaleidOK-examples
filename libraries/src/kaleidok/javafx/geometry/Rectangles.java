@@ -1,18 +1,11 @@
 package kaleidok.javafx.geometry;
 
-import com.jogamp.nativewindow.util.RectangleImmutable;
 import javafx.geometry.Rectangle2D;
 
 
 public final class Rectangles
 {
   private Rectangles() { }
-
-
-  public static Rectangle2D from( RectangleImmutable r )
-  {
-    return new Rectangle2D(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-  }
 
 
   public static Rectangle2D union( Rectangle2D a, Rectangle2D b )

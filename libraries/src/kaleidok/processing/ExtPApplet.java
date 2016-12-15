@@ -1,8 +1,7 @@
 package kaleidok.processing;
 
-import com.jogamp.nativewindow.NativeWindow;
 import com.jogamp.nativewindow.util.InsetsImmutable;
-import com.jogamp.nativewindow.util.Rectangle;
+import com.jogamp.newt.Screen;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowEvent;
@@ -11,6 +10,7 @@ import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.WritableNumberValue;
+import javafx.geometry.Rectangle2D;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.newt.WindowSupport;
@@ -472,30 +472,18 @@ public class ExtPApplet extends PApplet
   }
 
 
-  public Point getSurfaceLocation( Point l )
+  public Rectangle2D getWindowBounds()
   {
     if (!checkRendererSupported("get window bounds", true))
       return null;
-
-    NativeWindow w = (NativeWindow) getSurface().getNative();
-    return w.getLocationOnScreen(l);
-  }
-
-
-  public Rectangle getWindowBounds( Rectangle r )
-  {
-    if (!checkRendererSupported("get window bounds", true))
-      return null;
-    NativeWindow w = (NativeWindow) getSurface().getNative();
+    Window w = (Window) getSurface().getNative();
+    Screen screen = w.getScreen();
     InsetsImmutable insets = w.getInsets();
-    Point location = w.getLocationOnScreen(null);
-    if (r == null)
-      r = new Rectangle();
-    r.set(location.getX() - insets.getLeftWidth(),
-      location.getY() - insets.getTopHeight(),
+    return new Rectangle2D(
+      screen.getX() + w.getX() - insets.getLeftWidth(),
+      screen.getY() + w.getY() - insets.getTopHeight(),
       w.getWidth() + insets.getTotalWidth(),
       w.getHeight() + insets.getTotalHeight());
-    return r;
   }
 
 
