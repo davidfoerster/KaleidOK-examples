@@ -2,8 +2,6 @@ package kaleidok.processing;
 
 import com.jogamp.nativewindow.NativeWindow;
 import com.jogamp.nativewindow.util.InsetsImmutable;
-import com.jogamp.nativewindow.util.Point;
-import com.jogamp.nativewindow.util.PointImmutable;
 import com.jogamp.nativewindow.util.Rectangle;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
@@ -501,43 +499,19 @@ public class ExtPApplet extends PApplet
   }
 
 
-  private final Point savedSurfaceLocation = new Point();
-
-
   public synchronized boolean toggleFullscreen()
   {
     if (!checkRendererSupported("toggle fullscreen"))
       return sketchFullScreen();
 
     Window w = (Window) getSurface().getNative();
-    boolean currentFullscreenState = w.isFullscreen();
-    PointImmutable windowLocation;
-    //noinspection IfMayBeConditional
-    if (currentFullscreenState)
-    {
-      windowLocation = savedSurfaceLocation;
-      /*
-      System.out.format(
-        "Restoring previous window location (%d, %d)...%n",
-        windowLocation.getX(), windowLocation.getY());
-        */
-    }
-    else
-    {
-      windowLocation = getSurfaceLocation(savedSurfaceLocation);
-      /*
-      System.out.format(
-        "Stored current window location (%d, %d) for later user (screen index %d).%n",
-        windowLocation.getX(), windowLocation.getY(), w.getScreenIndex());
-      */
-    }
-
-    boolean newFullScreenState = WindowSupport.toggleFullscreen(w, windowLocation);
-    if (newFullScreenState == currentFullscreenState)
+    boolean oldFullscreenState = w.isFullscreen();
+    boolean newFullScreenState = WindowSupport.toggleFullscreen(w);
+    if (newFullScreenState == oldFullscreenState)
     {
       System.err.format(
         "Couldn't set fullscreen state to %b on %s.%n",
-        !currentFullscreenState, w);
+        !oldFullscreenState, w);
     }
     return newFullScreenState;
   }

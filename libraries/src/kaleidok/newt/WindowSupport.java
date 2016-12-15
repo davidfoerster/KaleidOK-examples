@@ -1,7 +1,5 @@
 package kaleidok.newt;
 
-import com.jogamp.nativewindow.util.Point;
-import com.jogamp.nativewindow.util.PointImmutable;
 import com.jogamp.nativewindow.util.Rectangle;
 import com.jogamp.newt.MonitorDevice;
 import com.jogamp.newt.Window;
@@ -14,20 +12,12 @@ public final class WindowSupport
   private WindowSupport() { }
 
 
-  public static boolean toggleFullscreen( Window w,
-    PointImmutable desiredWindowLocation )
+  public static boolean toggleFullscreen( Window w )
   {
     boolean newFullscreenState;
-    if (w.isFullscreen())
-    {
-      newFullscreenState = w.setFullscreen(false);
-      w.setPosition(desiredWindowLocation.getX(), desiredWindowLocation.getY());
-    }
-    else
-    {
-      newFullscreenState =
-        w.setFullscreen(Collections.singletonList(getMainMonitor(w)));
-    }
+    newFullscreenState = w.isFullscreen() ?
+      w.setFullscreen(false) :
+      w.setFullscreen(Collections.singletonList(getMainMonitor(w)));
     return newFullscreenState;
   }
 
@@ -49,9 +39,8 @@ public final class WindowSupport
 
   public static Rectangle getBoundsOnScreen( Window w )
   {
-    Point windowLocation = w.getLocationOnScreen(null);
     return new Rectangle(
-      windowLocation.getX(), windowLocation.getY(),
+      w.getScreen().getX() + w.getX(), w.getScreen().getY() + w.getY(),
       w.getWidth(), w.getHeight());
   }
 }
