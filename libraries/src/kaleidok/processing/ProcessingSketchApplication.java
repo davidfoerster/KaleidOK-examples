@@ -75,8 +75,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
 
 
   @Override
-  @OverridingMethodsMustInvokeSuper
-  public void start( Stage stage ) throws Exception
+  public void start( Stage stage )
   {
     getSketch().start();
     geometryPreferences.applyGeometryAndBind(stage);
@@ -85,8 +84,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   }
 
 
-  @SuppressWarnings("ProhibitedExceptionDeclared")
-  protected void show( Stage stage ) throws Exception
+  protected void show( Stage stage )
   {
     stage.show();
   }
@@ -95,7 +93,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   @Override
   public void stop() throws Exception
   {
-    sketch.exit();
+    getSketch().exit();
   }
 
 

@@ -157,7 +157,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
 
   @Override
-  public void start( Stage stage ) throws Exception
+  public void start( Stage stage )
   {
     stage.setTitle("Kaleidoscope Controls");
     stage.getIcons().addAll(makeIcons());
@@ -170,9 +170,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   }
 
 
-  @SuppressWarnings("ProhibitedExceptionDeclared")
   @Override
-  protected void show( Stage stage ) throws Exception
+  protected void show( Stage stage )
   {
     /*if (Double.isNaN(stage.getX()) || Double.isNaN(stage.getY()))
       placeAroundSketch(stage, 2, (Side[]) null);*/
