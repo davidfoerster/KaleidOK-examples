@@ -24,6 +24,7 @@ import kaleidok.javafx.scene.control.cell.NotificationTreeTableCell;
 import kaleidok.javafx.scene.control.cell.provider.hook.NotificationTreeItemEditorHook;
 import kaleidok.javafx.scene.control.cell.provider.*;
 import kaleidok.javafx.util.Callbacks;
+import kaleidok.util.containers.TreeIterator;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static kaleidok.kaleidoscope.KaleidoscopeApp.iconDir;
 import static kaleidok.kaleidoscope.controls.KaleidoscopeControls.loadIcon;
@@ -139,6 +141,15 @@ public class KaleidoscopeConfigurationEditor
       return new DynamicEditableTreeItem<>(
         (ReadOnlyProperty<Object>) property, this);
     }
+  }
+
+
+  public Stream<TreeItem<ReadOnlyProperty<Object>>> streamItems()
+  {
+    return (getRoot() != null) ?
+      StreamSupport.stream(
+        TreeIterator.getInstance(getRoot()).spliterator(), false) :
+      Stream.empty();
   }
 
 
