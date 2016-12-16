@@ -1,6 +1,8 @@
 package kaleidok.kaleidoscope;
 
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
@@ -15,6 +17,7 @@ import kaleidok.javafx.beans.property.aspect.HiddenAspectTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.stage.GeometryPreferences;
 import kaleidok.javafx.stage.Icons;
+import kaleidok.javafx.stage.StageOwnerInitializer;
 import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
 import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
 import kaleidok.processing.PAppletFactory;
@@ -40,8 +43,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   public static final String iconDir = "icons/";
 
-  @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
-  private Stage primaryStage;
+  private final ObjectProperty<Stage> primaryStage =
+    new SimpleObjectProperty<>(this, "primary stage");
 
   private Scene scene;
 
@@ -56,7 +59,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   }
 
 
-  private Stage configurationWindow;
+  private final ObjectProperty<Stage> configurationWindow =
+    new SimpleObjectProperty<>(this, "configuration window");
 
   private KaleidoscopeConfigurationEditor configurationEditor;
 
@@ -64,6 +68,12 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   private final GeometryPreferences configurationWindowPreferences =
     new GeometryPreferences(this, KaleidoscopeConfigurationEditor.class, true,
       GeometryPreferences.ALL);
+
+
+  public KaleidoscopeApp()
+  {
+    StageOwnerInitializer.apply(primaryStage, configurationWindow);
+  }
 
 
   @Override
@@ -78,21 +88,21 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   private synchronized Stage getConfigurationWindow()
   {
-    if (configurationWindow == null)
+    if (configurationWindow.get() == null)
     {
       KaleidoscopeConfigurationEditor ce = getConfigurationEditor();
-      final Stage cw = configurationWindow = new Stage();
+      Stage cw = new Stage();
       cw.setTitle(getSketch().getName() + " configuration");
-      cw.initOwner(primaryStage);
       cw.setWidth(ce.getPrefWidth() + 20);
       cw.setScene(new Scene(ce));
+      configurationWindow.set(cw);
       cw.showingProperty().addListener(
         ( obs, oldValue, newValue ) ->
           getControls().getConfigurationWindowButton().setSelected(newValue));
       Platform.runLater(() ->
-        configurationWindowPreferences.applyGeometryAndBind(cw));
+        configurationWindowPreferences.applyGeometryAndBind(configurationWindow.get()));
     }
-    return configurationWindow;
+    return configurationWindow.get();
   }
 
 
@@ -101,10 +111,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     if (configurationEditor == null)
     {
       configurationEditor = new KaleidoscopeConfigurationEditor();
-
       Kaleidoscope sketch = getSketch();
       configurationEditor.addBean(sketch);
-
       configurationEditor.getSortOrder().add(
         configurationEditor.getColumns().get(0));
     }
@@ -116,14 +124,11 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     if (show)
     {
-       Stage cw = getConfigurationWindow();
-       if (cw.getOwner() == null)
-         cw.initOwner(primaryStage);
-       cw.show();
+       getConfigurationWindow().show();
     }
-    else if (configurationWindow != null)
+    else if (configurationWindow.get() != null)
     {
-      configurationWindow.hide();
+      configurationWindow.get().hide();
     }
   }
 
@@ -159,14 +164,11 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   @Override
   public void start( Stage stage )
   {
+    primaryStage.set(stage);
     stage.setTitle("Kaleidoscope Controls");
     stage.getIcons().addAll(makeIcons());
     stage.setOnCloseRequest((e) -> Platform.runLater(this::stopChildStages));
     super.start(stage);
-    primaryStage = stage;
-
-    if (configurationWindowPreferences.isShowing(false))
-      getConfigurationEditor();
   }
 
 
@@ -179,7 +181,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     super.show(stage);
 
     if (configurationWindowPreferences.isShowing(false))
-      setShowConfigurationEditor(true);
+      setShowConfigurationEditor(true); // TODO: Move to background thread?
   }
 
 
@@ -201,8 +203,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
     //noinspection ConstantConditions
     configurationWindowPreferences.show.unbind();
-    if (configurationWindow != null)
-      configurationWindow.close();
+    if (configurationWindow.get() != null)
+      configurationWindow.get().close();
   }
 
 
