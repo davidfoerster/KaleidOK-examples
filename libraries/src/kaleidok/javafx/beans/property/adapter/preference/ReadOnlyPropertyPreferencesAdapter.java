@@ -102,7 +102,8 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
 
 
   public static final Pattern NON_WORD_SEQUENCE =
-    Pattern.compile("[\\W._-]{2,}|\\W+", Pattern.UNICODE_CHARACTER_CLASS);
+    Pattern.compile("[\\W._-]{2,}|[^\\w._-]+",
+      Pattern.UNICODE_CHARACTER_CLASS);
 
   public static final String NON_WORD_REPLACEMENT = "-";
 
