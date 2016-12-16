@@ -3,6 +3,7 @@ package kaleidok.javafx.beans.property.adapter.preference;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ReadOnlyProperty;
 import kaleidok.util.Reflection;
+import kaleidok.util.Strings;
 import kaleidok.util.logging.LoggingUtils;
 import kaleidok.util.prefs.PreferenceUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -105,8 +106,6 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
     Pattern.compile("[\\W._-]{2,}|[^\\w._-]+",
       Pattern.UNICODE_CHARACTER_CLASS);
 
-  public static final String NON_WORD_REPLACEMENT = "-";
-
 
   @Nonnull
   private static String getPrefixFromDefault( Class<?> beanClass,
@@ -126,23 +125,28 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
   private static String getPreferenceKey( @Nonnull String name,
     @Nonnull String prefix )
   {
-    name = name.trim();
-    if (!name.isEmpty())
-    {
-      name =
-        NON_WORD_SEQUENCE.matcher(name).replaceAll(NON_WORD_REPLACEMENT);
-    }
-
     String key =
-      prefix.isEmpty() ? name :
-      name.isEmpty() ? prefix :
-        (prefix + KEY_PART_DELIMITER + name);
-
+      Strings.join(prefix, scrubPropertyName(name), KEY_PART_DELIMITER)
+        .toString();
     if (key.isEmpty())
       throw new IllegalArgumentException("empty prefix and property name");
     assert Normalizer.isNormalized(key, Normalizer.Form.NFC);
-
     return key;
+  }
+
+
+  private static CharSequence scrubPropertyName( String name )
+  {
+    return name.isEmpty() ?
+      name :
+      Strings.replaceAll(NON_WORD_SEQUENCE, name,
+        (matcher, input, sb) -> {
+          int start = matcher.start();
+          if (start == 0 || matcher.end() == input.length())
+            return "";
+          char c = input.charAt(start);
+          return (c == KEY_PART_DELIMITER || c == '_') ? c : '-';
+        });
   }
 
 

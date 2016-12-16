@@ -317,4 +317,19 @@ public final class Strings
         (start == 0 && end == csq.length()) ? csq :
           csq.subSequence(start, end);
   }
+
+
+  public static CharSequence join( CharSequence a, CharSequence b,
+    char delimiter )
+  {
+    int aLen = a.length(), bLen = b.length();
+    if (aLen == 0)
+      return b;
+    if (bLen == 0)
+      return a;
+
+    return
+      new StringBuilder(aLen + bLen + 1)
+        .append(a).append(delimiter).append(b);
+  }
 }
