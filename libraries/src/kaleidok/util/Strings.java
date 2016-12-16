@@ -217,6 +217,11 @@ public final class Strings
 
         case ABORT:
           return null;
+
+        case STOP:
+          return (buf != null && buf.length() != 0) ?
+            buf.append(input, lastMatchEnd, matcher.start()) :
+            subSequence(input, lastMatchEnd, matcher.start());
         }
       }
 
@@ -225,10 +230,6 @@ public final class Strings
 
       buf.append(input, lastMatchEnd, matcher.start());
 
-      if (replacement == ReplaceCallback.Replacement.STOP)
-      {
-        return buf;
-      }
       if (replacement instanceof CharSequence)
       {
         buf.append((CharSequence) replacement);
@@ -255,9 +256,9 @@ public final class Strings
       lastMatchEnd = matcher.end();
     }
 
-    return (buf != null) ?
+    return (buf != null && buf.length() != 0) ?
       buf.append(input, lastMatchEnd, input.length()) :
-      input;
+      subSequence(input, lastMatchEnd, input.length());
   }
 
 
@@ -305,5 +306,15 @@ public final class Strings
   {
     return haystack.regionMatches(ignoreCase,
       haystack.length() - needle.length(), needle, 0, needle.length());
+  }
+
+
+  public static CharSequence subSequence( CharSequence csq, int start,
+    int end )
+  {
+    return
+      (start == end) ? "" :
+        (start == 0 && end == csq.length()) ? csq :
+          csq.subSequence(start, end);
   }
 }
