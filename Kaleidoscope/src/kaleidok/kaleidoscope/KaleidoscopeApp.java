@@ -18,7 +18,8 @@ import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.stage.GeometryPreferences;
 import kaleidok.javafx.stage.Icons;
 import kaleidok.javafx.stage.StageOwnerInitializer;
-import kaleidok.kaleidoscope.controls.KaleidoscopeConfigurationEditor;
+import kaleidok.kaleidoscope.controls.ConfigurationEditorScene;
+import kaleidok.kaleidoscope.controls.ConfigurationEditorTreeTable;
 import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchApplication;
@@ -46,7 +47,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   private final ObjectProperty<Stage> primaryStage =
     new SimpleObjectProperty<>(this, "primary stage");
 
-  private Scene scene;
+  private Scene primaryScene;
 
   private KaleidoscopeControls controls;
 
@@ -62,11 +63,9 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   private final ObjectProperty<Stage> configurationWindow =
     new SimpleObjectProperty<>(this, "configuration window");
 
-  private KaleidoscopeConfigurationEditor configurationEditor;
-
   @SuppressWarnings("StaticFieldReferencedViaSubclass")
   private final GeometryPreferences configurationWindowPreferences =
-    new GeometryPreferences(this, KaleidoscopeConfigurationEditor.class, true,
+    new GeometryPreferences(this, ConfigurationEditorScene.class, true,
       GeometryPreferences.ALL);
 
 
@@ -90,11 +89,15 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     if (configurationWindow.get() == null)
     {
-      KaleidoscopeConfigurationEditor ce = getConfigurationEditor();
+      ConfigurationEditorScene ces = new ConfigurationEditorScene();
+      ConfigurationEditorTreeTable cett = ces.configurationEditor;
+      cett.addBean(getSketch());
+      cett.getSortOrder().add(
+        cett.getColumns().get(0));
+
       Stage cw = new Stage();
-      cw.setTitle(getSketch().getName() + " configuration");
-      cw.setWidth(ce.getPrefWidth() + 20);
-      cw.setScene(new Scene(ce));
+      cw.setTitle(getSketch().getName() + " Preferences");
+      ces.start(cw);
       configurationWindow.set(cw);
       cw.showingProperty().addListener(
         ( obs, oldValue, newValue ) ->
@@ -103,20 +106,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
         configurationWindowPreferences.applyGeometryAndBind(configurationWindow.get()));
     }
     return configurationWindow.get();
-  }
-
-
-  private KaleidoscopeConfigurationEditor getConfigurationEditor()
-  {
-    if (configurationEditor == null)
-    {
-      configurationEditor = new KaleidoscopeConfigurationEditor();
-      Kaleidoscope sketch = getSketch();
-      configurationEditor.addBean(sketch);
-      configurationEditor.getSortOrder().add(
-        configurationEditor.getColumns().get(0));
-    }
-    return configurationEditor;
   }
 
 
@@ -136,11 +125,11 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   @Override
   protected synchronized Scene getScene()
   {
-    if (scene == null)
+    if (primaryScene == null)
     {
-      scene = new Scene(getControls());
+      primaryScene = new Scene(getControls());
     }
-    return scene;
+    return primaryScene;
   }
 
 

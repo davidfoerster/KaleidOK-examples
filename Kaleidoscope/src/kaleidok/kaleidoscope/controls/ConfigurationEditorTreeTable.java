@@ -43,7 +43,7 @@ import static kaleidok.kaleidoscope.KaleidoscopeApp.iconDir;
 import static kaleidok.kaleidoscope.controls.KaleidoscopeControls.loadIcon;
 
 
-public class KaleidoscopeConfigurationEditor
+public class ConfigurationEditorTreeTable
   extends TreeTableView<ReadOnlyProperty<Object>>
 {
   private final Map<Object, TreeItem<ReadOnlyProperty<Object>>> beansToItemsMap =
@@ -52,7 +52,7 @@ public class KaleidoscopeConfigurationEditor
 
   {
     setSortPolicy((ttv) ->
-      ((KaleidoscopeConfigurationEditor) ttv).sortPolicyImpl());
+      ((ConfigurationEditorTreeTable) ttv).sortPolicyImpl());
 
     setEditable(true);
     initColumns();
