@@ -181,7 +181,14 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     super.show(stage);
 
     if (configurationWindowPreferences.isShowing(false))
-      setShowConfigurationEditor(true); // TODO: Move to background thread?
+    {
+      executorService.submit(() -> {
+        // Construct the scene in a background thread
+        getConfigurationEditorScene();
+        // Construct and show the stage on the JavaFX application thread
+        Platform.runLater(() -> getConfigurationWindow().show());
+      });
+    }
   }
 
 
