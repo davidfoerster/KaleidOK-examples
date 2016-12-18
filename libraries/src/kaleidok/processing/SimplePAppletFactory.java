@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 
@@ -50,7 +51,7 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
 
   @Override
   public T createInstance( ProcessingSketchApplication<T> context,
-    List<String> args )
+    Consumer<T> callback, List<String> args )
     throws InvocationTargetException
   {
     T sketch;
@@ -62,6 +63,9 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
     {
       throw new AssertionError(ex);
     }
+
+    if (callback != null)
+      callback.accept(sketch);
 
     String sketchName =
       Reflection.getAnonymousClassSimpleName(sketch.getClass());

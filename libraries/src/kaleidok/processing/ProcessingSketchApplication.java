@@ -62,7 +62,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     try
     {
       sketch =
-        getSketchFactory().createInstance(this, getParameters().getRaw());
+        getSketchFactory().createInstance(this, null, getParameters().getRaw());
     }
     catch (InvocationTargetException ex)
     {
