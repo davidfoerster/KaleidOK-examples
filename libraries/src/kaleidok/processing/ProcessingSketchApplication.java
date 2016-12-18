@@ -17,12 +17,15 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 
 public abstract class ProcessingSketchApplication<T extends PApplet>
   extends PropertyLoaderApplication
 {
+  protected ExecutorService executorService;
+
   private T sketch = null;
 
   @SuppressWarnings("StaticFieldReferencedViaSubclass")
@@ -35,6 +38,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   public void init() throws Exception
   {
     super.init();
+    executorService = ExtPApplet.makeExecutorService(getClass());
     initSketch();
   }
 
@@ -62,7 +66,12 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     try
     {
       sketch =
-        getSketchFactory().createInstance(this, null, getParameters().getRaw());
+        getSketchFactory().createInstance(this,
+          (_sketch) -> {
+              if (_sketch instanceof ExtPApplet)
+                ((ExtPApplet) _sketch).executorService = this.executorService;
+            },
+          getParameters().getRaw());
     }
     catch (InvocationTargetException ex)
     {
