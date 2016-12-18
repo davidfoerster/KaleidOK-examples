@@ -23,27 +23,23 @@ public class IntegerNumberStringConverter
   @Override
   protected Integer convertParseResult( Object parseResult )
   {
-    Number n = (Number) parseResult;
     if (parseResult instanceof Integer)
       return (Integer) parseResult;
 
-    if (!Double.isNaN(n.doubleValue()))
-    {
-      long l = n.longValue();
-      if (l == (int) l)
-        return (int) l;
-    }
+    Number n = (Number) parseResult;
+    long l = n.longValue();
+    if ((l != 0) ? (l == (int) l) : !Double.isNaN(n.doubleValue()))
+      return (int) l;
 
-    StringBuffer sb = getStringBufferInstance();
-    sb.setLength(0);
-    sb.append("Exceeds number range: ");
+    StringBuffer sb = getStringBufferInstance()
+      .append("Exceeds number range: ");
     getFormat().format(n, sb, getFieldPositionInstance());
     throw new NumberFormatException(sb.toString());
   }
 
 
   @Override
-  protected Throwable getParseException( String source, ParsePosition pos )
+  protected ParseException getParseException( String source, ParsePosition pos )
   {
     return new ParseException("Not a valid integer", pos.getErrorIndex());
   }

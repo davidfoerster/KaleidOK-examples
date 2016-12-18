@@ -22,7 +22,7 @@ public class DoubleNumberStringConverter
 
 
   @Override
-  protected Throwable getParseException( String source, ParsePosition pos )
+  protected ParseException getParseException( String source, ParsePosition pos )
   {
     return new ParseException("Not a valid floating point number",
       pos.getErrorIndex());

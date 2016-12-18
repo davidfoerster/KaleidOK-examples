@@ -73,10 +73,11 @@ public class CachingFormattedStringConverter<T, F extends Format>
       return typedResult;
     }
 
-    Throwable ex = getParseException(source, parsePosition);
+    Exception ex =
+      Objects.requireNonNull(getParseException(source, parsePosition));
     throw (ex instanceof RuntimeException) ?
       (RuntimeException) ex :
-      new IllegalArgumentException(Objects.requireNonNull(ex));
+      new IllegalArgumentException(ex);
   }
 
 
@@ -87,7 +88,7 @@ public class CachingFormattedStringConverter<T, F extends Format>
   }
 
 
-  protected Throwable getParseException( String source, ParsePosition pos )
+  protected Exception getParseException( String source, ParsePosition pos )
   {
     return new ParseException("Couldn't parse source string",
       pos.getErrorIndex());
