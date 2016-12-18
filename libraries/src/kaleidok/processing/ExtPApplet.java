@@ -100,11 +100,9 @@ public class ExtPApplet extends PApplet
   public void settings()
   {
     parseAndSetConfig();
-    executorService = new ThreadPoolExecutor(
-      0, 16, 60, TimeUnit.SECONDS, new SynchronousQueue<>(),
-      new GroupedThreadFactory(
-        Reflection.getAnonymousClassSimpleName(getClass()) + " worker pool",
-        false, true));
+
+    if (executorService == null)
+      executorService = makeExecutorService(getClass());
   }
 
 
@@ -122,6 +120,16 @@ public class ExtPApplet extends PApplet
     Map<String, String> params = getParameterMap();
     smooth(DefaultValueParser.parseInt(
       params.get(sketchRenderer() + ".smooth"), sketchSmooth()));
+  }
+
+
+  static ExecutorService makeExecutorService( Class<?> namingClass )
+  {
+    return new ThreadPoolExecutor(
+      0, 16, 60, TimeUnit.SECONDS, new SynchronousQueue<>(),
+      new GroupedThreadFactory(
+        Reflection.getAnonymousClassSimpleName(namingClass) + " worker pool",
+        false, true));
   }
 
 
