@@ -137,6 +137,15 @@ public final class Strings
   }
 
 
+  public static int countLeadingWhitespace( CharSequence csq, int offset )
+  {
+    final int len = csq.length();
+    while (offset < len && Character.isWhitespace(csq.charAt(offset)))
+      offset++;
+    return offset;
+  }
+
+
   @FunctionalInterface
   public interface ReplaceCallback
   {
