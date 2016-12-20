@@ -1,14 +1,15 @@
 package kaleidok.javafx.util.converter;
 
+import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 
 
 public class IntegerNumberStringConverter
-  extends CachingFormattedStringConverter<Integer, NumberFormat>
+  extends CachingFormattedStringConverter<Integer, Format>
 {
-  public IntegerNumberStringConverter( NumberFormat format )
+  public IntegerNumberStringConverter( Format format )
   {
     super(format);
   }

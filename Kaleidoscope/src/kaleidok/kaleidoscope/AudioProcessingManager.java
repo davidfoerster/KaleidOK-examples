@@ -25,8 +25,10 @@ import kaleidok.javafx.beans.property.aspect.RestartRequiredTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedIntegerTag;
 import kaleidok.javafx.scene.control.cell.SteppingIntegerSpinnerValueFactory;
 import kaleidok.javafx.scene.control.cell.SteppingIntegerSpinnerValueFactory.BinaryLogarithmStepFunction;
+import kaleidok.javafx.util.converter.IntegerNumberStringConverter;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.Plugin;
+import kaleidok.text.InternationalSystemOfUnitsFormat;
 import kaleidok.util.Strings;
 import processing.event.KeyEvent;
 
@@ -85,7 +87,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     IntegerSpinnerValueFactory bounds =
       new IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
     bounds.setAmountToStepBy(1000);
-    // TODO: format with SI prefixes
+    bounds.setConverter(new IntegerNumberStringConverter(
+      InternationalSystemOfUnitsFormat.getNumberInstance(" Hz")));
     audioSampleRate.addAspect(BoundedIntegerTag.getIntegerInstance(), bounds);
     audioSampleRate.addAspect(LevelOfDetailTag.getInstance()).set(200);
     audioSampleRate

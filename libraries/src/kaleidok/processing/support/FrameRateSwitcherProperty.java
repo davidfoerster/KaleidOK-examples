@@ -5,7 +5,9 @@ import com.jogamp.opengl.util.FPSAnimator;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedDoubleProperty;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
+import kaleidok.javafx.util.converter.DoubleNumberStringConverter;
 import kaleidok.processing.ExtPApplet;
+import kaleidok.text.InternationalSystemOfUnitsFormat;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
@@ -29,6 +31,8 @@ public class FrameRateSwitcherProperty extends AspectedDoubleProperty
     DoubleSpinnerValueFactory bounds =
       new DoubleSpinnerValueFactory(0, Float.MAX_VALUE);
     bounds.setAmountToStepBy(5);
+    bounds.setConverter(new DoubleNumberStringConverter(
+      InternationalSystemOfUnitsFormat.getNumberInstance(" Hz")));
     addAspect(BoundedDoubleTag.getDoubleInstance(), bounds);
 
     this.applet = applet;

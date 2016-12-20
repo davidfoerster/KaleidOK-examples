@@ -1,16 +1,23 @@
 package kaleidok.javafx.util.converter;
 
+import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 
 
 public class DoubleNumberStringConverter
-  extends CachingFormattedStringConverter<Double, NumberFormat>
+  extends CachingFormattedStringConverter<Double, Format>
 {
-  public DoubleNumberStringConverter( NumberFormat format )
+  public DoubleNumberStringConverter( Format format )
   {
     super(format);
+  }
+
+
+  public DoubleNumberStringConverter()
+  {
+    this(NumberFormat.getNumberInstance());
   }
 
 
