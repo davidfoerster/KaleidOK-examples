@@ -2,6 +2,7 @@ package kaleidok.util;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.nio.CharBuffer;
 import java.util.regex.*;
 
 import static java.lang.Math.abs;
@@ -340,8 +341,52 @@ public final class Strings
     if (bLen == 0)
       return a;
 
-    return
-      new StringBuilder(aLen + bLen + 1)
-        .append(a).append(delimiter).append(b);
+    char[] result = new char[aLen + bLen + 1];
+    getChars(a, 0, aLen, result, 0);
+    result[aLen] = delimiter;
+    getChars(b, 0, bLen, result, aLen + 1);
+    return new String(result);
+  }
+
+
+  public static void getChars( CharSequence src, int srcBegin, int srcEnd,
+    char[] dst, int dstOffset )
+  {
+    if (src instanceof String)
+    {
+      ((String) src).getChars(srcBegin, srcEnd, dst, dstOffset);
+    }
+    else if (src instanceof StringBuilder)
+    {
+      ((StringBuilder) src).getChars(srcBegin, srcEnd, dst, dstOffset);
+    }
+    else if (src instanceof StringBuffer)
+    {
+      ((StringBuffer) src).getChars(srcBegin, srcEnd, dst, dstOffset);
+    }
+    else if (src instanceof CharBuffer)
+    {
+      CharBuffer cb = (CharBuffer) src;
+      int mark = cb.position();
+      cb.position(mark + srcBegin);
+      try {
+        cb.get(dst, dstOffset, srcEnd - srcBegin);
+      } finally {
+        cb.position(mark);
+      }
+    }
+    else
+    {
+      for (; srcBegin < srcEnd; srcBegin++, dstOffset++)
+        dst[dstOffset] = src.charAt(srcBegin);
+    }
+  }
+
+
+  public static char[] toCharArray( CharSequence csq )
+  {
+    char[] a = new char[csq.length()];
+    getChars(csq, 0, a.length, a, 0);
+    return a;
   }
 }
