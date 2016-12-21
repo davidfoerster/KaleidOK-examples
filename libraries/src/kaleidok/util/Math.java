@@ -104,7 +104,20 @@ public final class Math
 
   public static double log2( double x )
   {
-    return log(x) * (1 / LN2);
+    return java.lang.Math.log(x) * (1 / LN2);
+  }
+
+
+  public static double log( double x, long base )
+  {
+    return
+      (base == 2) ?
+        log2(x) :
+      (base == 10) ?
+        log10(x) :
+      (base >= 4 && isPowerOfTwo(base)) ?
+        scalb(log2(x), -1 - Long.numberOfTrailingZeros(base)) :
+        java.lang.Math.log(x) / java.lang.Math.log(base);
   }
 
 
