@@ -6,7 +6,6 @@ import java.util.regex.*;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
-import static java.lang.Math.log;
 import static kaleidok.util.AssertionUtils.fastAssert;
 
 
@@ -62,8 +61,13 @@ public final class Strings
 
   public static char[] toDigits( long n, int base, char[] dst )
   {
+    if (base <= 0)
+      throw new IllegalArgumentException("Non-positive base");
     if (dst == null) {
-      int len = (int) ceil(log(abs((double) n)) / log(base));
+      int len =
+        (n < Integer.MIN_VALUE || abs(n) > base) ?
+          (int) ceil(Math.log(abs((double) n), base)) :
+          1;
       if (n < 0)
         len++;
       dst = new char[len];
