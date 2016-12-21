@@ -282,7 +282,7 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
 
   private static Number applyMagnitude( BigInteger n, int magnitude )
   {
-    return BigInteger.ZERO.equals(n) ? n : applyMagnitudeImpl(n, magnitude);
+    return (n.signum() == 0) ? n : applyMagnitudeImpl(n, magnitude);
   }
 
 
