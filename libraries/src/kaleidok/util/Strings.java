@@ -212,7 +212,7 @@ public final class Strings
     Matcher matcher = pattern.matcher(input);
     StringBuilder buf = null;
 
-    int lastMatchEnd = 0;
+    int lastMatchEnd = 0, inputEnd = input.length();
     matcherLoop:
     while (matcher.find())
     {
@@ -228,13 +228,12 @@ public final class Strings
         case BREAK:
           break matcherLoop;
 
+        case STOP:
+          inputEnd = matcher.start();
+          break matcherLoop;
+
         case ABORT:
           return null;
-
-        case STOP:
-          return (buf != null && buf.length() != 0) ?
-            buf.append(input, lastMatchEnd, matcher.start()) :
-            subSequence(input, lastMatchEnd, matcher.start());
         }
       }
 
@@ -270,8 +269,8 @@ public final class Strings
     }
 
     return (buf != null && buf.length() != 0) ?
-      buf.append(input, lastMatchEnd, input.length()) :
-      subSequence(input, lastMatchEnd, input.length());
+      buf.append(input, lastMatchEnd, inputEnd) :
+      subSequence(input, lastMatchEnd, inputEnd);
   }
 
 
