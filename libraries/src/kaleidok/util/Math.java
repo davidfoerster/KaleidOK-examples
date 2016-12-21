@@ -26,7 +26,7 @@ public final class Math
 
   public static float sumOfSquares( float[] a, int offset, int len )
   {
-    checkBounds(offset, len, a.length);
+    checkBoundsThrow(offset, len, a.length);
     return (len != 0) ? sumOfSquares_noBoundsCheck(a, offset, len) : 0;
   }
 
@@ -51,7 +51,7 @@ public final class Math
 
   public static float sum( FloatList a, int offset, int len )
   {
-    checkBounds(offset, len, a.size());
+    checkBoundsThrow(offset, len, a.size());
     return (len != 0) ? sum_noBoundsCheck(a, offset, len) : 0;
   }
 
@@ -71,24 +71,25 @@ public final class Math
 
   private static boolean checkBounds( int offset, int len, int bufSize )
   {
-    if (offset < 0 || offset > bufSize)
-      throwArrayIndexOutOfBoundsException(offset);
-    if (len < 0)
-      throwArrayIndexOutOfBoundsException(len);
-    if ((long) offset + len > bufSize)
-      throwArrayIndexOutOfBoundsException((long) offset + len);
-    return true;
+    return offset >= 0 && len >= 0 && (long) offset + len <= bufSize;
   }
 
-  private static void throwArrayIndexOutOfBoundsException( long index )
+  @SuppressWarnings("ProhibitedExceptionDeclared")
+  private static void checkBoundsThrow( int offset, int len, int bufSize )
+    throws ArrayIndexOutOfBoundsException, ArithmeticException
   {
-    throw new ArrayIndexOutOfBoundsException(Long.toString(index));
+    if (offset < 0 || offset > bufSize)
+      throw new ArrayIndexOutOfBoundsException(offset);
+    if (len < 0)
+      throw new ArrayIndexOutOfBoundsException(len);
+    if (addExact(offset, len) > bufSize)
+      throw new ArrayIndexOutOfBoundsException(offset + len);
   }
 
   private static String getBoundsExceededMessage( int offset, int len, int bufSize )
   {
     return String.format(
-      "%2$d is 0, %1$d, %2$d or %3$d are negative, or %1$d + %2$d ≥ %3$d",
+      "%2$d is 0, %1$d, %2$d, or %3$d are negative, or %1$d + %2$d ≥ %3$d",
       offset, len, bufSize);
   }
 
