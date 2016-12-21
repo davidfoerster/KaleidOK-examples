@@ -11,8 +11,6 @@ import java.text.ParsePosition;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static kaleidok.util.Math.clamp;
@@ -86,27 +84,27 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
 
 
   @Override
-  public StringBuffer format( Object number, StringBuffer toAppendTo,
+  public StringBuffer format( Object o, StringBuffer toAppendTo,
     FieldPosition pos )
     throws IllegalArgumentException
   {
-    if (number instanceof Long || number instanceof Integer ||
-      number instanceof Short || number instanceof Byte ||
-      number instanceof AtomicInteger || number instanceof AtomicLong ||
-      (number instanceof BigInteger && ((BigInteger)number).bitLength () < 64))
+    if (o instanceof Number)
     {
-      return format(((Number) number).longValue(), toAppendTo, pos);
+      Number number = (Number) o;
+
+      if (kaleidok.util.Math.isBasicIntegral(number))
+        return format(number.longValue(), toAppendTo, pos);
+      if (number instanceof Double || number instanceof Float)
+        return format(number.doubleValue(), toAppendTo, pos);
+      if (number instanceof BigInteger)
+        return format((BigInteger) number, toAppendTo, pos);
+      if (number instanceof BigDecimal)
+        return format((BigDecimal) number, toAppendTo, pos);
     }
-    if (number instanceof Double || number instanceof Float)
-      return format(((Number)number).doubleValue(), toAppendTo, pos);
-    if (number instanceof BigInteger)
-      return format((BigInteger) number, toAppendTo, pos);
-    if (number instanceof BigDecimal)
-      return format((BigDecimal) number, toAppendTo, pos);
 
     throw new IllegalArgumentException(String.format(
       "Cannot format Object of type %s as a Number",
-      (number != null) ? number.getClass().getName() : "null"));
+      (o != null) ? o.getClass().getName() : null));
   }
 
 
