@@ -71,10 +71,10 @@ public final class Reflection
     while (!(type instanceof ParameterizedType) ||
       ((ParameterizedType) type).getRawType() != baseClass)
     {
-      type = (type instanceof ParameterizedType) ?
-        ((Class<?>) ((ParameterizedType) type).getRawType())
-          .getGenericSuperclass() :
-        ((Class<?>) type).getGenericSuperclass();
+      type =
+        ((Class<?>) ((type instanceof ParameterizedType) ?
+            ((ParameterizedType) type).getRawType() : type))
+          .getGenericSuperclass();
     }
 
     return ((ParameterizedType) type).getActualTypeArguments();

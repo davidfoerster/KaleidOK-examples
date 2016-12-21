@@ -327,8 +327,8 @@ public final class Strings
   {
     return
       (start == end) ? "" :
-        (start == 0 && end == csq.length()) ? csq :
-          csq.subSequence(start, end);
+      (start == 0 && end == csq.length()) ? csq :
+        csq.subSequence(start, end);
   }
 
 

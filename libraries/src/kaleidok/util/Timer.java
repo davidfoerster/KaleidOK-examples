@@ -11,15 +11,21 @@ public class Timer
   private boolean started = false;
 
 
+  protected Timer( long totalTime )
+  {
+    this.totalTime = totalTime;
+  }
+
+
   public Timer()
   {
-    this.totalTime = -1;
+    this(-1);
   }
 
 
   public Timer( long totalTime, TimeUnit unit )
   {
-    this.totalTime = unit.toNanos(totalTime);
+    this(unit.toNanos(totalTime));
   }
 
 
