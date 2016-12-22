@@ -60,7 +60,7 @@ public abstract class PropertyLoaderApplication extends Application
     if (!prop.isEmpty())
     {
       namedParameters =
-        new ChainedMap<>(namedParameters, PropertyLoader.toMap(prop, null));
+        new ChainedMap<>(namedParameters, PropertyLoader.toMap(prop));
     }
     namedParameters =
       new LowercaseStringMap<>(namedParameters, Locale.ENGLISH);

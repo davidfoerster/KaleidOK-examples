@@ -451,9 +451,7 @@ public final class LayerManager
         "Couldn''t load layer properties file \"{0}\"; using defaults", ex,
         propFn);
     }
-    return !layerProperties.isEmpty() ?
-      PropertyLoader.toMap(layerProperties, null) :
-      Collections.emptyMap();
+    return PropertyLoader.toMap(layerProperties);
   }
 
 
