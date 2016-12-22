@@ -1,6 +1,5 @@
 package kaleidok.util.containers;
 
-import kaleidok.util.function.InstanceSupplier;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -8,10 +7,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -104,27 +101,10 @@ public abstract class KeyTransformingMap<K, V> implements Map<K, V>
         "Map contains conflicting key-value-pairs");
     }
 
-    Function<Entry<? extends K, ? extends V>, ? extends K> keyMapper =
-      Entry::getKey;
-    keyMapper = keyMapper.andThen(this::transformTypedKey);
-    Function<Entry<? extends K, ? extends V>, V> valueMapper =
-      Entry::getValue;
-    BinaryOperator<V> duplicateMerger = (a, b) -> b;
-
-    if (underlying instanceof ConcurrentMap)
-    {
-      //noinspection unchecked
-      underlying.putAll(
-        m.entrySet().parallelStream().collect(
-          Collectors.toConcurrentMap(
-            keyMapper, valueMapper, duplicateMerger)));
-    }
-    else
-    {
-      m.entrySet().stream().sequential().collect(
-        Collectors.toMap(keyMapper, valueMapper, duplicateMerger,
-          new InstanceSupplier<>(underlying)));
-    }
+    underlying.putAll(
+      m.entrySet().stream().collect(Collectors.toMap(
+        ((Function<K, K>) this::transformTypedKey).compose(Entry::getKey),
+        Entry::getValue, (a, b) -> b)));
   }
 
 
