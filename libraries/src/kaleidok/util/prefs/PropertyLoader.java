@@ -6,8 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -64,27 +65,38 @@ public final class PropertyLoader
     }
     fastAssert(clazz != null || classLoader != null);
 
-    Stream<URL> resourceURLs = Stream.of(resourcePaths)
+    Stream<URI> resourceURIs = Stream.of(resourcePaths)
       .map((clazz != null) ? clazz::getResource : classLoader::getResource)
-      .filter(Objects::nonNull);
-    Stream<URL> filesystemURLs = Stream.of(filesystemPaths)
+      .filter(Objects::nonNull)
+      .map((url) -> {
+          try {
+            return url.toURI();
+          } catch (URISyntaxException ex) {
+            // Cross our fingers that #getRsources() only returns simple, RFC-2396-compliant URLs
+            throw new AssertionError(ex);
+          }
+        });
+    Stream<URI> filesystemURIs = Stream.of(filesystemPaths)
       .map(File::new)
       .filter(File::exists)
-      .map((file) -> {
-        try {
-          return file.toURI().toURL();
-        } catch (MalformedURLException ex) {
-          throw new UncheckedIOException(ex);
-        }});
+      .map(File::toURI);
 
-    URL[] urls;
-    try {
-      urls = Stream.concat(resourceURLs, filesystemURLs).sequential()
-        .distinct()
-        .toArray(URL[]::new);
-    } catch (UncheckedIOException ex) {
-      throw ex.getCause();
-    }
+    URL[] urls = Stream.concat(resourceURIs, filesystemURIs).sequential()
+      .distinct()
+      .map((uri) -> {
+          try {
+            return uri.toURL();
+          } catch (MalformedURLException ex) {
+            /*
+             * All URIs here either come from Class#getResource(),
+             * ClassLoader#getResource() or File#toUri(), all of which
+             * (should) return results that have a canonical URL
+             * representation.
+             */
+            throw new AssertionError(ex);
+          }
+        })
+      .toArray(URL[]::new);
 
     return load(prop, charset, urls);
   }
