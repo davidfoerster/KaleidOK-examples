@@ -1,7 +1,5 @@
 package kaleidok.text;
 
-import kaleidok.util.function.Functions;
-import kaleidok.util.function.InstanceSupplier;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.text.FieldPosition;
@@ -62,12 +60,12 @@ public final class FormatUtils
   }
 
 
-  public static void verifyFormatThrowing( Format fmt, Object fmtArg,
+  public static void verifyFormatThrowing( final Format fmt, Object fmtArg,
     Predicate<? super CharSequence> resultVerifier, String errorMessageFormat )
     throws IllegalArgumentException
   {
     verifyFormatThrowing(
-      Functions.ignoreArg(new InstanceSupplier<>(fmt)),
+      (ignored) -> fmt,
       (errorMessageFormat != null) ? Pair.of(errorMessageFormat, fmt) : null,
       fmtArg, resultVerifier,
       (errorMessageFormat != null) ? FormatUtils::formattedExceptionHandler : null);
