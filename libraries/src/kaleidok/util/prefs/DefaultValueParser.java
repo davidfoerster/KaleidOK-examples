@@ -134,15 +134,18 @@ public final class DefaultValueParser
   }
 
 
-  private static final Map<String, Boolean> BOOLEAN_WORDS =
-    new HashMap<String, Boolean>(12) {{
-      put("true", TRUE);
-      put("false", FALSE);
-      put("yes", TRUE);
-      put("no", FALSE);
-      put("on", TRUE);
-      put("off", FALSE);
-      put("enabled", TRUE);
-      put("disabled", FALSE);
-    }};
+  private static final Map<String, Boolean> BOOLEAN_WORDS;
+
+  static
+  {
+    Map<String, Boolean> m = BOOLEAN_WORDS = new HashMap<>(12);
+    m.put("true", TRUE);
+    m.put("false", FALSE);
+    m.put("yes", TRUE);
+    m.put("no", FALSE);
+    m.put("on", TRUE);
+    m.put("off", FALSE);
+    m.put("enabled", TRUE);
+    m.put("disabled", FALSE);
+  }
 }
