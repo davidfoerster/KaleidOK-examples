@@ -8,6 +8,7 @@ import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.HiddenAspectTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.value.ConstantBooleanValue;
 import kaleidok.util.Reflection;
 
 import java.util.Objects;
@@ -89,8 +90,8 @@ public abstract class AbstractGeometryPreferences<G> implements PreferenceBean
     if ((mode & SHOW) != 0)
     {
       show = new AspectedBooleanProperty(this, "show");
-      if (hideProperties)
-        show.addAspect(HiddenAspectTag.getInstance());
+      show.addAspect(HiddenAspectTag.getInstance(),
+        ConstantBooleanValue.of(hideProperties));
       show.addAspect(PropertyPreferencesAdapterTag.getInstance(),
         new BooleanPropertyPreferencesAdapter<>(show, preferences, beanClassName));
     }
@@ -106,8 +107,8 @@ public abstract class AbstractGeometryPreferences<G> implements PreferenceBean
   {
     AspectedDoubleProperty prop =
       new AspectedDoubleProperty(this, name, Double.NaN);
-    if (hide)
-      prop.addAspect(HiddenAspectTag.getInstance());
+    prop.addAspect(HiddenAspectTag.getInstance(),
+      ConstantBooleanValue.of(hide));
     prop.addAspect(PropertyPreferencesAdapterTag.getInstance(),
       new DoublePropertyPreferencesAdapter<>(prop, preferences,
         preferencesKeyPrefix));
