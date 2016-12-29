@@ -28,12 +28,14 @@ import kaleidok.util.Strings;
 import kaleidok.util.prefs.DefaultValueParser;
 import kaleidok.util.Threads;
 import kaleidok.util.concurrent.GroupedThreadFactory;
+import org.apache.commons.lang3.StringUtils;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
 import processing.core.PSurface;
 import processing.opengl.PGraphicsOpenGL;
 
+import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -46,9 +48,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static kaleidok.util.AssertionUtils.fastAssert;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
@@ -542,77 +545,61 @@ public class ExtPApplet extends PApplet
   }
 
 
-  private int[] parseParamIntDimensions( String key )
+  @Nullable
+  private <T extends Number> List<T> parseParamNumberList( String key, int max,
+    Function<? super String, T> valueParser )
   {
     if (key.isEmpty())
       throw new IllegalArgumentException("empty key");
 
     String value = getParameterMap().get(key);
-    if (value != null)
-    {
-      int[] result = parseIntDimensions(value);
-      if (result != null)
-        return result;
-
-    }
-    return null;
+    return (value != null) ? parseNumberList(value, max, valueParser) : null;
   }
 
 
-  private boolean parseParamIntDimensions( String key, WritableNumberValue... output )
+  private <T extends Number> boolean parseParamNumberList( String key,
+    Function<? super String, T> valueParser, WritableNumberValue... output )
   {
-    fastAssert(output.length != 0);
-    int[] result = parseParamIntDimensions(key);
+    List<T> result = parseParamNumberList(key, output.length, valueParser);
     if (result != null)
     {
-      if (result.length != output.length)
+      if (result.size() != output.length)
       {
         throw new IllegalArgumentException(
           output.length + " integers expected in \"" + key + '\"');
       }
       for (int i = output.length - 1; i >= 0; i--)
-        output[i].setValue(result[i]);
+        output[i].setValue(result.get(i));
     }
     return result != null;
   }
 
 
-  private static int[] parseIntDimensions( String s )
+  @Nullable
+  private static <T extends Number> List<T> parseNumberList( String s, int max,
+    Function<? super String, T> valueParser )
   {
-    return parseIntDimensions(s, ',');
+    return parseNumberList(s, ",", max, valueParser);
   }
 
-  private static int[] parseIntDimensions( String s, char delimiter )
+
+  @Nullable
+  private static <T extends Number> List<T> parseNumberList( String s,
+    String delimiter, int max, Function<? super String, T> valueParser )
   {
-    if (!s.isEmpty())
+    if (s.isEmpty())
+      return null;
+
+    try
     {
-      int p = s.indexOf(delimiter);
-      if (p != 0) try
-      {
-        int x = 0, y = 0;
-        boolean success = false;
-
-        if (p < 0)
-        {
-          x = y = Integer.parseInt(s);
-          success = true;
-        }
-        else if (s.length() > p + 1 && s.indexOf(delimiter, p + 1) < 0)
-        {
-          x = Integer.parseInt(s.substring(0, p));
-          y = Integer.parseInt(s.substring(p + 1));
-          success = true;
-        }
-
-        if (success)
-          return new int[]{ x, y };
-      }
-      catch (NumberFormatException ignored)
-      {
-        // return default
-      }
+      return Stream.of(StringUtils.split(s, delimiter, max))
+        .map(valueParser)
+        .collect(Collectors.toList());
     }
-    return null;
+    catch (NumberFormatException ignored)
+    {
+      return Collections.emptyList();
+    }
   }
 
 
@@ -658,9 +645,9 @@ public class ExtPApplet extends PApplet
 
   public void loadPreferences()
   {
-    parseParamIntDimensions("size",
+    parseParamNumberList("size", Integer::valueOf,
       geometryPreferences.w, geometryPreferences.h);
-    parseParamIntDimensions("location",
+    parseParamNumberList("location", Integer::valueOf,
       geometryPreferences.x, geometryPreferences.y);
 
     getAppletPreferenceAdapters()
