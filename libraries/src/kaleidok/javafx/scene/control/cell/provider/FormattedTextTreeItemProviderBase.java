@@ -10,12 +10,14 @@ import javafx.scene.Parent;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
 import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
 import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditableTreeTableCell;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider.findParentCell;
@@ -47,18 +49,24 @@ public abstract class FormattedTextTreeItemProviderBase<T, N extends Node>
   }
 
 
+  @Nullable
   protected static <T> StringConverter<T> getStringConverter(
     EditableTreeTableCell<T, ?> cell )
   {
-    return StringConverterAspectTag.<T>getInstance().of(
-      (AspectedReadOnlyProperty<T>) cell.getTreeTableRow().getTreeItem().getValue());
+    TreeItem<ReadOnlyProperty<T>> item = cell.getTreeTableRow().getTreeItem();
+    return (item != null) ?
+        StringConverterAspectTag.<T>getInstance().of(
+          (AspectedReadOnlyProperty<T>) item.getValue()) :
+        null;
   }
 
 
   protected static <T> void handleValueChange(
     EditableTreeTableCell<T, TextField> cell, T value )
   {
-    cell.getEditorNode().setText(getStringConverter(cell).toString(value));
+    StringConverter<T> converter = getStringConverter(cell);
+    if (converter != null)
+      cell.getEditorNode().setText(converter.toString(value));
   }
 
 
@@ -69,7 +77,8 @@ public abstract class FormattedTextTreeItemProviderBase<T, N extends Node>
     EditableTreeTableCell<T, ?> cell =
       (EditableTreeTableCell<T, ?>)
         Objects.requireNonNull(findParentCell(textField));
-    StringConverter<T> converter = getStringConverter(cell);
+    StringConverter<T> converter =
+      Objects.requireNonNull(getStringConverter(cell));
     T newValue;
     try
     {

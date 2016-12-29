@@ -17,6 +17,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Window;
+import javafx.util.StringConverter;
 import kaleidok.javafx.beans.property.AspectedListProperty;
 import kaleidok.javafx.beans.property.aspect.StringConverterAspectTag;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
@@ -129,9 +130,14 @@ public class MultiLineTextTreeItemProvider<E>
     EditableTreeTableCell<? super ObservableList<E>, HBox> cell,
     ObservableList<E> value )
   {
-    TextField textField =
-      (TextField) cell.getEditorNode().getChildren().get(0);
-    textField.setText(getStringConverter(cell).toString(value));
+    StringConverter<? super ObservableList<E>> converter =
+      getStringConverter(cell);
+    if (converter != null)
+    {
+      TextField textField =
+        (TextField) cell.getEditorNode().getChildren().get(0);
+      textField.setText(converter.toString(value));
+    }
   }
 
 
