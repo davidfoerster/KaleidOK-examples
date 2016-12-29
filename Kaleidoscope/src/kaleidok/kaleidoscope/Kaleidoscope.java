@@ -6,6 +6,7 @@ import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPrefere
 import kaleidok.processing.ExtPApplet;
 import kaleidok.processing.FrameRateDisplay;
 import kaleidok.processing.ProcessingSketchApplication;
+import org.apache.commons.lang3.StringUtils;
 import processing.event.KeyEvent;
 
 import java.util.Optional;
@@ -201,17 +202,13 @@ public class Kaleidoscope extends ExtPApplet
   String parseStringOrFile( String s, char filePrefix )
   {
     if (s != null && !s.isEmpty() && s.charAt(0) == filePrefix) {
-      s = new String((s.length() == 2 && s.charAt(1) == '-') ?
-        loadBytes(System.in) : loadBytes(s.substring(1)));
-      String suffix = System.lineSeparator();
-      int suffixLen = suffix.length();
-      if (suffixLen > 0)
-      {
-        int sLen = s.length();
-        while (s.startsWith(suffix, sLen - suffixLen))
-          sLen -= suffixLen;
-        s = s.substring(0, sLen);
-      }
+      byte[] fileContent =
+        (s.length() == 2 && s.charAt(1) == '-') ?
+          loadBytes(System.in) :
+          loadBytes(s.substring(1));
+      s = (fileContent != null) ?
+        StringUtils.stripEnd(new String(fileContent), System.lineSeparator()) :
+        null;
     }
     return s;
   }
