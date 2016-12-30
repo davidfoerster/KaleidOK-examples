@@ -161,6 +161,7 @@ public class Kaleidoscope extends ExtPApplet
   @Override
   public void draw()
   {
+    background(0);
     layers.run();
   }
 
