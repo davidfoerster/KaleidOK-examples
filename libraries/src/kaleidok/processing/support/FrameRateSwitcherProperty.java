@@ -72,9 +72,7 @@ public class FrameRateSwitcherProperty extends AspectedDoubleProperty
     }
     else
     {
-      System.err.format(
-        "Cannot determine the default framerate of the %s renderer.%n",
-        applet.sketchRenderer());
+      PApplet.showVariationWarning("Setting the default initial frame rate");
     }
 
     applet.registerMethod("pre", this);

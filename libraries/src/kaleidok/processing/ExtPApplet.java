@@ -56,6 +56,7 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
+import static processing.core.PGraphics.showWarning;
 
 
 /**
@@ -463,8 +464,12 @@ public class ExtPApplet extends PApplet
 
   public Rectangle2D getWindowBounds()
   {
-    if (!checkRendererSupported("get window bounds", true))
+    if (!P3D.equals(sketchRenderer()))
+    {
+      showMethodWarning("getWindowBounds");
       return null;
+    }
+
     Window w = (Window) getSurface().getNative();
     Screen screen = w.getScreen();
     InsetsImmutable insets = w.getInsets();
@@ -478,8 +483,11 @@ public class ExtPApplet extends PApplet
 
   public synchronized boolean toggleFullscreen()
   {
-    if (!checkRendererSupported("toggle fullscreen"))
+    if (!P3D.equals(sketchRenderer()))
+    {
+      showMethodWarning("toggleFullscreen");
       return sketchFullScreen();
+    }
 
     Window w = (Window) getSurface().getNative();
     boolean oldFullscreenState = w.isFullscreen();
@@ -491,35 +499,6 @@ public class ExtPApplet extends PApplet
         !oldFullscreenState, w);
     }
     return newFullScreenState;
-  }
-
-
-  protected final boolean checkRendererSupported( String operationDescription )
-  {
-    return checkRendererSupported(operationDescription, false);
-  }
-
-  protected boolean checkRendererSupported( String operationDescription,
-    boolean doThrow )
-  {
-    String renderer = sketchRenderer();
-    boolean supported = P3D.equals(renderer);
-
-    if (!supported)
-    {
-      String msgFormat =
-        "The following operation is currently not supported for the %s " +
-          "renderer: %s";
-      Object[] msgParams = { renderer, operationDescription };
-      if (doThrow)
-      {
-        throw new UnsupportedOperationException(
-          String.format(msgFormat, msgParams));
-      }
-      System.err.format(msgFormat, msgParams).println();
-    }
-
-    return supported;
   }
 
 
@@ -583,8 +562,11 @@ public class ExtPApplet extends PApplet
 
   public boolean isDrawingThread()
   {
-    checkRendererSupported("isDrawingThread", true);
-    return ((PGraphicsOpenGL) g).pgl.threadIsCurrent();
+    if (g instanceof PGraphicsOpenGL)
+      return ((PGraphicsOpenGL) g).pgl.threadIsCurrent();
+
+    showMethodWarning("isDrawingThread");
+    throw new UnsupportedOperationException();
   }
 
 
