@@ -1,7 +1,7 @@
 package kaleidok.kaleidoscope.layer;
 
 import kaleidok.processing.ExtPApplet;
-import kaleidok.processing.ExtPApplet.ImageResizeMode;
+import kaleidok.processing.image.ImageResizeMode;
 import processing.core.PImage;
 
 
@@ -19,12 +19,10 @@ public class BackgroundLayer extends ImageLayer
     PImage bgImage;
     if (wireframe.get() <= 0 && (bgImage = updateAndGetCurrentImage()) != null)
     {
-      // background image
-      final ExtPApplet parent = this.parent;
-      parent.image(bgImage, ImageResizeMode.PAN, 0, 0,
-        parent.width, parent.height); // resize-display image correctly to cover the whole screen
-      parent.fill(255, 125 + (float) Math.sin(parent.frameCount * 0.01) * 5); // white fill with dynamic transparency
-      parent.rect(0, 0, parent.width, parent.height); // rect covering the whole canvas
+      final ExtPApplet p = this.parent;
+      ImageResizeMode.ZOOM.drawImage(p, bgImage, 0, 0, p.width, p.height); // resize-display image correctly to cover the whole screen
+      p.fill(255, 125 + (float) Math.sin(p.frameCount * 0.01) * 5); // white fill with dynamic transparency
+      p.rect(0, 0, p.width, p.height); // rect covering the whole canvas
     }
   }
 }

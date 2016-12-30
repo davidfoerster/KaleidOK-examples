@@ -19,6 +19,7 @@ import kaleidok.processing.event.KeyEventSupport;
 import kaleidok.processing.event.KeyStroke;
 import kaleidok.processing.export.ImageSaveSet;
 import kaleidok.processing.image.ImageIO;
+import kaleidok.processing.image.ImageResizeMode;
 import kaleidok.processing.image.PImageFutures;
 import kaleidok.processing.support.FrameRateSwitcherProperty;
 import kaleidok.processing.support.GeometryPreferences;
@@ -318,46 +319,23 @@ public class ExtPApplet extends PApplet
   }
 
 
-  public enum ImageResizeMode
-  {
-    STRETCH,
-    PAN
-  }
-
   public void image( PImage img, ImageResizeMode resizeMode,
-    float dstLeft, float dstTop, float dstWidth, float dstHeight )
+    float a, float b, float c, float d )
   {
-    int srcLeft = 0, srcTop = 0, srcWidth = img.width, srcHeight = img.height;
+    switch (g.imageMode)
+    {
+    case CENTER:
+      a -= c * 0.5f;
+      b -= d * 0.5f;
+      //noinspection fallthrough
 
-    if (dstWidth <= 0 || dstHeight <= 0) {
-      throw new IllegalArgumentException("Image destination has zero area");
-    }
-    if (srcWidth <= 0 || srcHeight <= 0) {
-      throw new IllegalArgumentException("Image source has zero area");
-    }
-    if (g.imageMode != CORNER) {
-      throw new UnsupportedOperationException(
-        "Image modes besides CORNER are currently unimplemented");
-    }
-
-    switch (resizeMode) {
-    case STRETCH:
-      break;
-
-    case PAN:
-      float dstRatio = dstWidth / dstHeight,
-        srcRatio = (float) srcWidth / srcHeight;
-      if (srcRatio > dstRatio) {
-        srcWidth = (int)(srcHeight * dstRatio + 0.5f);
-        srcLeft = (img.width - srcWidth) / 2;
-      } else if (srcRatio < dstRatio) {
-        srcHeight = (int)(srcWidth / dstRatio + 0.5f);
-        srcTop = (img.height - srcHeight) / 2;
-      }
+    case CORNER:
+      c += a;
+      d += b;
       break;
     }
 
-    image(img, dstLeft, dstTop, dstWidth, dstHeight, srcLeft, srcTop, srcWidth, srcHeight);
+    resizeMode.drawImage(this, img, a, b, c, d);
   }
 
 
