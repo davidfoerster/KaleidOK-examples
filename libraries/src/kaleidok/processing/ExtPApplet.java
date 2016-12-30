@@ -62,7 +62,7 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
  */
 public class ExtPApplet extends PApplet
 {
-  private ProcessingSketchApplication<? extends ExtPApplet> parent;
+  private final ProcessingSketchApplication<? extends ExtPApplet> parent;
 
   public final Set<String> saveFilenames = new ImageSaveSet(this);
 
