@@ -234,9 +234,12 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       messageField.setText(messageFieldText.get());
       messageFieldText.bind(messageField.textProperty());
       messageField.setOnAction((ev) -> {
-          getSketch().getChromasthetiationService()
-            .submit(((TextInputControl) ev.getSource()).getText());
-          ev.consume();
+          String text = ((TextInputControl) ev.getSource()).getText();
+          if (text != null && !text.isEmpty())
+          {
+            getSketch().getChromasthetiationService().submit(text);
+            ev.consume();
+          }
         });
 
       PropertyChromatikQuery chromatikQuery = (PropertyChromatikQuery)
