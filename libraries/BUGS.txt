@@ -1,0 +1,8 @@
+List of known bugs
+------------------
+
+2016/12/31:
+Resizing the sketch window will make JOGL think that the window is positioned
+near the top left corner of the display viewport even though it actually stays
+in place. Moving the window again restores the correct position information.
+(X11/Linux, JOGL v2.3.2)
