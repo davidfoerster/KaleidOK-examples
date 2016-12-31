@@ -113,6 +113,19 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   }
 
 
+  protected void loadPreferences()
+  {
+    getPreferenceAdapters()
+      .forEach(ReadOnlyPropertyPreferencesAdapter::loadIfWritable);
+  }
+
+
+  protected void savePreferences()
+  {
+    ReadOnlyPropertyPreferencesAdapter.saveAndFlush(getPreferenceAdapters());
+  }
+
+
   public Side placeAroundSketch( Stage stage, double padding,
     Side... preferredSides )
     throws InterruptedException
