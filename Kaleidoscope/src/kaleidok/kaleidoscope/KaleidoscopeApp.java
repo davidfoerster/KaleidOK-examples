@@ -15,6 +15,7 @@ import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.ReadOnlyPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.HiddenAspectTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.javafx.beans.property.value.ConstantBooleanValue;
 import kaleidok.javafx.stage.GeometryPreferences;
 import kaleidok.javafx.stage.Icons;
 import kaleidok.javafx.stage.StageOwnerInitializer;
@@ -55,7 +56,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   {
     messageFieldText = new AspectedStringProperty(this, "text");
-    messageFieldText.addAspect(HiddenAspectTag.getInstance());
+    messageFieldText.addAspect(HiddenAspectTag.getInstance(),
+      ConstantBooleanValue.TRUE);
     messageFieldText.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
 
