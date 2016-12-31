@@ -197,6 +197,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   {
     stopChildStages();
     super.stop();
+    savePreferences();
   }
 
 
