@@ -92,7 +92,7 @@ public class GeometryPreferences extends AbstractGeometryPreferences<Void>
 
   private final class BindingWindowListener extends AbstractWindowListener
   {
-    private final DoubleBinding xBinding, yBinding, wBinding, hBinding;
+    public final DoubleBinding xBinding, yBinding, wBinding, hBinding;
 
 
     public BindingWindowListener( final Window window )

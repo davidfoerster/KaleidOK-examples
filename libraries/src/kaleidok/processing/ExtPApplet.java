@@ -603,7 +603,7 @@ public class ExtPApplet extends PApplet
   }
 
 
-  public void loadPreferences()
+  protected void loadPreferences()
   {
     parseParamNumberList("size", Integer::valueOf,
       geometryPreferences.w, geometryPreferences.h);
@@ -615,7 +615,7 @@ public class ExtPApplet extends PApplet
   }
 
 
-  public void savePreferences()
+  protected void savePreferences()
   {
     ReadOnlyPropertyPreferencesAdapter.saveAndFlush(getPreferenceAdapters());
   }
