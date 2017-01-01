@@ -24,7 +24,6 @@ import static kaleidok.http.HttpConnection.ConnectionState.DISCONNECTED;
 import static kaleidok.http.HttpConnection.ConnectionState.UNCONNECTED;
 
 
-@SuppressWarnings("unused")
 public class HttpConnection implements Closeable
 {
   public static final String HTTP_PROTOCOL = "http";

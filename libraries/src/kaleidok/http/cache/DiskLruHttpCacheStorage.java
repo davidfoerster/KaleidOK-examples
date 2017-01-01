@@ -23,10 +23,9 @@ import java.util.Collections;
 import java.util.Map;
 
 
-@SuppressWarnings("unused")
 public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
 {
-  /**
+  /*
    * The current collision resolution method simply replaces existing colliding
    * cache entries, which is probably fine in a key space of 2^(5*64).
    *
@@ -36,7 +35,6 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
    * have the drawback of defeating the LRU mechanism, as there is currently no
    * unaccounted access to cache entries.
    */
-
   private final DiskLruCache diskCache;
 
   /**

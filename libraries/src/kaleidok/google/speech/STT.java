@@ -279,7 +279,6 @@ public class STT implements PreferenceBean
     new AspectedDoubleProperty(this, "max. transcription interval", 0)
     {
       {
-        @SuppressWarnings("IntegerDivisionInFloatingPointContext")
         DoubleSpinnerValueFactory bounds =
           new DoubleSpinnerValueFactory(0, Double.MAX_VALUE);
         bounds.setAmountToStepBy(0.5);
