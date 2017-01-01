@@ -2,9 +2,8 @@ package kaleidok.kaleidoscope.layer;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.FloatBinding;
+import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.value.ObservableFloatValue;
-import javafx.beans.value.ObservableNumberValue;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedDoubleProperty;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
@@ -121,48 +120,24 @@ public class FoobarLayer extends CircularImageLayer
     return super.scaleFactorProperty();
   }
 
-  private final ObservableNumberValue innerOffset =
+  private final NumberBinding innerOffset =
     Bindings.divide(innerRadius, outerRadius);
 
 
-  private final ObservableFloatValue outerOffset =
-    new FloatBinding()
-    {
-      {
-        bind(innerOffset, scaleFactor);
-      }
+  private final FloatBinding outerOffset =
+    Bindings.createFloatBinding(
+      () -> {
+          float innerOffset = FoobarLayer.this.innerOffset.floatValue();
+          return innerOffset +
+            (1 - innerOffset) * (1 - (float) scaleFactor.get());
+        },
+      innerOffset, scaleFactor);
 
 
-      @Override
-      protected float computeValue()
-      {
-        float innerOffset = FoobarLayer.this.innerOffset.floatValue();
-        return innerOffset +
-          (1 - innerOffset) * (1 - (float) scaleFactor.get());
-      }
-
-
-      @Override
-      public void dispose()
-      {
-        unbind(innerOffset, scaleFactor);
-      }
-    };
-
-
-  private final ObservableFloatValue innerScale =
-    new FloatBinding()
-    {
-      {
-        bind(innerOffset, scaleFactor);
-      }
-
-      @Override
-      protected float computeValue()
-      {
-        return (1 - innerOffset.floatValue()) * (float) scaleFactor.get();
-      }
-    };
+  private final FloatBinding innerScale =
+    Bindings.createFloatBinding(
+      () -> (1 - innerOffset.floatValue()) * (float) scaleFactor.get(),
+      innerOffset, scaleFactor);
 
 
   @Override
