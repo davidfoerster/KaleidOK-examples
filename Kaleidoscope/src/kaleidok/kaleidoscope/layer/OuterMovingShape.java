@@ -229,7 +229,7 @@ public class OuterMovingShape extends CircularImageLayer
     protected double computeValue()
     {
       double pitchValue = this.pitchValue;
-      return !Double.isNaN(pitchValue) ?
+      return (pitchValue > 0 && !Double.isNaN(pitchValue)) ?
         Math.toRadians(map(Math.log(pitchValue),
           bounds[0].get(), bounds[1].get(), bounds[2].get(), bounds[3].get())) :
         0;
