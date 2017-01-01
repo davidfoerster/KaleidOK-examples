@@ -48,6 +48,15 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   private final Map<String, String> keyMap =
     Collections.synchronizedMap(new LRUMap<String, String>(500));
 
+  private static final ThreadLocal<KeyHasher> keyHasher =
+    ThreadLocal.withInitial(() -> {
+        try {
+          return new KeyHasher(MessageDigest.getInstance("SHA-384"));
+        } catch (NoSuchAlgorithmException ex) {
+          throw new InternalError(ex);
+        }
+      });
+
 
   public DiskLruHttpCacheStorage( File directory, int appVersion,
     long maxSize )
@@ -157,8 +166,7 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
       keyMap.remove(externalKey) :
       keyMap.get(externalKey);
     if (internalKey == null) {
-      internalKey =
-        ThreadLocalKeyHasher.INSTANCE.get().toInternalKey(externalKey);
+      internalKey = keyHasher.get().toInternalKey(externalKey);
       if (!remove)
         keyMap.put(externalKey, internalKey);
     }
@@ -237,24 +245,5 @@ public class DiskLruHttpCacheStorage implements HttpCacheStorage, Closeable
   {
     diskCache.delete();
     keyMap.clear();
-  }
-
-
-  private static class ThreadLocalKeyHasher extends ThreadLocal<KeyHasher>
-  {
-    public static final ThreadLocalKeyHasher INSTANCE =
-      new ThreadLocalKeyHasher();
-
-    protected ThreadLocalKeyHasher() { }
-
-    @Override
-    protected KeyHasher initialValue()
-    {
-      try {
-        return new KeyHasher(MessageDigest.getInstance("SHA-384"));
-      } catch (NoSuchAlgorithmException ex) {
-        throw new AssertionError(ex);
-      }
-    }
   }
 }
