@@ -46,6 +46,7 @@
     <module>${Synesketch.path}</module>
     <module>libraries</module>
     <module>Kaleidoscope</module>
+    <module>bundle</module>
   </modules>
 
   <build>

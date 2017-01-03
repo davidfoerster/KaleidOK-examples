@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="bundle" />
         <module name="javaFlacEncoder" />
         <module name="Kaleidoscope" />
         <module name="libraries" />
@@ -14,6 +15,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.8">
+      <module name="bundle" target="1.8" />
       <module name="javaFlacEncoder" target="1.8" />
       <module name="kaleidok" target="1.5" />
       <module name="Kaleidoscope" target="1.8" />
