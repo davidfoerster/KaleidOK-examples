@@ -1,5 +1,6 @@
 package kaleidok.processing.image;
 
+import kaleidok.io.IOResourceWrapper;
 import org.apache.commons.io.FilenameUtils;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -23,16 +24,12 @@ public class CallablePImageFileReader
   {
     checkInitializable();
 
-    ImageInputStream iis = new FileImageInputStream(source);
-    try
+    String extension = FilenameUtils.getExtension(source.getPath());
+    try (IOResourceWrapper<ImageInputStream> iis =
+      new IOResourceWrapper<>(new FileImageInputStream(source)))
     {
-      initFrom(iis, null, FilenameUtils.getExtension(source.getPath()));
-      iis = null;
-    }
-    finally
-    {
-      if (iis != null)
-        iis.close();
+      initFrom(iis.get(), null, extension);
+      iis.release();
     }
   }
 }

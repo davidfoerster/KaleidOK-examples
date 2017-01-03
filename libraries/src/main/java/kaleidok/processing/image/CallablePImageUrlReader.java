@@ -1,6 +1,7 @@
 package kaleidok.processing.image;
 
 import kaleidok.http.util.Parsers;
+import kaleidok.io.IOResourceWrapper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.entity.ContentType;
 
@@ -37,29 +38,34 @@ public class CallablePImageUrlReader extends AbstractCallablePImageReader<URL>
       http.setRequestProperty("Accept", IMAGE_MIMETYPE_MAP.toString());
     con.connect();
 
-    try (InputStream is = con.getInputStream())
+    String fileExtension =
+      FilenameUtils.getExtension(con.getURL().getPath());
+    String contentType = con.getContentType();
+    String mimeType = (contentType != null) ?
+      ContentType.parse(contentType).getMimeType() :
+      null;
+
+    String contentEncoding = con.getContentEncoding();
+    if (contentEncoding == null)
     {
-      String fileExtension =
-        FilenameUtils.getExtension(con.getURL().getPath());
-      String contentType = con.getContentType();
-      String mimeType = (contentType != null) ?
-        ContentType.parse(contentType).getMimeType() :
-        null;
+      contentEncoding = con.getHeaderField("transfer-encoding");
+      if ("chunked".equals(contentEncoding))
+        contentEncoding = null;
+    }
 
-      String contentEncoding = con.getContentEncoding();
-      if (contentEncoding == null) {
-        contentEncoding = con.getHeaderField("transfer-encoding");
-        if ("chunked".equals(contentEncoding))
-          contentEncoding = null;
-      }
-
-      try (InputStream decodedIs =
-        Parsers.DECODERS.getDecodedStream(contentEncoding, is))
+    try (IOResourceWrapper<InputStream> is =
+      new IOResourceWrapper<>(con.getInputStream()))
+    {
+      try (IOResourceWrapper<InputStream> decodedIs = new IOResourceWrapper<>(
+          Parsers.DECODERS.getDecodedStream(contentEncoding, is.get())))
       {
-        try (ImageInputStream iis =
-          ImageIO.createImageInputStream(decodedIs))
+        is.release();
+        try (IOResourceWrapper<ImageInputStream> iis = new IOResourceWrapper<>(
+          ImageIO.createImageInputStream(decodedIs.get())))
         {
-          initFrom(iis, mimeType, fileExtension);
+          decodedIs.release();
+          initFrom(iis.get(), mimeType, fileExtension);
+          iis.release();
         }
       }
     }

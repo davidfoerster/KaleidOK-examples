@@ -1,5 +1,6 @@
 package kaleidok.processing.image;
 
+import kaleidok.util.NoThrowResourceWrapper;
 import kaleidok.util.logging.LoggingUtils;
 import processing.core.PImage;
 
@@ -10,13 +11,14 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.Objects.requireNonNull;
 
 
 public class CallablePImageReaderBase implements Callable<PImage>
@@ -31,8 +33,8 @@ public class CallablePImageReaderBase implements Callable<PImage>
 
     public Resources( ImageInputStream sourceStream, ImageReader imageReader )
     {
-      this.sourceStream = Objects.requireNonNull(sourceStream);
-      this.imageReader = Objects.requireNonNull(imageReader);
+      this.sourceStream = requireNonNull(sourceStream);
+      this.imageReader = requireNonNull(imageReader);
     }
   }
 
@@ -171,23 +173,27 @@ public class CallablePImageReaderBase implements Callable<PImage>
   }
 
 
+  protected static NoThrowResourceWrapper<ImageReader> wrap(
+    ImageReader imageReader )
+  {
+    return new NoThrowResourceWrapper<>(
+      requireNonNull(imageReader, "image reader"),
+      ImageReader::dispose);
+  }
+
+
   protected void initFrom( ImageInputStream iis, String mimeType,
     String fileExtension )
     throws IllegalStateException
   {
     checkInitializable();
 
-    ImageReader imageReader = Objects.requireNonNull(
-      PImages.getSuitableReader(Objects.requireNonNull(iis), mimeType, fileExtension));
-    try
+    try (NoThrowResourceWrapper<ImageReader> imageReader =
+      wrap(PImages.getSuitableReader(
+        requireNonNull(iis, "input stream"), mimeType, fileExtension)))
     {
-      initFrom(iis, imageReader);
-      imageReader = null;
-    }
-    finally
-    {
-      if (imageReader != null)
-        imageReader.dispose();
+      initFrom(iis, imageReader.get());
+      imageReader.release();
     }
   }
 
