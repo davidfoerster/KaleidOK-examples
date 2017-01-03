@@ -186,10 +186,10 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   }
 
 
-  private static void logFutureImageException( Future<PImage> f, Throwable t )
+  private void logFutureImageException( Future<PImage> f, Throwable t )
   {
     LoggingUtils.logThrown(
-      Logger.getLogger(f.getClass().getCanonicalName()), Level.WARNING,
+      Logger.getLogger(this.getClass().getCanonicalName()), Level.WARNING,
       "Couldn''t construct image from: {0}", t, f);
   }
 

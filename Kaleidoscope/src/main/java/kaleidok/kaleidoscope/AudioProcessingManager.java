@@ -266,12 +266,24 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   {
     if (audioDispatcherThread == null)
     {
-      audioDispatcherThread = new Thread(() ->
-      {
-        p.getLayers().waitForImages();
-        dispatcher.run();
-      },
+      audioDispatcherThread = new Thread(
+        () -> {
+          try
+          {
+            p.getLayers().waitForImages();
+          }
+          catch (RuntimeException ex)
+          {
+            logger.log(Level.WARNING,
+              "Something unexpected happened while the audio dispatcher " +
+                "waited for the sketch layers to become ready.",
+              ex);
+          }
+
+          dispatcher.run();
+        },
         "Audio dispatching");
+
       audioDispatcherThread.setDaemon(true);
       audioDispatcherThread.setPriority(Thread.NORM_PRIORITY + 1);
     }

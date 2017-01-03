@@ -41,6 +41,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
+import static kaleidok.util.AssertionUtils.fastAssert;
 import static kaleidok.util.Strings.looksLikeUrl;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
@@ -385,21 +386,31 @@ public final class LayerManager
 
   public void waitForImages()
   {
-    for (Future<PImage> futureImg: getImages()) {
-      try {
-        PImage img;
-        while (true) {
-          try {
-            img = futureImg.get();
-            break;
-          } catch (InterruptedException ex) {
-            logger.log(Level.FINEST, "Waiting for images was interrupted", ex);
-          }
+    for (Future<PImage> futureImg: getImages())
+    {
+      PImage img;
+      while (true)
+      {
+        try
+        {
+          img = futureImg.get();
+          break;
         }
-        assert img != null && img.width > 0 && img.height > 0 :
-          img + " has width or height ≤0";
-      } catch (ExecutionException ex) {
-        throw new RuntimeException(ex.getCause());
+        catch (InterruptedException ex)
+        {
+          logger.log(Level.FINEST, "Waiting for images was interrupted", ex);
+        }
+        catch (ExecutionException ex)
+        {
+          throw new RuntimeException(ex.getCause());
+        }
+      }
+
+      fastAssert(img != null);
+      if (img.width <= 0 || img.height <= 0)
+      {
+        throw new RuntimeException(
+          "Image has non-positive width or height: " + img);
       }
     }
   }
