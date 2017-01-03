@@ -1,0 +1,96 @@
+<component name="ArtifactManager">
+  <artifact name="KaleidOk">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="root">
+      <element id="directory" name="lib">
+        <element id="archive" name="javaFlacEncoder.jar">
+          <element id="module-output" name="javaFlacEncoder" />
+        </element>
+        <element id="archive" name="TarsosDSP.jar">
+          <element id="module-output" name="TarsosDSP" />
+        </element>
+        <element id="archive" name="synesketch.jar">
+          <element id="module-output" name="Synesketch" />
+        </element>
+        <element id="library" level="project" name="Maven: com.apple:AppleJavaExtensions:1.4" />
+        <element id="library" level="project" name="Maven: org.ow2.asm:asm:5.0.2" />
+        <element id="library" level="project" name="Maven: xml-apis:xml-apis:1.0.b2" />
+        <element id="library" level="project" name="Maven: org.slf4j:slf4j-nop:1.7.21" />
+        <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.13" />
+        <element id="library" level="project" name="Maven: org.ow2.asm:asm-tree:5.0.2" />
+        <element id="library" level="project" name="Maven: org.ow2.asm:asm-debug-all:5.0.2" />
+        <element id="library" level="project" name="Maven: org.ow2.asm:asm-commons:5.0.2" />
+        <element id="library" level="project" name="Maven: org.clojure:clojure:1.5.1" />
+        <element id="library" level="project" name="Maven: jaxen:jaxen:1.1.6" />
+        <element id="library" level="project" name="Maven: dom4j:dom4j:1.6.1" />
+        <element id="library" level="project" name="Maven: net.jcip:jcip-annotations:1.0" />
+        <element id="library" level="project" name="Maven: ddf.minim:ddf.minim:2.2.0" />
+        <element id="library" level="project" name="Maven: com.jakewharton:disklrucache:2.0.2" />
+        <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.8.0" />
+        <element id="directory" name="itextpdf">
+          <element id="library" level="project" name="Maven: com.itextpdf:io:7.0.1" />
+          <element id="library" level="project" name="Maven: com.itextpdf:kernel:7.0.1" />
+          <element id="library" level="project" name="Maven: com.itextpdf:layout:7.0.1" />
+        </element>
+        <element id="directory" name="findbugs">
+          <element id="library" level="project" name="Maven: com.google.code.findbugs:bcel-findbugs:6.0" />
+          <element id="library" level="project" name="Maven: com.google.code.findbugs:findbugs:3.0.1" />
+          <element id="library" level="project" name="Maven: com.google.code.findbugs:jFormatString:2.0.1" />
+          <element id="library" level="project" name="Maven: com.google.code.findbugs:jsr305:2.0.1" />
+        </element>
+        <element id="directory" name="jogl2">
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-android-aarch64:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-android-armv6:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-linux-amd64:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-linux-armv6:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-linux-armv6hf:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-linux-i586:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-macosx-universal:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-solaris-amd64:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-solaris-i586:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-windows-amd64:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:natives-windows-i586:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-android-aarch64:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-android-armv6:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-linux-amd64:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-linux-armv6:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-linux-armv6hf:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-linux-i586:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-macosx-universal:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-solaris-amd64:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-solaris-i586:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-windows-amd64:2.3.2" />
+          <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:natives-windows-i586:2.3.2" />
+        </element>
+        <element id="directory" name="processing">
+          <element id="library" level="project" name="Maven: org.processing:core:3.2.3" />
+        </element>
+        <element id="directory" name="apache">
+          <element id="library" level="project" name="Maven: org.apache.httpcomponents:fluent-hc:4.5.2" />
+          <element id="library" level="project" name="Maven: commons-lang:commons-lang:2.6" />
+          <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpcore:4.4.4" />
+          <element id="library" level="project" name="Maven: commons-logging:commons-logging:1.2" />
+          <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpclient:4.5.2" />
+          <element id="library" level="project" name="Maven: commons-io:commons-io:2.5" />
+          <element id="library" level="project" name="Maven: commons-codec:commons-codec:1.9" />
+          <element id="library" level="project" name="Maven: org.apache.commons:commons-lang3:3.5" />
+          <element id="library" level="project" name="Maven: org.apache.httpcomponents:httpclient-cache:4.5.2" />
+          <element id="library" level="project" name="Maven: org.apache.commons:commons-collections4:4.1" />
+        </element>
+        <element id="directory" name="automata">
+          <element id="library" level="project" name="Maven: org.clojars.automata:jl:1.0.0" />
+          <element id="library" level="project" name="Maven: org.clojars.automata:mp3spi:1.9.4" />
+          <element id="library" level="project" name="Maven: org.clojars.automata:tritonus-aos:1.0.0" />
+          <element id="library" level="project" name="Maven: org.clojars.automata:tritonus-share:1.0.0" />
+        </element>
+      </element>
+      <element id="archive" name="kaleidoscope.jar">
+        <element id="module-output" name="libraries" />
+        <element id="module-output" name="Kaleidoscope" />
+        <element id="file-copy" path="$PROJECT_DIR$/libraries/BUGS.txt" />
+      </element>
+    </root>
+  </artifact>
+</component>
