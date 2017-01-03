@@ -1,3 +1,4 @@
-resources*/images/
+/target/
+/src/main/resources*/images/
 audio/replays/
 /*.properties

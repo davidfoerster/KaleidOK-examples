@@ -5,6 +5,18 @@
       <item index="0" class="java.lang.String" itemvalue="com.google.gson.annotations.Expose" />
     </list>
   </component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/../javaFlacEncoder/pom.xml" />
+        <option value="$PROJECT_DIR$/../TarsosDSP/pom.xml" />
+        <option value="$PROJECT_DIR$/../synesketch/pom.xml" />
+        <option value="$PROJECT_DIR$/libraries/pom.xml" />
+        <option value="$PROJECT_DIR$/Kaleidoscope/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+      </list>
+    </option>
+  </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="org.jetbrains.annotations.Nullable" />
     <option name="myDefaultNotNull" value="javax.annotation.Nonnull" />
