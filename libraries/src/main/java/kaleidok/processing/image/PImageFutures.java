@@ -32,7 +32,9 @@ public final class PImageFutures
        ((BufferedImage) img).getType() == IMAGE_TYPE_PREFERENCE_ORDER[0])
       ?
         ImmediateFuture.of(new PImage(img)) :
-        new FutureTask<>(() -> PImages.from(img));
+      (img != null) ?
+        new FutureTask<>(() -> PImages.from(img)) :
+        ImmediateFuture.empty();
   }
 
 
