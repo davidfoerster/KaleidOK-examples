@@ -26,7 +26,47 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <com.flickr.api.key/>
+        <com.google.developer.api.key/>
+      </properties>
+    </profile>
+    <profile>
+      <id>bundle</id>
+      <activation>
+        <file>
+          <exists>secrets.properties</exists>
+        </file>
+      </activation>
+      <build>
+        <filters>
+          <filter>secrets.properties</filter>
+        </filters>
+      </build>
+    </profile>
+  </profiles>
+
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>kaleidok/kaleidoscope/KaleidoscopeApp.properties</include>
+        </includes>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
