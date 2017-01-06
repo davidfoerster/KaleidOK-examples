@@ -52,6 +52,7 @@
       <useProjectArtifact>false</useProjectArtifact>
       <excludes>
         <exclude>${project.groupId}:kaleidoscope:jar:${project.version}</exclude>
+        <exclude>com.itextpdf:*</exclude>
       </excludes>
       <fileMode>0644</fileMode>
       <directoryMode>0755</directoryMode>

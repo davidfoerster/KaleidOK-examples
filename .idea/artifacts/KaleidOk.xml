@@ -27,11 +27,6 @@
         <element id="library" level="project" name="Maven: ddf.minim:ddf.minim:2.2.0" />
         <element id="library" level="project" name="Maven: com.jakewharton:disklrucache:2.0.2" />
         <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.8.0" />
-        <element id="directory" name="itextpdf">
-          <element id="library" level="project" name="Maven: com.itextpdf:io:7.0.1" />
-          <element id="library" level="project" name="Maven: com.itextpdf:kernel:7.0.1" />
-          <element id="library" level="project" name="Maven: com.itextpdf:layout:7.0.1" />
-        </element>
         <element id="directory" name="findbugs">
           <element id="library" level="project" name="Maven: com.google.code.findbugs:bcel-findbugs:6.0" />
           <element id="library" level="project" name="Maven: com.google.code.findbugs:findbugs:3.0.1" />
