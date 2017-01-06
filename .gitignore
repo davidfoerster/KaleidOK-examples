@@ -1,4 +1,5 @@
-/out/
+/target/
+*/target/
 
 # Demo screencasts
 *.m4v

@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
-    <file url="file://$PROJECT_DIR$/cmusphinx_example" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../TarsosDSP" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../javaFlacEncoder" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Kaleidoscope" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bundle" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/libraries" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../synesketch" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

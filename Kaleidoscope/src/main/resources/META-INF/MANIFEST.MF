@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Class-Path: lib/synesketch.jar lib/javaFlacEncoder.jar lib/TarsosDSP.j
+ ar lib/jogl2/gluegen-rt-2.3.2.jar lib/jogl2/gluegen-rt-2.3.2-natives-
+ android-aarch64.jar lib/jogl2/gluegen-rt-2.3.2-natives-android-armv6.
+ jar lib/jogl2/gluegen-rt-2.3.2-natives-linux-amd64.jarlib/gluegen-rt-
+ 2.3.2-natives-linux-armv6.jar lib/jogl2/gluegen-rt-2.3.2-natives-linu
+ x-armv6hf.jar lib/jogl2/gluegen-rt-2.3.2-natives-linux-i586.jar lib/j
+ ogl2/gluegen-rt-2.3.2-natives-macosx-universal.jar lib/jogl2/gluegen-
+ rt-2.3.2-natives-solaris-amd64.jar lib/jogl2/gluegen-rt-2.3.2-natives
+ -solaris-i586.jar lib/jogl2/gluegen-rt-2.3.2-natives-windows-amd64.ja
+ r lib/jogl2/gluegen-rt-2.3.2-natives-windows-i586.jar lib/jogl2/jogl-
+ all-2.3.2.jar lib/jogl2/jogl-all-2.3.2-natives-android-aarch64.jar li
+ b/jogl2/jogl-all-2.3.2-natives-android-armv6.jar lib/jogl2/jogl-all-2
+ .3.2-natives-linux-amd64.jar lib/jogl2/jogl-all-2.3.2-natives-linux-a
+ rmv6.jar lib/jogl2/jogl-all-2.3.2-natives-linux-armv6hf.jar lib/jogl2
+ /jogl-all-2.3.2-natives-linux-i586.jar lib/jogl2/jogl-all-2.3.2-nativ
+ es-macosx-universal.jar lib/jogl2/jogl-all-2.3.2-natives-solaris-amd6
+ 4.jar lib/jogl2/jogl-all-2.3.2-natives-solaris-i586.jar lib/jogl2/jog
+ l-all-2.3.2-natives-windows-amd64.jar lib/jogl2/jogl-all-2.3.2-native
+ s-windows-i586.jar lib/ddf.minim-2.2.0.jar lib/clojure-1.5.1.jar lib/
+ automata/jl-1.0.0.jar lib/automata/mp3spi-1.9.4.jar lib/automata/trit
+ onus-aos-1.0.0.jar lib/automata/tritonus-share-1.0.0.jar lib/apache/c
+ ommons-collections4-4.1.jar lib/disklrucache-2.0.2.jar lib/itextpdf/l
+ ayout-7.0.1.jar lib/itextpdf/kernel-7.0.1.jar lib/apache/io-7.0.1.jar
+  lib/slf4j-api-1.7.13.jar lib/slf4j-nop-1.7.21.jar lib/processing/cor
+ e-3.2.3.jar lib/apache/commons-lang3-3.5.jar lib/apache/commons-io-2.
+ 5.jar lib/findbugs/findbugs-3.0.1.jar lib/jcip-annotations-1.0.jar li
+ b/findbugs/jsr305-2.0.1.jar lib/findbugs/bcel-findbugs-6.0.jar lib/fi
+ ndbugs/jFormatString-2.0.1.jar lib/dom4j-1.6.1.jar lib/xml-apis-1.0.b
+ 2.jar lib/asm-debug-all-5.0.2.jar lib/asm-commons-5.0.2.jar lib/asm-t
+ ree-5.0.2.jar lib/asm-5.0.2.jar lib/apache/commons-lang-2.6.jar lib/A
+ ppleJavaExtensions-1.4.jar lib/jaxen-1.1.6.jar lib/apache/fluent-hc-4
+ .5.2.jar lib/apache/httpclient-4.5.2.jar lib/apache/httpcore-4.4.4.ja
+ r lib/apache/commons-codec-1.9.jar lib/apache/commons-logging-1.2.jar
+  lib/apache/httpclient-cache-4.5.2.jar lib/gson-2.8.0.jar
+Main-Class: kaleidok.kaleidoscope.KaleidoscopeApp
+

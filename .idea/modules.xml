@@ -5,7 +5,9 @@
       <module fileurl="file://$PROJECT_DIR$/Kaleidoscope/Kaleidoscope.iml" filepath="$PROJECT_DIR$/Kaleidoscope/Kaleidoscope.iml" />
       <module fileurl="file://$PROJECT_DIR$/../synesketch/Synesketch.iml" filepath="$PROJECT_DIR$/../synesketch/Synesketch.iml" />
       <module fileurl="file://$PROJECT_DIR$/../TarsosDSP/TarsosDSP.iml" filepath="$PROJECT_DIR$/../TarsosDSP/TarsosDSP.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bundle/bundle.iml" filepath="$PROJECT_DIR$/bundle/bundle.iml" />
       <module fileurl="file://$PROJECT_DIR$/../javaFlacEncoder/javaFlacEncoder.iml" filepath="$PROJECT_DIR$/../javaFlacEncoder/javaFlacEncoder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/kaleidok.iml" filepath="$PROJECT_DIR$/kaleidok.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
     </modules>
   </component>

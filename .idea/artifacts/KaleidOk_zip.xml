@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact name="KaleidOk.zip">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="root">
+      <element id="archive" name="KaleidOk.zip">
+        <element id="artifact" artifact-name="KaleidOk" />
+        <element id="file-copy" path="$PROJECT_DIR$/Kaleidoscope/README.md" />
+        <element id="file-copy" path="$PROJECT_DIR$/Kaleidoscope/src/bin/kaleidoscope.bat" />
+        <element id="file-copy" path="$PROJECT_DIR$/Kaleidoscope/src/bin/kaleidoscope.sh" />
+      </element>
+    </root>
+  </artifact>
+</component>
