@@ -68,13 +68,7 @@ public class ITextExport extends AbstractFrameRecorder
   }
 
 
-  @Override
-  protected void doBeginRecord()
-  {
-    // no initialization necessary
-  }
-
-
+  @SuppressWarnings("resource")
   @Override
   protected void doEndRecord()
   {

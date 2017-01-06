@@ -61,7 +61,7 @@ public abstract class AbstractFrameRecorder extends Plugin<PApplet>
     }
   }
 
-  protected abstract void doBeginRecord();
+  protected void doBeginRecord() { }
 
 
   @Override
@@ -73,7 +73,7 @@ public abstract class AbstractFrameRecorder extends Plugin<PApplet>
     }
   }
 
-  protected abstract void doEndRecord();
+  protected void doEndRecord() { }
 
 
   protected enum State {

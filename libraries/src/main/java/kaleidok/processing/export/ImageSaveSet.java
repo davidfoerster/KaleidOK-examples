@@ -130,15 +130,13 @@ public final class ImageSaveSet
   @Override
   public synchronized boolean equals( Object o )
   {
-    return underlying.equals(
-      (o instanceof ImageSaveSet) ?
-        ((ImageSaveSet) o).underlying :
-        o);
+    return o instanceof ImageSaveSet &&
+      underlying.equals(((ImageSaveSet) o).underlying);
   }
 
   @Override
   public synchronized int hashCode()
   {
-    return underlying.hashCode();
+    return underlying.hashCode() ^ 0xe9e10e1f;
   }
 }

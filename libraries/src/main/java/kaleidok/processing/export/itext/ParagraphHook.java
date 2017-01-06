@@ -24,6 +24,7 @@ public class ParagraphHook implements Consumer<Document>
   }
 
 
+  @SuppressWarnings("resource")
   @Override
   public void accept( Document doc )
   {
