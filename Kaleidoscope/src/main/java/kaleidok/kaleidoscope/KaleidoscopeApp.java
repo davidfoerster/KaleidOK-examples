@@ -3,6 +3,7 @@ package kaleidok.kaleidoscope;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
@@ -175,8 +176,18 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
   @Override
   protected void show( Stage stage )
   {
-    /*if (Double.isNaN(stage.getX()) || Double.isNaN(stage.getY()))
-      placeAroundSketch(stage, 2, (Side[]) null);*/
+    if (Double.isNaN(stage.getX()) || Double.isNaN(stage.getY()))
+    {
+      try
+      {
+        placeAroundSketch(stage, 2, (Side[]) null);
+      }
+      catch (InterruptedException ex)
+      {
+        logger.log(Level.WARNING,
+          "Thread interrupted during window placement", ex);
+      }
+    }
 
     super.show(stage);
 
