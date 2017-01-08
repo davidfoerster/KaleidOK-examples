@@ -49,20 +49,20 @@ public class UnixPaths extends PlatformPathsBase
   @Override
   protected Path getCacheDirImpl()
   {
-    return pathGetXdgHome("CACHE", ".cache");
+    return pathGetXdgHome("XDG_CACHE_HOME", ".cache");
   }
 
 
   @Override
   protected Path getDataDirImpl()
   {
-    return pathGetXdgHome("DATA", ".local/share");
+    return pathGetXdgHome("XDG_DATA_HOME", ".local/share");
   }
 
 
   private Path pathGetXdgHome( String type, String defaultPath )
   {
-    String dir = System.getenv("XDG_" + type + "_HOME");
+    String dir = System.getenv(type);
     return (dir != null && !dir.isEmpty()) ?
       Paths.get(dir, EMPTY_STRING_ARRAY) :
       getHomeDir().resolve(defaultPath);

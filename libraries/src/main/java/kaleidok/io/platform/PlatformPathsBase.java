@@ -145,7 +145,6 @@ public class PlatformPathsBase
 
   public Path getDataDir( String name ) throws IOException
   {
-    //noinspection ConfusingArgumentToVarargsMethod
     return getDataDir(name, (FileAttribute<?>[]) null);
   }
 
