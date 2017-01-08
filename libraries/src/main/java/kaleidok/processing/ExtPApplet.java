@@ -69,7 +69,7 @@ public class ExtPApplet extends PApplet
 
   protected ExecutorService executorService;
 
-  private CountDownLatch showSurfaceLatch = new CountDownLatch(1);
+  private volatile CountDownLatch showSurfaceLatch = new CountDownLatch(1);
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   protected final List<List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>>> keyEventHandlers =
@@ -182,9 +182,29 @@ public class ExtPApplet extends PApplet
   {
     geometryPreferences.applyPosition();
     geometryPreferences.bind();
-    showSurfaceLatch.countDown();
-    showSurfaceLatch = null;
-    super.showSurface();
+
+    if (P3D.equals(sketchRenderer()))
+    {
+      ((Window) getSurface().getNative()).addWindowListener(
+        new AbstractWindowListener()
+        {
+          @Override
+          public void windowResized( WindowEvent ev )
+          {
+            Window w = (Window) ev.getSource();
+            w.removeWindowListener(this);
+            System.out.format("window resized (%d, %d)%n", w.getWidth(), w.getHeight()); // TODO: remove
+            triggerShowSurface();
+          }
+        });
+
+      super.showSurface();
+    }
+    else
+    {
+      super.showSurface();
+      triggerShowSurface();
+    }
   }
 
 
@@ -201,6 +221,13 @@ public class ExtPApplet extends PApplet
   {
     super.frameRate(fps);
     setTargetFrameRate(fps);
+  }
+
+
+  private void triggerShowSurface()
+  {
+    showSurfaceLatch.countDown();
+    showSurfaceLatch = null;
   }
 
 
