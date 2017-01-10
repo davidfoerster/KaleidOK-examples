@@ -8,44 +8,37 @@ public class ChainedMap<K, V> implements Map<K, V>
 {
   private final Map<K, V> main;
 
-  private Map<K, V> fallback;
+  private Map<K,  V> fallback;
 
 
-  @SuppressWarnings("unchecked")
-  public ChainedMap( Map<? extends K, ? extends V> main )
+  public ChainedMap( Map<K, V> main )
   {
     this(main, null);
   }
 
 
-  @SuppressWarnings("unchecked")
-  public ChainedMap( Map<? extends K, ? extends V> main,
-    Map<? extends K, ? extends V> fallback )
+  public ChainedMap( Map<K, V> main, Map<K, V> fallback )
   {
-    Objects.requireNonNull(main);
-    this.main = (Map<K, V>) main;
-    this.fallback =
-      (fallback != null) ? (Map<K, V>) fallback : Collections.emptyMap();
+    this.main = Objects.requireNonNull(main);
+    this.fallback = (fallback != null) ? fallback : Collections.emptyMap();
   }
 
 
-  public Map<? extends K, ? extends V> getMain()
+  public Map<K, V> getMain()
   {
     return main;
   }
 
 
-  public Map<? extends K, ? extends V> getFallback()
+  public Map<K, V> getFallback()
   {
     return fallback;
   }
 
 
-  @SuppressWarnings("unchecked")
-  public void setFallback( Map<? extends K, ? extends V> fallback )
+  public void setFallback( Map<K, V> fallback )
   {
-    this.fallback =
-      (fallback != null) ? (Map<K, V>) fallback : Collections.emptyMap();
+    this.fallback = (fallback != null) ? fallback : Collections.emptyMap();
   }
 
 

@@ -18,10 +18,9 @@ public abstract class KeyTransformingMap<K, V> implements Map<K, V>
   protected final Map<K, V> underlying;
 
 
-  @SuppressWarnings("unchecked")
-  protected KeyTransformingMap( Map<? extends K, ? extends V> underlying )
+  protected KeyTransformingMap( Map<K, V> underlying )
   {
-    this.underlying = (Map<K, V>) Objects.requireNonNull(underlying);
+    this.underlying = Objects.requireNonNull(underlying);
   }
 
 

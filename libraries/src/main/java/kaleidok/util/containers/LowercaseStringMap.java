@@ -9,14 +9,13 @@ public class LowercaseStringMap<V> extends KeyTransformingMap<String, V>
   public final Locale locale;
 
 
-  public LowercaseStringMap( Map<String, ? extends V> underlying )
+  public LowercaseStringMap( Map<String, V> underlying )
   {
     this(underlying, null);
   }
 
 
-  public LowercaseStringMap( Map<String, ? extends V> underlying,
-    Locale locale )
+  public LowercaseStringMap( Map<String, V> underlying, Locale locale )
   {
     super(underlying);
     this.locale = (locale != null) ? locale : Locale.getDefault();
