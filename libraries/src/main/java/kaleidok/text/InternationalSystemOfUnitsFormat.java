@@ -129,7 +129,7 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
 
   static int getMagnitude( long n )
   {
-    return (n != 0) ? (int)(Math.log10(Math.abs(n)) / 3) : 0;
+    return (n != 0) ? (int)(Math.log10(Math.abs((double) n)) / 3) : 0;
   }
 
 
@@ -346,7 +346,8 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
 
   static
   {
-    Map<Integer, Character> m = new HashMap<>(24);
+    Map<Integer, Character> m =
+      new HashMap<>((MAGNITUDE_MAX - MAGNITUDE_MIN) * 3 / 2);
     m.put(-8, 'y');
     m.put(-7, 'z');
     m.put(-6, 'a');
@@ -372,9 +373,9 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
     CHAR_MAGNITUDE_MAP = Collections.unmodifiableMap(cmm);
   }
 
-  private static final int FACTORS_LONG_LENGTH = 7;
+  static final int FACTORS_LONG_LENGTH = 7;
 
-  private static final long[] FACTORS_LONG = {
+  static final long[] FACTORS_LONG = {
     1L, 1000L, 1_000_000L, 1_000_000_000L, 1_000_000_000_000L,
     1_000_000_000_000_000L, 1_000_000_000_000_000_000L
   };

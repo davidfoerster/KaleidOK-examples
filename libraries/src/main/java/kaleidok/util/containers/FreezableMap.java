@@ -3,6 +3,7 @@ package kaleidok.util.containers;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -29,7 +30,7 @@ public class FreezableMap<K, V> implements Map<K, V>
 
   public FreezableMap( Map<K, V> underlying )
   {
-    this.underlying = underlying;
+    this.underlying = Objects.requireNonNull(underlying);
   }
 
 

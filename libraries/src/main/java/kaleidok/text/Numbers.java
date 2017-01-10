@@ -3,10 +3,11 @@ package kaleidok.text;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
-import static kaleidok.util.AssertionUtils.fastAssert;
+import static kaleidok.text.InternationalSystemOfUnitsFormat.FACTORS_LONG;
 
 
 public final class Numbers
@@ -50,13 +51,10 @@ public final class Numbers
 
     if (multiplier != 1)
     {
-      fastAssert(multiplier > 0);
-
-      double dMultiplierLog10 = Math.log10(multiplier);
-      final int iMultiplierLog10 = (int) dMultiplierLog10;
-      //assert Double.isFinite(dMultiplierLog10) || iMultiplierLog10 != dMultiplierLog10;  // This is guaranteed because non-finite floating-point numbers are converted to either 0 or INT_MAX/INT_MIN all of which are unequal to non-finite floating-point numbers.
+      final int iMultiplierLog10 =
+        Arrays.binarySearch(FACTORS_LONG, multiplier);
       valueStream = valueStream.map(
-        (iMultiplierLog10 == dMultiplierLog10) ?
+        (iMultiplierLog10 >= 0) ?
           (v) -> v.scaleByPowerOfTen(iMultiplierLog10) :
           BigDecimal.valueOf(multiplier)::multiply);
     }

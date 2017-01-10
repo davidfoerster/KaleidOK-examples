@@ -74,7 +74,7 @@ public class FlickrAsync extends Flickr
   }
 
 
-  private FlickrFutureCallback<?> lastCallback = null;
+  private volatile FlickrFutureCallback<?> lastCallback = null;
 
   private <T> FlickrFutureCallback<T> getFlickrCallback(
     FutureCallback<T> nested )

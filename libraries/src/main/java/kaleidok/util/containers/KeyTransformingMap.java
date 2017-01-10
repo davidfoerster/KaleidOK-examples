@@ -172,9 +172,8 @@ public abstract class KeyTransformingMap<K, V> implements Map<K, V>
   @Override
   public boolean equals( Object o )
   {
-    return o == this ||
-      (o instanceof KeyTransformingMap) &&
-        this.underlying.equals(((KeyTransformingMap<?, ?>) o).underlying);
+    return (o instanceof KeyTransformingMap) &&
+      this.underlying.equals(((KeyTransformingMap<?, ?>) o).underlying);
   }
 
 
