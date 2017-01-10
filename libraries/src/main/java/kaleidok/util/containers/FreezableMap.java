@@ -233,6 +233,7 @@ public class FreezableMap<K, V> implements Map<K, V>
   @Override
   public V computeIfAbsent( K key, Function<? super K, ? extends V> mappingFunction )
   {
+    checkFrozen();
     return underlying.computeIfAbsent(key, mappingFunction);
   }
 
@@ -240,6 +241,7 @@ public class FreezableMap<K, V> implements Map<K, V>
   @Override
   public V computeIfPresent( K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction )
   {
+    checkFrozen();
     return underlying.computeIfPresent(key, remappingFunction);
   }
 
@@ -247,6 +249,7 @@ public class FreezableMap<K, V> implements Map<K, V>
   @Override
   public V compute( K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction )
   {
+    checkFrozen();
     return underlying.compute(key, remappingFunction);
   }
 }
