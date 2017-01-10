@@ -19,12 +19,11 @@ import synesketch.emotion.EmotionalState;
 import java.awt.Image;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static kaleidok.exaleads.chromatik.Chromasthetiator.EXPECTED_NEUTRAL_RESULT_COUNT;
 import static kaleidok.exaleads.chromatik.Chromasthetiator.logger;
@@ -78,7 +77,7 @@ public class ChromasthetiationService
     Chromasthetiator<FlickrAsync> chromasthetiator,
     FutureCallback<Future<Image>> futureImageCallback,
     FutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>> imageCallback,
-    Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
+    Consumer<Stream<? super Photo>> imageQueueCompletionCallback,
     int maxCount )
   {
     if (maxCount != 0) {
@@ -131,7 +130,7 @@ public class ChromasthetiationService
       Chromasthetiator<FlickrAsync> chromasthetiator,
       String text, FutureCallback<Future<Image>> futureImageCallback,
       FutureCallback<Pair<Image, Pair<ChromatikResponse, EmotionalState>>> imageCallback,
-      final Consumer<Collection<? super Photo>> imageQueueCompletionCallback,
+      final Consumer<Stream<? super Photo>> imageQueueCompletionCallback,
       int maxCount )
     {
       this.chromasthetiator = chromasthetiator;
@@ -144,8 +143,9 @@ public class ChromasthetiationService
       if (imageQueueCompletionCallback != null)
       {
         photoQueue.completionCallback =
-          ( objects ) -> imageQueueCompletionCallback.accept(
-            objects.stream().map(Pair::getLeft).collect(Collectors.toList()));
+          ( objects ) ->
+            imageQueueCompletionCallback.accept(
+              objects.stream().map(Pair::getLeft));
       }
     }
 

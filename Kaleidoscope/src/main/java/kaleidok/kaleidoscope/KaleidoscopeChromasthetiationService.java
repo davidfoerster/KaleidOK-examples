@@ -40,7 +40,6 @@ import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -78,7 +77,7 @@ public final class KaleidoscopeChromasthetiationService
   private final ChromasthetiationCallback chromasthetiationCallback =
     new ChromasthetiationCallback();
 
-  public BiConsumer<String, Collection<? super Photo>> imageQueueCompletionCallback = null;
+  public BiConsumer<String, Stream<? super Photo>> imageQueueCompletionCallback = null;
 
   private final AspectedObjectProperty<RGBImageFilter> neutralFilter;
 
@@ -297,7 +296,7 @@ public final class KaleidoscopeChromasthetiationService
 
   public void submit( final String text )
   {
-    Consumer<Collection<? super Photo>> imageQueueCompletionCallback =
+    Consumer<Stream<? super Photo>> imageQueueCompletionCallback =
       (this.imageQueueCompletionCallback != null) ?
         (photos) -> this.imageQueueCompletionCallback.accept(text, photos) :
         null;
