@@ -36,7 +36,7 @@ public final class SttManager extends Plugin<Kaleidoscope>
     super(sketch);
 
     Map<String, String> params = sketch.getParameterMap();
-    stt = new STT(new SttResponseHandler(),
+    stt = new STT(AbstractFutureCallback.getInstance(this::handleSttResponse),
       sketch.parseStringOrFile(
         params.get("com.google.developer.api.key"), '@'))
       {
@@ -79,27 +79,23 @@ public final class SttManager extends Plugin<Kaleidoscope>
   }
 
 
-  private class SttResponseHandler extends AbstractFutureCallback<SttResponse>
+  private void handleSttResponse( SttResponse response )
   {
-    @Override
-    public void completed( SttResponse response )
+    SttResponse.Result.Alternative topAlternative =
+      response.getTopAlternative();
+
+    if (topAlternative != null)
     {
-      SttResponse.Result.Alternative topAlternative =
-        response.getTopAlternative();
+      logger.log(Level.INFO,
+        "Transcribed with confidence {0,number,percent}: {1}",
+        new Object[]{topAlternative.confidence, topAlternative.transcript});
 
-      if (topAlternative != null) {
-        logger.log(Level.INFO,
-          "Transcribed with confidence {0,number,percent}: {1}",
-          new Object[]{topAlternative.confidence, topAlternative.transcript});
-
-        if (enableResponseHandlerProperty().get())
-        {
-          p.getChromasthetiationService()
-            .submit(topAlternative.transcript);
-        }
-      } else {
-        logger.info("Transcription returned no result");
-      }
+      if (enableResponseHandlerProperty().get())
+        p.getChromasthetiationService().submit(topAlternative.transcript);
+    }
+    else
+    {
+      logger.info("Transcription returned no result");
     }
   }
 

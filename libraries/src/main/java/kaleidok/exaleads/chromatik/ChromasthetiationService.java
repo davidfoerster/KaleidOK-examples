@@ -199,14 +199,8 @@ public class ChromasthetiationService
         "Requesting search results from: {0}", chromatikUri);
 
       jsonAsync.execute(Request.Get(chromatikUri), ChromatikResponse.class,
-        new NestedFutureCallback<ChromatikResponse, Pair<ChromatikResponse, EmotionalState>>(this)
-        {
-          @Override
-          public void completed( ChromatikResponse response )
-          {
-            nested.completed(Pair.of(response, emoState));
-          }
-        });
+        NestedFutureCallback.getInstance(this,
+          (response, cb) -> cb.completed(Pair.of(response, emoState))));
     }
 
 

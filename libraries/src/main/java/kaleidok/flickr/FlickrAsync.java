@@ -21,18 +21,20 @@ public class FlickrAsync extends Flickr
 
 
   protected static class FlickrFutureCallback<T>
-    extends NestedFutureCallback<T, T>
+    extends NestedFutureCallback<T, T, FutureCallback<? super T>>
   {
-    public FlickrFutureCallback( FutureCallback<T> nested )
+    public FlickrFutureCallback( FutureCallback<? super T> nested )
     {
       super(nested);
     }
+
 
     @Override
     public void completed( T t )
     {
       nested.completed(t);
     }
+
 
     @Override
     public void failed( Exception ex )
@@ -44,6 +46,7 @@ public class FlickrAsync extends Flickr
       }
     }
 
+
     private void failed( JsonParseException ex )
     {
       Throwable cause = ex.getCause();
@@ -53,6 +56,7 @@ public class FlickrAsync extends Flickr
         super.failed(ex);
       }
     }
+
 
     private void failed( FlickrException ex )
     {
