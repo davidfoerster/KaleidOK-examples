@@ -30,7 +30,8 @@ public class IIOReadProgressAbortListener
   @Override
   public void imageProgress( ImageReader source, float percentageDone )
   {
-    source.abort();
+    if (percentageDone >= 100)
+      source.abort();
   }
 
   @Override
