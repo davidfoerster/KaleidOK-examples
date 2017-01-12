@@ -248,8 +248,8 @@ public class ExtPApplet extends PApplet
        * PSurfaceJOGL starts a thread watching for exceptions thrown by the
        * animator thread. Unfortunately that thread isn't flagged as a daemon,
        * so it'll keep running beyond the termination of the animator thread.
-       * However, with the follow trick we can send a fake null exception as
-       * signal to that thread which leads to its voluntary termination.
+       * However, with the following trick we can send a fake null exception as
+       * a signal to that thread which leads to its voluntary termination.
        */
         ((GLAutoDrawable) getSurface().getNative()).getAnimator()
           .getUncaughtExceptionHandler().uncaughtException(null, null, null);
