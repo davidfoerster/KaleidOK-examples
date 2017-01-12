@@ -17,9 +17,9 @@ public final class ImageIO
 
 
   public static final int
-    BMP_FILEHEADER_SIZE = 14,
-    BMP_INFOHEADER_SIZE = 40,
-    BMP_OVERALLHEADER_SIZE = BMP_FILEHEADER_SIZE + BMP_INFOHEADER_SIZE;
+    BMP_FILE_HEADER_SIZE = 14,
+    BMP_INFO_HEADER_SIZE = 40,
+    BMP_OVERALL_HEADER_SIZE = BMP_FILE_HEADER_SIZE + BMP_INFO_HEADER_SIZE;
 
 
   private static void checkBounds( int width, int height, int[] pixels,
@@ -53,7 +53,7 @@ public final class ImageIO
     long
       len = (long) width * height,
       imageSize = len * Integer.BYTES,
-      fileSize = imageSize + BMP_OVERALLHEADER_SIZE;
+      fileSize = imageSize + BMP_OVERALL_HEADER_SIZE;
     if (fileSize > buf.remaining())
       throw new BufferOverflowException();
 
@@ -62,10 +62,10 @@ public final class ImageIO
 
     // file header
       .put((byte) 'B').put((byte) 'M')
-      .putInt((int) fileSize).putInt(0).putInt(BMP_OVERALLHEADER_SIZE)
+      .putInt((int) fileSize).putInt(0).putInt(BMP_OVERALL_HEADER_SIZE)
 
     // info header
-      .putInt(BMP_INFOHEADER_SIZE).putInt(width).putInt(-height)
+      .putInt(BMP_INFO_HEADER_SIZE).putInt(width).putInt(-height)
       .putShort((short) 1).putShort((short) Integer.SIZE)
       .putInt(0).putInt((int) imageSize)
       .putInt(0).putInt(0).putInt(0).putInt(0)
@@ -85,7 +85,7 @@ public final class ImageIO
     checkBounds(width, height, pixels, offset);
 
     long fileSize =
-      (long) width * height * Integer.BYTES + BMP_OVERALLHEADER_SIZE;
+      (long) width * height * Integer.BYTES + BMP_OVERALL_HEADER_SIZE;
     MappedByteBuffer map;
     try {
       map = fc.map(FileChannel.MapMode.READ_WRITE, fc.position(), fileSize);
