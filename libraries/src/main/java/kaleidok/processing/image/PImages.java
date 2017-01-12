@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static java.awt.image.BufferedImage.*;
 import static org.apache.commons.lang3.ArrayUtils.INDEX_NOT_FOUND;
@@ -106,20 +107,27 @@ public final class PImages
     String mimeType, String fileExtension )
   {
     ImageReader imageReader;
-    if (mimeType != null)
+    try
     {
-      imageReader = getFirstImageReader(
-        ImageIO.getImageReadersByMIMEType(mimeType));
+      if (mimeType != null)
+      {
+        imageReader = getFirstImageReader(
+          ImageIO.getImageReadersByMIMEType(mimeType));
+      }
+      else
+      {
+        imageReader =
+          (fileExtension != null && !fileExtension.isEmpty()) ?
+            getFirstImageReader(
+              ImageIO.getImageReadersBySuffix(fileExtension), null) :
+            null;
+        if (imageReader == null)
+          imageReader = getFirstImageReader(ImageIO.getImageReaders(iis));
+      }
     }
-    else
+    catch (NoSuchElementException ex)
     {
-      imageReader =
-        (fileExtension != null && !fileExtension.isEmpty()) ?
-          getFirstImageReader(
-            ImageIO.getImageReadersBySuffix(fileExtension), null) :
-          null;
-      if (imageReader == null)
-        imageReader = getFirstImageReader(ImageIO.getImageReaders(iis));
+      throw new IllegalArgumentException(ex);
     }
     return imageReader;
   }
@@ -172,20 +180,18 @@ public final class PImages
 
   static ImageReader getFirstImageReader(
     Iterator<ImageReader> readers, ImageReader defaultReader )
-    throws IllegalArgumentException
   {
     return readers.hasNext() ? readers.next() : defaultReader;
   }
 
 
-  static ImageReader getFirstImageReader(
-    Iterator<ImageReader> readers )
-    throws IllegalArgumentException
+  static ImageReader getFirstImageReader( Iterator<ImageReader> readers )
+    throws NoSuchElementException
   {
     if (readers.hasNext())
       return readers.next();
 
-    throw new IllegalArgumentException("No suitable image decoder found");
+    throw new NoSuchElementException("No suitable image decoder found");
   }
 
 
