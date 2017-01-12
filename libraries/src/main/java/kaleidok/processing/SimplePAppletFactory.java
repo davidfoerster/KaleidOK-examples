@@ -16,14 +16,6 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
   protected final Constructor<? extends T> constructor;
 
 
-  public static <T extends PApplet> SimplePAppletFactory<T> forClass(
-    Class<T> sketchClass )
-    throws IllegalArgumentException
-  {
-    return new SimplePAppletFactory<>(sketchClass);
-  }
-
-
   public SimplePAppletFactory( Class<? extends T> sketchClass )
     throws IllegalArgumentException
   {

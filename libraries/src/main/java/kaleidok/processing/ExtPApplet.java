@@ -155,15 +155,15 @@ public class ExtPApplet extends PApplet
          * Invoke parent#exit() instead of PApplet#exit() when closing the
          * sketch window.
          */
-        ((Window) surface.getNative()).addWindowListener(
-          0, new AbstractWindowListener()
-          {
-            @Override
-            public void windowDestroyNotify( WindowEvent ev )
+        ((Window) surface.getNative()).addWindowListener(0,
+          new AbstractWindowListener()
             {
-              parent.exit();
-            }
-          });
+              @Override
+              public void windowDestroyNotify( WindowEvent ev )
+              {
+                parent.exit();
+              }
+            });
       }
     }
 
@@ -407,7 +407,7 @@ public class ExtPApplet extends PApplet
         // fall through
 
       default:
-        ExtPApplet.super.save(filename);
+        super.save(filename);
         break;
       }
     });
@@ -540,10 +540,12 @@ public class ExtPApplet extends PApplet
   }
 
 
-  private <T extends Number> boolean parseParamNumberList( String key,
-    Function<? super String, T> valueParser, WritableNumberValue... output )
+  private boolean parseParamNumberList( String key,
+    Function<? super String, ? extends Number> valueParser,
+    WritableNumberValue... output )
   {
-    List<T> result = parseParamNumberList(key, output.length, valueParser);
+    List<? extends Number> result =
+      parseParamNumberList(key, output.length, valueParser);
     if (result != null)
     {
       if (result.size() != output.length)
