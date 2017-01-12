@@ -51,7 +51,7 @@ public class FrameRateSwitcherProperty extends AspectedDoubleProperty
     float targetFps = Float.intBitsToFloat(
       changeRequest.getAndSet(FLOAT_NAN_INT_BITS));
 
-    if (targetFps <= 0 || Float.isNaN(targetFps) &&
+    if ((targetFps <= 0 || Float.isNaN(targetFps)) &&
       applet instanceof ExtPApplet)
     {
       String sFrameRate =
