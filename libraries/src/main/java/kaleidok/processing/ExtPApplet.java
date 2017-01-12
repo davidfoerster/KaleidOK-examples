@@ -640,8 +640,8 @@ public class ExtPApplet extends PApplet
     if (g instanceof PGraphicsOpenGL)
       return ((PGraphicsOpenGL) g).pgl.threadIsCurrent();
 
-    showMethodWarning("isDrawingThread");
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(
+      "isDrawingThread() is unavailable with this renderer");
   }
 
 
