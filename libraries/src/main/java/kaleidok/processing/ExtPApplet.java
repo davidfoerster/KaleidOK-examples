@@ -423,6 +423,12 @@ public class ExtPApplet extends PApplet
   }
 
 
+  public <V> Future<V> future( Callable<V> action )
+  {
+    return executorService.submit(action);
+  }
+
+
   @Override
   public void thread( String methodName )
   {
@@ -449,6 +455,45 @@ public class ExtPApplet extends PApplet
       catch (InvocationTargetException ex)
       {
         Threads.handleUncaught(ex.getCause());
+      }
+    });
+  }
+
+
+  public Future<?> future( String methodName )
+  {
+    final Method method;
+    try
+    {
+      method = getClass().getMethod(methodName, EMPTY_CLASS_ARRAY);
+    }
+    catch (NoSuchMethodException ex)
+    {
+      throw new IllegalArgumentException(ex);
+    }
+
+    return future(() ->
+    {
+      try
+      {
+        return method.invoke(this, EMPTY_OBJECT_ARRAY);
+      }
+      catch (IllegalAccessException | IllegalArgumentException ex)
+      {
+        throw new AssertionError(ex);
+      }
+      catch (InvocationTargetException ex)
+      {
+        Throwable cause = ex.getCause();
+        if (cause != ex)
+        {
+          if (cause instanceof Exception)
+            throw (Exception) cause;
+          if (cause != null)
+            throw (Error) cause;
+        }
+        throw new AssertionError(
+          "InvocationTargetException without a cause", ex);
       }
     });
   }
