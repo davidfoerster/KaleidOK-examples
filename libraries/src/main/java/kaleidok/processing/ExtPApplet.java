@@ -331,7 +331,10 @@ public class ExtPApplet extends PApplet
 
   public Future<PImage> getImageFuture( URL url )
   {
-    return thread(PImageFutures.from(url));
+    RunnableFuture<PImage> fImage = PImageFutures.from(url);
+    if (!fImage.isDone())
+      thread(fImage);
+    return fImage;
   }
 
 
@@ -414,10 +417,9 @@ public class ExtPApplet extends PApplet
   }
 
 
-  public <R extends Runnable> R thread( R action )
+  public void thread( Runnable action )
   {
     executorService.execute(action);
-    return action;
   }
 
 
