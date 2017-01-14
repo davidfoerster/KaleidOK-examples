@@ -1,11 +1,12 @@
 package kaleidok.google.gson;
 
 import com.google.gson.*;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 
 public final class TypeAdapterManager
@@ -16,47 +17,47 @@ public final class TypeAdapterManager
   public static void registerTypeAdapter( Type type,
     JsonDeserializer<?> typeAdapter )
   {
-    TypeAdapterMap.INSTANCE.put(type, typeAdapter);
+    TypeAdapterSet.INSTANCE.add(type, typeAdapter);
   }
 
 
   public static void registerTypeAdapter( Type type,
     JsonSerializer<?> typeAdapter )
   {
-    TypeAdapterMap.INSTANCE.put(type, typeAdapter);
+    TypeAdapterSet.INSTANCE.add(type, typeAdapter);
   }
 
 
   public static void registerTypeAdapter( Type type,
     TypeAdapter<?> typeAdapter )
   {
-    TypeAdapterMap.INSTANCE.put(type, typeAdapter);
+    TypeAdapterSet.INSTANCE.add(type, typeAdapter);
   }
 
 
   public static void registerTypeAdapter( Type type,
     InstanceCreator<?> typeAdapter )
   {
-    TypeAdapterMap.INSTANCE.put(type, typeAdapter);
+    TypeAdapterSet.INSTANCE.add(type, typeAdapter);
   }
 
 
   public static Gson getGson()
   {
-    return TypeAdapterMap.INSTANCE.getGson();
+    return TypeAdapterSet.INSTANCE.getGson();
   }
 
 
-  public static class TypeAdapterMap
+  public static class TypeAdapterSet
   {
-    private final Map<Type, Object> map = new HashMap<>();
+    private final Set<Pair<Type, ?>> adapters = new HashSet<>();
 
     private volatile Gson gson = null;
 
 
-    protected TypeAdapterMap() { }
+    protected TypeAdapterSet() { }
 
-    static final TypeAdapterMap INSTANCE = new TypeAdapterMap();
+    static final TypeAdapterSet INSTANCE = new TypeAdapterSet();
 
 
     public Gson getGson()
@@ -69,7 +70,7 @@ public final class TypeAdapterManager
           if ((gson = this.gson) == null)
           {
             final GsonBuilder gsonBuilder = new GsonBuilder();
-            for (Map.Entry<Type, Object> e: map.entrySet())
+            for (Pair<Type, ?> e: adapters)
               gsonBuilder.registerTypeAdapter(e.getKey(), e.getValue());
             this.gson = gson = gsonBuilder.create();
           }
@@ -79,38 +80,38 @@ public final class TypeAdapterManager
     }
 
 
-    public Object put( Type key, JsonDeserializer<?> value )
+    public boolean add( Type key, JsonDeserializer<?> value )
     {
-      return put(key, (Object) value);
+      return add(key, (Object) value);
     }
 
 
-    public Object put( Type key, JsonSerializer<?> value )
+    public boolean add( Type key, JsonSerializer<?> value )
     {
-      return put(key, (Object) value);
+      return add(key, (Object) value);
     }
 
 
-    public Object put( Type key, TypeAdapter<?> value )
+    public boolean add( Type key, TypeAdapter<?> value )
     {
-      return put(key, (Object) value);
+      return add(key, (Object) value);
     }
 
 
-    public Object put( Type key, InstanceCreator<?> value )
+    public boolean add( Type key, InstanceCreator<?> value )
     {
-      return put(key, (Object) value);
+      return add(key, (Object) value);
     }
 
 
-    private synchronized Object put( Type key, Object value )
+    private synchronized boolean add( Type key, Object value )
     {
-      Object prev = map.put(
+      boolean changed = adapters.add(Pair.of(
         Objects.requireNonNull(key, "key"),
-        Objects.requireNonNull(value, "value"));
-      if (!Objects.equals(prev, value))
+        Objects.requireNonNull(value, "value")));
+      if (changed)
         gson = null;
-      return prev;
+      return changed;
     }
   }
 }
