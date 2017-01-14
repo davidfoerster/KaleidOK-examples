@@ -200,17 +200,24 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
   protected abstract void doSave();
 
 
-  protected static final CharSequenceTranslator ESCAPE =
-    new AggregateTranslator(
-      new LookupTranslator(new String[][]{
-          {"\\", "\\\\"},
-          {"\0", "\\0"}
-        }),
-      new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_ESCAPE()),
+  protected static final CharSequenceTranslator ESCAPE;
+  static
+  {
+    String[][]
+      javaCtrlCharsEscape = EntityArrays.JAVA_CTRL_CHARS_ESCAPE(),
+      ourCtrlCharsEscape = new String[javaCtrlCharsEscape.length + 2][];
+    ourCtrlCharsEscape[0] = new String[]{ "\\", "\\\\" };
+    ourCtrlCharsEscape[1] = new String[]{ "\0", "\\0" };
+    System.arraycopy(javaCtrlCharsEscape, 0, ourCtrlCharsEscape, 2,
+      javaCtrlCharsEscape.length);
+
+    ESCAPE = new AggregateTranslator(
+      new LookupTranslator(ourCtrlCharsEscape),
       JavaUnicodeEscaper.outsideOf(32, Character.MAX_CODE_POINT),
       JavaUnicodeEscaper.between(
         Character.MIN_SURROGATE, Character.MAX_SURROGATE),
       JavaUnicodeEscaper.between(0xfffe, 0xffff));
+  }
 
   protected static final CharSequenceTranslator UNESCAPE =
     StringEscapeUtils.UNESCAPE_JAVA;
