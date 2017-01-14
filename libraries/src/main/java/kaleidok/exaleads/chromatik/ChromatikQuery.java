@@ -206,13 +206,13 @@ public abstract class ChromatikQuery
         "Total color weight exceeds 1: " + totalWeight);
     }
 
-    Map<String, ? extends Number> colorGroups = colors.entrySet().stream()
-      .collect(Collectors.groupingBy(
-        (e) -> e.getKey().groupName,
-        Collectors.summingDouble((n) -> n.getValue().doubleValue())));
-
     if (!colors.isEmpty())
     {
+      Map<String, ? extends Number> colorGroups = colors.entrySet().stream()
+        .collect(Collectors.groupingBy(
+          (e) -> e.getKey().groupName,
+          Collectors.summingDouble((n) -> n.getValue().doubleValue())));
+
       if (sb.length() != 0)
         sb.append(' ');
       sb.append('(');
