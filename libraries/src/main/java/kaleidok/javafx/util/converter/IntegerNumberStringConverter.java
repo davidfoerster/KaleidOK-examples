@@ -1,5 +1,6 @@
 package kaleidok.javafx.util.converter;
 
+import java.math.BigInteger;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -28,12 +29,16 @@ public class IntegerNumberStringConverter
       return (Integer) parseResult;
 
     Number n = (Number) parseResult;
-    long l = n.longValue();
-    if ((l != 0) ? (l == (int) l) : !Double.isNaN(n.doubleValue()))
-      return (int) l;
+    int i = n.intValue();
+    if ((n instanceof Long && i == n.longValue()) ||
+      (n instanceof BigInteger && ((BigInteger) n).bitLength() < Integer.SIZE) ||
+      i == n.doubleValue())
+    {
+      return i;
+    }
 
     StringBuffer sb = getStringBufferInstance()
-      .append("Exceeds number range: ");
+      .append("Not an integer or exceeds number range: ");
     getFormat().format(n, sb, getFieldPositionInstance());
     throw new NumberFormatException(sb.toString());
   }
