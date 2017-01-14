@@ -27,7 +27,7 @@ public interface PreferenceBean
   }
 
 
-  static <P extends Property<String>> StringPropertyPreferencesAdapter<P>
+  static <P extends StringProperty> StringPropertyPreferencesAdapter<P>
   of( P stringProperty )
   {
     return new StringPropertyPreferencesAdapter<>(stringProperty);
@@ -74,18 +74,18 @@ public interface PreferenceBean
     PropertyPreferencesAdapter<?, ?> ppa =
       (property instanceof ObservableNumberValue) ? (
         (property instanceof IntegerProperty) ?
-          new IntegerPropertyPreferencesAdapter<>((IntegerProperty) property) :
+          of((IntegerProperty) property) :
         (property instanceof DoubleProperty) ?
-          new DoublePropertyPreferencesAdapter<>((DoubleProperty) property) :
+          of((DoubleProperty) property) :
         (property instanceof LongProperty) ?
-          new LongPropertyPreferencesAdapter<>((LongProperty) property) :
+          of((LongProperty) property) :
         (property instanceof FloatProperty) ?
-          new FloatPropertyPreferencesAdapter<>((FloatProperty) property) :
+          of((FloatProperty) property) :
           null) :
       (property instanceof StringProperty) ?
-        new StringPropertyPreferencesAdapter<>((StringProperty) property) :
+        of((StringProperty) property) :
       (property instanceof BooleanProperty) ?
-        new BooleanPropertyPreferencesAdapter<>((BooleanProperty) property) :
+        of((BooleanProperty) property) :
         null;
 
     if (ppa == null)
