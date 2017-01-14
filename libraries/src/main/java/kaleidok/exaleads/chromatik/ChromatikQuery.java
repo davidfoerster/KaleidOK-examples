@@ -206,13 +206,10 @@ public abstract class ChromatikQuery
         "Total color weight exceeds 1: " + totalWeight);
     }
 
-    Map<String, Number> colorGroups = colors.entrySet().stream()
+    Map<String, ? extends Number> colorGroups = colors.entrySet().stream()
       .collect(Collectors.groupingBy(
         (e) -> e.getKey().groupName,
-        Collectors.reducing(null, Map.Entry::getValue, (a, b) ->
-          (a == null) ? b :
-          (b == null) ? a :
-            a.doubleValue() + b.doubleValue())));
+        Collectors.summingDouble((n) -> n.getValue().doubleValue())));
 
     if (!colors.isEmpty())
     {
@@ -233,7 +230,7 @@ public abstract class ChromatikQuery
           .append("{s=200000}").append(' ');
       }
 
-      for (Map.Entry<String, Number> o: colorGroups.entrySet())
+      for (Map.Entry<String, ? extends Number> o: colorGroups.entrySet())
       {
         int weight = (int) (o.getValue().doubleValue() * 100);
         sb.append(QUERY_OPT_COLORGROUP).append(QUERY_OPT_NAMEDELIM)
