@@ -236,7 +236,10 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
   }
 
 
-  public void loadIfWritable() { }
+  public boolean loadIfWritable()
+  {
+    return false;
+  }
 
 
   private volatile InvalidationListener autoSaveListener = null;

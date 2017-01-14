@@ -40,9 +40,9 @@ public abstract class PropertyPreferencesAdapter<T, P extends Property<T>>
 
 
   @Override
-  public void loadIfWritable()
+  public boolean loadIfWritable()
   {
-    load();
+    return load();
   }
 
 
