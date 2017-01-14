@@ -159,10 +159,10 @@ public final class PropertyUtils
   }
 
 
-  public static void applyProperty( final Property<?> prop, String strValue )
+  public static <T> void applyProperty( final Property<T> prop, String strValue )
     throws IllegalArgumentException, UnsupportedOperationException
   {
-    Class<?> propType = getPropertyValueType(prop);
+    Class<? extends T> propType = getPropertyValueType(prop);
     if (propType == null)
     {
       throw new UnsupportedOperationException(
@@ -171,9 +171,7 @@ public final class PropertyUtils
 
     try
     {
-      //noinspection unchecked
-      ((WritableValue<Object>) prop).setValue(
-        DefaultValueParser.valueOf(strValue, propType));
+      prop.setValue(DefaultValueParser.valueOf(strValue, propType));
     }
     catch (IllegalArgumentException ex)
     {
@@ -214,10 +212,10 @@ public final class PropertyUtils
 
 
   @SuppressWarnings("unchecked")
-  public static <T> Class<? extends T> getPropertyValueType(
+  public static <T> Class<T> getPropertyValueType(
     WritableObjectValue<T> prop )
   {
-    return (Class<? extends T>) (
+    return (Class<T>) (
       (prop instanceof WritableStringValue) ? String.class :
       (prop instanceof WritableListValue) ? ObservableList.class :
       (prop instanceof WritableSetValue) ? ObservableSet.class :
