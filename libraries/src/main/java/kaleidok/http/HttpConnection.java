@@ -76,11 +76,18 @@ public class HttpConnection implements Closeable
   }
 
 
+  @SuppressWarnings("ProhibitedExceptionDeclared")
   protected static <T extends HttpConnection>
   T openURL( URL url, Class<T> clazz )
     throws IOException, InstantiationException, NoSuchMethodException,
-    InvocationTargetException
+    InvocationTargetException, ClassCastException
   {
+    if (!HttpConnection.class.isAssignableFrom(clazz))
+    {
+      throw new ClassCastException(String.format(
+        "Cannot cast %s to %s",
+        clazz.getName(), HttpConnection.class.getName()));
+    }
     if (Modifier.isAbstract(clazz.getModifiers()))
       throw new InstantiationException(clazz.getName() + " is abstract");
 
