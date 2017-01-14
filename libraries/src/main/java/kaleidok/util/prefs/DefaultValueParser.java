@@ -5,6 +5,7 @@ import kaleidok.util.Reflection;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -85,22 +86,28 @@ public final class DefaultValueParser
       if (s.length() == 1)
         return (T) Character.valueOf(s.charAt(0));
 
-      ex = new IllegalArgumentException(
-        "Cannot cast string of length " + s.length() + " to " +
-          targetClass.getName());
+      ex = new IllegalArgumentException(String.format(
+        "Cannot cast string of length %d to %s.",
+        s.length(), targetClass.getName()));
     }
     else try
     {
       Method m = wrapperClass.getMethod("valueOf", valueOfParameterTypes);
-      if (wrapperClass.isAssignableFrom(
+      if (!Modifier.isStatic(m.getModifiers()))
+      {
+        ex = new NoSuchMethodException(m + " is an instance method.");
+      }
+      else if (!wrapperClass.isAssignableFrom(
         Reflection.getWrapperType(m.getReturnType())))
+      {
+        ex = new ClassCastException(String.format(
+          "Cannot cast the return type of %s to %s.",
+          m, targetClass.getName()));
+      }
+      else
       {
         return (T) m.invoke(null, s);
       }
-
-      ex = new ClassCastException(
-        "Cannot assign the return type of " + m + " to " +
-          targetClass.getName());
     }
     catch (InvocationTargetException ex1)
     {
