@@ -33,19 +33,13 @@ public class MessageFormatBinding
   protected MessageFormat computeValue()
   {
     String s = formatString.getValue();
-    if (s != null)
-    {
-      s = s.trim();
-      if (!s.isEmpty())
-      {
-        return FormatUtils.verifyFormatThrowing(
-          ( _s ) -> new MessageFormat(_s, Locale.ENGLISH),
-          s, testArgs,
-          (resultVerifier != null) ? resultVerifier : StringUtils::isNotEmpty,
-          null);
-      }
-    }
-    return null;
+    return (s != null && !s.isEmpty()) ?
+      FormatUtils.verifyFormatThrowing(
+        ( _s ) -> new MessageFormat(_s, Locale.ENGLISH),
+        s, testArgs,
+        (resultVerifier != null) ? resultVerifier : StringUtils::isNotEmpty,
+        null) :
+      null;
   }
 
 
