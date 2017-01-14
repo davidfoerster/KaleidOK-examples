@@ -14,15 +14,10 @@ public class NotificationTreeTableCell<T, U, N extends Node>
     TreeItem<ReadOnlyProperty<T>> newItem, EditorNodeInfo<N, T> oldNodeInfo,
     EditorNodeInfo<N, T> newNodeInfo )
   {
-    if (oldNodeInfo != null && !oldNodeInfo.isEmpty())
-    {
-      graphicProperty().unbind();
-    }
+    graphicProperty().unbind();
 
     if (newNodeInfo != null && !newNodeInfo.isEmpty())
-    {
       graphicProperty().bind(newNodeInfo.notificationNodeProperty());
-    }
 
     return newNodeInfo;
   }
