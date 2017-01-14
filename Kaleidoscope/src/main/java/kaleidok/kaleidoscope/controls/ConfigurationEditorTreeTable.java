@@ -118,9 +118,9 @@ public class ConfigurationEditorTreeTable
 
     private MyTreeItemProvider()
     {
-      //noinspection unchecked,RedundantCast
+      //noinspection unchecked
       super(
-        (List<? extends TreeItemProvider<Object, Node>>) (List<? extends TreeItemProvider<?,?>>)
+        (List<TreeItemProvider<Object, Node>>) (List<? extends TreeItemProvider<?,?>>)
         Arrays.asList(
           new CheckBoxTreeItemProvider(),
           new MultiLineTextTreeItemProvider<>(),

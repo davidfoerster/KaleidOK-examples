@@ -35,18 +35,16 @@ public class MultiTreeItemProvider<T, N extends Node>
   private final List<TreeItemProvider<T, N>> underlying;
 
 
-  @SuppressWarnings("unchecked")
   public MultiTreeItemProvider(
-    List<? extends TreeItemProvider<T, N>> underlying )
+    List<TreeItemProvider<T, N>> underlying )
   {
-    this.underlying =
-      (List<TreeItemProvider<T, N>>) underlying;
+    this.underlying = underlying;
   }
 
 
   public MultiTreeItemProvider()
   {
-    underlying = new ArrayList<>();
+    this(new ArrayList<>());
   }
 
 
