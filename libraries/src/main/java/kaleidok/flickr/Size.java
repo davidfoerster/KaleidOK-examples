@@ -24,6 +24,11 @@ public class Size implements Serializable
   public String source;
 
 
+  public Label getLabel()
+  {
+    return label;
+  }
+
   public enum Label
   {
     Square,
