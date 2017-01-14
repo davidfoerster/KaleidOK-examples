@@ -23,6 +23,9 @@ public class UriStringConverter extends StringConverter<URI>
   @Override
   public URI fromString( String string )
   {
+    if (string == null || string.isEmpty())
+      return null;
+
     URI value = URI.create(string);
 
     if (!value.isAbsolute() || value.isOpaque())
