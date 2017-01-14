@@ -6,6 +6,7 @@ import kaleidok.flickr.Photo;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.stream.StreamSupport;
 
 
 public class ChromatikResponse implements Serializable
@@ -42,7 +43,7 @@ public class ChromatikResponse implements Serializable
 
 
   public static ChromatikResponse deserialize( JsonElement jsonElement, Type type,
-    JsonDeserializationContext context )
+    final JsonDeserializationContext context )
     throws JsonParseException
   {
     assert type instanceof Class && ChromatikResponse.class.isAssignableFrom((Class<?>) type) :
@@ -51,13 +52,10 @@ public class ChromatikResponse implements Serializable
     JsonArray a = jsonElement.getAsJsonArray();
     ChromatikResponse response = new ChromatikResponse();
     response.hits = a.get(0).getAsInt();
-    final Result[] results =
-      new Result[a.size() - 1];
-    for (int i = 0; i < results.length; i++) {
-      results[i] =
-        context.deserialize(a.get(i + 1), Result.class);
-    }
-    response.results = results;
+    response.results =
+      StreamSupport.stream(a.spliterator(), false).skip(1)
+        .map((resultItem) -> context.deserialize(resultItem, Result.class))
+        .toArray(Result[]::new);
     return response;
   }
 }
