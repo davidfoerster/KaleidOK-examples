@@ -139,7 +139,7 @@ public class Flickr implements PreferenceBean
   }
 
 
-  protected URL getPhotoSizeUrl( String photoId )
+  protected URL getPhotoSizesUrl( String photoId )
   {
     try
     {
@@ -156,7 +156,7 @@ public class Flickr implements PreferenceBean
     throws FlickrException, IOException
   {
     try (JsonHttpConnection con =
-      JsonHttpConnection.openURL(getPhotoSizeUrl(photoId)))
+      JsonHttpConnection.openURL(getPhotoSizesUrl(photoId)))
     {
       return con.get(SizeMap.class);
     } catch (JsonParseException ex) {
