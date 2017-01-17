@@ -13,7 +13,7 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
   /**
    * No consistency checking for null values or incompatible formats is
    * performed!
-   **/
+   */
   public List<TarsosDSPAudioInputStream> streams;
 
   public MultiAudioInputStream()
@@ -102,14 +102,12 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
   }
 
 
-  public boolean isFormatCompatible( TarsosDSPAudioFormat format )
+  public boolean isFormatCompatible( final TarsosDSPAudioFormat format )
   {
-    for (TarsosDSPAudioInputStream stream: streams) {
-      TarsosDSPAudioFormat other = stream.getFormat();
-      if (format != other && !format.matches(other))
-        return false;
-    }
-    return true;
+    return streams.stream()
+      .map(TarsosDSPAudioInputStream::getFormat)
+      .allMatch((streamFormat) ->
+        format == streamFormat || format.matches(streamFormat));
   }
 
 
