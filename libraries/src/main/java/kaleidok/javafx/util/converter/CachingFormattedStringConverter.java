@@ -37,7 +37,7 @@ public class CachingFormattedStringConverter<T, F extends Format>
   public String toString( T value )
   {
     if (value == null)
-      return "";
+      return null;
 
     if (value.equals(toStringCachedValue))
       return toStringCachedString;

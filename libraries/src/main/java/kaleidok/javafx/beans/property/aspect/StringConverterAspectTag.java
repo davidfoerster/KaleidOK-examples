@@ -24,7 +24,7 @@ public class StringConverterAspectTag<T>
 
   @SuppressWarnings("rawtypes")
   @Override
-  protected final Class<? extends PropertyAspectTag> getTagClass()
+  protected final Class<StringConverterAspectTag> getTagClass()
   {
     return StringConverterAspectTag.class;
   }

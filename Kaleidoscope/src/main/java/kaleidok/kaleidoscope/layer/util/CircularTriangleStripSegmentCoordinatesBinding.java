@@ -32,12 +32,12 @@ public class CircularTriangleStripSegmentCoordinatesBinding
       new float[Math.multiplyExact(segmentCount.get(), DIMENSIONS)];
     final double step = Math.PI * 2 / segmentCoords.length;  // generate the step size based on the number of segments
 
-    // pre-calculate x and y based on angle and store values in two arrays
+    // pre-calculate x and y based on angle and store values interleaved in an array
     for (int i = segmentCoords.length - DIMENSIONS; i >= 0; i -= DIMENSIONS)
     {
-      double theta = step * i; // angle for this segment
-      segmentCoords[i] = (float) Math.sin(theta);
-      segmentCoords[i + 1] = (float) Math.cos(theta);
+      double θ = step * i; // angle for this segment
+      segmentCoords[i] = (float) Math.sin(θ);
+      segmentCoords[i + 1] = (float) Math.cos(θ);
     }
 
     return segmentCoords;

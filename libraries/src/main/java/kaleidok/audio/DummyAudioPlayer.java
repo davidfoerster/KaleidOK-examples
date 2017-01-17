@@ -92,14 +92,13 @@ public class DummyAudioPlayer implements AudioProcessor
    * @return  A Runnable to use in your audio dispatcher thread
    */
   public Runnable addToDispatcher( final AudioDispatcher audioDispatcher,
-    Runnable chained )
+    final Runnable chained )
   {
-    final Runnable _chained = (chained != null) ? chained : audioDispatcher;
     return () -> {
         audioDispatcher.addAudioProcessor(DummyAudioPlayer.this);
         startTime = System.nanoTime();
         startTimeSet = true;
-        _chained.run();
+        ((chained != null) ? chained : audioDispatcher).run();
       };
   }
 }

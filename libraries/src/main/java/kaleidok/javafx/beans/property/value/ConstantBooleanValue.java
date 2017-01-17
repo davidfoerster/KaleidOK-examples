@@ -38,4 +38,11 @@ public final class ConstantBooleanValue extends ConstantValueBase<Boolean>
   {
     return value;
   }
+
+
+  @Override
+  protected void valueToString( StringBuilder sb )
+  {
+    sb.append(value);
+  }
 }

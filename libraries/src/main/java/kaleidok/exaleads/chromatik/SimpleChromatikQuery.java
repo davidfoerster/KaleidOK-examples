@@ -73,7 +73,7 @@ public class SimpleChromatikQuery extends ChromatikQuery
   }
 
 
-  @SuppressWarnings({ "unchecked", "CloneCallsConstructors" })
+  @SuppressWarnings("unchecked")
   @Override
   public SimpleChromatikQuery clone()
   {

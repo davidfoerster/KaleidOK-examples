@@ -99,6 +99,11 @@ public final class Math
     return x * x;
   }
 
+  public static double square( double x )
+  {
+    return x * x;
+  }
+
 
   public static final double LN2 = 0.69314718055994528622;
 

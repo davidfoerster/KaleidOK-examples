@@ -88,7 +88,6 @@ public class SimpleChromasthetiator<F extends Flickr>
   }
 
 
-  @SuppressWarnings("CloneCallsConstructors")
   @Override
   public SimpleChromasthetiator<F> clone()
   {

@@ -157,7 +157,7 @@ public class OuterMovingShape extends CircularImageLayer
   {
     final PApplet parent = this.parent;
     final int wireframe = this.wireframe.get();
-    final float outerRadius = (float) this.outerRadius.get();
+    final float outerRadius = this.outerRadius.floatValue();
 
     if (wireframe >= 2) {
       parent.stroke(192, 0, 0);

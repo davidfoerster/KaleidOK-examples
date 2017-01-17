@@ -129,14 +129,14 @@ public class FoobarLayer extends CircularImageLayer
       () -> {
           float innerOffset = FoobarLayer.this.innerOffset.floatValue();
           return innerOffset +
-            (1 - innerOffset) * (1 - (float) scaleFactor.get());
+            (1 - innerOffset) * (1 - scaleFactor.floatValue());
         },
       innerOffset, scaleFactor);
 
 
   private final FloatBinding innerScale =
     Bindings.createFloatBinding(
-      () -> (1 - innerOffset.floatValue()) * (float) scaleFactor.get(),
+      () -> (1 - innerOffset.floatValue()) * scaleFactor.floatValue(),
       innerOffset, scaleFactor);
 
 
@@ -146,8 +146,8 @@ public class FoobarLayer extends CircularImageLayer
     final PApplet parent = this.parent;
     final int wireframe = this.wireframe.get();
     final float
-      innerRadius = (float) this.innerRadius.get(),
-      outerRadius = (float) this.outerRadius.get(),
+      innerRadius = this.innerRadius.floatValue(),
+      outerRadius = this.outerRadius.floatValue(),
       innerOffset = this.innerOffset.floatValue(),
       outerOffset = this.outerOffset.get(),
       innerScale = this.innerScale.get(),
@@ -156,8 +156,8 @@ public class FoobarLayer extends CircularImageLayer
     final float
       // Wrap around the run time every ~1.1 h but preserve noise precision after that time
       runTime = parent.millis() & (FloatConsts.SIGNIF_BIT_MASK >>> 1),
-      fc1 = runTime * (float) innerNoiseFrequency.get(),
-      fc2 = runTime * (float) outerNoiseFrequency.get();
+      fc1 = runTime * innerNoiseFrequency.floatValue(),
+      fc2 = runTime * outerNoiseFrequency.floatValue();
 
     if (wireframe >= 2)
     {
@@ -168,7 +168,7 @@ public class FoobarLayer extends CircularImageLayer
       drawDebugCircle(outerRadius);
 
       float
-        scaleFactor = (float) this.scaleFactor.get(),
+        scaleFactor = this.scaleFactor.floatValue(),
         innerScaled = mapNormalized(scaleFactor, innerRadius, outerRadius),
         //innerScaled = map(scaleFactor, 0, 1, innerRadius, outerRadius),
         outerScaled = mapNormalized(scaleFactor, outerRadius, innerRadius),

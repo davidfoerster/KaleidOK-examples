@@ -117,12 +117,12 @@ public class SpectrogramLayer extends CircularImageLayer
   {
     final PApplet parent = this.parent;
     final int wireframe = this.wireframe.get();
-    final float outerRadius = (float) this.outerRadius.get();
+    final float outerRadius = this.outerRadius.floatValue();
 
     if (wireframe >= 2)
     {
       parent.stroke(0, 192, 0);
-      drawDebugCircle((float) innerRadius.get());
+      drawDebugCircle(innerRadius.floatValue());
       parent.stroke(128, 255, 128);
       drawDebugCircle(outerRadius);
     }
@@ -134,7 +134,7 @@ public class SpectrogramLayer extends CircularImageLayer
     final float
       scaledInnerRadius = this.scaledInnerRadius.floatValue(),
       outerScale = 1 - scaledInnerRadius,
-      scaleFactor = (float) this.scaleFactor.get();
+      scaleFactor = this.scaleFactor.floatValue();
     final double exponent = this.exponent.get();
     final int segmentCount = this.segmentCount.get();
     assert segmentCount <= avgSpectrum.size() :

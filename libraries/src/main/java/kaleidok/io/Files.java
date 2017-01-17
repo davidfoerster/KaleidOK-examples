@@ -27,12 +27,14 @@ public final class Files
   @SuppressWarnings("OctalInteger")
   public static Set<PosixFilePermission> permissionsFromMask( int mask )
   {
-    if ((mask & 0777) == 0777)
+    mask &= 0777;
+
+    if (mask == 0777)
       return EnumSet.allOf(PosixFilePermission.class);
 
     final EnumSet<PosixFilePermission> dst =
       EnumSet.noneOf(PosixFilePermission.class);
-    if ((mask & 0777) != 0)
+    if (mask != 0)
     {
       int maxOrdinal = posixFilePermissions.size() - 1;
       for (PosixFilePermission p: posixFilePermissions)

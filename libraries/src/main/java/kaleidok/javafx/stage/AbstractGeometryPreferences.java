@@ -57,9 +57,7 @@ public abstract class AbstractGeometryPreferences<G> implements PreferenceBean
     Preferences preferences = Preferences.userNodeForPackage(beanClass);
     String beanClassName =
       Reflection.getAnonymousClassSimpleName(beanClass);
-    String geometryKeyPrefix =
-      Reflection.getAnonymousClassSimpleName(beanClass) +
-        KEY_PART_DELIMITER + NAME;
+    String geometryKeyPrefix = beanClassName + KEY_PART_DELIMITER + NAME;
 
     if ((mode & POSITION) != 0)
     {

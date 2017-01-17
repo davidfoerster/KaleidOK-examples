@@ -6,6 +6,7 @@ import javafx.scene.control.Cell;
 import javafx.scene.control.TextField;
 import kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem;
 import kaleidok.javafx.scene.control.cell.EditorNodeInfo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
@@ -29,7 +30,8 @@ public class TextFieldItemProvider extends FilteredTreeItemProvider<String, Text
     textField.setEditable(true);
     textField.setOnAction(TextFieldItemProvider::actionEventHandler);
     return EditorNodeInfo.of(textField,
-      (c, v) -> c.getEditorNode().setText((v != null) ? v : ""),
+      (cell, value) ->
+        cell.getEditorNode().setText(StringUtils.defaultString(value)),
       null);
   }
 

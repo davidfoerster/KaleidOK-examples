@@ -182,7 +182,7 @@ public class MultiTreeItemProvider<T, N extends Node>
   @Override
   public int hashCode()
   {
-    return underlying.hashCode();
+    return underlying.hashCode() ^ 0xab98d62e;
   }
 
   @Override

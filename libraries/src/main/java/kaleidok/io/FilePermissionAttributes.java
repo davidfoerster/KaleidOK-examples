@@ -14,7 +14,10 @@ public class FilePermissionAttributes implements FileAttribute<Set<PosixFilePerm
   public FilePermissionAttributes( Set<PosixFilePermission> permissions )
   {
     if (permissions.contains(null))
-      throw new NullPointerException();
+    {
+      throw new NullPointerException(
+        "The permission set contains a null element.");
+    }
     this.permissions = Collections.unmodifiableSet(permissions);
   }
 
