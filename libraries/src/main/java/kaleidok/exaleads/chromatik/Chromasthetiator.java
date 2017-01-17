@@ -126,11 +126,23 @@ public abstract class Chromasthetiator<F extends Flickr>
     EmotionalState synState, Map<Serializable, Serializable> opts,
     Random random )
   {
-    if (opts == null)
-      opts = new HashMap<>();
-
     int maxColors = getMaxColors();
-    if (maxColors > 0)
+    int colorCount;
+    if (opts != null)
+    {
+      colorCount = !opts.isEmpty() ?
+        (int) opts.keySet().stream()
+          .filter((k) -> k instanceof ChromatikColor)
+          .count() :
+        0;
+    }
+    else
+    {
+      opts = new HashMap<>(maxColors * 2);
+      colorCount = 0;
+    }
+
+    if (maxColors > colorCount)
     {
       Emotion emo = synState.getStrongestEmotion();
 
@@ -145,11 +157,13 @@ public abstract class Chromasthetiator<F extends Flickr>
 
       for (int c : palette)
       {
-        if (opts.size() >= maxColors)
+        if (colorCount >= maxColors)
           break;
         ChromatikColor cc = new ChromatikColor(c);
         if (opts.put(cc, weight) == null)
         {
+          colorCount++;
+
           if (logger.isLoggable(Level.FINE))
           {
             if (fmt == null)
