@@ -6,6 +6,7 @@ import kaleidok.flickr.Flickr;
 import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.flickr.SizeMap;
+import kaleidok.util.Math;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
 
@@ -14,6 +15,8 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.Math.max;
 import static java.lang.Math.sqrt;
@@ -113,8 +116,9 @@ public abstract class Chromasthetiator<F extends Flickr>
       Emotion emo = synState.getStrongestEmotion();
       if (emo.getType() != Emotion.NEUTRAL)
       {
-        keywords = String.join(" ", findStrongestAffectWords(
-          synState.getAffectWords(), getMaxKeywords()));
+        keywords =
+          findStrongestAffectWords(synState.getAffectWords(), getMaxKeywords())
+            .collect(Collectors.joining(" "));
         logger.log(Level.FINE, "Selected keywords: {0}", keywords);
       }
     }
@@ -275,26 +279,17 @@ public abstract class Chromasthetiator<F extends Flickr>
   }
 
 
-  private static List<String> findStrongestAffectWords(
-    Collection<AffectWord> affectWords, int maxCount)
+  private static Stream<String> findStrongestAffectWords(
+    Collection<AffectWord> affectWords, int maxCount )
   {
-    if (maxCount < 0 || maxCount > affectWords.size())
-      maxCount = affectWords.size();
-    if (maxCount == 0)
-      return Collections.emptyList();
-
-    ArrayList<String> resultWords = new ArrayList<>(maxCount);
-    Comparator<AffectWord> comp = AffectWord.SquareWeightSumComparator.INSTANCE;
-
-    if (maxCount == 1) {
-      resultWords.add(Collections.max(affectWords, comp).getWord());
-    } else {
-      AffectWord[] a = affectWords.toArray(new AffectWord[affectWords.size()]);
-      Arrays.sort(a, comp);
-      final int limit = affectWords.size() - maxCount;
-      for (int i = affectWords.size() - 1; i >= limit; i--)
-        resultWords.add(a[i].getWord());
-    }
-    return resultWords;
+    return (maxCount > 0 && !affectWords.isEmpty()) ?
+      affectWords.stream()
+        .map(
+          (aw) -> new AbstractMap.SimpleEntry<>(
+            aw.getWord(), aw.getWeights().map(Math::square).sum()))
+        .sorted(Map.Entry.comparingByValue())
+        .limit(maxCount)
+        .map(Map.Entry::getKey) :
+      Stream.empty();
   }
 }
