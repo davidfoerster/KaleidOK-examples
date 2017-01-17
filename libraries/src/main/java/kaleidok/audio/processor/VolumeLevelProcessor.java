@@ -6,7 +6,7 @@ import be.tarsos.dsp.AudioProcessor;
 
 public class VolumeLevelProcessor implements AudioProcessor
 {
-  private double level = Double.NaN;
+  private volatile double level = Double.NaN;
 
 
   public double getLevel()
