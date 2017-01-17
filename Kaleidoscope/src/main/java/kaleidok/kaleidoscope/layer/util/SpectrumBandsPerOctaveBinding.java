@@ -81,7 +81,8 @@ public class SpectrumBandsPerOctaveBinding extends IntegerBinding
 
     public void apply( int value )
     {
-      processor.logAverages(MIN_FREQUENCY, value);
+      processor.setAverageParams(
+        MinimFFTProcessor.AverageType.LOGARITHMIC, MIN_FREQUENCY, value);
     }
   }
 }

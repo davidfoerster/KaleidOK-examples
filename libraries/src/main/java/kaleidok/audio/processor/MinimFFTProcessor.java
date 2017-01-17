@@ -4,11 +4,12 @@ import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
 import ddf.minim.analysis.FFT;
 import kaleidok.audio.spectrum.Spectrum;
+import org.apache.commons.lang3.ArrayUtils;
 
 
 public class MinimFFTProcessor implements AudioProcessor, Spectrum
 {
-  private enum AverageType {
+  public enum AverageType {
     NONE, LINEAR, LOGARITHMIC
   }
 
@@ -21,36 +22,12 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
 
   private AverageType avgType = AverageType.NONE;
 
-  private int avgParam1, avgParam2;
+  private int[] avgParams = ArrayUtils.EMPTY_INT_ARRAY;
 
 
   public MinimFFTProcessor( int bufferSize )
   {
     this.sampleBuffer = new float[bufferSize];
-  }
-
-
-  public void noAverages()
-  {
-    avgType = AverageType.NONE;
-    updateAverages();
-  }
-
-
-  public void linAverages( int bands )
-  {
-    avgType = AverageType.LINEAR;
-    avgParam1 = bands;
-    updateAverages();
-  }
-
-
-  public void logAverages( int minBandwidth, int bandsPerOctave )
-  {
-    avgType = AverageType.LOGARITHMIC;
-    avgParam1 = minBandwidth;
-    avgParam2 = bandsPerOctave;
-    updateAverages();
   }
 
 
@@ -63,14 +40,29 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
         break;
 
       case LINEAR:
-        fft.linAverages(avgParam1);
+        fft.linAverages(avgParams[0]);
         break;
 
       case LOGARITHMIC:
-        fft.logAverages(avgParam1, avgParam2);
+        fft.logAverages(avgParams[0], avgParams[1]);
         break;
       }
     }
+  }
+
+
+  public void setAverageParams( AverageType type, int... params )
+  {
+    if (params.length != type.ordinal())
+    {
+      throw new IllegalArgumentException(String.format(
+        "Average type %s requires exactly %d parameters, not %d",
+        type.name(), type.ordinal(), params.length));
+    }
+
+    avgType = type;
+    avgParams = params;
+    updateAverages();
   }
 
 
