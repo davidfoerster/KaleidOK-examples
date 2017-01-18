@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 
 import static be.tarsos.dsp.io.jvm.AudioDispatcherFactory.fromDefaultMicrophone;
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
+import static kaleidok.util.AbstractResourceWrapper.closeExceptional;
 import static kaleidok.util.Math.isPowerOfTwo;
 
 
@@ -218,6 +219,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
           }
           else
           {
+            //noinspection resource,IOResourceOpenedButNotSafelyClosed
             ais = new ContinuousAudioInputStream(audioSource);
           }
           audioDispatcher =
@@ -584,11 +586,12 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
             InputStream is = item.url.openStream();
             try
             {
+              //noinspection resource,IOResourceOpenedButNotSafelyClosed
               ais = new ContinuousAudioInputStream(is);
             }
             catch (IOException | UnsupportedAudioFileException ex)
             {
-              is.close();
+              closeExceptional(is, ex);
               throw ex;
             }
           }
@@ -598,17 +601,17 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
           }
           else if (!ais.getFormat().matches(format))
           {
-            ais.close();
-            throw new UnsupportedAudioFileException(String.format(
-              "Mismatching audio formats: \"%s\" vs. \"%s\"",
-              ais.getFormat(), format));
+            throw closeExceptional(ais,
+              new UnsupportedAudioFileException(String.format(
+                "Mismatching audio formats: \"%s\" vs. \"%s\"",
+                ais.getFormat(), format)));
           }
           audioInputStream.streams.add(ais);
         }
       }
       catch (IOException | UnsupportedAudioFileException ex)
       {
-        audioInputStream.clear();
+        closeExceptional(audioInputStream::clear, ex);
         throw ex;
       }
 
@@ -677,6 +680,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
         return;
 
       MultiAudioInputStream ais = audioInputStream;
+      //noinspection resource
       double streamLength =
         ais.getCurrentStream().getFrameLength() /
           (double) ais.getFormat().getSampleRate();
