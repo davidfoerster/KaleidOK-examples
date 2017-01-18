@@ -34,9 +34,6 @@ import processing.event.KeyEvent;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.Timer;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.FileReader;
 import java.io.IOError;
 import java.io.IOException;
@@ -44,6 +41,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
@@ -468,7 +468,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
-  private ReplayAction replayAction = null;
+  private volatile ReplayAction replayAction = null;
 
 
   private synchronized ReplayAction getReplayAction()
@@ -531,14 +531,26 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
   }
 
 
-  public static final class ReplayAction extends Plugin<Kaleidoscope>
-    implements ActionListener
+  @Override
+  public void keyEvent( KeyEvent ev )
   {
+    ReplayAction replayAction = this.replayAction;
+    if (replayAction != null)
+      replayAction.keyEvent(ev);
+  }
+
+
+  public static final class ReplayAction extends TimerTask
+  {
+    private final Kaleidoscope p;
+
     private final ReplayList replayList;
 
     public final MultiAudioInputStream audioInputStream;
 
     public final Timer timer;
+
+    private volatile boolean running = false;
 
     private volatile int idx = -1;
 
@@ -554,12 +566,10 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     private ReplayAction( Kaleidoscope sketch, ReplayList replayList )
       throws IOException, JsonParseException, UnsupportedAudioFileException
     {
-      super(sketch);
-
-      this.replayList = replayList;
+      this.p = Objects.requireNonNull(sketch, "sketch");
+      this.replayList = Objects.requireNonNull(replayList, "replayList");
       audioInputStream = makeMultiAudioStream(replayList.items);
-      timer = new Timer(0, this);
-      timer.setRepeats(false);
+      timer = new Timer("ReplayAction timer", true);
 
       logger.log(Level.CONFIG,
         "Replaying recorded interaction \"{0}\"", replayList.name);
@@ -619,7 +629,6 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
     }
 
 
-    @Override
     public void keyEvent( KeyEvent ev )
     {
       if (ev.getAction() == KeyEvent.TYPE) {
@@ -634,11 +643,13 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
     private boolean checkRunning()
     {
-      if (timer.isRunning()) {
-        System.err.println("Please wait for the current replay action to finish!");
-        return true;
+      boolean running = this.running;
+      if (running)
+      {
+        System.err.println(
+          "Please wait for the current replay action to finish!");
       }
-      return false;
+      return running;
     }
 
 
@@ -684,8 +695,7 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       double streamLength =
         ais.getCurrentStream().getFrameLength() /
           (double) ais.getFormat().getSampleRate();
-      timer.setInitialDelay((int)(streamLength * 1e3));
-      timer.start();
+      timer.schedule(this, (long)(streamLength * 1e3));
 
       logger.log(Level.FINE,
         "Playing back audio file {0} of {1}",
@@ -694,8 +704,10 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
 
     @Override
-    public void actionPerformed( ActionEvent ev )
+    public void run()
     {
+      running = true;
+
       if (!p.getSTT().enableResponseHandlerProperty().get())
       {
         p.getChromasthetiationService()
@@ -703,6 +715,8 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
       }
 
       doNextReplayItem();
+
+      running = false;
     }
   }
 
