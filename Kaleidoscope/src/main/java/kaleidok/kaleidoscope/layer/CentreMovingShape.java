@@ -82,7 +82,7 @@ public class CentreMovingShape extends CircularImageLayer
    * Manages the exponent for the dynamic range adjustment of the volume level
    * before deriving the radius:
    * <pre>
-   * radius = level ^ exp
+   * radius = level<sup>exp</sup>
    * </pre>
    * where {@code level} is assumed to lie between 0 and 1, so that the same
    * can be true for {@code radius}.
@@ -107,7 +107,7 @@ public class CentreMovingShape extends CircularImageLayer
    * Draws the rotated circle with a volume-dependent radius. The volume level
    * is scaled according to a power function:
    * <pre>
-   * l = (a * x) ^ exponent
+   * l = (a ⋅ x)<sup>exponent</sup>
    * </pre>
    * where {@code a} is the value of
    * <code>{@link #scaleFactorProperty()}</code>.

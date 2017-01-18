@@ -24,10 +24,13 @@ import static kaleidok.util.Math.map;
  * Draws a shape that is rotated with a speed depending on the logarithm of the
  * pitch frequency of an audio signal. The rough relation between the two is:
  * <pre>
- * v = (a * log(pitchFrequency) + b) / frameRate
+ * v = (a ⋅ log(pitchFrequency) + b) ÷ frameRate
  * </pre>
- * Where {@code a} and {@code b} are some suitable values and {@code v} is the
- * angular velocity.
+ * Where {@code a} and {@code b} are derived from
+ * {@link #pitchToAngleMapMinPitchProperty()},
+ * {@link #pitchToAngleMapMaxPitchProperty()},
+ * {@link #pitchToAngleMapMinAngleProperty()}, and
+ * {@link #pitchToAngleMapMaxAngleProperty()}.
  *
  * @see PitchProcessor
  */

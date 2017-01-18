@@ -101,7 +101,7 @@ public class SpectrogramLayer extends CircularImageLayer
    * Draws the current spectrogram around a ring. The spectral lines are scaled
    * according to a power function:
    * <pre>
-   * l = (a * x) ^ exponent
+   * l = (a ⋅ x)<sup>exponent</sup>
    * </pre>
    * where {@code a} is the result of
    * <code>{@link #scaleFactorProperty()}</code>.
