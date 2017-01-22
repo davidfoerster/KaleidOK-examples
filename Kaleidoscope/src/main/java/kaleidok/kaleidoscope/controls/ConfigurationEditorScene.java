@@ -128,7 +128,7 @@ public class ConfigurationEditorScene extends Scene
     {
       ex.printStackTrace();
       final String message = String.format(
-        "Couldn't import preferences from \"%s\": %s",
+        "Couldn’t import preferences from \"%s\": %s",
         f, ex.getLocalizedMessage());
       Platform.runLater(() -> showAlertDialog(message));
       return false;
@@ -165,7 +165,7 @@ public class ConfigurationEditorScene extends Scene
     {
       ex.printStackTrace();
       final String message = String.format(
-        "Couldn't export preferences to \"%s\": %s",
+        "Couldn’t export preferences to \"%s\": %s",
         f, ex.getLocalizedMessage());
       Platform.runLater(() -> showAlertDialog(message));
       return false;

@@ -70,7 +70,7 @@ public class DecoderMap
     if (!Modifier.isPublic(value.getModifiers()))
     {
       throw new IllegalArgumentException(new IllegalAccessException(
-        value + " isn't public"));
+        value + " isn’t public"));
     }
     if (!Arrays.equals(value.getParameters(), decoderConstructorParams))
     {
@@ -96,7 +96,7 @@ public class DecoderMap
     if (!FilterInputStream.class.isAssignableFrom(clazz))
     {
       throw new IllegalArgumentException(new ClassCastException(
-        clazz.getName() + " doesn't extend " +
+        clazz.getName() + " doesn’t extend " +
           FilterInputStream.class.getCanonicalName()));
     }
   }

@@ -61,7 +61,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
   protected void doHandle( HttpExchange t ) throws IOException
   {
     if (transcriptionService == null)
-      throw new IllegalStateException("Transcription service wasn't set");
+      throw new IllegalStateException("Transcription service wasn’t set");
 
     String contextPath = t.getHttpContext().getPath(),
       uriPath = t.getRequestURI().getPath(),
@@ -143,7 +143,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       fastAssert(duration <= stt.getMaxTranscriptionInterval(),
         "FLAC stream duration exceeds maximum transcription interval");
     } else {
-      logger.finest("Couldn''t determine duration of the submitted audio record");
+      logger.finest("Couldn’t determine duration of the submitted audio record");
     }
 
     byte[] transcriptionResult = normalTranscriptionResult;
@@ -191,7 +191,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     catch (IOException ex)
     {
       logger.log(Level.WARNING,
-        "Your system configuration doesn''t permit the validation of submitted audio data",
+        "Your system configuration doesn’t permit the validation of submitted audio data",
         ex);
       return Double.NaN;
     }
@@ -216,7 +216,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     fileOutput = fileOutput.substring(p + 2);
     String[] fileSpec = fileOutput.split(", ");
     fastAssert(fileSpec[0].startsWith("FLAC"),
-      "The sent data doesn't look like a FLAC stream: " + fileOutput);
+      "The sent data doesn’t look like a FLAC stream: " + fileOutput);
 
     double sampleRate = Double.NaN;
     long sampleCount = -1;
@@ -257,9 +257,9 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     }
 
     fastAssert(sampleRate > 0 && Double.isFinite(sampleRate),
-      "Couldn't determine sample rate of submitted audio stream");
+      "Couldn’t determine sample rate of submitted audio stream");
     fastAssertFmt(sampleRate == expectedSampleRate,
-      "Sample rate of submitted audio stream (%f) doesn't match expectation (%f)",
+      "Sample rate of submitted audio stream (%f) doesn’t match expectation (%f)",
       sampleRate, expectedSampleRate);
 
     return (sampleCount >= 0) ? sampleCount / sampleRate : Double.NaN;

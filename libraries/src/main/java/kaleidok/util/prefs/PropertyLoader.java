@@ -109,7 +109,7 @@ public final class PropertyLoader
          resourceAndFilePath.charAt(0) == File.separatorChar))
     {
       throw new IllegalArgumentException(
-        "Can't use an absolute resource and path name here");
+        "Can’t use an absolute resource and path name here");
     }
 
     String[] a = { resourceAndFilePath };

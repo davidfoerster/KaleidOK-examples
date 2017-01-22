@@ -33,13 +33,13 @@ public class RGBImageFilterFormat extends Format
       argumentEnclosingEnd <= SPACE)
     {
       throw new IllegalArgumentException(
-        "The delimiters and enclosures mustn't be spaces or control characters");
+        "The delimiters and enclosures mustn’t be spaces or control characters");
     }
     if (argumentDelimiter == argumentEnclosingStart ||
       argumentDelimiter == argumentEnclosingEnd)
     {
       throw new IllegalArgumentException(
-        "The argument delimiter mustn't be equal to one of the enclosing characters");
+        "The argument delimiter mustn’t be equal to one of the enclosing characters");
     }
 
     this.argumentDelimiter = argumentDelimiter;

@@ -25,7 +25,7 @@ public class ContinuousAudioInputStream implements ResettableAudioStream
     throws IOException
   {
     if (!source.markSupported())
-      throw new IllegalArgumentException("Source doesn't support marks for rewinding");
+      throw new IllegalArgumentException("Source doesn’t support marks for rewinding");
 
     format = JVMAudioInputStream.toTarsosDSPFormat(source.getFormat());
     int frameSize = format.getFrameSize();

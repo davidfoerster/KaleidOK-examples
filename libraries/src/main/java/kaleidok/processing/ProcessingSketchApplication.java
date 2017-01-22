@@ -51,7 +51,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     if (sketch != null)
       return sketch;
 
-    throw new IllegalStateException(this + " hasn't been initialized");
+    throw new IllegalStateException(this + " hasn’t been initialized");
   }
 
 
@@ -145,7 +145,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     {
       throw new UnsupportedOperationException(
         "The sketch class " + sketch.getClass().getName() +
-          " isn't derived from " + ExtPApplet.class.getName());
+          " isn’t derived from " + ExtPApplet.class.getName());
     }
 
     if (placement == null)

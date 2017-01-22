@@ -52,7 +52,7 @@ public class ExportService extends ITextExport
     catch (IOException ex)
     {
       logThrown(logger, Level.SEVERE,
-        "Couldn''t instantiate PDF export to {0}",
+        "Couldn’t instantiate PDF export to {0}",
         ex, outputPath);
       return null;
     }

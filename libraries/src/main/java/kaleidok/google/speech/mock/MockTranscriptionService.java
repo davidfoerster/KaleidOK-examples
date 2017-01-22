@@ -114,7 +114,7 @@ public class MockTranscriptionService extends TranscriptionServiceBase
     if (!Objects.equals(apiBase, this.apiBase.get()))
     {
       logger.log(Level.CONFIG,
-        "Trying to set property \"{0}\" to \"{1}\" but it''s part of a mock " +
+        "Trying to set property \"{0}\" to \"{1}\" but it’s part of a mock " +
           "implementation and therefore read-only.",
         new Object[]{ this.apiBase.getName(), apiBase });
     }

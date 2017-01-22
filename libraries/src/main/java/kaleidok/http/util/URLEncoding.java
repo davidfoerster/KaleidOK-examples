@@ -419,7 +419,7 @@ public final class URLEncoding
   private static int countEscapeSequences( CharSequence s, int begin, final int end )
   {
     assert 0 <= begin && begin <= end && end <= s.length() :
-      String.format("0 ≤ %d ≤ %d ≤ %d doesn't hold", begin, end, s.length());
+      String.format("0 ≤ %d ≤ %d ≤ %d doesn’t hold", begin, end, s.length());
     int escapedCount = 0;
     while (begin < end) {
       if (s.charAt(begin++) == ESCAPE_PREFIX) {

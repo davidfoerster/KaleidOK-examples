@@ -64,7 +64,7 @@ public final class Reflection
     if (!baseClass.isAssignableFrom(clazz))
     {
       throw new IllegalArgumentException(
-        clazz.getName() + " doesn't derive from " + baseClass.getName());
+        clazz.getName() + " doesn’t derive from " + baseClass.getName());
     }
 
     Type type = clazz.getGenericSuperclass();

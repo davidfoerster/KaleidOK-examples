@@ -227,7 +227,7 @@ public class MimeTypeMap extends FreezableMap<String, Float>
 
   private static String getMismatchError( String mime )
   {
-    return String.format("\"%s\" isn't a MIME type matching \"%s\"",
+    return String.format("\"%s\" isn’t a MIME type matching \"%s\"",
       mime, MIME_TYPE_PATTERN.pattern());
   }
 }

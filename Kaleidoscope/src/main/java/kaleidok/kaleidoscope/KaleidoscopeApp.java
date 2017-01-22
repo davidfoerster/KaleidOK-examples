@@ -157,7 +157,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
     } else {
       ex = new FileNotFoundException(iconPathname);
     }
-    logger.log(Level.WARNING, "Couldn''t load application icon", ex);
+    logger.log(Level.WARNING, "Couldn’t load application icon", ex);
     return Collections.emptyList();
   }
 

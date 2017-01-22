@@ -96,7 +96,7 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
 
     // Check for array bean
     if (useDefaultPrefix && prefix == null && beanClass.isArray())
-      throw new IllegalArgumentException("arrays aren't beans");
+      throw new IllegalArgumentException("arrays aren’t beans");
 
     return beanClass;
   }
@@ -190,7 +190,7 @@ public abstract class ReadOnlyPropertyPreferencesAdapter<T, P extends ReadOnlyPr
     {
       if (logger != null)
       {
-        logThrown(logger, Level.WARNING, "Couldn''t save preference {0}/{1}", ex,
+        logThrown(logger, Level.WARNING, "Couldn’t save preference {0}/{1}", ex,
           new Object[]{ preferences.absolutePath(), key });
       }
     }

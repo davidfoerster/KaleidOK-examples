@@ -105,7 +105,7 @@ public class CallablePImageReaderBase implements Callable<PImage>
 
     Resources res = this.resources.get();
     if (res == null)
-      throw new IllegalStateException(this + " hasn't been initialized");
+      throw new IllegalStateException(this + " hasn’t been initialized");
 
     Image img;
     try

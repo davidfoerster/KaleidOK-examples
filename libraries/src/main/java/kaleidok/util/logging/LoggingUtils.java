@@ -61,7 +61,7 @@ public final class LoggingUtils
     catch (IOException ex)
     {
       logThrown(Logger.getAnonymousLogger(), Level.SEVERE,
-        "Couldn''t load default {0} file for {1}", ex,
+        "Couldn’t load default {0} file for {1}", ex,
         new Object[]{loggingFile, contextClass.getName()});
       return false;
     }

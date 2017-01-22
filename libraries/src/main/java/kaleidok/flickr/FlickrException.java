@@ -45,7 +45,7 @@ public class FlickrException extends Exception
   public void setPertainingObject( String pertainingObject )
   {
     if (this.pertainingObject != null)
-      throw new IllegalStateException("Can't change the pertaining object");
+      throw new IllegalStateException("Can’t change the pertaining object");
 
     if (pertainingObject != null)
     {

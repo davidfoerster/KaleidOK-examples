@@ -229,7 +229,7 @@ public abstract class Chromasthetiator<F extends Flickr>
 
 
     private static final String flickrErrorMessage =
-      "Couldn't retrieve Flickr image sizes";
+      "Couldn’t retrieve Flickr image sizes";
 
     @Override
     public SizeMap getSizes()

@@ -459,7 +459,7 @@ public final class LayerManager
     catch (IOException ex)
     {
       logThrown(logger, Level.SEVERE,
-        "Couldn''t load layer properties file \"{0}\"; using defaults", ex,
+        "Couldn’t load layer properties file \"{0}\"; using defaults", ex,
         propFn);
     }
     return PropertyLoader.toMap(layerProperties);
@@ -670,7 +670,7 @@ public final class LayerManager
     return
       (paragraphs.isEmpty() || paragraphs.stream().allMatch(StringUtils::isBlank)) ?
         new IllegalArgumentException(
-          "The initial image list shouldn't be empty") :
+          "The initial image list shouldn’t be empty") :
         null;
   }
 

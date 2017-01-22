@@ -41,7 +41,7 @@ public class CollectionStringConverter<E, C extends Collection<E>>
     this.elementToString = (obj) -> {
         String s = elementToString.apply(obj);
         if (s == null)
-          throw new NullPointerException("Can't join null string");
+          throw new NullPointerException("Can’t join null string");
         if (s.contains(delimiter))
           throw new IllegalArgumentException("List element contains delimiter");
         return s;

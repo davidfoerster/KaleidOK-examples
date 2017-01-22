@@ -297,7 +297,7 @@ public class ChromasthetiationService
             previousResults.getLeft().getMediumUrl());
         } else if (ex instanceof IOException) {
           ex = new IOException(
-            "Couldn't load sizes of " + previousResults.getLeft(), ex);
+            "Couldn’t load sizes of " + previousResults.getLeft(), ex);
         }
 
         Chromasthetiation.this.failed(ex);
@@ -346,7 +346,7 @@ public class ChromasthetiationService
       {
         logThrown(logger,
           (ex instanceof IOException) ? Level.SEVERE : Level.FINER,
-          "Couldn''t download {0}",
+          "Couldn’t download {0}",
           ex, getPhoto().getLargestImageSize().source);
 
         imageCallback.failed(ex);

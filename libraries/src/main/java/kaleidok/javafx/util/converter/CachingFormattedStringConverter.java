@@ -90,7 +90,7 @@ public class CachingFormattedStringConverter<T, F extends Format>
 
   protected Exception getParseException( String source, ParsePosition pos )
   {
-    return new ParseException("Couldn't parse source string",
+    return new ParseException("Couldn’t parse source string",
       pos.getErrorIndex());
   }
 
