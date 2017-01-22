@@ -105,9 +105,10 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   private synchronized Stage getConfigurationWindow()
   {
-    if (configurationWindow.get() == null)
+    Stage cw;
+    if ((cw = configurationWindow.get()) == null)
     {
-      Stage cw = new Stage();
+      cw = new Stage();
       cw.setTitle(getSketch().getName() + " Preferences");
       getConfigurationEditorScene().start(cw);
       configurationWindow.set(cw);
@@ -117,7 +118,7 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
       Platform.runLater(() ->
         configurationWindowPreferences.applyGeometryAndBind(configurationWindow.get()));
     }
-    return configurationWindow.get();
+    return cw;
   }
 
 
