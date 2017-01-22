@@ -74,7 +74,7 @@ public class KaleidoscopeControls extends BorderPane
     Image img = new Image(url, backgroundLoading);
     if (img.isError())
     {
-      logAssertion(KaleidoscopeControls.class, logger, Level.WARNING,
+      logAssertion(logger, Level.WARNING,
         "Couldn’t load icon: {0}", img.getException(), url);
     }
     return img;

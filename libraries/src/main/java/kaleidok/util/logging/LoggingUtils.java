@@ -109,4 +109,12 @@ public final class LoggingUtils
       throw new AssertionError(MessageFormat.format(msg, params), ex);
     }
   }
+
+
+  public static void logAssertion( Logger logger, Level level, String msg,
+    Throwable thrown, Object... params )
+  {
+    logAssertion(sun.reflect.Reflection.getCallerClass(), logger, level, msg,
+      thrown, params);
+  }
 }
