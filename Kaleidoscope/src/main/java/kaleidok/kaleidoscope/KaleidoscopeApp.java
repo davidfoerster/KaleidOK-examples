@@ -26,7 +26,6 @@ import kaleidok.kaleidoscope.controls.KaleidoscopeControls;
 import kaleidok.processing.PAppletFactory;
 import kaleidok.processing.ProcessingSketchApplication;
 import kaleidok.processing.SimplePAppletFactory;
-import kaleidok.util.AssertionUtils;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -277,7 +276,6 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   public static void main( String... args )
   {
-    AssertionUtils.enableAssertionsOnDebugging();
     launch(KaleidoscopeApp.class, args);
   }
 
