@@ -102,14 +102,7 @@ public final class LoggingUtils
   public static void logAssertion( Class<?> assertionClass, Logger logger,
     Level level, String msg, Throwable ex, Object... params )
   {
-    if (ex != null)
-    {
-      logThrown(logger, level, msg, ex, params);
-    }
-    else
-    {
-      logger.log(level, msg, params);
-    }
+    logThrown(logger, level, msg, ex, params);
 
     if (assertionClass.desiredAssertionStatus())
     {
