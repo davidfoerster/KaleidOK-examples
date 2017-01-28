@@ -43,7 +43,7 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
 
   @Override
   public T createInstance( ProcessingSketchApplication<T> context,
-    Consumer<T> callback, List<String> args )
+    Consumer<? super T> callback, List<String> args )
     throws InvocationTargetException
   {
     T sketch;
