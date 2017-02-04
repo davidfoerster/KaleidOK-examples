@@ -1,12 +1,12 @@
 package kaleidok.util.prefs;
 
+import kaleidok.net.UriUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -66,14 +66,8 @@ public final class PropertyLoader
     Stream<URI> resourceURIs = Stream.of(resourcePaths)
       .map((clazz != null) ? clazz::getResource : classLoader::getResource)
       .filter(Objects::nonNull)
-      .map((url) -> {
-          try {
-            return url.toURI();
-          } catch (URISyntaxException ex) {
-            // Cross our fingers that #getRsources() only returns simple, RFC-2396-compliant URLs
-            throw new AssertionError(ex);
-          }
-        });
+      // Cross our fingers that #getRsource() only returns simple, RFC-2396-compliant URLs.
+      .map(UriUtil.toUriFunction(AssertionError::new));
     Stream<URI> filesystemURIs = Stream.of(filesystemPaths)
       .map(File::new)
       .filter(File::exists)
@@ -81,19 +75,12 @@ public final class PropertyLoader
 
     URL[] urls = Stream.concat(resourceURIs, filesystemURIs).sequential()
       .distinct()
-      .map((uri) -> {
-          try {
-            return uri.toURL();
-          } catch (MalformedURLException ex) {
-            /*
-             * All URIs here either come from Class#getResource(),
-             * ClassLoader#getResource() or File#toUri(), all of which
-             * (should) return results that have a canonical URL
-             * representation.
-             */
-            throw new AssertionError(ex);
-          }
-        })
+      /*
+       * All URIs here either come from Class#getResource(),
+       * ClassLoader#getResource() or File#toUri(), all of which (should)
+       * return results that have a canonical URL representation.
+       */
+      .map(UriUtil.toUrlFunction(AssertionError::new))
       .toArray(URL[]::new);
 
     return load(prop, charset, urls);
