@@ -2,7 +2,7 @@ package kaleidok.flickr;
 
 import com.google.gson.JsonParseException;
 import kaleidok.util.concurrent.NestedFutureCallback;
-import kaleidok.http.async.JsonAsync;
+import kaleidok.net.http.async.JsonAsync;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
 

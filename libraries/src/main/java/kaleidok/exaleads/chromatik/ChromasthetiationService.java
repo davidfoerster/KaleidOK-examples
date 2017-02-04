@@ -2,13 +2,13 @@ package kaleidok.exaleads.chromatik;
 
 import kaleidok.exaleads.chromatik.Chromasthetiator.FlickrPhoto;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
-import kaleidok.http.responsehandler.PImageBaseResponseHandler;
+import kaleidok.net.http.responsehandler.PImageBaseResponseHandler;
 import kaleidok.util.Threads;
 import kaleidok.flickr.*;
 import kaleidok.util.concurrent.NestedFutureCallback;
 import kaleidok.util.containers.BoundedCompletionQueue;
-import kaleidok.http.async.ImageAsync;
-import kaleidok.http.async.JsonAsync;
+import kaleidok.net.http.async.ImageAsync;
+import kaleidok.net.http.async.JsonAsync;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Request;

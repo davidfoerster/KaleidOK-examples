@@ -4,7 +4,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
-import kaleidok.http.JsonHttpConnection;
+import kaleidok.net.http.JsonHttpConnection;
 import kaleidok.google.gson.TypeAdapterManager;
 import kaleidok.io.platform.PlatformPaths;
 import kaleidok.text.IMessageFormat;
@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 
 import static kaleidok.google.speech.STT.logger;
-import static kaleidok.http.HttpConnection.ConnectionState.CONNECTED;
+import static kaleidok.net.http.HttpConnection.ConnectionState.CONNECTED;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
 
 

@@ -2,8 +2,8 @@ package kaleidok.google.speech.mock;
 
 import kaleidok.google.speech.STT;
 import com.sun.net.httpserver.HttpExchange;
-import kaleidok.http.requesthandler.MockRequestHandlerBase;
-import kaleidok.http.util.Parsers;
+import kaleidok.net.http.requesthandler.MockRequestHandlerBase;
+import kaleidok.net.http.util.Parsers;
 import kaleidok.io.platform.PlatformPaths;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.*;
 
-import static kaleidok.http.util.URLEncoding.DEFAULT_CHARSET;
+import static kaleidok.net.http.util.URLEncoding.DEFAULT_CHARSET;
 import static kaleidok.io.Files.NO_ATTRIBUTES;
 import static kaleidok.util.AssertionUtils.fastAssert;
 import static kaleidok.util.AssertionUtils.fastAssertFmt;

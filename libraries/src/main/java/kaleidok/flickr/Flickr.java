@@ -7,7 +7,7 @@ import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import kaleidok.google.gson.TypeAdapterManager;
-import kaleidok.http.JsonHttpConnection;
+import kaleidok.net.http.JsonHttpConnection;
 import kaleidok.javafx.beans.property.AspectedObjectProperty;
 import kaleidok.javafx.beans.property.AspectedStringProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;

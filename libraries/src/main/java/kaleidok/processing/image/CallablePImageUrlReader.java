@@ -1,6 +1,6 @@
 package kaleidok.processing.image;
 
-import kaleidok.http.util.Parsers;
+import kaleidok.net.http.util.Parsers;
 import kaleidok.io.IOResourceWrapper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.entity.ContentType;
@@ -13,7 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
-import static kaleidok.http.responsehandler.ImageMimeTypeChecker.IMAGE_MIMETYPE_MAP;
+import static kaleidok.net.http.responsehandler.ImageMimeTypeChecker.IMAGE_MIMETYPE_MAP;
 
 
 public class CallablePImageUrlReader extends AbstractCallablePImageReader<URL>

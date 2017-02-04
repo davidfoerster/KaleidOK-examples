@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import static kaleidok.http.util.URLEncoding.appendEncoded;
+import static kaleidok.net.http.util.URLEncoding.appendEncoded;
 
 
 public abstract class TranscriptionServiceBase implements PreferenceBean

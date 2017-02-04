@@ -3,7 +3,7 @@ package kaleidok.exaleads.chromatik;
 import kaleidok.exaleads.chromatik.data.ChromatikColor;
 import kaleidok.exaleads.chromatik.data.ChromatikResponse;
 import kaleidok.google.gson.TypeAdapterManager;
-import kaleidok.http.JsonHttpConnection;
+import kaleidok.net.http.JsonHttpConnection;
 import kaleidok.util.Objects;
 import kaleidok.util.Strings;
 import org.apache.http.client.utils.URIBuilder;
