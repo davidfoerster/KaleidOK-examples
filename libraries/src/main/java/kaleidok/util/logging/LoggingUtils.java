@@ -3,10 +3,7 @@ package kaleidok.util.logging;
 import kaleidok.util.Reflection;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -73,20 +70,26 @@ public final class LoggingUtils
     ClassLoader cl )
     throws FileNotFoundException
   {
-    try
+    FileNotFoundException thrown = null;
+
+    File file = new File(filename);
+    if (file.exists()) try
     {
-      return new FileInputStream(filename);
+      return new FileInputStream(file);
     }
     catch (FileNotFoundException ex)
     {
-      if (cl != null)
-      {
-        InputStream is = cl.getResourceAsStream(filename);
-        if (is != null)
-          return is;
-      }
-      throw ex;
+      thrown = ex;
     }
+
+    if (cl != null)
+    {
+      InputStream is = cl.getResourceAsStream(filename);
+      if (is != null)
+        return is;
+    }
+
+    throw (thrown != null) ? thrown : new FileNotFoundException(filename);
   }
 
 

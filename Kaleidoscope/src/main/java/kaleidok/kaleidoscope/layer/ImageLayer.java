@@ -221,14 +221,14 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
     {
       assert image.width > 0 && image.height > 0 :
         image + " has width or height ≤0";
-      float
-        imgWidth = image.width, imgHeight = image.height,
-        imgAspect = imgWidth / imgHeight;
-      if (imgAspect <= 1) {
+      if (image.width <= image.height)
+      {
         txFactor = 0.5f;
-        tyFactor = imgAspect * 0.5f;
-      } else {
-        txFactor = imgHeight / imgWidth * 0.5f; // = 1 / imgAspect;
+        tyFactor = (float) image.width / image.height * 0.5f;
+      }
+      else
+      {
+        txFactor = (float) image.height / image.width * 0.5f;
         tyFactor = 0.5f;
       }
 

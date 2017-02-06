@@ -198,10 +198,10 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
 
   private StringBuffer addUnit( StringBuffer sb, int magnitude )
   {
-    String unit = this.unit;
-    int unitOffset = Strings.countLeadingWhitespace(unit, 0);
     if (magnitude != 0)
     {
+      String unit = this.unit;
+      int unitOffset = Strings.countLeadingWhitespace(unit, 0);
       sb.append(unit, 0, unitOffset)
         .append(getMagnitudeChar(magnitude))
         .append(unit, unitOffset, unit.length());
@@ -282,7 +282,7 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
 
   private static Number applyMagnitude( BigInteger n, int magnitude )
   {
-    return (n.signum() == 0) ? n : applyMagnitudeImpl(n, magnitude);
+    return (n.signum() != 0) ? applyMagnitudeImpl(n, magnitude) : n;
   }
 
 
@@ -301,16 +301,19 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
   private Number applyMagnitudeImpl( double x, int magnitude )
   {
     return isParseBigDecimal() ?
-      BigDecimal.valueOf(x).scaleByPowerOfTen(magnitude * 3) :
+      applyMagnitudeImpl(BigDecimal.valueOf(x), magnitude) :
       x * Math.pow(1000, magnitude);
   }
 
 
   private static Number applyMagnitude( BigDecimal x, int magnitude )
   {
-    return (x.signum() != 0) ?
-      x.scaleByPowerOfTen(magnitude * 3) :
-      x;
+    return (x.signum() != 0) ? applyMagnitudeImpl(x, magnitude) : x;
+  }
+
+  private static Number applyMagnitudeImpl( BigDecimal x, int magnitude )
+  {
+    return x.scaleByPowerOfTen(magnitude * 3);
   }
 
 

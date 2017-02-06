@@ -127,10 +127,9 @@ public class ConfigurationEditorScene extends Scene
     catch (IOException | InvalidPreferencesFormatException ex)
     {
       ex.printStackTrace();
-      final String message = String.format(
+      showAlertDialogLater(String.format(
         "Couldn’t import preferences from \"%s\": %s",
-        f, ex.getLocalizedMessage());
-      Platform.runLater(() -> showAlertDialog(message));
+        f, ex.getLocalizedMessage()));
       return false;
     }
 
@@ -164,10 +163,9 @@ public class ConfigurationEditorScene extends Scene
     catch (IOException | BackingStoreException ex)
     {
       ex.printStackTrace();
-      final String message = String.format(
+      showAlertDialogLater(String.format(
         "Couldn’t export preferences to \"%s\": %s",
-        f, ex.getLocalizedMessage());
-      Platform.runLater(() -> showAlertDialog(message));
+        f, ex.getLocalizedMessage()));
       return false;
     }
     //System.out.format("Saved preferences to %s", f);
@@ -192,5 +190,11 @@ public class ConfigurationEditorScene extends Scene
     Alert alertDialog = getAlertDialog();
     alertDialog.setContentText(message);
     return alertDialog.showAndWait().orElse(null);
+  }
+
+
+  private void showAlertDialogLater( final String message )
+  {
+    Platform.runLater(() -> showAlertDialog(message));
   }
 }

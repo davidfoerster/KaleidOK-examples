@@ -111,7 +111,7 @@ public final class Strings
 
   public static boolean isAscii( int c )
   {
-    return (c & ~0x7f) == 0;
+    return c >>> 7 == 0;
   }
 
   public static boolean isAscii( CharSequence s )

@@ -1,8 +1,8 @@
 package kaleidok.kaleidoscope.layer;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.FloatBinding;
-import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedDoubleProperty;
@@ -120,8 +120,8 @@ public class FoobarLayer extends CircularImageLayer
     return super.scaleFactorProperty();
   }
 
-  private final NumberBinding innerOffset =
-    Bindings.divide(innerRadius, outerRadius);
+
+  private final DoubleBinding innerOffset = innerRadius.divide(outerRadius);
 
 
   private final FloatBinding outerOffset =
@@ -188,7 +188,7 @@ public class FoobarLayer extends CircularImageLayer
       drawDebugCircle(outerScaled);
     }
 
-    parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
+    parent.pushMatrix(); // use push/popMatrix so each shape translation does not affect other drawings
     parent.scale(outerRadius);
 
     parent.stroke(255); // set stroke to white

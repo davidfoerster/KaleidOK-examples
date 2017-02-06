@@ -129,9 +129,9 @@ public class CentreMovingShape extends CircularImageLayer
     // Adjust the dynamic range of the volume level:
     level = pow(level * scaleFactor.get(), exponent.get());
     final float
-      outerRadius = (float) this.outerRadius.get(),
+      outerRadius = this.outerRadius.floatValue(),
       radius = mapNormalized(
-        (float) level, (float) this.innerRadius.get(), outerRadius);
+        (float) level, this.innerRadius.floatValue(), outerRadius);
 
     final PApplet parent = this.parent;
     final int wireframe = this.wireframe.get();

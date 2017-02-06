@@ -1,7 +1,6 @@
 package kaleidok.kaleidoscope.layer;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.NumberBinding;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import kaleidok.audio.processor.MinimFFTProcessor;
@@ -93,8 +92,7 @@ public class SpectrogramLayer extends CircularImageLayer
   }
 
 
-  private final NumberBinding scaledInnerRadius =
-    Bindings.divide(innerRadius, outerRadius);
+  private final DoubleBinding scaledInnerRadius = innerRadius.divide(outerRadius);
 
 
   /**

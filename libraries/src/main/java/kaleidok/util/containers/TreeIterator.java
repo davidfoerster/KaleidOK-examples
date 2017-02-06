@@ -44,12 +44,11 @@ public class TreeIterator<T> implements Iterator<T>, Iterable<T>
   @Override
   public boolean hasNext()
   {
-    Iterator<T> top;
-    while ((top = stack.peekLast()) != null)
+    while (!stack.isEmpty())
     {
-      if (top.hasNext())
+      if (stack.getLast().hasNext())
         return true;
-      stack.pollLast();
+      stack.removeLast();
     }
     return false;
   }

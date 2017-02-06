@@ -1,6 +1,7 @@
 package kaleidok.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
@@ -23,11 +24,19 @@ public final class Objects
   public static <T extends Cloneable> T clone( T o )
     throws CloneNotSupportedException
   {
+    Method cloneMethod;
+    try
+    {
+      cloneMethod = o.getClass().getMethod("clone", EMPTY_CLASS_ARRAY);
+    }
+    catch (NoSuchMethodException ignored)
+    {
+      return null;
+    }
     try
     {
       //noinspection unchecked
-      return (T) o.getClass()
-        .getMethod("clone", EMPTY_CLASS_ARRAY).invoke(o, EMPTY_OBJECT_ARRAY);
+      return (T) cloneMethod.invoke(o, EMPTY_OBJECT_ARRAY);
     }
     catch (IllegalAccessException ex)
     {
@@ -40,13 +49,9 @@ public final class Objects
       if (cause instanceof CloneNotSupportedException)
         throw (CloneNotSupportedException) cause;
       throw new InternalError(
-        "Object#clone() should only ever throw " +
+        cloneMethod + " should only ever throw " +
           CloneNotSupportedException.class.getCanonicalName(),
         cause);
-    }
-    catch (NoSuchMethodException ignored)
-    {
-      return null;
     }
   }
 

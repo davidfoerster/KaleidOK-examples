@@ -1,5 +1,6 @@
 package kaleidok.util;
 
+import java.lang.Math;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -160,7 +161,7 @@ public final class Reflection
       if (arrayDepth != 0)
       {
         int i = simpleName.length();
-        final char[] a = new char[i + arrayDepth * 2];
+        final char[] a = new char[Math.addExact(i, arrayDepth * 2)];
         simpleName.getChars(0, i, a, 0);
         while (i < a.length)
         {
