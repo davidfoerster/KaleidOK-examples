@@ -16,7 +16,6 @@ import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.kaleidoscope.KaleidoscopeApp;
 
 import java.io.*;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.prefs.BackingStoreException;
@@ -140,7 +139,7 @@ public class ConfigurationEditorScene extends Scene
       .map((prop) -> (AspectedProperty<?>) prop)
       .filter((prop) -> !prop.isBound())
       .map(PropertyPreferencesAdapterTag.getWritableInstance()::ofAny)
-      .filter(Objects::nonNull)
+      .filter((ppa) -> ppa != null && !ppa.isAutoLoad())
       .forEach(PropertyPreferencesAdapter::load);
     return true;
   }
@@ -154,7 +153,7 @@ public class ConfigurationEditorScene extends Scene
       configurationEditor.streamItems()
         .map(TreeItem::getValue)
         .map(PropertyPreferencesAdapterTag.getInstance()::ofAny)
-        .filter(Objects::nonNull)
+        .filter((ppa) -> ppa != null && !ppa.isAutoSave())
         .forEach(ReadOnlyPropertyPreferencesAdapter::save);
 
       Preferences.userNodeForPackage(KaleidoscopeApp.class).parent()
