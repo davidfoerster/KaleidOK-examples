@@ -96,7 +96,7 @@ public final class Strings
       dst[i] = toDigit((int)(n % base));
 
     int intN = (int) n, intBase = (int) base;
-    for (i = offset + len - 1; i >= offset && intN != 0; i--, intN /= intBase)
+    for (; i >= offset && intN != 0; i--, intN /= intBase)
       dst[i] = toDigit(intN % intBase);
 
     if (i >= offset) {
