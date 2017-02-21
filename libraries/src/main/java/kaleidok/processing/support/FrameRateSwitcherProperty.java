@@ -19,8 +19,6 @@ import static kaleidok.util.Math.FLOAT_NAN_INT_BITS;
 
 public class FrameRateSwitcherProperty extends AspectedDoubleProperty
 {
-  protected final PApplet applet;
-
   private final AtomicInteger changeRequest =
     new AtomicInteger(FLOAT_NAN_INT_BITS);
 
@@ -34,8 +32,6 @@ public class FrameRateSwitcherProperty extends AspectedDoubleProperty
     bounds.setConverter(new DoubleNumberStringConverter(
       InternationalSystemOfUnitsFormat.getNumberInstance(" Hz")));
     addAspect(BoundedDoubleTag.getDoubleInstance(), bounds);
-
-    this.applet = applet;
   }
 
 
@@ -48,6 +44,7 @@ public class FrameRateSwitcherProperty extends AspectedDoubleProperty
 
   public void setup()
   {
+    PApplet applet = (PApplet) getBean();
     float targetFps = Float.intBitsToFloat(
       changeRequest.getAndSet(FLOAT_NAN_INT_BITS));
 
@@ -84,12 +81,13 @@ public class FrameRateSwitcherProperty extends AspectedDoubleProperty
   {
     int targetFpsBits = changeRequest.getAndSet(FLOAT_NAN_INT_BITS);
     if (targetFpsBits != FLOAT_NAN_INT_BITS)
-      applet.frameRate(Float.intBitsToFloat(targetFpsBits));
+      ((PApplet) getBean()).frameRate(Float.intBitsToFloat(targetFpsBits));
   }
 
 
   public void dispose()
   {
+    PApplet applet = (PApplet) getBean();
     applet.unregisterMethod("pre", this);
     applet.unregisterMethod("dispose", this);
   }
