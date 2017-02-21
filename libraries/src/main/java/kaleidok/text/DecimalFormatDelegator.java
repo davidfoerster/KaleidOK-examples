@@ -222,7 +222,7 @@ public abstract class DecimalFormatDelegator extends Format
   {
     ParsePosition parsePosition = new ParsePosition(0);
     Number result = parse(source, parsePosition);
-    if (parsePosition.getIndex() > 0)
+    if (parsePosition.getIndex() > 0 && parsePosition.getErrorIndex() < 0)
       return result;
 
     throw new ParseException("Unparseable number: " + source,

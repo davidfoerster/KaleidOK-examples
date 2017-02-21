@@ -217,11 +217,12 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
   @Override
   public Number parse( String text, ParsePosition parsePosition )
   {
-    Number result = getUnderlying().parse(text, parsePosition);
     int pos = parsePosition.getIndex();
-    if (pos == 0)
+    Number result = getUnderlying().parse(text, parsePosition);
+    if (pos == parsePosition.getIndex())
       return result;
 
+    pos = parsePosition.getIndex();
     int len = text.length();
     String unit = this.unit;
     int unitLen = unit.length();
@@ -239,8 +240,7 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
     }
     else if (enforceUnitWhenParsing)
     {
-      parsePosition.setIndex(0);
-      return null;
+      parsePosition.setErrorIndex(pos);
     }
 
     parsePosition.setIndex(pos);

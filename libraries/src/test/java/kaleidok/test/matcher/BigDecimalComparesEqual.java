@@ -34,7 +34,10 @@ public class BigDecimalComparesEqual extends TypeSafeDiagnosingMatcher<Number>
   @Override
   protected boolean matchesSafely( Number o, Description mismatchDescription )
   {
-    boolean result = expectedValue.compareTo((BigDecimal) o) == 0;
+    BigDecimal expectedValue = this.expectedValue;
+    boolean result =
+      (o != null && expectedValue != null &&
+        expectedValue.compareTo((BigDecimal) o) == 0);
     if (!result)
       mismatchDescription.appendValue(o);
     return result;
