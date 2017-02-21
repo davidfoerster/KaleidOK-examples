@@ -3,7 +3,7 @@
     <output_file path="/tmp/user/1000/KaleidoscopeApp.log" />
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <option name="MAIN_CLASS_NAME" value="kaleidok.kaleidoscope.KaleidoscopeApp" />
-    <option name="VM_PARAMETERS" value="-ea -Djdk.launcher.addmods=javafx.deploy -Djava.util.prefs.userRoot=/tmp" />
+    <option name="VM_PARAMETERS" value="-ea -Xfuture -Djdk.launcher.addmods=javafx.deploy -Djava.util.prefs.userRoot=/tmp" />
     <option name="PROGRAM_PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="file:///tmp" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
