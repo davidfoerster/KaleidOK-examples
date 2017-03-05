@@ -27,6 +27,7 @@ public class GeometryPreferences extends AbstractGeometryPreferences<Void>
     double w = this.w.get(), h = this.h.get();
     if (!Double.isNaN(w) && !Double.isNaN(h))
     {
+      double minDimension = this.minDimension;
       ((PApplet) getParent()).size(
         (int) Math.max(w, minDimension),
         (int) Math.max(h, minDimension));

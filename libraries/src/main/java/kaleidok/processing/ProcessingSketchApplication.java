@@ -143,9 +143,9 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
     }
     else
     {
-      throw new UnsupportedOperationException(
-        "The sketch class " + sketch.getClass().getName() +
-          " isn’t derived from " + ExtPApplet.class.getName());
+      throw new UnsupportedOperationException(String.format(
+        "The sketch class %s isn’t derived from %s",
+        sketch.getClass().getName(), ExtPApplet.class.getName()));
     }
 
     if (placement == null)

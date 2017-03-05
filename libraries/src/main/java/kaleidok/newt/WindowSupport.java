@@ -14,11 +14,9 @@ public final class WindowSupport
 
   public static boolean toggleFullscreen( Window w )
   {
-    boolean newFullscreenState;
-    newFullscreenState = w.isFullscreen() ?
+    return w.isFullscreen() ?
       w.setFullscreen(false) :
       w.setFullscreen(Collections.singletonList(getMainMonitor(w)));
-    return newFullscreenState;
   }
 
 

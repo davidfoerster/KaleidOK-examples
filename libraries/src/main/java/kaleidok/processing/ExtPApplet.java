@@ -144,10 +144,9 @@ public class ExtPApplet extends PApplet
 
     if (P3D.equals(sketchRenderer()))
     {
-      final Runnable toggleFullScreenAction = this::toggleFullscreen;
       keyEventHandlers.get(processing.event.KeyEvent.TYPE - 1).add(
         new SimpleEntry<>(KeyStroke.fullscreenKeystroke,
-          (ev) -> thread(toggleFullScreenAction)));
+          (ev) -> thread(this::toggleFullscreen)));
 
       if (parent != null)
       {

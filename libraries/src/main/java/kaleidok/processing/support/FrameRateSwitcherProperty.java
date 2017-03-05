@@ -66,6 +66,7 @@ public class FrameRateSwitcherProperty extends AspectedDoubleProperty
       GLAutoDrawable nativeSurface =
         (GLAutoDrawable) applet.getSurface().getNative();
       set(((FPSAnimator) nativeSurface.getAnimator()).getFPS());
+      changeRequest.set(FLOAT_NAN_INT_BITS);
     }
     else
     {

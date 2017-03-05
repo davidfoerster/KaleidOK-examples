@@ -61,19 +61,13 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
 
     String sketchName =
       Reflection.getAnonymousClassSimpleName(sketch.getClass());
-    String[] extArgs;
-    if (args != null && !args.isEmpty())
-    {
-      Stream<String> sArgs =
-        args.stream().filter((s) -> !"--fullscreen".equals(s));
-      extArgs =
-        Stream.concat(sArgs, Stream.of(sketchName))
-          .toArray(String[]::new);
-    }
-    else
-    {
-      extArgs = new String[]{ sketchName };
-    }
+    String[] extArgs =
+      (args != null && !args.isEmpty()) ?
+        Stream.concat(
+          args.stream().filter(( s ) -> !"--fullscreen".equals(s)),
+          Stream.of(sketchName))
+            .toArray(String[]::new) :
+        new String[]{ sketchName };
 
     PApplet.runSketch(extArgs, sketch);
     return sketch;
