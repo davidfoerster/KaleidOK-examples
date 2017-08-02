@@ -22,20 +22,14 @@ public final class ImageSaveSet
 
 
   @Override
-  public void post()
+  public synchronized void post()
   {
     if (!isEmpty())
     {
-      synchronized (this)
-      {
-        if (!isEmpty())
-        {
-          final ExtPApplet p = this.p;
-          for (String fn : this)
-            p.save(fn);
-          clear();
-        }
-      }
+      final ExtPApplet p = this.p;
+      for (String fn : this)
+        p.save(fn);
+      underlying.clear();
     }
   }
 
