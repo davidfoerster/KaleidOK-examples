@@ -3,8 +3,8 @@ package kaleidok.processing.support;
 import com.jogamp.nativewindow.util.RectangleImmutable;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.WindowEvent;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import kaleidok.javafx.beans.binding.FunctionDoubleBinding;
 import kaleidok.javafx.stage.AbstractGeometryPreferences;
 import kaleidok.newt.event.AbstractWindowListener;
 import processing.core.PApplet;
@@ -99,14 +99,12 @@ public class GeometryPreferences extends AbstractGeometryPreferences<Void>
     public BindingWindowListener( final Window window )
     {
       this(
-        Bindings.createDoubleBinding(
-          () -> (double) (window.getX() + window.getScreen().getX())),
-        Bindings.createDoubleBinding(
-          () -> (double) (window.getY() + window.getScreen().getY())),
-        Bindings.createDoubleBinding(
-          () -> (double) window.getWidth()),
-        Bindings.createDoubleBinding(
-          () -> (double) window.getHeight()));
+        new FunctionDoubleBinding(
+          () -> window.getX() + window.getScreen().getX()),
+        new FunctionDoubleBinding(
+          () -> window.getY() + window.getScreen().getY()),
+        new FunctionDoubleBinding(window::getWidth),
+        new FunctionDoubleBinding(window::getHeight));
     }
 
 
