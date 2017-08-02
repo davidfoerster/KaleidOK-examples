@@ -29,6 +29,14 @@ public class Size implements Serializable
     return label;
   }
 
+
+  @Override
+  public String toString()
+  {
+    return label.name() + '[' + width + 'x' + height + ']';
+  }
+
+
   public enum Label
   {
     Square,
