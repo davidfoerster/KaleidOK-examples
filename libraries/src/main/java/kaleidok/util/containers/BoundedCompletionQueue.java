@@ -17,7 +17,7 @@ public class BoundedCompletionQueue<E> implements Queue<E>
 
   public final int maxPermits;
 
-  private int permits, completed = 0;
+  private volatile int permits, completed = 0;
 
   private Collection<E> removedItems;
 
