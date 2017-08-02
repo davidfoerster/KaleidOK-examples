@@ -7,6 +7,7 @@ import processing.core.PImage;
 
 public enum ImageResizeMode
 {
+  @SuppressWarnings("unused")
   STRETCH
   {
     @Override

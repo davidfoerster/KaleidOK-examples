@@ -96,7 +96,7 @@ public class KaleidoscopeControls extends BorderPane
       button.setPadding(Insets.EMPTY);
       BorderPane.setMargin(button, new Insets(10));
 
-      @SuppressWarnings("OptionalGetWithoutIsPresent")
+      @SuppressWarnings("ConstantConditions")
       double diameter =
         DoubleStream.of(
           unselectedImage.getWidth(), unselectedImage.getHeight(),

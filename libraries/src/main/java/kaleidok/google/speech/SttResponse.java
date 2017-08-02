@@ -33,6 +33,7 @@ public class SttResponse implements Serializable
     @Expose
     public Alternative[] alternative;
 
+    @SuppressWarnings("unused")
     @Expose
     public int result_index;
 

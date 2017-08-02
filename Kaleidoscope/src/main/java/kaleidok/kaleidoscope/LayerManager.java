@@ -141,6 +141,7 @@ public final class LayerManager
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   private int initLayerProperties()
   {
     final Map<String, String> propertyEntries = loadLayerProperties();

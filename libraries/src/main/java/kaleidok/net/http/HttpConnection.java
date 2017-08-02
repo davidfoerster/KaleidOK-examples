@@ -13,7 +13,6 @@ import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +92,7 @@ public class HttpConnection implements Closeable
 
     checkHttpProtocol(url);
     Constructor<T> ctor = clazz.getConstructor(constructorArgumentTypes);
-    URLConnection conn = url.openConnection();
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     try
     {
       return ctor.newInstance(conn);

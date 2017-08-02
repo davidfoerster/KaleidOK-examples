@@ -22,7 +22,8 @@ public abstract class NodeInfoTreeTableCell<T, U, N extends Node>
 
 
   protected abstract EditorNodeInfo<N, T> updateNodeInfo(
-    TreeItem<ReadOnlyProperty<T>> newItem, EditorNodeInfo<N, T> oldNodeInfo,
+    @SuppressWarnings("unused") TreeItem<ReadOnlyProperty<T>> newItem,
+    @SuppressWarnings("unused") EditorNodeInfo<N, T> oldNodeInfo,
     EditorNodeInfo<N, T> newNodeInfo );
 
 

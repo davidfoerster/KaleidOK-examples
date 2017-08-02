@@ -81,6 +81,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
   }
 
 
+  @SuppressWarnings("SameReturnValue")
   protected boolean handleRecognize( HttpExchange t ) throws IOException
   {
     if (!"POST".equals(t.getRequestMethod()))
@@ -323,8 +324,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
 
 
   @SuppressWarnings({ "unused", "HardcodedLineSeparator" })
-  private static final byte[]
-    normalTranscriptionResult = (
+  private static final byte[] normalTranscriptionResult = (
         "{\"result\":[]}\n" +
         "{\"result\":[{" +
         "\"alternative\":[" +
@@ -337,9 +337,10 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
         "\"final\":true" +
         "}]," +
         "\"result_index\":0}\n"
-      ).getBytes(ContentType.APPLICATION_JSON.getCharset()),
+      ).getBytes(ContentType.APPLICATION_JSON.getCharset());
 
-    emptyTranscriptionResult =
+  @SuppressWarnings({ "unused", "HardcodedLineSeparator" })
+  private static final byte[] emptyTranscriptionResult =
       "{\"result\":[]}"
         .getBytes(ContentType.APPLICATION_JSON.getCharset());
 }

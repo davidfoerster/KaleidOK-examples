@@ -156,6 +156,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
   }
 
 
+  @SuppressWarnings("OptionalAssignedToNull")
   private Optional<PImage> getNextAvailableImage()
   {
     Future<PImage> nextFuture;

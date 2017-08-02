@@ -42,6 +42,7 @@ public class DecoderMap
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public Constructor<? extends FilterInputStream> put( String key,
     Class<? extends FilterInputStream> value )
   {
@@ -52,6 +53,7 @@ public class DecoderMap
     checkClass(value);
     try
     {
+      //noinspection JavaReflectionMemberAccess
       return underlying.put(key, value.getConstructor(decoderConstructorParams));
     }
     catch (NoSuchMethodException ex)

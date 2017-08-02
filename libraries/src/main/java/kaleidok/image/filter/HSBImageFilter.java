@@ -12,7 +12,8 @@ public abstract class HSBImageFilter extends RGBImageFilter
   public abstract boolean isNeutral();
 
 
-  public abstract float[] filterHSB( int x, int y, float[] hsb );
+  public abstract float[] filterHSB( @SuppressWarnings("unused") int x,
+    @SuppressWarnings("unused") int y, float[] hsb );
 
 
   @Override

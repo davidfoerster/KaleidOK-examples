@@ -80,24 +80,28 @@ public final class TypeAdapterManager
     }
 
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean add( Type key, JsonDeserializer<?> value )
     {
       return add(key, (Object) value);
     }
 
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean add( Type key, JsonSerializer<?> value )
     {
       return add(key, (Object) value);
     }
 
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean add( Type key, TypeAdapter<?> value )
     {
       return add(key, (Object) value);
     }
 
 
+    @SuppressWarnings("UnusedReturnValue")
     public boolean add( Type key, InstanceCreator<?> value )
     {
       return add(key, (Object) value);

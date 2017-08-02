@@ -158,6 +158,7 @@ public final class Strings
       /**
        * Replace the current match with itself.
        */
+      @SuppressWarnings("SpellCheckingInspection")
       DONT_REPLACE,
 
       /**

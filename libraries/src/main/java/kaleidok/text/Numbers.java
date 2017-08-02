@@ -19,6 +19,7 @@ public final class Numbers
    * TODO: Try to skip BigDecimal and use IEEE floating-point arithmetic in
    * combination with a precision limit instead.
    */
+  @SuppressWarnings("UnusedReturnValue")
   public static NumberFormat adjustFractionalDigits( NumberFormat fmt,
     double... values )
     throws ArithmeticException

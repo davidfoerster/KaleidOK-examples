@@ -5,8 +5,12 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,14 +18,27 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static kaleidok.util.AssertionUtils.fastAssert;
 
-@SuppressWarnings("SpellCheckingInspection")
+
 public class SizeMap extends TreeMap<Size.Label, Size>
 {
   private static final long serialVersionUID = -8966551070440870922L;
 
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
   @Expose
-  public boolean canblog, canprint, candownload;
+  @SerializedName("canblog")
+  public boolean canBlog;
+
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  @Expose
+  @SerializedName("canprint")
+  public boolean canPrint;
+
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  @Expose
+  @SerializedName("candownload")
+  public boolean canDownload;
 
 
   public SizeMap() { }
@@ -44,9 +61,34 @@ public class SizeMap extends TreeMap<Size.Label, Size>
       Stream.<Size>of(context.deserialize(o.get("size"), Size[].class))
         .collect(Collectors.toMap(Size::getLabel, Function.identity())));
 
-    sizes.canblog = o.getAsJsonPrimitive("canblog").getAsInt() != 0;
-    sizes.canprint = o.getAsJsonPrimitive("canprint").getAsInt() != 0;
-    sizes.candownload = o.getAsJsonPrimitive("candownload").getAsInt() != 0;
+    try
+    {
+      for (Field f: SizeMap.class.getDeclaredFields())
+      {
+        Expose expose = f.getAnnotation(Expose.class);
+        if (expose != null && expose.deserialize() &&
+          !Modifier.isFinal(f.getModifiers()))
+        {
+          SerializedName serializedName =
+            f.getAnnotation(SerializedName.class);
+          JsonPrimitive valueElement =
+            o.getAsJsonPrimitive(
+              (serializedName != null) ? serializedName.value() : f.getName());
+          if (valueElement != null)
+          {
+            fastAssert(f.getType() == boolean.class);
+            f.setBoolean(sizes,
+              valueElement.isBoolean() ?
+                valueElement.getAsBoolean() :
+                valueElement.getAsInt() != 0);
+          }
+        }
+      }
+    }
+    catch (IllegalAccessException|NumberFormatException|ClassCastException ex)
+    {
+      throw new JsonParseException(ex);
+    }
 
     return sizes;
   }

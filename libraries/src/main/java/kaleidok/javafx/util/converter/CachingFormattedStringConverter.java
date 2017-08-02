@@ -88,7 +88,8 @@ public class CachingFormattedStringConverter<T, F extends Format>
   }
 
 
-  protected Exception getParseException( String source, ParsePosition pos )
+  protected Exception getParseException(
+    @SuppressWarnings("unused") String source, ParsePosition pos )
   {
     return new ParseException("Couldn’t parse source string",
       pos.getErrorIndex());

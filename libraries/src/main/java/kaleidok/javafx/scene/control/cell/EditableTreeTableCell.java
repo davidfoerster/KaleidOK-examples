@@ -70,6 +70,7 @@ public class EditableTreeTableCell<T, N extends Node>
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   private boolean startEdit( boolean requestFocus )
   {
     if (!isEditing() && isEditableInherited())

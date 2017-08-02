@@ -85,7 +85,7 @@ public class FreezableMap<K, V> implements Map<K, V>
   }
 
 
-  @SuppressWarnings("UnusedParameters")
+  @SuppressWarnings({ "UnusedParameters", "SameReturnValue" })
   protected boolean isValidEntry( K key, V value )
   {
     return true;

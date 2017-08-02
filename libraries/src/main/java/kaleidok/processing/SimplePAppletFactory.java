@@ -32,6 +32,7 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
     }
     try
     {
+      //noinspection JavaReflectionMemberAccess
       constructor = sketchClass.getConstructor(ProcessingSketchApplication.class);
     }
     catch (NoSuchMethodException ex)

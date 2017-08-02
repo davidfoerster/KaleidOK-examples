@@ -586,6 +586,7 @@ public class ExtPApplet extends PApplet
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   private boolean parseParamNumberList( String key,
     Function<? super String, ? extends Number> valueParser,
     WritableNumberValue... output )

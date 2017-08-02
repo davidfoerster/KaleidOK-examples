@@ -20,13 +20,19 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 
 
+@SuppressWarnings("EmptyMethod")
 public class Plugin<P extends PApplet>
 {
   public enum HookMethod {
-    pre, draw, post, pause, resume, dispose,
-    mouseEvent(MouseEvent.class),
-    keyEvent(KeyEvent.class),
-    touchEvent(TouchEvent.class);
+    @SuppressWarnings("unused") pre,
+    @SuppressWarnings("unused") draw,
+    @SuppressWarnings("unused") post,
+    @SuppressWarnings("unused") pause,
+    @SuppressWarnings("unused") resume,
+    dispose,
+    @SuppressWarnings("unused") mouseEvent(MouseEvent.class),
+    @SuppressWarnings("unused") keyEvent(KeyEvent.class),
+    @SuppressWarnings("unused") touchEvent(TouchEvent.class);
 
 
     private final Class<?>[] argumentTypes;
@@ -34,13 +40,14 @@ public class Plugin<P extends PApplet>
 
     HookMethod( Class<?>... argumentTypes )
     {
-      this.argumentTypes = Objects.requireNonNull(argumentTypes);
+      this.argumentTypes =
+        (argumentTypes != null) ? argumentTypes : EMPTY_CLASS_ARRAY;
     }
 
 
     HookMethod()
     {
-      this(EMPTY_CLASS_ARRAY);
+      this((Class<?>[]) null);
     }
 
 

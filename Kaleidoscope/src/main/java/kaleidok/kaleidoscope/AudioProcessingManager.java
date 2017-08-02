@@ -5,6 +5,7 @@ import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import com.google.gson.JsonParseException;
+import com.google.gson.annotations.Expose;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
@@ -723,15 +724,19 @@ public class AudioProcessingManager extends Plugin<Kaleidoscope>
 
   private static class ReplayList
   {
+    @Expose
     public String name;
 
+    @Expose
     public Item[] items;
 
 
     public static class Item
     {
+      @Expose
       public URL url;
 
+      @Expose
       public String transcription;
     }
   }

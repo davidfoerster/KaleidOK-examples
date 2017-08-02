@@ -18,7 +18,10 @@ public class Size implements Serializable
   public Label label;
 
   @Expose
-  public int width, height;
+  public int width;
+
+  @Expose
+  public int height;
 
   @Expose
   public String source;
@@ -37,6 +40,7 @@ public class Size implements Serializable
   }
 
 
+  @SuppressWarnings("unused")
   public enum Label
   {
     Square,

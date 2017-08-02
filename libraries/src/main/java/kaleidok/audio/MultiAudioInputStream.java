@@ -34,6 +34,7 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
     return currentIdx;
   }
 
+  @SuppressWarnings("resource")
   public void setCurrentIdx( int currentIdx ) throws IOException
   {
     this.currentIdx = currentIdx;
@@ -67,6 +68,7 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
   }
 
 
+  @SuppressWarnings("resource")
   @Override
   public long skip( long bytesToSkip ) throws IOException
   {
@@ -74,6 +76,7 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
   }
 
 
+  @SuppressWarnings("resource")
   @Override
   public int read( byte[] b, int off, int len ) throws IOException
   {
@@ -99,6 +102,7 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
   }
 
 
+  @SuppressWarnings("resource")
   @Override
   public TarsosDSPAudioFormat getFormat()
   {
@@ -117,6 +121,7 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
   }
 
 
+  @SuppressWarnings("resource")
   @Override
   public long getFrameLength()
   {

@@ -183,6 +183,7 @@ public abstract class ChromatikQuery
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   private StringBuilder buildColorSubquery( StringBuilder sb )
   {
     Map<ChromatikColor, Number> colors = optionMap.entrySet().stream()
@@ -244,6 +245,7 @@ public abstract class ChromatikQuery
   }
 
 
+  @SuppressWarnings("SameReturnValue")
   private static boolean assertValidChars( CharSequence s, char c )
   {
     assert s.toString().indexOf(c) < 0 :
@@ -325,17 +327,32 @@ public abstract class ChromatikQuery
   }
 
 
+  @SuppressWarnings("SpellCheckingInspection")
+  public static final String QUERY_OPT_COLOR = "color";
+
+  @SuppressWarnings("SpellCheckingInspection")
+  public static final String QUERY_OPT_COLORGROUP = "colorgroup";
+
   @SuppressWarnings({ "unused", "SpellCheckingInspection" })
-  public static final String
-    QUERY_OPT_COLOR = "color",
-    QUERY_OPT_COLORGROUP = "colorgroup",
-    QUERY_OPT_SATURATION = "saturation",
-    QUERY_OPT_SATURATION_COLORFUL = "Colorful",
-    QUERY_OPT_SATURATION_GRAYSCALE = "Grayscale",
-    QUERY_OPT_DARKNESS = "darkness",
-    QUERY_OPT_DARKNESS_BRIGHT = "Bright",
-    QUERY_OPT_DARKNESS_DARK = "Dark",
-    QUERY_OPT_RIGHTS = "rights";
+  public static final String QUERY_OPT_SATURATION = "saturation";
+
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  public static final String QUERY_OPT_SATURATION_COLORFUL = "Colorful";
+
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  public static final String QUERY_OPT_SATURATION_GRAYSCALE = "Grayscale";
+
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  public static final String QUERY_OPT_DARKNESS = "darkness";
+
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  public static final String QUERY_OPT_DARKNESS_BRIGHT = "Bright";
+
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  public static final String QUERY_OPT_DARKNESS_DARK = "Dark";
+
+  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  public static final String QUERY_OPT_RIGHTS = "rights";
 
   @SuppressWarnings("SpellCheckingInspection")
   public static final int QUERY_NHITS_DEFAULT = 40;

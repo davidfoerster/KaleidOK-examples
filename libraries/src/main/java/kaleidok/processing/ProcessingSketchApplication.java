@@ -126,6 +126,7 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public Side placeAroundSketch( Stage stage, double padding,
     Side... preferredSides )
     throws InterruptedException

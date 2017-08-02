@@ -3,9 +3,6 @@ package kaleidok.util;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
-import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
-
 
 public final class Objects
 {
@@ -27,21 +24,23 @@ public final class Objects
     Method cloneMethod;
     try
     {
-      cloneMethod = o.getClass().getMethod("clone", EMPTY_CLASS_ARRAY);
+      //noinspection JavaReflectionMemberAccess
+      cloneMethod = o.getClass().getMethod("clone", (Class<?>[]) null);
     }
-    catch (NoSuchMethodException ignored)
+    catch (NoSuchMethodException ex)
     {
-      return null;
+      // Shouldn't happen since Object declares #clone()
+      throw new InternalError(ex);
     }
     try
     {
       //noinspection unchecked
-      return (T) cloneMethod.invoke(o, EMPTY_OBJECT_ARRAY);
+      return (T) cloneMethod.invoke(o, (Object[]) null);
     }
     catch (IllegalAccessException ex)
     {
       // Shouldn't happen since Class#getMethod(...) only returns public methods
-      throw new AssertionError(ex);
+      throw new InternalError(ex);
     }
     catch (InvocationTargetException ex)
     {

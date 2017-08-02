@@ -59,6 +59,7 @@ public final class LayerUtils
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public static AspectedDoubleProperty adjustFormat(
     AspectedDoubleProperty property )
   {
@@ -66,6 +67,7 @@ public final class LayerUtils
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public static AspectedDoubleProperty adjustPercentFormat(
     AspectedDoubleProperty property )
   {
@@ -73,6 +75,7 @@ public final class LayerUtils
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public static AspectedDoubleProperty adjustPermilleFormat(
     AspectedDoubleProperty property )
   {

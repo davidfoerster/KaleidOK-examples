@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 public class STT implements PreferenceBean
 {
+  @SuppressWarnings("unused")
   public enum State
   {
     IDLE,

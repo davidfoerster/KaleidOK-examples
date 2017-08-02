@@ -3,7 +3,6 @@ package kaleidok.javafx.beans.property.aspect.bounded;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.Property;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedReadOnlyProperty;
 
 

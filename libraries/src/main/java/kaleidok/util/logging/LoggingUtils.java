@@ -47,6 +47,7 @@ public final class LoggingUtils
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public static boolean loadLocalLoggerProperties( Class<?> contextClass )
   {
     String loggingFile = "logging.properties";

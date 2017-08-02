@@ -80,7 +80,7 @@ public class FoobarLayer extends CircularImageLayer
    *
    * @return  A property object with the above purpose
    */
-  @SuppressWarnings("RedundantMethodOverride")
+  @SuppressWarnings({ "RedundantMethodOverride", "EmptyMethod" })
   @Override
   public DoubleProperty innerRadiusProperty()
   {
@@ -94,7 +94,7 @@ public class FoobarLayer extends CircularImageLayer
    *
    * @return  A property object with the above purpose
    */
-  @SuppressWarnings("RedundantMethodOverride")
+  @SuppressWarnings({ "RedundantMethodOverride", "EmptyMethod" })
   @Override
   public DoubleProperty outerRadiusProperty()
   {
@@ -113,7 +113,7 @@ public class FoobarLayer extends CircularImageLayer
  *
  * @return  A property object with the above purpose
  */
-  @SuppressWarnings("RedundantMethodOverride")
+  @SuppressWarnings({ "RedundantMethodOverride", "EmptyMethod" })
   @Override
   public DoubleProperty scaleFactorProperty()
   {

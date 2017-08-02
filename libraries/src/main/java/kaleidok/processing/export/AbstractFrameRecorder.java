@@ -22,6 +22,7 @@ public abstract class AbstractFrameRecorder extends Plugin<PApplet>
   public abstract boolean isReady();
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public boolean schedule()
   {
     return schedule(true);
@@ -61,6 +62,8 @@ public abstract class AbstractFrameRecorder extends Plugin<PApplet>
     }
   }
 
+
+  @SuppressWarnings("EmptyMethod")
   protected void doBeginRecord() { }
 
 

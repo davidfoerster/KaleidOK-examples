@@ -94,6 +94,7 @@ public class ConfigurationEditorScene extends Scene
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   private synchronized File openFileChooser( String mode,
     String title, Predicate<File> successPredicate )
   {

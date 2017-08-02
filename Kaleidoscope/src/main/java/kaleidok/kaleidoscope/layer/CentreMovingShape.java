@@ -89,7 +89,7 @@ public class CentreMovingShape extends CircularImageLayer
    *
    * @return  A property object with the above purpose
    */
-  @SuppressWarnings("RedundantMethodOverride")
+  @SuppressWarnings({ "RedundantMethodOverride", "EmptyMethod" })
   @Override
   public DoubleProperty scaleFactorProperty()
   {

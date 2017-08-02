@@ -67,6 +67,7 @@ public final class URLEncoding
     return encode(s, DEFAULT_CHARSET);
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   public static StringBuilder appendEncoded( CharSequence s, StringBuilder dst )
   {
     encode(s, DEFAULT_CHARSET, dst);

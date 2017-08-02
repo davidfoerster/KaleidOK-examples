@@ -211,6 +211,7 @@ public class RGBImageFilterFormat extends Format
     return parseError(pos, pos.getIndex());
   }
 
+  @SuppressWarnings("SameReturnValue")
   private static <T> T parseError( ParsePosition pos, int errorIndex )
   {
     pos.setErrorIndex(errorIndex);

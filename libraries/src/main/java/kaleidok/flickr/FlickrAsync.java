@@ -65,6 +65,7 @@ public class FlickrAsync extends Flickr
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public Future<SizeMap> getPhotoSizes( String photoId,
     FutureCallback<SizeMap> callback )
   {

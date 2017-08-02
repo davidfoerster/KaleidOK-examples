@@ -6,7 +6,6 @@ import kaleidok.util.Objects;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
-import static com.jogamp.newt.event.InputEvent.META_MASK;
 import static com.jogamp.newt.event.KeyEvent.*;
 import static java.util.Objects.requireNonNull;
 import static kaleidok.processing.event.KeyEventSupport.dummySurfaceHolder;
@@ -15,9 +14,10 @@ import static kaleidok.processing.event.KeyEventSupport.dummySurfaceHolder;
 public class KeyStroke
 {
   @SuppressWarnings("unused")
-  public static final short
-    KEY_PRESSED = EVENT_KEY_PRESSED,
-    KEY_RELEASED = EVENT_KEY_RELEASED;
+  public static final short KEY_PRESSED = EVENT_KEY_PRESSED;
+
+  @SuppressWarnings("unused")
+  public static final short KEY_RELEASED = EVENT_KEY_RELEASED;
 
 
   public static final KeyStroke

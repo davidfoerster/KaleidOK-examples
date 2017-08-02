@@ -48,6 +48,7 @@ public class SpectrumBandsPerOctaveBinding extends IntegerBinding
   }
 
 
+  @SuppressWarnings("UnusedReturnValue")
   public ChangeListener<Number> attach( final MinimFFTProcessor processor )
   {
     Objects.requireNonNull(processor);
