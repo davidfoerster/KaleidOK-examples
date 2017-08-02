@@ -1,5 +1,6 @@
 package kaleidok.processing;
 
+import kaleidok.util.Arrays;
 import kaleidok.util.Reflection;
 import processing.core.PApplet;
 import processing.event.KeyEvent;
@@ -14,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_CLASS_ARRAY;
 
@@ -89,34 +91,28 @@ public class Plugin<P extends PApplet>
 
     public static EnumSet<HookMethod> getAvailableHooks( Object plugin )
     {
-      if (plugin instanceof Plugin)
-        return getAvailableHooks((Plugin<?>) plugin);
+      return (plugin instanceof Plugin) ?
+        getAvailableHooks((Plugin<?>) plugin) :
+        Stream.of(plugin.getClass().getMethods())
+          .map((m) -> {
+              HookMethod hm = valueMap.get(m.getName());
+              return
+                (hm != null &&
+                   hm.argumentTypes.length == m.getParameterCount() &&
+                   Arrays.equals(hm.argumentTypes, m.getParameterTypes(),
+                     HookMethod::isCompatible))
+                ? hm : null;
+            })
+          .filter(Objects::nonNull)
+          .collect(Collectors.toCollection(() -> EnumSet.noneOf(HookMethod.class)));
+    }
 
-      EnumSet<HookMethod> result = EnumSet.noneOf(HookMethod.class);
-      outer:
-      for (Method m : plugin.getClass().getMethods())
-      {
-        HookMethod hm = valueMap.get(m.getName());
-        if (hm != null && m.getParameterCount() == hm.argumentTypes.length)
-        {
-          Class<?>[] expectedArgumentTypes = hm.argumentTypes;
-          if (expectedArgumentTypes.length != 0)
-          {
-            Class<?>[] actualArgumentTypes = m.getParameterTypes();
-            for (int i = expectedArgumentTypes.length - 1; i >= 0; i--)
-            {
-              if (!Reflection.getWrapperType(expectedArgumentTypes[i])
-                .isAssignableFrom(
-                  Reflection.getWrapperType(actualArgumentTypes[i])))
-              {
-                continue outer;
-              }
-            }
-          }
-          result.add(hm);
-        }
-      }
-      return result;
+
+    private static boolean isCompatible( Class<?> expected, Class<?> actual )
+    {
+      return
+        Reflection.getWrapperType(expected)
+          .isAssignableFrom(Reflection.getWrapperType(actual));
     }
 
 

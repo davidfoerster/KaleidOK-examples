@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.RandomAccess;
+import java.util.function.BiPredicate;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
@@ -38,6 +39,29 @@ public final class Arrays
   public static DoubleStream stream( final float[] a )
   {
     return stream(a, 0, a.length);
+  }
+
+
+  public static <T, U> boolean equals( final T[] a, final U[] b,
+    final BiPredicate<? super T, ? super U> predicate )
+  {
+    //noinspection ArrayEquality
+    if (a != b)
+    {
+      if (a == null || b == null)
+        return false;
+
+      final int length = a.length;
+      if (length != b.length)
+        return false;
+
+      for (int i = 0; i < length; i++)
+      {
+        if (!predicate.test(a[i], b[i]))
+          return false;
+      }
+    }
+    return true;
   }
 
 
