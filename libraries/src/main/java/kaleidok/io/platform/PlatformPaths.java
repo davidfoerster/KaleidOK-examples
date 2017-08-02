@@ -17,9 +17,9 @@ public final class PlatformPaths
     String os = System.getProperty("os.name").replace(" ", "");
     platform =
       os.startsWith("Windows") ? new WindowsPaths() :
-      os.startsWith("Linux") ? new LinuxPaths() :
       os.startsWith("MacOSX") ? new OsxPaths() :
-      (os.startsWith("Solaris") || os.endsWith("BSD")) ? new UnixPaths() :
+      (os.startsWith("Linux") || os.startsWith("Solaris") || os.endsWith("BSD")) ?
+        new UnixPaths() :
         new PlatformPathsBase();
   }
 
