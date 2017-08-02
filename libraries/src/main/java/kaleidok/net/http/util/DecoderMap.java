@@ -72,7 +72,7 @@ public class DecoderMap
       throw new IllegalArgumentException(new IllegalAccessException(
         value + " isn’t public"));
     }
-    if (!Arrays.equals(value.getParameters(), decoderConstructorParams))
+    if (!Arrays.equals(value.getParameterTypes(), decoderConstructorParams))
     {
       throw new IllegalArgumentException(new IllegalArgumentException(
         value + " has an illegal parameter list; expected " +
