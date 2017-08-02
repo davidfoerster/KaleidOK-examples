@@ -7,7 +7,6 @@ import java.util.regex.*;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
-import static kaleidok.util.AssertionUtils.fastAssert;
 
 
 public final class Strings
@@ -286,11 +285,19 @@ public final class Strings
       replaceAll(CAMEL_CASE_CONVERSION_PATTERN, s,
         (matcher, input, sb) -> {
           int start1 = matcher.start(1), end1 = matcher.end(1);
+          char[] cs;
           if (start1 == end1)
-            return ArrayUtils.EMPTY_CHAR_ARRAY;
-          fastAssert(start1 + 1 == end1);
-          char c = input.charAt(start1);
-          return (matcher.start() != 0) ? Character.toUpperCase(c) : c;
+          {
+            cs = ArrayUtils.EMPTY_CHAR_ARRAY;
+          }
+          else
+          {
+            int c = Character.codePointAt(input, start1);
+            assert start1 + Character.charCount(c) == end1;
+            cs = Character.toChars(
+              (matcher.start() != 0) ? Character.toUpperCase(c) : c);
+          }
+          return cs;
         });
   }
 
