@@ -18,7 +18,14 @@ import java.util.stream.Stream;
 import static kaleidok.util.prefs.PreferenceUtils.KEY_PART_DELIMITER;
 
 
-public abstract class AbstractGeometryPreferences<G> implements PreferenceBean
+/**
+ * Abstract base class to help save and restore (window) geometries to and from
+ * the Preferences interface.
+ *
+ * @param <G> The graphics object with the geometry to store
+ * @param <P> The “parent” application holding the preferences
+ */
+public abstract class AbstractGeometryPreferences<G, P> implements PreferenceBean
 {
   public static final int
     POSITION = 1,
@@ -29,14 +36,14 @@ public abstract class AbstractGeometryPreferences<G> implements PreferenceBean
   private static final String NAME = "geometry";
 
 
-  private final Object parent;
+  private final P parent;
 
   public final AspectedDoubleProperty x, y, w, h;
 
   public final AspectedBooleanProperty show;
 
 
-  protected AbstractGeometryPreferences( Object parent, boolean hideProperties,
+  protected AbstractGeometryPreferences( P parent, boolean hideProperties,
     int mode )
   {
     this(parent, Objects.requireNonNull(parent, "parent").getClass(),
@@ -44,7 +51,7 @@ public abstract class AbstractGeometryPreferences<G> implements PreferenceBean
   }
 
 
-  protected AbstractGeometryPreferences( Object parent, Class<?> beanClass,
+  protected AbstractGeometryPreferences( P parent, Class<?> beanClass,
     boolean hideProperties, int mode )
   {
     if ((mode & ALL) == 0)
@@ -146,7 +153,7 @@ public abstract class AbstractGeometryPreferences<G> implements PreferenceBean
 
 
   @Override
-  public Object getParent()
+  public P getParent()
   {
     return parent;
   }

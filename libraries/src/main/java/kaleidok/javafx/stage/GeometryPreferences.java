@@ -1,18 +1,19 @@
 package kaleidok.javafx.stage;
 
+import javafx.application.Application;
 import javafx.stage.Window;
 
 
-public class GeometryPreferences extends AbstractGeometryPreferences<Window>
+public class GeometryPreferences extends AbstractGeometryPreferences<Window, Application>
 {
-  public GeometryPreferences( Object parent, boolean hideProperties,
+  public GeometryPreferences( Application parent, boolean hideProperties,
     int mode )
   {
     super(parent, hideProperties, mode);
   }
 
 
-  public GeometryPreferences( Object parent, Class<?> beanClass,
+  public GeometryPreferences( Application parent, Class<?> beanClass,
     boolean hideProperties, int mode )
   {
     super(parent, beanClass, hideProperties, mode);

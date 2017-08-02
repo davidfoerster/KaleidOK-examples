@@ -11,7 +11,7 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 
 
-public class GeometryPreferences extends AbstractGeometryPreferences<Void>
+public class GeometryPreferences extends AbstractGeometryPreferences<Void, PApplet>
 {
   public double minDimension = 50;
 
@@ -28,7 +28,7 @@ public class GeometryPreferences extends AbstractGeometryPreferences<Void>
     if (!Double.isNaN(w) && !Double.isNaN(h))
     {
       double minDimension = this.minDimension;
-      ((PApplet) getParent()).size(
+      getParent().size(
         (int) Math.max(w, minDimension),
         (int) Math.max(h, minDimension));
     }
@@ -37,7 +37,7 @@ public class GeometryPreferences extends AbstractGeometryPreferences<Void>
 
   public void applyPosition()
   {
-    PApplet sketch = (PApplet) getParent();
+    PApplet sketch = getParent();
     if (PConstants.P3D.equals(sketch.sketchRenderer()))
       applyPosition((Window) sketch.getSurface().getNative());
   }
@@ -74,7 +74,7 @@ public class GeometryPreferences extends AbstractGeometryPreferences<Void>
 
   public void bind()
   {
-    PApplet sketch = (PApplet) getParent();
+    PApplet sketch = getParent();
     if (PConstants.P3D.equals(sketch.sketchRenderer()))
       bind((Window) sketch.getSurface().getNative());
   }
