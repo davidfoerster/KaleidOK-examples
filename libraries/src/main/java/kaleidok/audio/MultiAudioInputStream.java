@@ -45,11 +45,17 @@ public class MultiAudioInputStream implements TarsosDSPAudioInputStream
 
   public void skipToNext( boolean cyclic ) throws IOException
   {
-    int next = currentIdx + 1;
-    if (cyclic) {
-      next %= streams.size();
-    } else if (next >= streams.size()) {
-      throw new IndexOutOfBoundsException(Integer.toString(next));
+    int next = currentIdx + 1, size = streams.size();
+    if (next >= size)
+    {
+      if (cyclic && size != 0)
+      {
+        next %= size;
+      }
+      else
+      {
+        throw new IndexOutOfBoundsException(Integer.toString(next));
+      }
     }
     setCurrentIdx(next);
   }
