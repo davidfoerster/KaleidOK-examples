@@ -223,7 +223,7 @@ public abstract class Chromasthetiator<F extends Flickr>
       ChromatikResponse.Result imgInfo )
     {
       FlickrPhoto photo = new FlickrPhoto(flickr);
-      photo.parseUrl(imgInfo.squarethumbnailurl);
+      photo.parseUrl(imgInfo.squareThumbnailUrl);
       return photo;
     }
 

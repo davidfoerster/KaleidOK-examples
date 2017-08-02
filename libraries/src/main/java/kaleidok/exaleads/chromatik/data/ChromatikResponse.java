@@ -2,6 +2,7 @@ package kaleidok.exaleads.chromatik.data;
 
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import kaleidok.flickr.Photo;
 
 import java.io.Serializable;
@@ -18,6 +19,7 @@ public class ChromatikResponse implements Serializable
   public Result[] results;
 
 
+  @SuppressWarnings("unused")
   public static class Result implements Serializable
   {
     private static final long serialVersionUID = 7448038875557807767L;
@@ -36,7 +38,13 @@ public class ChromatikResponse implements Serializable
 
     @SuppressWarnings("SpellCheckingInspection")
     @Expose
-    public String thumbnailurl, squarethumbnailurl;
+    @SerializedName("thumbnailurl")
+    public String thumbnailUrl;
+
+    @SuppressWarnings("SpellCheckingInspection")
+    @Expose
+    @SerializedName("squarethumbnailurl")
+    public String squareThumbnailUrl;
 
     public Photo flickrPhoto;
   }
