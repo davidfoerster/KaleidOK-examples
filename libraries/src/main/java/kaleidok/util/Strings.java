@@ -391,7 +391,7 @@ public final class Strings
   }
 
 
-  public static char[] toCharArray( CharSequence csq )
+  public static char[] getChars( CharSequence csq )
   {
     char[] a = new char[csq.length()];
     getChars(csq, 0, a.length, a, 0);
