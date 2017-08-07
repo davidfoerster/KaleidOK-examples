@@ -157,7 +157,7 @@ public abstract class Chromasthetiator<F extends Flickr>
       Formatter fmt = null;
       int[] palette = palettes.getColors(emo);
       if (random != null)
-        palette = shuffle(palette, random);
+        palette = shuffle(palette.clone(), random);
 
       for (int c : palette)
       {

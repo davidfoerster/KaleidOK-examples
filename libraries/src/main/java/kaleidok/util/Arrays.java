@@ -22,10 +22,13 @@ public final class Arrays
 
   public static int[] shuffle( int[] ar, Random rnd )
   {
-    ar = ar.clone();
-
     for (int i = ar.length - 1; i > 0; i--)
-      ArrayUtils.swap(ar, i, rnd.nextInt(i + 1));
+    {
+      int j = rnd.nextInt(i + 1);
+      int aux = ar[i];
+      ar[i] = ar[j];
+      ar[j] = aux;
+    }
 
     return ar;
   }
