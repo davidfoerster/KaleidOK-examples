@@ -29,8 +29,11 @@ public final class Objects
     }
     catch (NoSuchMethodException ex)
     {
-      // Shouldn't happen since Object declares #clone()
-      throw new InternalError(ex);
+      throw new InternalError(
+        o.getClass().getName() +
+          "#clone() isn’t public and violates the contract of " +
+          Cloneable.class.getName(),
+        ex);
     }
     try
     {
