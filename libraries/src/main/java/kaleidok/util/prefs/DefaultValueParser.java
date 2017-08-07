@@ -75,7 +75,6 @@ public final class DefaultValueParser
   private static final Class<?>[] valueOfParameterTypes = { String.class };
 
 
-  @SuppressWarnings("unchecked")
   public static <T> T valueOf( String s, Class<T> targetClass )
     throws IllegalArgumentException
   {
@@ -84,7 +83,10 @@ public final class DefaultValueParser
     if (wrapperClass == Character.class)
     {
       if (s.length() == 1)
+      {
+        //noinspection unchecked
         return (T) Character.valueOf(s.charAt(0));
+      }
 
       ex = new IllegalArgumentException(String.format(
         "Cannot cast string of length %d to %s.",
@@ -106,16 +108,25 @@ public final class DefaultValueParser
       }
       else
       {
+        //noinspection unchecked
         return (T) m.invoke(null, s);
       }
+    }
+    catch (NoSuchMethodException ex1)
+    {
+      ex = ex1;
     }
     catch (InvocationTargetException ex1)
     {
       ex = ex1.getCause();
     }
-    catch (ReflectiveOperationException | IllegalArgumentException ex1)
+    catch (IllegalAccessException | IllegalArgumentException ex1)
     {
-      ex = ex1;
+      /*
+       * This shouldn't happen; Class#getMethod() returns only public methods,
+       * we verified that it's static and has the right argument type.
+       */
+      throw new InternalError(ex1);
     }
     throw new IllegalArgumentException(
       "Cannot parse to " + targetClass.getName(), ex);

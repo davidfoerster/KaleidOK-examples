@@ -122,7 +122,8 @@ public final class Reflection
         if (interfaces.length != 0)
           superClass = interfaces[0];
         simpleName = superClass.getSimpleName();
-        fastAssert(!simpleName.isEmpty(), "Anonymous interface");
+        if (simpleName.isEmpty())
+          throw new InternalError("Anonymous interface: " + superClass);
       }
       else
       {
@@ -132,7 +133,8 @@ public final class Reflection
           if (!simpleName.isEmpty())
             break;
         }
-        fastAssert(!simpleName.isEmpty(), "Anonymous top-level class");
+        if (simpleName.isEmpty())
+          throw new InternalError("Anonymous top-level class");
       }
     }
     return getClassOrSimpleName(origin, simpleName, arrayDepth, returnType);
