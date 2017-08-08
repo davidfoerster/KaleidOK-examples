@@ -75,6 +75,8 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
   @Override
   public boolean process( AudioEvent audioEvent )
   {
+    final float[] sampleBuffer = this.sampleBuffer;
+
     if (fft == null) {
       sampleRate = audioEvent.getSampleRate();
       fft = new FFT(sampleBuffer.length, sampleRate);
@@ -103,10 +105,11 @@ public class MinimFFTProcessor implements AudioProcessor, Spectrum
 
 
   @Override
-  public float[] get( float[] a, int offset, int first, int length )
+  public float[] get( final float[] a, int offset, int first, int length )
   {
-    for (int last = first + length; first < last; first++, offset++)
-      a[offset] = get(first);
+    final FFT fft = this.fft;
+    for (final int last = first + length; first < last; first++, offset++)
+      a[offset] = fft.getAvg(first);
     return a;
   }
 

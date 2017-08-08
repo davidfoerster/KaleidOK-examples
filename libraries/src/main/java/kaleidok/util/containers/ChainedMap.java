@@ -8,7 +8,7 @@ public class ChainedMap<K, V> implements Map<K, V>
 {
   private final Map<K, V> main;
 
-  private Map<K,  V> fallback;
+  private Map<K, V> fallback;
 
 
   public ChainedMap( Map<K, V> main )
