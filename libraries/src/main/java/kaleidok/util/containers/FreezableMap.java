@@ -104,7 +104,7 @@ public class FreezableMap<K, V> implements Map<K, V>
   public void putAll( Map<? extends K, ? extends V> m )
   {
     checkFrozen();
-    for (Entry<K, V> e: underlying.entrySet())
+    for (Entry<? extends K, ? extends V> e: m.entrySet())
       checkValidEntry(e.getKey(), e.getValue());
     underlying.putAll(m);
   }
