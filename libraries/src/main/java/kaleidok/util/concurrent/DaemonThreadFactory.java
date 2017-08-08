@@ -20,7 +20,8 @@ public class DaemonThreadFactory implements ThreadFactory
   @Override
   public Thread newThread( Runnable r )
   {
-    Thread thread = new Thread(r, name);
+    String name = this.name;
+    Thread thread = (name != null) ? new Thread(r, name) : new Thread(r);
     thread.setDaemon(asDaemon);
     return thread;
   }
