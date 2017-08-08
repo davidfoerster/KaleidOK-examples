@@ -28,6 +28,7 @@ public class ChromatikColor implements Serializable
    */
   public final String groupName;
 
+
   /**
    * Construct color object by a compound RGB value
    *
@@ -38,6 +39,7 @@ public class ChromatikColor implements Serializable
   {
     this((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff);
   }
+
 
   /**
    * Construct color object from individual RGB values (0-255).
@@ -101,17 +103,20 @@ public class ChromatikColor implements Serializable
     }
   }
 
+
   @Override
   public int hashCode()
   {
-    return value;
+    return value ^ 0x6a7a521b;
   }
+
 
   @Override
   public boolean equals( Object obj )
   {
     return obj instanceof ChromatikColor && ((ChromatikColor) obj).value == this.value;
   }
+
 
   @Override
   public String toString()
@@ -125,6 +130,7 @@ public class ChromatikColor implements Serializable
 
     return new String(a);
   }
+
 
   static final String[] HUE_NAMES = {
     "Red", "Orange", "Yellow", "Green", "Green", "Green",
