@@ -192,23 +192,23 @@ public abstract class ChromatikQuery
         (o) -> (ChromatikColor) o.getKey(),
         (o) -> (Number) requireNonNull(o.getValue())));
 
-    colors.values().stream()
-      .mapToDouble(Number::doubleValue)
-      .filter((w) -> w != w || w <= 0 || w > 1)
-      .findAny().ifPresent((illegalWeight) -> {
-          throw new IllegalArgumentException(
-            "Color weight lies outside of (0, 1]: " + illegalWeight);
-        });
-
-    double totalWeight =
-      colors.values().stream().mapToDouble(Number::doubleValue).sum();
-    if (totalWeight > 1) {
-      throw new IllegalArgumentException(
-        "Total color weight exceeds 1: " + totalWeight);
-    }
-
     if (!colors.isEmpty())
     {
+      colors.values().stream()
+        .mapToDouble(Number::doubleValue)
+        .filter((w) -> w != w || w <= 0 || w > 1)
+        .findAny().ifPresent((illegalWeight) -> {
+        throw new IllegalArgumentException(
+          "Color weight lies outside of (0, 1]: " + illegalWeight);
+      });
+
+      double totalWeight =
+        colors.values().stream().mapToDouble(Number::doubleValue).sum();
+      if (totalWeight > 1) {
+        throw new IllegalArgumentException(
+          "Total color weight exceeds 1: " + totalWeight);
+      }
+
       Map<String, ? extends Number> colorGroups = colors.entrySet().stream()
         .collect(Collectors.groupingBy(
           (e) -> e.getKey().groupName,
@@ -258,8 +258,8 @@ public abstract class ChromatikQuery
   {
     return
       (o == null) ? null :
-        (o instanceof CharSequence) ? (CharSequence) o :
-          o.toString();
+      (o instanceof CharSequence) ? (CharSequence) o :
+        o.toString();
   }
 
 
