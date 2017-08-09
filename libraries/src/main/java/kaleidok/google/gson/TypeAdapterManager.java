@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public final class TypeAdapterManager
@@ -52,7 +53,7 @@ public final class TypeAdapterManager
   {
     private final Set<Pair<Type, ?>> adapters = new HashSet<>();
 
-    private volatile Gson gson = null;
+    private final AtomicReference<Gson> gson = new AtomicReference<>();
 
 
     protected TypeAdapterSet() { }
@@ -63,18 +64,14 @@ public final class TypeAdapterManager
     public Gson getGson()
     {
       Gson gson;
-      if ((gson = this.gson) == null)
+      while ((gson = this.gson.get()) == null)
       {
-        synchronized (this)
-        {
-          if ((gson = this.gson) == null)
-          {
-            final GsonBuilder gsonBuilder = new GsonBuilder();
-            for (Pair<Type, ?> e: adapters)
-              gsonBuilder.registerTypeAdapter(e.getKey(), e.getValue());
-            this.gson = gson = gsonBuilder.create();
-          }
-        }
+        final GsonBuilder gsonBuilder = new GsonBuilder();
+        for (Pair<Type, ?> e: adapters)
+          gsonBuilder.registerTypeAdapter(e.getKey(), e.getValue());
+        gson = gsonBuilder.create();
+        if (this.gson.compareAndSet(null, gson))
+          break;
       }
       return gson;
     }
@@ -114,7 +111,7 @@ public final class TypeAdapterManager
         Objects.requireNonNull(key, "key"),
         Objects.requireNonNull(value, "value")));
       if (changed)
-        gson = null;
+        gson.set(null);
       return changed;
     }
   }
