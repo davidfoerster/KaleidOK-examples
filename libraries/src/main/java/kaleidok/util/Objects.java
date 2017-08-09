@@ -2,6 +2,7 @@ package kaleidok.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 
 public final class Objects
@@ -55,6 +56,25 @@ public final class Objects
           CloneNotSupportedException.class.getCanonicalName(),
         cause);
     }
+  }
+
+
+  public static <T> T clone( T o,
+    Function<? super T, ? extends T> fallbackCopier )
+  {
+    if (o instanceof Cloneable)
+    {
+      try
+      {
+        //noinspection unchecked
+        return (T) clone((Cloneable) o);
+      }
+      catch (CloneNotSupportedException ignored)
+      {
+        // use fall-back
+      }
+    }
+    return fallbackCopier.apply(o);
   }
 
 

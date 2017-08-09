@@ -308,22 +308,13 @@ public abstract class ChromatikQuery
 
   protected Map<Serializable, Serializable> copyOptionMap()
   {
-    if (optionMap == null)
-      return null;
-
-    Map<Serializable, Serializable> optsClone = null;
-    if (optionMap instanceof Cloneable) try
-    {
-      //noinspection OverlyStrongTypeCast
-      optsClone = Objects.clone(
-        (Cloneable & Map<Serializable, Serializable>) optionMap);
-    }
-    catch (CloneNotSupportedException ignored)
-    {
-      // leave the null reference to invoke the fall-back behaviour
-    }
-
-    return (optsClone != null) ? optsClone : new HashMap<>(optionMap);
+    Map<Serializable, Serializable> optionMap = this.optionMap;
+    //noinspection unchecked
+    return
+      (optionMap == null) ? null :
+      (optionMap instanceof HashMap) ?
+        (Map<Serializable, Serializable>) ((HashMap<?,?>) optionMap).clone() :
+        Objects.clone(optionMap, HashMap::new);
   }
 
 
