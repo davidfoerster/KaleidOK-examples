@@ -228,33 +228,40 @@ public abstract class Chromasthetiator<F extends Flickr>
     }
 
 
-    private static final String flickrErrorMessage =
-      "Couldn’t retrieve Flickr image sizes";
-
     @Override
     public SizeMap getSizes()
     {
       SizeMap sizes = super.getSizes();
-      if (sizes == null) {
-        try {
+      if (sizes == null)
+      {
+        try
+        {
           sizes = getSizesThrow();
-        } catch (FlickrException ex) {
-          switch (ex.getErrorCode()) {
+        }
+        catch (FlickrException ex)
+        {
+          switch (ex.getErrorCode())
+          {
           case 1: // Photo not found
           case 2: // Permission denied
-            logger.log(Level.FINER, "{0} for {1}: {2}",
-              new Object[]{flickrErrorMessage, this, ex.getLocalizedMessage()});
+            logger.log(Level.FINER,
+              "Couldn’t retrieve Flickr image sizes for {0}: {1}",
+              new Object[]{ this, ex.getLocalizedMessage() });
             sizes = new SizeMap();
             break;
 
           default:
-            logThrown(logger, Level.WARNING, "{0} for {1}", ex,
-              new Object[]{flickrErrorMessage, this});
+            logThrown(logger, Level.WARNING,
+              "Couldn’t retrieve Flickr image sizes for {0}",
+              ex, this);
             break;
           }
-        } catch (IOException ex) {
-          logThrown(logger, Level.WARNING, "{0} for {1}", ex,
-            new Object[]{flickrErrorMessage, this});
+        }
+        catch (IOException ex)
+        {
+          logThrown(logger, Level.WARNING,
+            "Couldn’t retrieve Flickr image sizes for {0}",
+            ex, this);
         }
       }
       return sizes;
