@@ -7,6 +7,7 @@ import kaleidok.flickr.FlickrException;
 import kaleidok.flickr.Photo;
 import kaleidok.flickr.SizeMap;
 import kaleidok.util.Math;
+import org.apache.commons.lang3.tuple.Pair;
 import synesketch.art.util.SynesketchPalette;
 import synesketch.emotion.*;
 
@@ -289,14 +290,18 @@ public abstract class Chromasthetiator<F extends Flickr>
   private static Stream<String> findStrongestAffectWords(
     Collection<AffectWord> affectWords, int maxCount )
   {
-    return (maxCount > 0 && !affectWords.isEmpty()) ?
-      affectWords.stream()
-        .map(
-          (aw) -> new AbstractMap.SimpleEntry<>(
-            aw.getWord(), aw.getWeights().map(Math::square).sum()))
-        .sorted(Map.Entry.comparingByValue())
-        .limit(maxCount)
-        .map(Map.Entry::getKey) :
-      Stream.empty();
+    if (maxCount <= 0 || affectWords.isEmpty())
+      return Stream.empty();
+
+    Stream<Map.Entry<String, Double>> weightedAffectWords =
+      affectWords.stream().map(
+        (aw) -> Pair.of(aw.getWord(), aw.getWeights().map(Math::square).sum()));
+    Comparator<Map.Entry<String, Double>> comparator =
+      Map.Entry.comparingByValue();
+    //noinspection ConstantConditions
+    return (maxCount == 1) ?
+      Stream.of(weightedAffectWords.max(comparator).get().getKey()) :
+      weightedAffectWords.sorted(comparator).limit(maxCount)
+        .map(Map.Entry::getKey);
   }
 }
