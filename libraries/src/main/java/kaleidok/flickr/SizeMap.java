@@ -25,17 +25,17 @@ public class SizeMap extends TreeMap<Size.Label, Size>
 {
   private static final long serialVersionUID = -8966551070440870922L;
 
-  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  @SuppressWarnings("SpellCheckingInspection")
   @Expose
   @SerializedName("canblog")
   public boolean canBlog;
 
-  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  @SuppressWarnings("SpellCheckingInspection")
   @Expose
   @SerializedName("canprint")
   public boolean canPrint;
 
-  @SuppressWarnings({ "unused", "SpellCheckingInspection" })
+  @SuppressWarnings("SpellCheckingInspection")
   @Expose
   @SerializedName("candownload")
   public boolean canDownload;
