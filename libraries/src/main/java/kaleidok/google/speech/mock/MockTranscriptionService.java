@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static kaleidok.google.speech.TranscriptionService.DEFAULT_API_BASE;
+import static kaleidok.net.http.HttpConnection.HTTP_PROTOCOL;
 
 
 public class MockTranscriptionService extends TranscriptionServiceBase
@@ -93,7 +94,7 @@ public class MockTranscriptionService extends TranscriptionServiceBase
     InetSocketAddress addr = context.getServer().getAddress();
     try {
       return new URI(
-        "http", null, addr.getHostString(), addr.getPort(),
+        HTTP_PROTOCOL, null, addr.getHostString(), addr.getPort(),
         context.getPath(), null, null);
     } catch (URISyntaxException ex) {
       throw new AssertionError(ex);

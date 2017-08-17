@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static kaleidok.net.http.HttpConnection.HTTP_PROTOCOL;
 
 
 public abstract class ChromatikQuery
@@ -369,7 +370,7 @@ public abstract class ChromatikQuery
     {
       //noinspection SpellCheckingInspection
       DEFAULT_URI =
-        new URI("http", "chromatik.labs.exalead.com", "/searchphotos", null);
+        new URI(HTTP_PROTOCOL, "chromatik.labs.exalead.com", "/searchphotos", null);
     }
     catch (URISyntaxException ex)
     {

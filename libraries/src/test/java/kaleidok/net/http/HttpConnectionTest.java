@@ -18,6 +18,7 @@ import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static kaleidok.net.http.HttpConnection.HTTP_PROTOCOL;
 import static org.junit.Assert.*;
 
 
@@ -54,7 +55,7 @@ public class HttpConnectionTest
     stubFor(get(urlEqualTo(PATH)).willReturn(r));
 
     con = HttpConnection.openURL(
-      new URL("http", "localhost", wireMockRule.port(), PATH));
+      new URL(HTTP_PROTOCOL, "localhost", wireMockRule.port(), PATH));
   }
 
 
