@@ -21,9 +21,45 @@ public final class Strings
   }
 
 
-  private static char toDigit( int n )
+  /**
+   * @param n  An integer between 0 and 35
+   * @return  {@code toDigitUnsafe(n, 'a' - 10)}
+   * @see #toDigitUnchecked(int, int)
+   */
+  public static char toDigitLowerCaseUnchecked( int n )
   {
-    return (char) (n + (n < 10 ? '0' : 'a' - 10));
+    return toDigitUnchecked(n, 'a' - 10);
+  }
+
+
+  /**
+   * @param n  An integer between 0 and 35
+   * @return  {@code toDigitUnsafe(n, 'A' - 10)}
+   * @see #toDigitUnchecked(int, int)
+   */
+  public static char toDigitUpperCaseUnchecked( int n )
+  {
+    return toDigitUnchecked(n, 'A' - 10);
+  }
+
+
+  /**
+   * <p>Converts an integer between 0 and 35 to a suitable digit character:
+   * <ul>
+   *   <li>0–9 are mapped to {@code '0'}–{@code '9'} and</li>
+   *   <li>10–35 are mapped to ({@code letterBase}+10)–({@code letterBase}+35).</li>
+   * </ul>
+   * </p>
+   * <p><em>The result is undefined for integers outside that range.</em></p>
+   *
+   * @param n  An integer between 0 and 35
+   * @param letterBase  A base value for digits in the range [10, 36];
+   *   typically {@code 'A'}−10 or {@code 'a'}−10.
+   * @return  A digit representing the integer {@code n}
+   */
+  public static char toDigitUnchecked( int n, int letterBase )
+  {
+    return (char) ((n < 10 ? '0' : letterBase) + n);
   }
 
 
@@ -51,7 +87,7 @@ public final class Strings
   {
     int i;
     for (i = offset + len - 1; i >= offset && n != 0; i--, n >>>= 4)
-      dst[i] = toDigit((int) n & 0xf);
+      dst[i] = toDigitLowerCaseUnchecked((int) n & 0xf);
     java.util.Arrays.fill(dst, offset, i + 1, '0');
     return dst;
   }
@@ -84,7 +120,7 @@ public final class Strings
     boolean negative = n < 0;
     if (negative) {
       if (n == Long.MIN_VALUE) {
-        dst[offset + (--len)] = toDigit((int) -(n % base));
+        dst[offset + (--len)] = toDigitLowerCaseUnchecked((int) -(n % base));
         n /= base;
       }
       n = -n;
@@ -92,11 +128,11 @@ public final class Strings
 
     int i;
     for (i = offset + len - 1; i >= offset && n > Integer.MAX_VALUE; i--, n /= base)
-      dst[i] = toDigit((int)(n % base));
+      dst[i] = toDigitLowerCaseUnchecked((int)(n % base));
 
     int intN = (int) n, intBase = (int) base;
     for (; i >= offset && intN != 0; i--, intN /= intBase)
-      dst[i] = toDigit(intN % intBase);
+      dst[i] = toDigitLowerCaseUnchecked(intN % intBase);
 
     if (i >= offset) {
       if (negative)

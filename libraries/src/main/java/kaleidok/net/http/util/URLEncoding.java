@@ -1,5 +1,7 @@
 package kaleidok.net.http.util;
 
+import kaleidok.util.Strings;
+
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -193,8 +195,8 @@ public final class URLEncoding
           {
             int b = bytes.get() & 0xff;
             dst.append(ESCAPE_PREFIX)
-              .append((char) toHexDigit(b >>> 4))
-              .append((char) toHexDigit(b & 0xf));
+              .append(Strings.toDigitUpperCaseUnchecked(b >>> 4))
+              .append(Strings.toDigitUpperCaseUnchecked(b & 0xf));
           }
           bytes.limit(bytes.capacity());
           bytes.rewind();
@@ -214,14 +216,6 @@ public final class URLEncoding
 
 
   private static final int CODER_MAX_CHARS_CAPACITY = 8;
-
-  private static int toHexDigit( int c )
-  {
-    assert c >>> 4 == 0 :
-      String.format("%#010x (%<d) is outside of [0, 16)", c);
-
-    return c + ((c < 10) ? '0' : ('A' - 10));
-  }
 
 
   private static int estimateEncoderOutputLength( int inputLength )
