@@ -8,6 +8,7 @@ import java.awt.image.RGBImageFilter;
 import java.text.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -85,7 +86,15 @@ public class RGBImageFilterFormat extends Format
 
   public RGBImageFilterFormat()
   {
-    this(NumberFormat.getNumberInstance());
+    this(getDefaultNumberFormat());
+  }
+
+
+  private static NumberFormat getDefaultNumberFormat()
+  {
+    NumberFormat fmt = NumberFormat.getInstance(Locale.ROOT);
+    fmt.setGroupingUsed(false);
+    return fmt;
   }
 
 

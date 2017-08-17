@@ -39,8 +39,6 @@ import java.awt.Image;
 import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
-import java.text.NumberFormat;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -90,8 +88,7 @@ public final class KaleidoscopeChromasthetiationService
 
     neutralFilter = new AspectedObjectProperty<>(this, "neutral image filter");
     StringConverter<RGBImageFilter> filterConverter =
-      new CachingFormattedStringConverter<>(new RGBImageFilterFormat(
-        NumberFormat.getNumberInstance(Locale.ROOT)));
+      new CachingFormattedStringConverter<>(new RGBImageFilterFormat());
     neutralFilter.addAspect(StringConverterAspectTag.getInstance(),
       filterConverter);
     neutralFilter.addAspect(PropertyPreferencesAdapterTag.getInstance(),
