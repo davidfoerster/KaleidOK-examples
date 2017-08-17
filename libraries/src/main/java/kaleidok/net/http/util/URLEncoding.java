@@ -327,16 +327,18 @@ public final class URLEncoding
         {
           while (i + 1 < len && bytes.hasRemaining())
           {
-            int v = hexDigitValue(s.charAt(i++));
-            v = (v << 4) | hexDigitValue(s.charAt(i++));
+            int v =
+              hexDigitValue(s.charAt(i)) << 4 | hexDigitValue(s.charAt(i + 1));
             if ((v & ~0xff) != 0)
             {
               throw new IllegalArgumentException(String.format(
                 "Illegal hex characters in escape pattern: \"%c%s\"",
-                ESCAPE_PREFIX, ESCAPE_JAVA.translate(s.subSequence(i - 2, i))));
+                ESCAPE_PREFIX,
+                ESCAPE_JAVA.translate(s.subSequence(i, i + 2))));
             }
             bytes.put((byte) v);
 
+            i += 2;
             if (i >= len || s.charAt(i) != ESCAPE_PREFIX) {
               reachedEndOfSequence = true;
               break;

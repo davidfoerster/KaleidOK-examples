@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 
 public class HttpConnectionTest
 {
+  @SuppressWarnings("SpellCheckingInspection")
   public static final String
     PATH = "/",
     MIME_TYPE = ContentType.TEXT_PLAIN.getMimeType(),
