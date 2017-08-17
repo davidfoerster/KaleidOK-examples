@@ -138,8 +138,7 @@ public class MimeTypeMap extends FreezableMap<String, Float>
   {
     if (mime == null || !MIME_TYPE_PATTERN.matcher(mime).matches())
     {
-      if (this.getClass().desiredAssertionStatus())
-        throw new AssertionError(getMismatchError(mime));
+      assert false : getMismatchError(mime);
       return null;
     }
 
@@ -205,7 +204,7 @@ public class MimeTypeMap extends FreezableMap<String, Float>
         sb.append(";q=").append(qs);
       }
     }
-    String acceptString = (sb.length() != 0) ? sb.toString() : "";
+    String acceptString = sb.toString();
     if (isFrozen())
       this.acceptString = acceptString;
     return acceptString;
@@ -213,15 +212,15 @@ public class MimeTypeMap extends FreezableMap<String, Float>
 
 
   public static final Pattern MIME_TYPE_PATTERN = Pattern.compile(
-    "^(?:\\*/\\*|[a-z.-]+/(?:\\*|[a-z.-]+))$");
+    "\\*/\\*|[a-z.-]+/(?:\\*|[a-z.-]+)");
 
-  private static final NumberFormat qFormat =
-    NumberFormat.getNumberInstance(Locale.ROOT);
+  private static final NumberFormat qFormat;
   static {
-    qFormat.setMinimumIntegerDigits(1);
-    qFormat.setMaximumIntegerDigits(1);
-    qFormat.setMinimumFractionDigits(0);
-    qFormat.setMaximumFractionDigits(3);
+    NumberFormat fmt = qFormat = NumberFormat.getNumberInstance(Locale.ROOT);
+    fmt.setMinimumIntegerDigits(1);
+    fmt.setMaximumIntegerDigits(1);
+    fmt.setMinimumFractionDigits(0);
+    fmt.setMaximumFractionDigits(3);
   }
 
 
