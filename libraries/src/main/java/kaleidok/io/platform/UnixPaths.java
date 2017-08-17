@@ -1,11 +1,14 @@
 package kaleidok.io.platform;
 
 import kaleidok.io.FilePermissionAttributes;
+import org.apache.commons.lang.StringUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 import java.util.EnumSet;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
@@ -19,11 +22,13 @@ public class UnixPaths extends PlatformPathsBase
   @Override
   protected Path getTempDirImpl()
   {
-    String dir = System.getenv("TMPDIR");
-    if (dir == null || dir.isEmpty())
-      dir = System.getenv("TMP");
-    return (dir != null && !dir.isEmpty()) ?
-      Paths.get(dir, EMPTY_STRING_ARRAY) :
+    Optional<String> dir =
+      Stream.of("TMPDIR", "TMP")
+        .map(System::getenv)
+        .filter(StringUtils::isNotEmpty)
+        .findFirst();
+    return dir.isPresent() ?
+      Paths.get(dir.get(), EMPTY_STRING_ARRAY) :
       super.getTempDirImpl();
   }
 
