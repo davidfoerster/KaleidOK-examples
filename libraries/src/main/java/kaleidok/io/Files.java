@@ -5,8 +5,8 @@ import kaleidok.util.Arrays;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -20,8 +20,18 @@ public final class Files
   public static final LinkOption[] FOLLOW_LINKS = {};
 
 
-  public static final Collection<PosixFilePermission> posixFilePermissions =
-    Arrays.asImmutableList(PosixFilePermission.values());
+  private static List<PosixFilePermission> posixFilePermissions = null;
+
+  public static List<PosixFilePermission> getPosixFilePermissions()
+  {
+    List<PosixFilePermission> l;
+    if ((l = posixFilePermissions) == null)
+    {
+      posixFilePermissions = l =
+        Arrays.asImmutableList(PosixFilePermission.values());
+    }
+    return l;
+  }
 
 
   @SuppressWarnings("OctalInteger")
@@ -36,6 +46,8 @@ public final class Files
       EnumSet.noneOf(PosixFilePermission.class);
     if (mask != 0)
     {
+      final List<PosixFilePermission> posixFilePermissions =
+        getPosixFilePermissions();
       int maxOrdinal = posixFilePermissions.size() - 1;
       for (PosixFilePermission p: posixFilePermissions)
       {
