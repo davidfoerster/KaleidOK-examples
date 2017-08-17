@@ -1,12 +1,15 @@
 package kaleidok.io.platform;
 
 import kaleidok.io.FilePermissionAttributes;
-import kaleidok.io.Files;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
+import java.util.EnumSet;
 
+import static java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 import static org.apache.commons.lang.ArrayUtils.EMPTY_STRING_ARRAY;
 
 
@@ -27,10 +30,11 @@ public class UnixPaths extends PlatformPathsBase
 
   private static final FileAttribute<?>[]
     DEFAULT_TEMPFILE_ATTRIBUTES = {
-        new FilePermissionAttributes(Files.permissionsFromMask(0600))
+        new FilePermissionAttributes(EnumSet.of(OWNER_READ, OWNER_WRITE))
       },
     DEFAULT_TEMPDIR_ATTRIBUTES = {
-        new FilePermissionAttributes(Files.permissionsFromMask(0700))
+        new FilePermissionAttributes(EnumSet.of(
+          OWNER_READ, OWNER_WRITE, OWNER_EXECUTE))
       };
 
   @Override
