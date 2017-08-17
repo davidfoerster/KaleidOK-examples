@@ -105,6 +105,10 @@ public abstract class MockRequestHandlerBase implements HttpHandler
     if (contentLength == 0)
       return Collections.emptyMap();
 
+    Charset charset = contentType.getCharset();
+    if (charset == null)
+      charset = URLEncoding.DEFAULT_CHARSET;
+
     String sFormData;
     if (contentLength > 0)
     {
@@ -113,16 +117,14 @@ public abstract class MockRequestHandlerBase implements HttpHandler
       try (InputStream bodyStream = t.getRequestBody()) {
         count = IOUtils.read(bodyStream, buf);
       }
-      fastAssert(count == buf.length, "Content length mismatch");
+      fastAssert(count == contentLength, "Content length mismatch");
 
-      Charset charset = contentType.getCharset();
-      sFormData =
-        new String(buf, (charset != null) ? charset : URLEncoding.DEFAULT_CHARSET);
+      sFormData = new String(buf, charset);
     }
     else
     {
       try (InputStream bodyStream = t.getRequestBody()) {
-        sFormData = IOUtils.toString(bodyStream, contentType.getCharset());
+        sFormData = IOUtils.toString(bodyStream, charset);
       }
     }
     return Parsers.getQueryMap(sFormData, URLEncoding.DEFAULT_CHARSET);
