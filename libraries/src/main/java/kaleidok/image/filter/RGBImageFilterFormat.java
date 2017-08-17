@@ -1,5 +1,6 @@
 package kaleidok.image.filter;
 
+import kaleidok.image.filter.HSBAdjustFilter.FilterMode;
 import kaleidok.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -115,15 +116,15 @@ public class RGBImageFilterFormat extends Format
   public StringBuffer format( HSBAdjustFilter filter, StringBuffer sb,
     FieldPosition pos )
   {
-    if (!(filter.filterMode instanceof HSBAdjustFilter.FilterMode))
+    Object filterMode = filter.filterMode;
+    if (!(filterMode instanceof FilterMode))
     {
       throw new IllegalArgumentException(
-        "Filter mode is no instance of " +
-          HSBAdjustFilter.FilterMode.class.getName());
+        "Filter mode is no instance of " + FilterMode.class.getName());
     }
 
     sb.ensureCapacity(sb.length() + 30);
-    sb.append(((HSBAdjustFilter.FilterMode) filter.filterMode).symbol)
+    sb.append(((FilterMode) filterMode).symbol)
       .append("hsb").append(argumentEnclosingStart);
     numberFormat.format(filter.hue, sb, pos)
       .append(argumentDelimiter).append(SPACE);
@@ -145,15 +146,14 @@ public class RGBImageFilterFormat extends Format
 
     // parse filter mode
     final int initialIndex = pos.getIndex();
-    char c = s.charAt(initialIndex);
-    HSBAdjustFilter.FilterMode filterMode;
-    if (Character.isJavaIdentifierStart(c))
+    FilterMode filterMode;
+    if (Character.isJavaIdentifierStart(s.charAt(pos.getIndex())))
     {
-      filterMode = HSBAdjustFilter.FilterMode.ADD;
+      filterMode = FilterMode.ADD;
     }
     else try
     {
-      filterMode = HSBAdjustFilter.FilterMode.fromSymbol(c);
+      filterMode = FilterMode.fromSymbol(s.charAt(pos.getIndex()));
       pos.setIndex(pos.getIndex() + 1);
     }
     catch (IllegalArgumentException ignored)
