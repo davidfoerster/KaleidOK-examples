@@ -44,11 +44,13 @@ public class AudioTranscriptionProcessor implements AudioProcessor
   {
     if (shouldRecord)
     {
-      int[] audioInt = convertTo16Bit(audioEvent, audioConversionBuffer);
-      audioConversionBuffer = audioInt;
-      try {
+      int[] audioInt = audioConversionBuffer =
+        convertTo16Bit(audioEvent, audioConversionBuffer);
+      try
+      {
         ensureEncoderReady(audioEvent);
-        encoder.addSamples(audioInt, audioInt.length);
+        encoder.addSamples(audioInt,
+          audioEvent.getBufferSize() - audioEvent.getOverlap());
         encoder.t_encodeSamples(
           encoder.fullBlockSamplesAvailableToEncode(),
           false, Integer.MAX_VALUE);
@@ -177,7 +179,7 @@ public class AudioTranscriptionProcessor implements AudioProcessor
     public void finishEncoding() throws IOException
     {
       assert !stt.service.isInQueue(this) :
-        this + " is not in the queue of " + stt.service;
+        this + " mustn’t be in the queue of " + stt.service;
 
       int availableSamples = encoder.samplesAvailableToEncode();
       logger.log(Level.FINEST,
