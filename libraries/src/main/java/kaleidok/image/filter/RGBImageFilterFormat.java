@@ -1,10 +1,11 @@
 package kaleidok.image.filter;
 
+import kaleidok.util.Arrays;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.awt.image.RGBImageFilter;
-import java.text.FieldPosition;
-import java.text.Format;
-import java.text.NumberFormat;
-import java.text.ParsePosition;
+import java.text.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,21 +28,49 @@ public class RGBImageFilterFormat extends Format
     char argumentDelimiter, char argumentEnclosingStart,
     char argumentEnclosingEnd )
   {
-    this.numberFormat = Objects.requireNonNull(numberFormat);
-
-    if (argumentDelimiter <= SPACE || argumentEnclosingStart <= SPACE ||
-      argumentEnclosingEnd <= SPACE)
-    {
-      throw new IllegalArgumentException(
-        "The delimiters and enclosures mustn’t be spaces or control characters");
-    }
     if (argumentDelimiter == argumentEnclosingStart ||
       argumentDelimiter == argumentEnclosingEnd)
     {
       throw new IllegalArgumentException(
-        "The argument delimiter mustn’t be equal to one of the enclosing characters");
+        "The argument delimiter mustn’t be equal to either of the enclosing " +
+          "characters");
     }
 
+    char[] delimiters = {
+        argumentDelimiter, argumentEnclosingStart, argumentEnclosingEnd
+      };
+    if (ArrayUtils.contains(delimiters, SPACE) ||
+      Arrays.stream(delimiters).anyMatch(Character::isDigit))
+    {
+      throw new IllegalArgumentException(
+        "The delimiters and enclosures mustn’t be spaces or control " +
+          "characters or digits");
+    }
+
+    if (Objects.requireNonNull(numberFormat) instanceof DecimalFormat)
+    {
+      DecimalFormat dFmt = (DecimalFormat) numberFormat;
+      DecimalFormatSymbols dFmtSym = dFmt.getDecimalFormatSymbols();
+      if (ArrayUtils.contains(delimiters, dFmtSym.getDecimalSeparator()) ||
+        (dFmt.isGroupingUsed() &&
+           ArrayUtils.contains(delimiters, dFmtSym.getGroupingSeparator())))
+      {
+        throw new IllegalArgumentException(
+          "The delimiters and enclosures mustn’t be the same as the decimal " +
+            "or grouping separators");
+      }
+      if (StringUtils.containsAny(dFmt.getPositivePrefix(), delimiters) ||
+        StringUtils.containsAny(dFmt.getNegativePrefix(), delimiters) ||
+        ArrayUtils.contains(delimiters, dFmtSym.getMinusSign()) ||
+        StringUtils.containsAny(dFmtSym.getExponentSeparator(), delimiters))
+      {
+        throw new IllegalArgumentException(
+          "The argument delimiter mustn’t appear in the prefixes for positive " +
+            "or negative numbers or the exponent separator");
+      }
+    }
+
+    this.numberFormat = numberFormat;
     this.argumentDelimiter = argumentDelimiter;
     this.argumentEnclosingStart = argumentEnclosingStart;
     this.argumentEnclosingEnd = argumentEnclosingEnd;

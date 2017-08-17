@@ -45,6 +45,17 @@ public final class Arrays
   }
 
 
+  public static IntStream stream( final char[] a, int offset, int end )
+  {
+    return IntStream.range(offset, end).map((i) -> a[i]);
+  }
+
+  public static IntStream stream( final char[] a )
+  {
+    return stream(a, 0, a.length);
+  }
+
+
   public static <T, U> boolean equals( final T[] a, final U[] b,
     final BiPredicate<? super T, ? super U> predicate )
   {
