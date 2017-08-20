@@ -139,10 +139,7 @@ public class GeometryPreferences extends AbstractGeometryPreferences<Void, PAppl
     @Override
     public void windowDestroyed( WindowEvent ev )
     {
-      x.unbind();
-      y.unbind();
-      w.unbind();
-      h.unbind();
+      unbind();
     }
   }
 }

@@ -1,7 +1,9 @@
 package kaleidok.javafx.stage;
 
+import javafx.beans.property.Property;
 import kaleidok.javafx.beans.property.AspectedBooleanProperty;
 import kaleidok.javafx.beans.property.AspectedDoubleProperty;
+import kaleidok.javafx.beans.property.AspectedProperty;
 import kaleidok.javafx.beans.property.adapter.preference.BooleanPropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.adapter.preference.DoublePropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
@@ -138,6 +140,12 @@ public abstract class AbstractGeometryPreferences<G, P> implements PreferenceBea
   public abstract void bind( G graphics );
 
 
+  public void unbind()
+  {
+    getProperties().forEach(Property::unbind);
+  }
+
+
   public void applyGeometryAndBind( G graphics )
   {
     applyGeometry(graphics);
@@ -163,8 +171,13 @@ public abstract class AbstractGeometryPreferences<G, P> implements PreferenceBea
   public Stream<? extends PropertyPreferencesAdapter<?, ?>>
   getPreferenceAdapters()
   {
-    return Stream.of(x, y, w, h, show)
-      .filter(Objects::nonNull)
+    return getProperties()
       .map(PropertyPreferencesAdapterTag.getWritableInstance()::ofAny);
+  }
+
+
+  private Stream<? extends AspectedProperty<?>> getProperties()
+  {
+    return Stream.of(x, y, w, h, show).filter(Objects::nonNull);
   }
 }
