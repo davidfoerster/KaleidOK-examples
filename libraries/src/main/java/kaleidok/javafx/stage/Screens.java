@@ -6,10 +6,10 @@ import javafx.geometry.Side;
 import javafx.stage.Screen;
 import kaleidok.javafx.geometry.Rectangles;
 
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
@@ -25,7 +25,7 @@ public final class Screens
     };
 
 
-  public static Map.Entry<Side, Point2D> placeAround( double windowWidth,
+  public static Entry<Side, Point2D> placeAround( double windowWidth,
     double windowHeight, Rectangle2D occupiedArea, double padding,
     Side... preferredSides )
   {
@@ -67,7 +67,7 @@ public final class Screens
       if (!occupiedArea.intersects(x, y, windowWidth, windowHeight) &&
         totalScreenSpace.contains(x, y, windowWidth, windowHeight))
       {
-        return new AbstractMap.SimpleEntry<>(side, new Point2D(x, y));
+        return new SimpleEntry<>(side, new Point2D(x, y));
       }
     }
 
@@ -75,7 +75,7 @@ public final class Screens
   }
 
 
-  public static Map.Entry<Side, Screen> getNeighborScreen(
+  public static Entry<Side, Screen> getNeighborScreen(
     final int screenIdx, Side... preferredSides )
   {
     final List<Screen> screens = Screen.getScreens();
@@ -95,7 +95,7 @@ public final class Screens
           .filter(distanceFunction)
           .min(Comparator.comparingDouble(distanceFunction));
       if (closestScreen.isPresent())
-        return new AbstractMap.SimpleEntry<>(side, closestScreen.get());
+        return new SimpleEntry<>(side, closestScreen.get());
     }
 
     return null;
