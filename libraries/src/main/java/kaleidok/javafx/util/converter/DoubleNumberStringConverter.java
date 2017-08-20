@@ -24,7 +24,9 @@ public class DoubleNumberStringConverter
   @Override
   protected Double convertParseResult( Object n )
   {
-    return (n instanceof Double) ? (Double) n : ((Number) n).doubleValue();
+    return (n instanceof Double) ?
+      (Double) n :
+      Double.valueOf(((Number) n).doubleValue());
   }
 
 
