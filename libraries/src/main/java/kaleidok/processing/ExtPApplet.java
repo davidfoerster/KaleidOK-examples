@@ -595,8 +595,8 @@ public class ExtPApplet extends PApplet
     {
       if (result.size() != output.length)
       {
-        throw new IllegalArgumentException(
-          output.length + " integers expected in \"" + key + '\"');
+        throw new IllegalArgumentException(String.format(
+          "%d numbers expected in \"%s\"", output.length, key));
       }
       for (int i = output.length - 1; i >= 0; i--)
         output[i].setValue(result.get(i));
@@ -678,9 +678,10 @@ public class ExtPApplet extends PApplet
 
   protected void loadPreferences()
   {
-    parseParamNumberList("size", Integer::valueOf,
+    Function<String, Integer> parseInt = Integer::valueOf;
+    parseParamNumberList("size", parseInt,
       geometryPreferences.w, geometryPreferences.h);
-    parseParamNumberList("location", Integer::valueOf,
+    parseParamNumberList("location", parseInt,
       geometryPreferences.x, geometryPreferences.y);
 
     getAppletPreferenceAdapters()

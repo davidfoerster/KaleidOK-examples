@@ -210,8 +210,10 @@ public final class PImages
     if (dst == null)
       dst = new PImage();
     if (src != dst)
+    {
       dst.init(width, height, src.format, src.pixelDensity);
-    dst.loadPixels();
+      dst.loadPixels();
+    }
     int[] dpx = dst.pixels;
 
     for (int i = 0, y = 0; y < height; y++)
