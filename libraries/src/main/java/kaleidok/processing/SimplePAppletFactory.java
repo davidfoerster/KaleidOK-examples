@@ -39,13 +39,18 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
     {
       throw new IllegalArgumentException(ex);
     }
+    if (!Stream.of(constructor.getExceptionTypes()).allMatch((ex) ->
+      RuntimeException.class.isAssignableFrom(ex) || Error.class.isAssignableFrom(ex)))
+    {
+      throw new IllegalArgumentException(
+        constructor + " declares non-runtime, non-error exceptions");
+    }
   }
 
 
   @Override
   public T createInstance( ProcessingSketchApplication<T> context,
     Consumer<? super T> callback, List<String> args )
-    throws InvocationTargetException
   {
     T sketch;
     try
@@ -54,6 +59,15 @@ public class SimplePAppletFactory<T extends PApplet> implements PAppletFactory<T
     }
     catch (InstantiationException | IllegalAccessException | IllegalArgumentException ex)
     {
+      throw new AssertionError(ex);
+    }
+    catch (InvocationTargetException ex)
+    {
+      Throwable cause = ex.getCause();
+      if (cause instanceof RuntimeException)
+        throw (RuntimeException) cause;
+      if (cause instanceof Error)
+        throw (Error) cause;
       throw new AssertionError(ex);
     }
 

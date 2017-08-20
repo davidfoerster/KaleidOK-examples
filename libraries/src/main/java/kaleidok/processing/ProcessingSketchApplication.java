@@ -14,7 +14,6 @@ import kaleidok.javafx.stage.Screens;
 import processing.core.PApplet;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -63,20 +62,13 @@ public abstract class ProcessingSketchApplication<T extends PApplet>
         sketch.getClass().getCanonicalName() + " is already initialized");
     }
 
-    try
-    {
-      sketch =
-        getSketchFactory().createInstance(this,
-          (_sketch) -> {
-              if (_sketch instanceof ExtPApplet)
-                ((ExtPApplet) _sketch).executorService = this.executorService;
-            },
-          getParameters().getRaw());
-    }
-    catch (InvocationTargetException ex)
-    {
-      throw new Error(ex.getCause());
-    }
+    sketch =
+      getSketchFactory().createInstance(this,
+        (sketch) -> {
+            if (sketch instanceof ExtPApplet)
+              ((ExtPApplet) sketch).executorService = this.executorService;
+          },
+        getParameters().getRaw());
   }
 
 
