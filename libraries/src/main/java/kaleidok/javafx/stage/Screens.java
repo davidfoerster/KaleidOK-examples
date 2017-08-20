@@ -10,9 +10,12 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.Stream;
 
 
 public final class Screens
@@ -89,7 +92,7 @@ public final class Screens
     for (Side side : preferredSides)
     {
       SideBoundsDistanceFunction distanceFunction =
-        SideBoundsDistanceFunction.forSide(side, referenceScreen);
+        sbdfCtors[side.ordinal()].apply(referenceScreen);
       Optional<Screen> closestScreen =
         screens.stream()
           .filter(distanceFunction)
@@ -133,25 +136,6 @@ public final class Screens
 
 
     public abstract double distanceTo( Screen screen );
-
-
-    public static SideBoundsDistanceFunction forSide( Side side,
-      Screen referenceScreen )
-    {
-      switch (side)
-      {
-      case LEFT:
-        return new LeftSideBoundsDistanceFunction(referenceScreen);
-      case RIGHT:
-        return new RightSideBoundsDistanceFunction(referenceScreen);
-      case TOP:
-        return new TopSideBoundsDistanceFunction(referenceScreen);
-      case BOTTOM:
-        return new BottomSideBoundsDistanceFunction(referenceScreen);
-      default:
-        throw new IllegalArgumentException(String.valueOf(side));
-      }
-    }
   }
 
 
@@ -216,5 +200,21 @@ public final class Screens
     {
       return screen.getBounds().getMinY() - referenceBounds.getMaxY();
     }
+  }
+
+
+  @SuppressWarnings({ "SpellCheckingInspection", "MismatchedReadAndWriteOfArray" })
+  private static final Function<Screen, ? extends SideBoundsDistanceFunction>[] sbdfCtors;
+  static
+  {
+    @SuppressWarnings("unchecked")
+    Function<Screen, ? extends SideBoundsDistanceFunction>[] a = sbdfCtors =
+      new Function[4];
+    a[Side.TOP.ordinal()] = TopSideBoundsDistanceFunction::new;
+    a[Side.BOTTOM.ordinal()] = BottomSideBoundsDistanceFunction::new;
+    a[Side.LEFT.ordinal()] = LeftSideBoundsDistanceFunction::new;
+    a[Side.RIGHT.ordinal()] = RightSideBoundsDistanceFunction::new;
+    assert a.length == Side.values().length &&
+      Stream.of(a).noneMatch(Objects::isNull);
   }
 }
