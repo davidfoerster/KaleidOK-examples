@@ -10,10 +10,8 @@ import processing.event.TouchEvent;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.lang.reflect.Method;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -79,17 +77,13 @@ public class Plugin<P extends PApplet>
     static final EnumSet<HookMethod> valueSet =
       EnumSet.allOf(HookMethod.class);
 
-    static final Map<String, HookMethod> valueMap =
-      valueSet.stream().collect(
-        Collectors.toMap(Enum::name, Function.identity()));
-
 
     public static EnumSet<HookMethod> getAvailableHooks( Plugin<?> plugin )
     {
-      EnumSet<HookMethod> result = EnumSet.noneOf(HookMethod.class);
+      EnumSet<HookMethod> result = EnumSet.of(dispose);
       for (HookMethod hm: valueSet)
       {
-        if (hm == dispose || hm.isOverriddenOn(plugin))
+        if (!result.contains(hm) && hm.isOverriddenOn(plugin))
           result.add(hm);
       }
       return result;
@@ -102,12 +96,16 @@ public class Plugin<P extends PApplet>
         getAvailableHooks((Plugin<?>) plugin) :
         Stream.of(plugin.getClass().getMethods())
           .map((m) -> {
-              HookMethod hm = valueMap.get(m.getName());
+              HookMethod hm;
+              try {
+                hm = valueOf(m.getName());
+              } catch (IllegalArgumentException ignored) {
+                return null;
+              }
               return
-                (hm != null &&
-                   hm.argumentTypes.length == m.getParameterCount() &&
-                   Arrays.equals(hm.argumentTypes, m.getParameterTypes(),
-                     HookMethod::isCompatible))
+                (hm.argumentTypes.length == m.getParameterCount() &&
+                  Arrays.equals(hm.argumentTypes, m.getParameterTypes(),
+                    HookMethod::isCompatible))
                 ? hm : null;
             })
           .filter(Objects::nonNull)
