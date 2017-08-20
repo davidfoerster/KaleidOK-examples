@@ -45,7 +45,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -72,10 +71,10 @@ public class ExtPApplet extends PApplet
   private volatile CountDownLatch showSurfaceLatch = new CountDownLatch(1);
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  protected final List<List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>>> keyEventHandlers =
+  protected final List<Map<KeyStroke, Consumer<? super KeyEvent>>> keyEventHandlers =
     Arrays.asImmutableList(
-      Stream.generate(() -> new ArrayList<>(0))
-        .limit(3).toArray(List[]::new));
+      Stream.generate(() -> new LinkedHashMap<>(0)).limit(3)
+        .toArray(Map[]::new));
 
   private final GeometryPreferences geometryPreferences =
     new GeometryPreferences(this, true);
@@ -144,9 +143,8 @@ public class ExtPApplet extends PApplet
 
     if (P3D.equals(sketchRenderer()))
     {
-      keyEventHandlers.get(processing.event.KeyEvent.TYPE - 1).add(
-        new SimpleEntry<>(KeyStroke.fullscreenKeystroke,
-          (ev) -> thread(this::toggleFullscreen)));
+      keyEventHandlers.get(processing.event.KeyEvent.TYPE - 1).put(
+        KeyStroke.fullscreenKeystroke, (ev) -> thread(this::toggleFullscreen));
 
       if (parent != null)
       {
@@ -501,14 +499,14 @@ public class ExtPApplet extends PApplet
   @Override
   protected void handleKeyEvent( processing.event.KeyEvent event )
   {
-    List<Map.Entry<KeyStroke, Consumer<? super KeyEvent>>> handlers =
+    Map<KeyStroke, Consumer<? super KeyEvent>> handlers =
       keyEventHandlers.get(event.getAction() - 1);
     if (!handlers.isEmpty())
     {
       KeyEvent newtEvent = KeyEventSupport.convert(event);
       if (newtEvent != null)
       {
-        for (Map.Entry<KeyStroke, Consumer<? super KeyEvent>> e: handlers)
+        for (Map.Entry<KeyStroke, Consumer<? super KeyEvent>> e: handlers.entrySet())
         {
           if (e.getKey().matches(newtEvent))
           {
