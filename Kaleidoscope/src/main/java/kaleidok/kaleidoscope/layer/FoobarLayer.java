@@ -8,7 +8,7 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import kaleidok.javafx.beans.property.AspectedDoubleProperty;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
-import kaleidok.javafx.util.converter.CachingFormattedStringConverter;
+import kaleidok.javafx.util.converter.DoubleNumberStringConverter;
 import kaleidok.processing.ExtPApplet;
 import kaleidok.text.InternationalSystemOfUnitsFormat;
 import processing.core.PApplet;
@@ -54,7 +54,7 @@ public class FoobarLayer extends CircularImageLayer
     bounds.setAmountToStepBy(1e-4 / 2);
     InternationalSystemOfUnitsFormat fmt =
       InternationalSystemOfUnitsFormat.getNumberInstance(" Hz");
-    bounds.setConverter(new CachingFormattedStringConverter<>(fmt));
+    bounds.setConverter(new DoubleNumberStringConverter(fmt));
     p.addAspect(BoundedDoubleTag.getDoubleInstance(), bounds);
     p.addAspect(PropertyPreferencesAdapterTag.getInstance());
     return p;
