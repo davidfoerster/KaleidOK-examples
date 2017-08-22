@@ -322,25 +322,31 @@ public final class Strings
 
   public static CharSequence toCamelCase( CharSequence s )
   {
-    return (s.length() < 2) ?
-      s :
-      replaceAll(CAMEL_CASE_CONVERSION_PATTERN, s,
-        (matcher, input, sb) -> {
-          int start1 = matcher.start(1), end1 = matcher.end(1);
-          char[] cs;
-          if (start1 == end1)
-          {
-            cs = ArrayUtils.EMPTY_CHAR_ARRAY;
-          }
-          else
-          {
-            int c = Character.codePointAt(input, start1);
-            assert start1 + Character.charCount(c) == end1;
-            cs = Character.toChars(
-              (matcher.start() != 0) ? Character.toUpperCase(c) : c);
-          }
-          return cs;
-        });
+    return
+      (s.length() > 1) ?
+        replaceAll(CAMEL_CASE_CONVERSION_PATTERN, s,
+          Strings::toCamelCaseReplaceCallback) :
+        s;
+  }
+
+
+  private static Object toCamelCaseReplaceCallback( MatchResult matcher,
+    CharSequence input, @SuppressWarnings("unused") StringBuilder sb )
+  {
+    int start1 = matcher.start(1), end1 = matcher.end(1);
+    char[] cs;
+    if (start1 == end1)
+    {
+      cs = ArrayUtils.EMPTY_CHAR_ARRAY;
+    }
+    else
+    {
+      int c = Character.codePointAt(input, start1);
+      assert start1 + Character.charCount(c) == end1;
+      cs = Character.toChars(
+        (matcher.start() != 0) ? Character.toUpperCase(c) : c);
+    }
+    return cs;
   }
 
 
