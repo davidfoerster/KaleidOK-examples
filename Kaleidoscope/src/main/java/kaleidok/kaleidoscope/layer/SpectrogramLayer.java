@@ -58,7 +58,8 @@ public class SpectrogramLayer extends CircularImageLayer
 
     exponent = new AspectedDoubleProperty(this, "exponent", 1.125);
     exponent
-      .addAspect(BoundedDoubleTag.getDoubleInstance(), new DoubleSpinnerValueFactory(0, 4))
+      .addAspect(BoundedDoubleTag.getDoubleInstance(),
+        new DoubleSpinnerValueFactory(0, 4))
       .setAmountToStepBy(0.05);
     exponent.addAspect(PropertyPreferencesAdapterTag.getInstance());
   }
@@ -135,8 +136,10 @@ public class SpectrogramLayer extends CircularImageLayer
       scaleFactor = this.scaleFactor.floatValue();
     final double exponent = this.exponent.get();
     final int segmentCount = this.segmentCount.get();
+    /*
     assert segmentCount <= avgSpectrum.size() :
       segmentCount + " > " + avgSpectrum.size();
+    */
 
     parent.pushMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
     parent.scale(outerRadius);

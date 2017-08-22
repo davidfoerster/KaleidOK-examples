@@ -122,8 +122,7 @@ public abstract class ImageLayer implements Runnable, PreferenceBean
    * Updates and retrieves the current image for this layer. If the
    * {@link Future} returned by {@link #getNextImage()} is
    * {@link Future#isDone() done} and, its wrapped value is used as the
-   * new
-   * current image and the next image is reset as if calling
+   * new current image and the next image is reset as if calling
    * {@link #setNextImage(Future) setNextImage(null)}.
    * <p>
    * {@link Future#isCancelled() Cancelled} futures are skipped silently.

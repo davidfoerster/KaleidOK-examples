@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.FieldPosition;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 
@@ -24,8 +25,7 @@ public class MessageFormatBinding
 
   public MessageFormatBinding( ObservableValue<String> formatString )
   {
-    this.formatString = formatString;
-    bind(formatString);
+    bind(this.formatString = Objects.requireNonNull(formatString));
   }
 
 

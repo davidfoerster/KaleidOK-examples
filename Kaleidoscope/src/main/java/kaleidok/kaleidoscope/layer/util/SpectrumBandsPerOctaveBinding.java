@@ -27,8 +27,7 @@ public class SpectrumBandsPerOctaveBinding extends IntegerBinding
     if (sampleRate <= 0 || !Double.isFinite(sampleRate))
       throw new IllegalArgumentException("non-positive or non-finite sample rate");
 
-    bind(totalBands);
-    this.totalBands = totalBands;
+    bind(this.totalBands = Objects.requireNonNull(totalBands));
     octaveCount = log2(sampleRate * (0.5 / MIN_FREQUENCY));
   }
 

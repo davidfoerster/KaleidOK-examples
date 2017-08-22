@@ -209,9 +209,11 @@ public class OuterMovingShape extends CircularImageLayer
 
     final int segmentCount = this.segmentCount.get();
     parent.vertex(0, 0, 0.5f, 0.5f); // define a central point for the TRIANGLE_FAN, note the (0.5, 0.5) uv texture coordinates
-    for (int i = 0; i <= segmentCount; i++) {
-      drawCircleVertex(i % segmentCount, 1);
+    for (int i = 0; i < segmentCount; i++) {
+      drawCircleVertex(i, 1);
     }
+    drawCircleVertex(segmentCount, 1);
+
     parent.endShape(); // finalize the Shape
     parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
   }
