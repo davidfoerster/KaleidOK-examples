@@ -1,7 +1,6 @@
 package kaleidok.kaleidoscope.layer.util;
 
 import javafx.beans.binding.IntegerBinding;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
 import kaleidok.audio.processor.MinimFFTProcessor;
 
@@ -48,18 +47,27 @@ public class SpectrumBandsPerOctaveBinding extends IntegerBinding
   }
 
 
-  @SuppressWarnings("UnusedReturnValue")
-  public ChangeListener<Number> attach( final MinimFFTProcessor processor )
-  {
-    Objects.requireNonNull(processor);
-    ChangeListener<Number> listener =
-      ( obs, oldValue, newValue ) ->
-        processor.setAverageParams(
-          MinimFFTProcessor.AverageType.LOGARITHMIC, MIN_FREQUENCY,
-          newValue.intValue());
+  protected MinimFFTProcessor listeningProcessor = null;
 
-    listener.changed(this, null, getValue());
-    addListener(listener);
-    return listener;
+  public void attach( MinimFFTProcessor processor )
+  {
+    onInvalidating(listeningProcessor = processor);
+  }
+
+
+  @Override
+  protected void onInvalidating()
+  {
+    onInvalidating(listeningProcessor);
+  }
+
+
+  protected void onInvalidating( MinimFFTProcessor processor )
+  {
+    if (processor != null)
+    {
+      processor.setAverageParams(
+        MinimFFTProcessor.AverageType.LOGARITHMIC, MIN_FREQUENCY, get());
+    }
   }
 }
