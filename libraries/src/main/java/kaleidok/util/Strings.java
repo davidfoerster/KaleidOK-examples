@@ -180,8 +180,13 @@ public final class Strings
   public static int countLeadingWhitespace( CharSequence csq, int offset )
   {
     final int len = csq.length();
-    while (offset < len && Character.isWhitespace(csq.charAt(offset)))
-      offset++;
+    while (offset < len)
+    {
+      int c = Character.codePointAt(csq, offset);
+      offset += Character.charCount(c);
+      if (Character.isWhitespace(c))
+        break;
+    }
     return offset;
   }
 
@@ -345,13 +350,15 @@ public final class Strings
     if (len == 0)
       return false;
 
-    char c0 = s.charAt(0);
-    if (!Character.isDigit(c0) && (len == 1 || (c0 != '+' && c0 != '-')))
+    int c = Character.codePointAt(s, 0);
+    int i = Character.charCount(c);
+    if (!Character.isDigit(c) && (len == i || (c != '+' && c != '-')))
       return false;
 
-    for (int i = 1; i < len; i++)
+    for (; i < len; i += Character.charCount(c))
     {
-      if (!Character.isDigit(s.charAt(i)))
+      c = Character.codePointAt(s, i);
+      if (!Character.isDigit(c))
         return false;
     }
     return true;
