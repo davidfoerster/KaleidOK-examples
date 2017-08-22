@@ -157,44 +157,44 @@ public class InternationalSystemOfUnitsFormatTest
   @Test
   public void testGetMagnitudeBigDecimal1()
   {
-    assertEquals(0, getMagnitude(BigDecimal.ZERO));
-    assertEquals(0, getMagnitude(BigDecimal.ONE));
-    assertEquals(0, getMagnitude(BigDecimal.TEN));
-    assertEquals(0, getMagnitude(BigDecimal.valueOf(100)));
-    assertEquals(0, getMagnitude(BigDecimal.valueOf(999)));
-    assertEquals(1, getMagnitude(BigDecimal.valueOf(1000)));
-    assertEquals(1, getMagnitude(BigDecimal.valueOf(10000)));
-    assertEquals(1, getMagnitude(BigDecimal.valueOf(100000)));
-    assertEquals(1, getMagnitude(BigDecimal.valueOf(999999)));
-    assertEquals(2, getMagnitude(BigDecimal.valueOf(1000000)));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.ZERO));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.ONE));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.TEN));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.valueOf(100)));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.valueOf(999)));
+    assertEquals(1, fmt.getMagnitude(BigDecimal.valueOf(1000)));
+    assertEquals(1, fmt.getMagnitude(BigDecimal.valueOf(10000)));
+    assertEquals(1, fmt.getMagnitude(BigDecimal.valueOf(100000)));
+    assertEquals(1, fmt.getMagnitude(BigDecimal.valueOf(999999)));
+    assertEquals(2, fmt.getMagnitude(BigDecimal.valueOf(1000000)));
 
-    assertEquals(0, getMagnitude(BigDecimal.valueOf(-1)));
-    assertEquals(0, getMagnitude(BigDecimal.valueOf(-10)));
-    assertEquals(0, getMagnitude(BigDecimal.valueOf(-100)));
-    assertEquals(0, getMagnitude(BigDecimal.valueOf(-999)));
-    assertEquals(1, getMagnitude(BigDecimal.valueOf(-1000)));
-    assertEquals(1, getMagnitude(BigDecimal.valueOf(-10000)));
-    assertEquals(1, getMagnitude(BigDecimal.valueOf(-100000)));
-    assertEquals(1, getMagnitude(BigDecimal.valueOf(-999999)));
-    assertEquals(2, getMagnitude(BigDecimal.valueOf(-1000000)));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.valueOf(-1)));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.valueOf(-10)));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.valueOf(-100)));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.valueOf(-999)));
+    assertEquals(1, fmt.getMagnitude(BigDecimal.valueOf(-1000)));
+    assertEquals(1, fmt.getMagnitude(BigDecimal.valueOf(-10000)));
+    assertEquals(1, fmt.getMagnitude(BigDecimal.valueOf(-100000)));
+    assertEquals(1, fmt.getMagnitude(BigDecimal.valueOf(-999999)));
+    assertEquals(2, fmt.getMagnitude(BigDecimal.valueOf(-1000000)));
   }
 
 
   @Test
   public void testGetMagnitudeBigDecimal2()
   {
-    assertEquals(-1, getMagnitude(BigDecimal.valueOf(1e-1)));
-    assertEquals(-1, getMagnitude(BigDecimal.valueOf(1e-2)));
-    assertEquals(-1, getMagnitude(BigDecimal.valueOf(1e-3)));
-    assertEquals(-1, getMagnitude(BigDecimal.valueOf(999e-3)));
-    assertEquals(-2, getMagnitude(BigDecimal.valueOf(1e-4)));
-    assertEquals(-2, getMagnitude(BigDecimal.valueOf(1e-5)));
-    assertEquals(-2, getMagnitude(BigDecimal.valueOf(1e-6)));
-    assertEquals(-2, getMagnitude(BigDecimal.valueOf(999e-6)));
-    assertEquals(-3, getMagnitude(BigDecimal.valueOf(1e-7)));
+    assertEquals(-1, fmt.getMagnitude(BigDecimal.valueOf(1e-1)));
+    assertEquals(-1, fmt.getMagnitude(BigDecimal.valueOf(1e-2)));
+    assertEquals(-1, fmt.getMagnitude(BigDecimal.valueOf(1e-3)));
+    assertEquals(-1, fmt.getMagnitude(BigDecimal.valueOf(999e-3)));
+    assertEquals(-2, fmt.getMagnitude(BigDecimal.valueOf(1e-4)));
+    assertEquals(-2, fmt.getMagnitude(BigDecimal.valueOf(1e-5)));
+    assertEquals(-2, fmt.getMagnitude(BigDecimal.valueOf(1e-6)));
+    assertEquals(-2, fmt.getMagnitude(BigDecimal.valueOf(999e-6)));
+    assertEquals(-3, fmt.getMagnitude(BigDecimal.valueOf(1e-7)));
 
-    assertEquals(-1, getMagnitude(BigDecimal.valueOf(999.999e-3)));
-    assertEquals(0, getMagnitude(BigDecimal.valueOf(1.999999)));
+    assertEquals(-1, fmt.getMagnitude(BigDecimal.valueOf(999.999e-3)));
+    assertEquals(0, fmt.getMagnitude(BigDecimal.valueOf(1.999999)));
   }
 
 

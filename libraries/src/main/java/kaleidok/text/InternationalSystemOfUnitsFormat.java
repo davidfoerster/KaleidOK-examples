@@ -8,12 +8,14 @@ import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static kaleidok.util.Math.clamp;
+import static kaleidok.util.Math.pow10;
 
 
 public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
@@ -23,6 +25,8 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
   private String unit;
 
   public boolean enforceUnitWhenParsing = false;
+
+  private int minMagnitude = MAGNITUDE_MIN, maxMagnitude = MAGNITUDE_MAX;
 
 
   public InternationalSystemOfUnitsFormat( DecimalFormat underlying,
@@ -83,6 +87,40 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
   }
 
 
+  public void setMagnitudeBounds( int min, int max )
+  {
+    if (min < MAGNITUDE_MIN)
+    {
+      throw new IllegalArgumentException(
+        min + " is below the permissible minimum " + MAGNITUDE_MIN);
+    }
+    if (max > MAGNITUDE_MAX)
+    {
+      throw new IllegalArgumentException(
+        max + " exceeds the permissible maximum " + MAGNITUDE_MAX);
+    }
+    if (min > max)
+    {
+      throw new IllegalArgumentException(min + " > " + max);
+    }
+
+    minMagnitude = min;
+    maxMagnitude = max;
+  }
+
+
+  public int getMinMagnitude()
+  {
+    return minMagnitude;
+  }
+
+
+  public int getMaxMagnitude()
+  {
+    return maxMagnitude;
+  }
+
+
   @Override
   public StringBuffer format( Object o, StringBuffer toAppendTo,
     FieldPosition pos )
@@ -127,9 +165,25 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
   }
 
 
-  static int getMagnitude( long n )
+  int getMagnitude( long n )
   {
-    return (n != 0) ? (int)(Math.log10(Math.abs((double) n)) / 3) : 0;
+    if (minMagnitude == maxMagnitude)
+      return minMagnitude;
+
+    n = Math.abs(n);
+    return clamp(
+        (n < 1000) ?
+          ((n >= 0) ? 0 : (FACTORS_LONG_LENGTH - 1)) :
+          getMagnitudeImpl(n),
+      minMagnitude, maxMagnitude);
+  }
+
+
+  private static int getMagnitudeImpl( long n )
+  {
+    int magnitude = Arrays.binarySearch(
+      FACTORS_LONG, 2, FACTORS_LONG_LENGTH, n);
+    return (magnitude < 0) ? -2 - magnitude : magnitude;
   }
 
 
@@ -140,18 +194,22 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
     int magnitude = getMagnitude(n);
     return addUnit(
       getUnderlying().format(
-        n * Math.pow(1000, -magnitude), toAppendTo, pos),
+        n * pow10(magnitude * -3), toAppendTo, pos),
       magnitude);
   }
 
 
-  static int getMagnitude( double n )
+  int getMagnitude( double n )
   {
-    double nAbs = Math.abs(n);
-    return  (nAbs != 0 && nAbs <= Double.MAX_VALUE) ?
-      clamp((int) Math.floor(Math.log10(nAbs) / 3),
-        MAGNITUDE_MIN, MAGNITUDE_MAX) :
-      0;
+    if (minMagnitude == maxMagnitude)
+      return minMagnitude;
+
+    n = Math.abs(n);
+    return clamp(
+      (n != 0 && n <= Double.MAX_VALUE) ?
+        (int) Math.floor(Math.log10(n) / 3) :
+        0,
+      minMagnitude, maxMagnitude);
   }
 
 
@@ -168,11 +226,9 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
   }
 
 
-  static int getMagnitude( BigInteger n )
+  int getMagnitude( BigInteger n )
   {
-    return (n.bitLength() < Long.SIZE) ?
-      getMagnitude(n.longValue()) :
-      getMagnitude(n.doubleValue());
+    return getMagnitude(n.doubleValue());
   }
 
 
@@ -186,13 +242,16 @@ public class InternationalSystemOfUnitsFormat extends DecimalFormatDelegator
   }
 
 
-  static int getMagnitude( BigDecimal n )
+  int getMagnitude( BigDecimal n )
   {
+    if (minMagnitude == maxMagnitude)
+      return minMagnitude;
+
     n = n.stripTrailingZeros();
     int significantDigitPosition = n.precision() - n.scale();
     return clamp(
       (significantDigitPosition - ((significantDigitPosition > 0) ? 1 : 3)) / 3,
-      MAGNITUDE_MIN, MAGNITUDE_MAX);
+      minMagnitude, maxMagnitude);
   }
 
 
