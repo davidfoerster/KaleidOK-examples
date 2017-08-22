@@ -35,6 +35,8 @@ public class CentreMovingShape extends CircularImageLayer
   /**
    * Manages the exponent to adjust the dynamic range of the spectral
    * intensities.
+   *
+   * @see #exponentProperty()
    */
   protected final AspectedDoubleProperty exponent;
 
@@ -82,21 +84,19 @@ public class CentreMovingShape extends CircularImageLayer
    * Manages the exponent for the dynamic range adjustment of the volume level
    * before deriving the radius:
    * <pre>
-   * radius = level<sup>exp</sup>
+   * radius = (level ⋅ scale)<sup>exp</sup>
    * </pre>
    * where {@code level} is assumed to lie between 0 and 1, so that the same
    * can be true for {@code radius}.
+   * <p>
+   * See {@link #run()} for more details on the relation between the
+   * {@link #innerRadiusProperty() radius}, the
+   * {@link VolumeLevelProcessor#getLevel() volume level}, the
+   * {@link #scaleFactorProperty() scale factor}, and the exponent.
    *
    * @return  A property object with the above purpose
+   * @see #exponent
    */
-  @SuppressWarnings({ "RedundantMethodOverride", "EmptyMethod" })
-  @Override
-  public DoubleProperty scaleFactorProperty()
-  {
-    return super.scaleFactorProperty();
-  }
-
-
   public DoubleProperty exponentProperty()
   {
     return exponent;
