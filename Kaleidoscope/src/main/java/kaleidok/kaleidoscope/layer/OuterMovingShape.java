@@ -12,7 +12,9 @@ import kaleidok.javafx.beans.property.AspectedDoubleProperty;
 import kaleidok.javafx.beans.property.aspect.LevelOfDetailTag;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
+import kaleidok.javafx.util.converter.DoubleNumberStringConverter;
 import kaleidok.processing.ExtPApplet;
+import kaleidok.text.InternationalSystemOfUnitsFormat;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
@@ -54,13 +56,13 @@ public class OuterMovingShape extends CircularImageLayer
 
     AspectedDoubleProperty[] pitchToAngleMapProperties = {
       pitchToAngleMapMinPitch =
-        makePitchToAngleMapProperty("min. pitch", 3),
+        makePitchToAngleMapProperty("min. pitch", " ln(Hz)", 3, 1, 10),
       pitchToAngleMapMaxPitch =
-        makePitchToAngleMapProperty("max. pitch", 7),
+        makePitchToAngleMapProperty("max. pitch", " ln(Hz)", 7, 1, 10),
       pitchToAngleMapMinAngle =
-        makePitchToAngleMapProperty("min. angle", -3),
+        makePitchToAngleMapProperty("min. angle", "°", -3, -360, 360),
       pitchToAngleMapMaxAngle =
-        makePitchToAngleMapProperty("max. angle", 3),
+        makePitchToAngleMapProperty("max. angle", "°", +3, -360, 360),
     };
     for (int i = pitchToAngleMapProperties.length - 1; i >= 0; i--)
     {
@@ -73,12 +75,21 @@ public class OuterMovingShape extends CircularImageLayer
 
 
   private AspectedDoubleProperty makePitchToAngleMapProperty( String name,
-    double initialValue )
+    String unit, double initialValue, double min, double max )
   {
     AspectedDoubleProperty prop =
       new AspectedDoubleProperty(this, "pitch-to-angle map " + name, initialValue);
-    DoubleSpinnerValueFactory svf = new DoubleSpinnerValueFactory(-1000, 1000);
+
+    DoubleSpinnerValueFactory svf = new DoubleSpinnerValueFactory(min, max);
     svf.setAmountToStepBy(0.25);
+    if (unit != null && !unit.isEmpty())
+    {
+      InternationalSystemOfUnitsFormat fmt =
+        InternationalSystemOfUnitsFormat.getNumberInstance(unit);
+      fmt.setMagnitudeBounds(0, 0);
+      svf.setConverter(new DoubleNumberStringConverter(fmt));
+    }
+
     prop.addAspect(BoundedDoubleTag.getDoubleInstance(), svf);
     prop.addAspect(PropertyPreferencesAdapterTag.getInstance());
     return prop;

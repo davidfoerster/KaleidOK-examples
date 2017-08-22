@@ -10,13 +10,11 @@ import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
 import kaleidok.javafx.beans.property.aspect.bounded.BoundedDoubleTag;
 import kaleidok.javafx.util.converter.CachingFormattedStringConverter;
 import kaleidok.processing.ExtPApplet;
+import kaleidok.text.InternationalSystemOfUnitsFormat;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PImage;
 import sun.misc.FloatConsts;
-
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 import static kaleidok.util.Math.mapNormalized;
 
@@ -54,8 +52,8 @@ public class FoobarLayer extends CircularImageLayer
       new AspectedDoubleProperty(this, name, initialValue);
     DoubleSpinnerValueFactory bounds = new DoubleSpinnerValueFactory(0, 1);
     bounds.setAmountToStepBy(1e-4 / 2);
-    DecimalFormat fmt = (DecimalFormat) NumberFormat.getNumberInstance();
-    fmt.setMultiplier(1000);
+    InternationalSystemOfUnitsFormat fmt =
+      InternationalSystemOfUnitsFormat.getNumberInstance(" Hz");
     bounds.setConverter(new CachingFormattedStringConverter<>(fmt));
     p.addAspect(BoundedDoubleTag.getDoubleInstance(), bounds);
     p.addAspect(PropertyPreferencesAdapterTag.getInstance());
