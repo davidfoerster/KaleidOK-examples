@@ -146,12 +146,12 @@ public final class LayerManager
   {
     final Map<String, String> propertyEntries = loadLayerProperties();
     Stream<String> appliedEntries = getLayerPreferenceAdapters()
-      .map((pa) -> new AbstractMap.SimpleEntry<>(
-        PropertyUtils.applyProperty(
-          propertyEntries, "kaleidok.kaleidoscope.layer", pa.property),
-        pa))
-      .peek((item) -> item.getValue().load())
-      .map(Map.Entry::getKey)
+      .map((pa) -> {
+          String key = PropertyUtils.applyProperty(
+            propertyEntries, "kaleidok.kaleidoscope.layer", pa.property);
+          pa.load();
+          return key;
+        })
       .filter(Objects::nonNull);
 
     return logger.isLoggable(Level.FINEST) ?
