@@ -261,16 +261,24 @@ public final class KaleidoscopeChromasthetiationService
           ".images.filter.neutral",
       filterStr = parent.getParameterMap().get(paramName);
 
-    if (filterStr != null && !filterStr.isEmpty()) try
+    if (filterStr != null && !filterStr.isEmpty())
     {
-      neutralFilter.set(
-        neutralFilter.getAspect(StringConverterAspectTag.getInstance())
-          .fromString(filterStr));
-    }
-    catch (RuntimeException ex)
-    {
-      logThrown(logger, Level.WARNING,
-        "Illegal image filter value; {0} ignored.", ex, paramName);
+      RGBImageFilter filter;
+      try
+      {
+        filter =
+          neutralFilter.getAspect(StringConverterAspectTag.getInstance())
+            .fromString(filterStr);
+      }
+      catch (RuntimeException ex)
+      {
+        logThrown(logger, Level.WARNING,
+          "Illegal image filter value; {0} ignored.", ex, paramName);
+        filter = null;
+      }
+
+      if (filter != null)
+        neutralFilter.set(filter);
     }
   }
 
