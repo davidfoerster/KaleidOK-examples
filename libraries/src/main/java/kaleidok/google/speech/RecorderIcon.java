@@ -58,12 +58,9 @@ public class RecorderIcon extends Plugin<PApplet> implements PreferenceBean
   @Override
   public void draw()
   {
-    if (enabled.get() <= 0)
-      return;
-
-    PApplet p = this.p;
-    if (recorderState.getValue() == State.RECORDING)
+    if (enabled.get() > 0 && recorderState.getValue() == State.RECORDING)
     {
+      PApplet p = this.p;
       int previousEllipseMode = p.g.ellipseMode;
       p.ellipseMode(PConstants.RADIUS);
       p.fill(fillColor);

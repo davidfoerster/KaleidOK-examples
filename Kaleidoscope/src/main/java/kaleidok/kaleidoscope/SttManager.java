@@ -8,6 +8,7 @@ import kaleidok.javafx.beans.property.AspectedBooleanProperty;
 import kaleidok.javafx.beans.property.adapter.preference.PreferenceBean;
 import kaleidok.javafx.beans.property.adapter.preference.PropertyPreferencesAdapter;
 import kaleidok.javafx.beans.property.aspect.PropertyPreferencesAdapterTag;
+import kaleidok.util.Reflection;
 import kaleidok.util.concurrent.AbstractFutureCallback;
 import kaleidok.processing.Plugin;
 import processing.event.KeyEvent;
@@ -67,7 +68,8 @@ public final class SttManager extends Plugin<Kaleidoscope>
       return;
 
     String s = p.getParameterMap().get(
-      stt.getClass().getName() + ".log.pattern");
+      Reflection.getNamedSuperClass(stt.getClass()).getName() +
+        ".log.pattern");
     if (isNotEmpty(s))
       stt.setLogfilePathFormatString(s);
   }

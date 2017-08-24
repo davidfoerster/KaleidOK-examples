@@ -347,8 +347,8 @@ public class ConfigurationEditorTreeTable
       leafComparator = lodComparator.thenComparing(ReadOnlyProperty::getName);
 
     DEFAULT_COMPARATOR = (o1, o2) -> {
-        int r = Boolean.compare(o1.isLeaf(), o2.isLeaf());
-        return (r != 0) ? -r :
+        int r = Boolean.compare(o2.isLeaf(), o1.isLeaf());
+        return (r != 0) ? r :
           (o1.isLeaf() ? leafComparator : innerComparator)
             .compare(o1.getValue(), o2.getValue());
       };
@@ -382,7 +382,7 @@ public class ConfigurationEditorTreeTable
     switch (sortMode)
     {
     case ALL_DESCENDANTS:
-      sort(root, comparator);
+      deepSort(root, comparator);
       break;
 
     case ONLY_FIRST_LEVEL:
@@ -394,7 +394,7 @@ public class ConfigurationEditorTreeTable
   }
 
 
-  private static void sort( TreeItem<? extends ReadOnlyProperty<?>> item,
+  private static void deepSort( TreeItem<? extends ReadOnlyProperty<?>> item,
     Comparator<? super TreeItem<? extends ReadOnlyProperty<?>>> comparator )
   {
     ObservableList<? extends TreeItem<? extends ReadOnlyProperty<?>>> children =
@@ -402,6 +402,6 @@ public class ConfigurationEditorTreeTable
     FXCollections.sort(children, comparator);
 
     for (TreeItem<? extends ReadOnlyProperty<?>> subItem: children)
-      sort(subItem, comparator);
+      deepSort(subItem, comparator);
   }
 }

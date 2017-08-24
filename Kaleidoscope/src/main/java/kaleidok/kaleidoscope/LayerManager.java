@@ -41,7 +41,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static kaleidok.kaleidoscope.Kaleidoscope.logger;
-import static kaleidok.util.AssertionUtils.fastAssert;
 import static kaleidok.util.Strings.looksLikeUrl;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
@@ -407,7 +406,6 @@ public final class LayerManager
         }
       }
 
-      fastAssert(img != null);
       if (img.width <= 0 || img.height <= 0)
       {
         throw new RuntimeException(
