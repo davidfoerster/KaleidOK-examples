@@ -301,9 +301,11 @@ public final class KaleidoscopeChromasthetiationService
 
   public void submit( final String text )
   {
+    final BiConsumer<String, Stream<? super Photo>> deferredImageQueueCompletionCallback =
+      this.imageQueueCompletionCallback;
     Consumer<Stream<? super Photo>> imageQueueCompletionCallback =
-      (this.imageQueueCompletionCallback != null) ?
-        (photos) -> this.imageQueueCompletionCallback.accept(text, photos) :
+      (deferredImageQueueCompletionCallback != null) ?
+        (photos) -> deferredImageQueueCompletionCallback.accept(text, photos) :
         null;
 
     submit(text, getChromasthetiator().toSimple(),
