@@ -14,7 +14,7 @@ public final class Objects
    * Reflectively calls the object’s {@code clone()} method.
    *
    * @param o  An object to clone
-   * @return  A clone of {@code o} or {@code null} if {@code o.clone()} isn’t
+   * @return  A clone of {@code o} or {@code null} if {@code o.copy()} isn’t
    *    public.
    * @throws CloneNotSupportedException  as thrown by {@code o.clone()}
    * @see Object#clone()
@@ -31,9 +31,9 @@ public final class Objects
     catch (NoSuchMethodException ex)
     {
       throw new InternalError(
-        o.getClass().getName() +
-          "#clone() isn’t public and violates the contract of " +
-          Cloneable.class.getName(),
+        String.format(
+          "The non-public visibility of %s#clone() violates the contract of %s",
+          o.getClass().getName(), Cloneable.class.getName()),
         ex);
     }
     try
@@ -53,15 +53,17 @@ public final class Objects
         throw (CloneNotSupportedException) cause;
       throw new InternalError(
         cloneMethod + " should only ever throw " +
-          CloneNotSupportedException.class.getCanonicalName(),
+          CloneNotSupportedException.class.getName(),
         cause);
     }
   }
 
 
-  public static <T> T clone( T o,
+  public static <T> T copy( T o,
     Function<? super T, ? extends T> fallbackCopier )
   {
+    if (o == null)
+      throw new NullPointerException();
     if (o instanceof Cloneable)
     {
       try

@@ -315,7 +315,7 @@ public abstract class ChromatikQuery
       (optionMap == null) ? null :
       (optionMap instanceof HashMap) ?
         (Map<Serializable, Serializable>) ((HashMap<?,?>) optionMap).clone() :
-        Objects.clone(optionMap, HashMap::new);
+        Objects.copy(optionMap, HashMap::new);
   }
 
 

@@ -5,6 +5,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.nio.CharBuffer;
 import java.util.regex.*;
 
+import static java.lang.Character.MAX_RADIX;
+import static java.lang.Character.MIN_RADIX;
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
 
@@ -28,7 +30,7 @@ public final class Strings
    */
   public static char toDigitLowerCaseUnchecked( int n )
   {
-    return toDigitUnchecked(n, 'a' - 10);
+    return (char) toDigitUnchecked(n, 'a' - 10);
   }
 
 
@@ -39,7 +41,7 @@ public final class Strings
    */
   public static char toDigitUpperCaseUnchecked( int n )
   {
-    return toDigitUnchecked(n, 'A' - 10);
+    return (char) toDigitUnchecked(n, 'A' - 10);
   }
 
 
@@ -57,9 +59,9 @@ public final class Strings
    *   typically {@code 'A'}−10 or {@code 'a'}−10.
    * @return  A digit representing the integer {@code n}
    */
-  public static char toDigitUnchecked( int n, int letterBase )
+  public static int toDigitUnchecked( int n, int letterBase )
   {
-    return (char) ((n < 10 ? '0' : letterBase) + n);
+    return (n < 10 ? '0' : letterBase) + n;
   }
 
 
@@ -93,15 +95,13 @@ public final class Strings
   }
 
 
-  public static final int DIGITS_BASE_MAX = 36;
-
   public static char[] toDigits( long n, int base, char[] dst )
   {
     if (base <= 0)
       throw new IllegalArgumentException("Non-positive base");
     if (dst == null) {
       int len =
-        (n < Integer.MIN_VALUE || abs(n) > base) ?
+        (abs(n) > base || n == Long.MIN_VALUE) ?
           (int) ceil(Math.log(abs((double) n), base)) :
           1;
       if (n < 0)
@@ -113,9 +113,9 @@ public final class Strings
 
   public static char[] toDigits( long n, long base, char[] dst, int offset, int len )
   {
-    assert base > 1 && base <= DIGITS_BASE_MAX && len > 0 :
-      String.format("base %d is not in [2, %d] or length %d ≤ 0",
-        base, DIGITS_BASE_MAX, len);
+    assert base >= MIN_RADIX && base <= MAX_RADIX && len > 0 :
+      String.format("base %d is not in [%d, %d] or length %d ≤ 0",
+        base, MIN_RADIX, MAX_RADIX, len);
 
     boolean negative = n < 0;
     if (negative) {
@@ -163,7 +163,7 @@ public final class Strings
   public static boolean isConcatenation( String s, String prefix,
     String suffix )
   {
-    return s.length() == prefix.length() + suffix.length() &&
+    return s.length() == (long) prefix.length() + suffix.length() &&
       s.startsWith(prefix) && s.endsWith(suffix);
   }
 
