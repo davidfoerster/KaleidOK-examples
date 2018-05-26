@@ -212,7 +212,7 @@ public class OuterMovingShape extends CircularImageLayer
     for (int i = 0; i < segmentCount; i++) {
       drawCircleVertex(i, 1);
     }
-    drawCircleVertex(segmentCount, 1);
+    drawCircleVertex(0, 1);
 
     parent.endShape(); // finalize the Shape
     parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings

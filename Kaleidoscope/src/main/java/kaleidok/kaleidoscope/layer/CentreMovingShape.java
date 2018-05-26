@@ -163,7 +163,7 @@ public class CentreMovingShape extends CircularImageLayer
     for (int i = 0; i < segmentCount; i++) {
       drawCircleVertex(i, radius);
     }
-    drawCircleVertex(segmentCount, radius);
+    drawCircleVertex(0, radius);
 
     parent.endShape(); // finalize the Shape
     parent.popMatrix(); // use push/popMatrix so each Shape's translation does not affect other drawings
