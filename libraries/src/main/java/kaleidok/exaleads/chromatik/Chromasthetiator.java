@@ -28,7 +28,7 @@ import static kaleidok.util.logging.LoggingUtils.logThrown;
 public abstract class Chromasthetiator<F extends Flickr>
 {
   static final Logger logger =
-    Logger.getLogger(ChromasthetiationService.class.getPackage().getName());
+    Logger.getLogger(Chromasthetiator.class.getPackage().getName());
 
   public static int EXPECTED_NEUTRAL_RESULT_COUNT = 10000;
 
