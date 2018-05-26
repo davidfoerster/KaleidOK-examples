@@ -16,7 +16,6 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collections;
 import java.util.Map;
 
-import static kaleidok.util.AssertionUtils.fastAssert;
 import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
 import static org.apache.http.entity.ContentType.WILDCARD;
 
@@ -117,7 +116,7 @@ public abstract class MockRequestHandlerBase implements HttpHandler
       try (InputStream bodyStream = t.getRequestBody()) {
         count = IOUtils.read(bodyStream, buf);
       }
-      fastAssert(count == contentLength, "Content length mismatch");
+      assert count == contentLength : "Content length mismatch";
 
       sFormData = new String(buf, charset);
     }

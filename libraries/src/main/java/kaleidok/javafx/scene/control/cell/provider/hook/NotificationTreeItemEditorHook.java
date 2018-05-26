@@ -20,8 +20,6 @@ import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static kaleidok.util.AssertionUtils.fastAssert;
-
 
 public class NotificationTreeItemEditorHook<T, N extends Node>
   implements MultiTreeItemProvider.TreeItemEditorHook<T, N>
@@ -41,7 +39,7 @@ public class NotificationTreeItemEditorHook<T, N extends Node>
     PropertyAspectTag<? extends ObservableBooleanValue, ? super T> notificationTag,
     String tooltipText, Supplier<? extends Image> iconSupplier, Image icon )
   {
-    fastAssert(iconSupplier != null || icon != null);
+    assert iconSupplier != null || icon != null;
 
     this.notificationTag =
       Objects.requireNonNull(notificationTag, "notification tag");

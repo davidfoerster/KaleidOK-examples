@@ -23,7 +23,6 @@ import static kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoord
 import static kaleidok.kaleidoscope.layer.util.CircularTriangleStripSegmentCoordinatesBinding.MIN_SEGMENTS;
 import static kaleidok.kaleidoscope.layer.util.LayerUtils.adjustPercentFormat;
 import static kaleidok.kaleidoscope.layer.util.LayerUtils.adjustPermilleFormat;
-import static kaleidok.util.AssertionUtils.fastAssert;
 
 
 public abstract class CircularImageLayer extends ImageLayer
@@ -140,7 +139,7 @@ public abstract class CircularImageLayer extends ImageLayer
   protected void drawDebugCircle( float radius )
   {
     PApplet parent = this.parent;
-    fastAssert(parent.g.ellipseMode == PConstants.RADIUS);
+    assert parent.g.ellipseMode == PConstants.RADIUS;
     parent.noFill();
     parent.ellipse(0, 0, radius, radius);
   }

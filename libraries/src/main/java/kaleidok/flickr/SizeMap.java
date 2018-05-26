@@ -18,8 +18,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static kaleidok.util.AssertionUtils.fastAssert;
-
 
 public class SizeMap extends TreeMap<Size.Label, Size>
 {
@@ -76,7 +74,7 @@ public class SizeMap extends TreeMap<Size.Label, Size>
               (serializedName != null) ? serializedName.value() : f.getName());
           if (valueElement != null)
           {
-            fastAssert(f.getType() == boolean.class);
+            assert f.getType() == boolean.class;
             f.setBoolean(sizes,
               valueElement.isBoolean() ?
                 valueElement.getAsBoolean() :

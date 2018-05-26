@@ -7,7 +7,6 @@ import java.io.Serializable;
 
 import static java.lang.Math.max;
 import static java.lang.Math.round;
-import static kaleidok.util.AssertionUtils.fastAssert;
 import static kaleidok.util.Math.square;
 
 
@@ -66,7 +65,7 @@ public class ChromatikColor implements Serializable
 
       // and go back to gray value
       int c = brBin * 255 / HUE_COLS;
-      fastAssert(c >= 21 && c <= 255);
+      assert c >= 21 && c <= 255;
       value = c | c << 8 | c << 16;
 
       // find color group name based on rules

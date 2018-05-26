@@ -5,8 +5,6 @@ import kaleidok.javafx.beans.property.aspect.PropertyAspectTag;
 import java.util.Map;
 import java.util.Objects;
 
-import static kaleidok.util.AssertionUtils.fastAssert;
-
 
 final class AspectHelper
 {
@@ -32,7 +30,7 @@ final class AspectHelper
           "aspect");
       });
 
-    fastAssert(newAspect != null);
+    assert newAspect != null;
 
     return newAspect;
   }

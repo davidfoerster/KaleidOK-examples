@@ -17,8 +17,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static kaleidok.util.AssertionUtils.fastAssert;
-
 
 public final class PropertyLoader
 {
@@ -61,7 +59,7 @@ public final class PropertyLoader
     } else {
       clazz = classLoaderReference.getClass();
     }
-    fastAssert(clazz != null || classLoader != null);
+    assert clazz != null || classLoader != null;
 
     Stream<URI> resourceURIs = Stream.of(resourcePaths)
       .map((clazz != null) ? clazz::getResource : classLoader::getResource)

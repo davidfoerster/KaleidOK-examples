@@ -8,8 +8,6 @@ import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import static kaleidok.util.AssertionUtils.fastAssert;
-
 
 public final class Reflection
 {
@@ -36,7 +34,7 @@ public final class Reflection
         {
           throw new AssertionError(ex);
         }
-        fastAssert(primitive.isPrimitive());
+        assert primitive.isPrimitive();
 
         map.put(wrapper, primitive);
         map.put(primitive, wrapper);

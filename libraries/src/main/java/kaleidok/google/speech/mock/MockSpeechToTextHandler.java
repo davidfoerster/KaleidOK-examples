@@ -25,8 +25,6 @@ import java.util.regex.*;
 
 import static kaleidok.net.http.util.URLEncoding.DEFAULT_CHARSET;
 import static kaleidok.io.Files.NO_ATTRIBUTES;
-import static kaleidok.util.AssertionUtils.fastAssert;
-import static kaleidok.util.AssertionUtils.fastAssertFmt;
 import static kaleidok.util.logging.LoggingUtils.logThrown;
 
 
@@ -92,14 +90,12 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
 
     Map<String, String> q =
       Parsers.getQueryMap(t.getRequestURI(), DEFAULT_CHARSET);
-    fastAssert(q != null && !q.isEmpty(), "No request parameters");
-    fastAssert("json".equals(q.get("output")),
-      "Invalid request parameter value: output=" + q.get("output"));
-    fastAssert(!StringUtils.isEmpty(q.get("key")),
-      "Empty request parameter: key");
-    fastAssert(!StringUtils.isEmpty(q.get("lang")),
-      "Empty request parameter: lang");
-    fastAssert(q.size() == 3, "Superfluous request parameters");
+    assert q != null && !q.isEmpty() : "No request parameters";
+    assert "json".equals(q.get("output")) :
+      "Invalid request parameter value: output=" + q.get("output");
+    assert !StringUtils.isEmpty(q.get("key")) : "Empty request parameter: key";
+    assert !StringUtils.isEmpty(q.get("lang")) : "Empty request parameter: lang";
+    assert q.size() == 3 : "Superfluous request parameters";
 
     ContentType contentType =
       getContentType(t.getRequestHeaders(), "audio/x-flac");
@@ -129,8 +125,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     logger.log(Level.FINEST,
       "Received {0} bytes on request to {1}",
       new Object[]{flacBuffer.length, t.getRequestURI()});
-    fastAssert(flacBuffer.length > 86,
-      "Transmitted data only seems to contain FLAC header");
+    assert flacBuffer.length > 86 : "Transmitted data only seems to contain FLAC header";
 
     Path tmpFilePath = createFlacLogFile();
     if (tmpFilePath != null) {
@@ -141,14 +136,13 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
 
     double duration = testFlacFile(flacBuffer, sampleRate);
     if (!Double.isNaN(duration)) {
-      fastAssert(duration <= stt.getMaxTranscriptionInterval(),
-        "FLAC stream duration exceeds maximum transcription interval");
+      assert duration <= stt.getMaxTranscriptionInterval() : "FLAC stream duration exceeds maximum transcription interval";
     } else {
       logger.finest("Couldn’t determine duration of the submitted audio record");
     }
 
     byte[] transcriptionResult = normalTranscriptionResult;
-    fastAssert(transcriptionResult.length != 0);
+    assert transcriptionResult.length != 0;
     setContentType(t, ContentType.APPLICATION_JSON);
     t.sendResponseHeaders(HttpURLConnection.HTTP_OK, transcriptionResult.length);
     try (OutputStream out = t.getResponseBody()) {
@@ -186,7 +180,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
         new BufferedReader(new InputStreamReader(pr.getInputStream())))
       {
         fileOutput = r.readLine();
-        fastAssert(fileOutput == null || r.read() == -1);
+        assert fileOutput == null || r.read() == -1;
       }
     }
     catch (IOException ex)
@@ -201,7 +195,7 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
     {
       try
       {
-        fastAssert(pr.waitFor() == 0);
+        assert pr.waitFor() == 0;
         break;
       }
       catch (InterruptedException ex)
@@ -211,13 +205,13 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       }
     }
 
-    fastAssert(fileOutput != null, "The type of the sent data is unknown");
+    assert fileOutput != null : "The type of the sent data is unknown";
     int p = fileOutput.indexOf(':');
-    fastAssert(p >= 0);
+    assert p >= 0;
     fileOutput = fileOutput.substring(p + 2);
     String[] fileSpec = fileOutput.split(", ");
-    fastAssert(fileSpec[0].startsWith("FLAC"),
-      "The sent data doesn’t look like a FLAC stream: " + fileOutput);
+    assert fileSpec[0].startsWith("FLAC") :
+      "The sent data doesn’t look like a FLAC stream: " + fileOutput;
 
     double sampleRate = Double.NaN;
     long sampleCount = -1;
@@ -257,11 +251,11 @@ public class MockSpeechToTextHandler extends MockRequestHandlerBase
       }
     }
 
-    fastAssert(sampleRate > 0 && Double.isFinite(sampleRate),
-      "Couldn’t determine sample rate of submitted audio stream");
-    fastAssertFmt(sampleRate == expectedSampleRate,
-      "Sample rate of submitted audio stream (%f) doesn’t match expectation (%f)",
-      sampleRate, expectedSampleRate);
+    assert sampleRate > 0 && Double.isFinite(sampleRate) :
+      "Couldn’t determine sample rate of submitted audio stream";
+    assert sampleRate == expectedSampleRate :
+      String.format("Sample rate of submitted audio stream (%f) doesn’t match expectation (%f)",
+        sampleRate, expectedSampleRate);
 
     return (sampleCount >= 0) ? sampleCount / sampleRate : Double.NaN;
   }

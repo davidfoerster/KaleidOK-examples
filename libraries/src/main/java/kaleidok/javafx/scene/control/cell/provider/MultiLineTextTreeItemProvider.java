@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static kaleidok.javafx.scene.control.cell.DynamicEditableTreeItem.TreeItemProvider.findParentCell;
-import static kaleidok.util.AssertionUtils.fastAssert;
 
 
 public class MultiLineTextTreeItemProvider<E>
@@ -185,7 +184,7 @@ public class MultiLineTextTreeItemProvider<E>
     if (dialog.getOwner() == null) {
       dialog.initOwner(ownerWindow);
     } else {
-      fastAssert(dialog.getOwner() == ownerWindow);
+      assert dialog.getOwner() == ownerWindow;
     }
 
     TextArea textArea = getTextArea();
