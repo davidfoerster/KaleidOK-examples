@@ -43,7 +43,7 @@ public final class PropertyLoader
   }
 
 
-  public static int load( Properties prop, Charset charset,
+  public static URL[] load( Properties prop, Charset charset,
     Object classLoaderReference, String[] resourcePaths,
     String[] filesystemPaths )
     throws IOException
@@ -81,11 +81,12 @@ public final class PropertyLoader
       .map(UriUtil.toUrlFunction(AssertionError::new))
       .toArray(URL[]::new);
 
-    return load(prop, charset, urls);
+    load(prop, charset, urls);
+    return urls;
   }
 
 
-  public static int load( Properties prop, Charset charset,
+  public static URL[] load( Properties prop, Charset charset,
     Object classLoaderReference, String resourceAndFilePath )
     throws IOException
   {

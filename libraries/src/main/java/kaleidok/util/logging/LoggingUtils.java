@@ -1,9 +1,11 @@
 package kaleidok.util.logging;
 
+import kaleidok.io.AnnotatedInputStream;
 import kaleidok.util.Reflection;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -51,10 +53,18 @@ public final class LoggingUtils
   public static boolean loadLocalLoggerProperties( Class<?> contextClass )
   {
     String loggingFile = "logging.properties";
-    try (InputStream is =
-      newInputStream(loggingFile, contextClass.getClassLoader()))
+    AnnotatedInputStream is;
+    try
     {
-      LogManager.getLogManager().readConfiguration(is);
+      is = newInputStream(loggingFile, contextClass.getClassLoader());
+      try
+      {
+        LogManager.getLogManager().readConfiguration(is);
+      }
+      finally
+      {
+        is.close();
+      }
     }
     catch (IOException ex)
     {
@@ -63,11 +73,15 @@ public final class LoggingUtils
         new Object[]{loggingFile, contextClass.getName()});
       return false;
     }
+
+    Logger.getLogger(contextClass.getCanonicalName()).log(Level.CONFIG,
+      "Loaded logger configuration from: {0}", is.annotation);
+
     return true;
   }
 
 
-  private static InputStream newInputStream( String filename,
+  private static AnnotatedInputStream newInputStream( String filename,
     ClassLoader cl )
     throws FileNotFoundException
   {
@@ -76,7 +90,8 @@ public final class LoggingUtils
     File file = new File(filename);
     if (file.exists()) try
     {
-      return new FileInputStream(file);
+      return new AnnotatedInputStream(
+        new FileInputStream(file), file.getAbsolutePath());
     }
     catch (FileNotFoundException ex)
     {
@@ -85,9 +100,16 @@ public final class LoggingUtils
 
     if (cl != null)
     {
-      InputStream is = cl.getResourceAsStream(filename);
-      if (is != null)
-        return is;
+      URL resource = cl.getResource(filename);
+      if (resource != null) try
+      {
+        return new AnnotatedInputStream(
+          resource.openStream(), resource.toExternalForm());
+      }
+      catch (IOException ex)
+      {
+        throw new AssertionError(ex);
+      }
     }
 
     throw (thrown != null) ? thrown : new FileNotFoundException(filename);

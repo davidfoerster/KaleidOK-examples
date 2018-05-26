@@ -276,6 +276,8 @@ public class KaleidoscopeApp extends ProcessingSketchApplication<Kaleidoscope>
 
   public static void main( String... args )
   {
+    @SuppressWarnings("unused")
+    Logger packageLogger = Logger.getLogger("kaleidok");
     launch(KaleidoscopeApp.class, args);
   }
 

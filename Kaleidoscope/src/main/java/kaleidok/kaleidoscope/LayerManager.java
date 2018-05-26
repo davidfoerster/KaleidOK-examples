@@ -27,6 +27,7 @@ import processing.core.PImage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -216,9 +217,9 @@ public final class LayerManager
   {
     return Stream.concat(
       Stream.of(
-        initialImagePaths.getAspect(
+        (PropertyPreferencesAdapter<?,?>) initialImagePaths.getAspect(
           PropertyPreferencesAdapterTag.getWritableInstance()),
-        screenshotPathFormatString.getAspect(
+        (PropertyPreferencesAdapter<?,?>) screenshotPathFormatString.getAspect(
           PropertyPreferencesAdapterTag.getWritableInstance())),
       getLayerPreferenceAdapters());
   }
@@ -445,22 +446,39 @@ public final class LayerManager
   {
     String propFn = "layer.properties";
     Properties layerProperties = new Properties();
+    URL[] propFiles;
+
     try
     {
-      if (PropertyLoader.load(
-        layerProperties, null, ImageLayer.class, propFn) == 0)
+      propFiles = PropertyLoader.load(
+        layerProperties, null, ImageLayer.class, propFn);
+    }
+    catch (IOException ex)
+    {
+      propFiles = null;
+      logThrown(logger, Level.SEVERE,
+        "Couldn’t load layer properties file \"{0}\"; using defaults", ex,
+        propFn);
+    }
+
+    if (propFiles != null)
+    {
+      if (propFiles.length != 0)
+      {
+        if (logger.isLoggable(Level.CONFIG))
+        {
+          logger.config(Stream.of(propFiles).map(String::valueOf).collect(
+            Collectors.joining(", ", "Loaded layer configuration from: ", "")));
+        }
+      }
+      else
       {
         logger.log(Level.CONFIG,
           "No layer properties file \"{0}\" found; using defaults",
           propFn);
       }
     }
-    catch (IOException ex)
-    {
-      logThrown(logger, Level.SEVERE,
-        "Couldn’t load layer properties file \"{0}\"; using defaults", ex,
-        propFn);
-    }
+
     return PropertyLoader.toMap(layerProperties);
   }
 
