@@ -1,5 +1,9 @@
 # Kaleidoscope
 
+**Note:** Image discovery and retrieval is defunct since [Chromatik], the web
+service behind this function, went defunct itself.
+
+
 ## Setup
 
  1. [Request a Flickr API key](https://www.flickr.com/services/api/keys/apply/)
@@ -75,3 +79,4 @@ except API keys are optional and have sensible defaults.
 
 
 [configuration]: #configuration
+[Chromatik]: http://labs.exalead.com/project/chromatik
